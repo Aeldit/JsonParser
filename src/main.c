@@ -1,5 +1,7 @@
 #include <stdio.h>
 
+#include "parser.h"
+
 int main(int argc, char *argv[])
 {
     if (argc < 2)
@@ -8,6 +10,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    printf("%s\n", argv[1]);
+    struct fc_control *fcc = read_file(argv[1]);
+    print_file_content(fcc);
     return 0;
 }

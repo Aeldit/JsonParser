@@ -3,7 +3,7 @@ CFLAGS=-W -Wall -Werror -std=c99 -pedantic
 
 SANITIZE=-g -fsanitize=address
 
-CFILES=src/*.c
+CFILES=$(wildcard src/*.c)
 OBJS=${CFILES:.c=.o}
 
 JSONFILES=tests/*.json
