@@ -9,8 +9,7 @@
 /*******************************************************************************
 **                              DEFINES / MACROS                              **
 *******************************************************************************/
-
-#define READ_BUFF_LEN 10
+#define READ_BUFF_LEN 1024
 
 /*******************************************************************************
 **                                 STRUCTURES                                 **
@@ -58,5 +57,16 @@ void add_fc_to_fc_control(struct fc_control *fcc, struct file_content *fc);
 ** \brief Destroys the structure containing the file
 */
 void destroy_fc_control(struct fc_control *fcc);
+
+/**
+** \brief Reads the contents of the given file and stores it inside a chained
+**        list
+*/
+struct fc_control *read_file(char *path);
+
+/**
+** \brief Prints the contents of the given file
+*/
+void print_file_content(struct fc_control *fcc);
 
 #endif // !FILES_HANDLING_H
