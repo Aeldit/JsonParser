@@ -6,6 +6,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "parser.h"
+
 /*******************************************************************************
 **                              DEFINES / MACROS                              **
 *******************************************************************************/
@@ -61,7 +63,7 @@
         tmp->list[st->idx++] = elt;                                            \
     }                                                                          \
     ++st->nb_type;                                                             \
-    return st->idx;
+    return elt;
 
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
@@ -69,9 +71,49 @@
 /***************************************
 **               PAIRS                **
 ***************************************/
-size_t append_pair(pair_control_st *pc, struct pair *p)
+struct pair *append_pair(pair_control_st *pc, struct pair *p)
 {
     APPEND(pair_array_link, pc, p, pairs, nb_pairs)
+}
+
+void print_pairs(pair_control_st *pc)
+{
+    if (pc == NULL || pc->head == NULL || pc->nb_pairs == 0)
+    {
+        return;
+    }
+
+    struct pair_array_link *tmp = pc->head;
+    printf("{\n");
+    // Iterates over the arrays
+    while (tmp != NULL)
+    {
+        // Iterates over an array
+        for (size_t i = 0; i < (tmp->next == NULL ? pc->idx : ARRAY_LEN); ++i)
+        {
+            switch (tmp->pairs[i]->type)
+            {
+            case TYPE_STR:
+                printf("\t\"%s\": \"%s\"", tmp->pairs[i]->key,
+                       (const char *)tmp->pairs[i]->value);
+                break;
+            case TYPE_NUM:
+                printf("\t\"%s\": \"%ld\"", tmp->pairs[i]->key,
+                       (long)tmp->pairs[i]->value);
+                break;
+            default:
+                break;
+            }
+            // If we are not at the last element of the last array, we print a
+            // ','
+            if ((tmp->next == NULL && i != pc->idx - 1) || tmp->next != NULL)
+            {
+                printf(",\n");
+            }
+        }
+        tmp = tmp->next;
+    }
+    printf("\n}\n");
 }
 
 void destroy_pair_control(pair_control_st *pc)
@@ -98,7 +140,7 @@ void destroy_pair_control(pair_control_st *pc)
 /***************************************
 **                KEY                 **
 ***************************************/
-size_t append_key(key_control_st *kc, const char *key)
+const char *append_key(key_control_st *kc, const char *key)
 {
     APPEND(key_array_link, kc, key, keys, nb_keys)
 }
@@ -151,37 +193,9 @@ void destroy_key_control(key_control_st *kc)
 /***************************************
 **                STR                 **
 ***************************************/
-size_t append_str(str_control_st *sc, const char *str)
+const char *append_str(str_control_st *sc, const char *str)
 {
     APPEND(str_array_link, sc, str, strings, nb_str)
-}
-
-void print_strings(str_control_st *sc)
-{
-    if (sc == NULL || sc->head == NULL || sc->nb_str == 0)
-    {
-        return;
-    }
-
-    struct str_array_link *tmp = sc->head;
-    printf("[ ");
-    // Iterates over the arrays
-    while (tmp != NULL)
-    {
-        // Iterates over an array
-        for (size_t i = 0; i < (tmp->next == NULL ? sc->idx : ARRAY_LEN); ++i)
-        {
-            printf("\"%s\"", tmp->strings[i]);
-            // If we are not at the last element of the last array, we print a
-            // ','
-            if ((tmp->next == NULL && i != sc->idx - 1) || tmp->next != NULL)
-            {
-                printf(", ");
-            }
-        }
-        tmp = tmp->next;
-    }
-    printf(" ]\n");
 }
 
 void destroy_str_control(str_control_st *sc)

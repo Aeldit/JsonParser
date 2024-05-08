@@ -100,7 +100,9 @@ typedef struct bool_control bool_control_st;
 /***************************************
 **               PAIRS                **
 ***************************************/
-size_t append_pair(pair_control_st *pc, struct pair *p);
+struct pair *append_pair(pair_control_st *pc, struct pair *p);
+
+void print_pairs(pair_control_st *pc);
 
 void destroy_pair_control(pair_control_st *p);
 
@@ -109,13 +111,13 @@ void destroy_pair_control(pair_control_st *p);
 ** \return The index of the added key + 1 (0 is the error code), so we have to
 **         make sure later to substract 1 to the result of this function
 */
-size_t append_key(key_control_st *kl, const char *key);
+const char *append_key(key_control_st *kl, const char *key);
 
 void print_keys(key_control_st *kc);
 
 void destroy_key_control(key_control_st *kc);
 
-size_t append_str(str_control_st *sc, const char *str);
+const char *append_str(str_control_st *sc, const char *str);
 
 void destroy_str_control(str_control_st *sc);
 

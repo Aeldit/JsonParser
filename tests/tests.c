@@ -30,7 +30,7 @@ int main(void)
     add_str(jd, "k", "a");
     add_str(jd, "l", "a");
     add_str(jd, "m", "a");
-    // print_strs(jd->keys);
+    print_pairs(jd->pairs);
     destroy_dict(jd);
     return 0;
 }

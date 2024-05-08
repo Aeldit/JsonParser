@@ -44,8 +44,8 @@ char add_str(json_dict_st *jd, const char *key, const char *str)
         return FAILURE;
     }
     p->type = TYPE_STR;
-    p->key_idx = append_key(jd->keys, key);
-    p->value_idx = append_str(jd->strings, str);
+    p->key = append_key(jd->keys, key);
+    p->value = append_str(jd->strings, str);
     append_pair(jd->pairs, p);
     return SUCCESS;
 }

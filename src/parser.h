@@ -25,8 +25,8 @@
 */
 struct pair
 {
-    size_t key_idx;
-    size_t value_idx;
+    const char *key; // Points to a key inside the 'keys' linked list
+    const void *value; // Points to a value inside the associated linked list
     unsigned char type;
 };
 
