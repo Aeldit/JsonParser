@@ -8,7 +8,7 @@ OBJS=${CFILES:.c=.o}
 
 JSONFILES=tests/*.json
 
-CTEST=src/linked_lists.c tests/tests.c
+CTEST=src/linked_lists.c src/parser.c tests/tests.c
 TESTSOBJS=${CTEST:.c=.o}
 
 all: json-parser

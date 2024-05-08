@@ -1,8 +1,17 @@
 #include "linked_lists.h"
 
+/*******************************************************************************
+**                                  INCLUDES                                  **
+*******************************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
 
+/*******************************************************************************
+**                                 FUNCTIONS                                  **
+*******************************************************************************/
+/***************************************
+**                KEY                 **
+***************************************/
 size_t append_key(key_control_t *kc, const char *key)
 {
     if (kc == NULL || key == NULL)
@@ -20,7 +29,7 @@ size_t append_key(key_control_t *kc, const char *key)
         }
         kc->head->keys[kc->idx++] = key;
     }
-    // Case where the current head array is full
+    // Case where the current array is full
     else if (kc->idx == ARRAY_LEN)
     {
         struct key_array_link *nkl = calloc(1, sizeof(struct key_array_link));

@@ -2,35 +2,36 @@
 #include <stdlib.h>
 
 #include "../src/linked_lists.h"
+#include "../src/parser.h"
 
 int main(void)
 {
-    key_control_t *kc = calloc(1, sizeof(key_control_t *));
-    if (kc == NULL)
+    json_dict_t *jd = init_dict();
+    if (jd == NULL)
     {
         return 1;
     }
-    append_key(kc, "t");
-    append_key(kc, "te");
-    append_key(kc, "tes");
-    append_key(kc, "test");
-    append_key(kc, "testi");
-    append_key(kc, "testin");
-    append_key(kc, "testing");
-    append_key(kc, "a");
-    append_key(kc, "b");
-    append_key(kc, "c");
-    append_key(kc, "d");
-    append_key(kc, "e");
-    append_key(kc, "f");
-    append_key(kc, "g");
-    append_key(kc, "h");
-    append_key(kc, "i");
-    append_key(kc, "j");
-    append_key(kc, "k");
-    append_key(kc, "l");
-    append_key(kc, "m");
-    print_keys(kc);
-    destroy_key_control(kc);
+    add_key(jd, "t");
+    add_key(jd, "te");
+    add_key(jd, "tes");
+    add_key(jd, "test");
+    add_key(jd, "testi");
+    add_key(jd, "testin");
+    add_key(jd, "testing");
+    add_key(jd, "a");
+    add_key(jd, "b");
+    add_key(jd, "c");
+    add_key(jd, "d");
+    add_key(jd, "e");
+    add_key(jd, "f");
+    add_key(jd, "g");
+    add_key(jd, "h");
+    add_key(jd, "i");
+    add_key(jd, "j");
+    add_key(jd, "k");
+    add_key(jd, "l");
+    add_key(jd, "m");
+    print_keys(jd->keys);
+    destroy_dict(jd);
     return 0;
 }

@@ -49,8 +49,12 @@ struct json_dict_t
 typedef struct json_dict_t json_dict_t;
 
 /*******************************************************************************
-**                                 functions                                  **
+**                                 FUNCTIONS                                  **
 *******************************************************************************/
-json_dict_t parse(char *file_path);
+json_dict_t *init_dict(void);
+
+char add_key(json_dict_t *jd, char *key);
+
+void destroy_dict(json_dict_t *jd);
 
 #endif // !JSON_PARSER_H
