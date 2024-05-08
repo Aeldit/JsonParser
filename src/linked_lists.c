@@ -17,11 +17,12 @@
 ** \param elt The element to add
 ** \param list the name of the list in which to add 'elt'
 ** \param nb_type The name of the field containing the number of elements
+** \param err_ret The value to return on error
 */
-#define APPEND(link_type, st, elt, list, nb_type)                              \
-    if (st == NULL || elt == NULL)                                             \
+#define APPEND(link_type, st, elt, list, nb_type, err_ret)                     \
+    if (st == NULL)                                                            \
     {                                                                          \
-        return 0;                                                              \
+        return err_ret;                                                        \
     }                                                                          \
     /* Case where there is no element */                                       \
     if (st->head == NULL)                                                      \
@@ -29,7 +30,7 @@
         st->head = calloc(1, sizeof(struct link_type));                        \
         if (st->head == NULL)                                                  \
         {                                                                      \
-            return 0;                                                          \
+            return err_ret;                                                    \
         }                                                                      \
         st->head->list[st->idx++] = elt;                                       \
     }                                                                          \
@@ -41,7 +42,7 @@
         struct link_type *nkl = calloc(1, sizeof(struct link_type));           \
         if (nkl == NULL)                                                       \
         {                                                                      \
-            return 0;                                                          \
+            return err_ret;                                                    \
         }                                                                      \
         struct link_type *tmp = st->head;                                      \
         while (tmp->next != NULL)                                              \
@@ -60,10 +61,14 @@
         {                                                                      \
             tmp = tmp->next;                                                   \
         }                                                                      \
-        tmp->list[st->idx++] = elt;                                            \
+        tmp->list[st->idx] = elt;                                              \
     }                                                                          \
     ++st->nb_type;                                                             \
-    return elt;
+    struct link_type *tmp = st->head;                                          \
+    while (tmp->next != NULL)                                                  \
+    {                                                                          \
+        tmp = tmp->next;                                                       \
+    }
 
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
@@ -73,7 +78,12 @@
 ***************************************/
 struct pair *append_pair(pair_control_st *pc, struct pair *p)
 {
-    APPEND(pair_array_link, pc, p, pairs, nb_pairs)
+    if (p == NULL)
+    {
+        return NULL;
+    }
+    APPEND(pair_array_link, pc, p, pairs, nb_pairs, NULL)
+    return tmp->pairs[pc->idx++];
 }
 
 void print_pairs(pair_control_st *pc)
@@ -142,7 +152,12 @@ void destroy_pair_control(pair_control_st *pc)
 ***************************************/
 const char *append_key(key_control_st *kc, const char *key)
 {
-    APPEND(key_array_link, kc, key, keys, nb_keys)
+    if (key == NULL)
+    {
+        return NULL;
+    }
+    APPEND(key_array_link, kc, key, keys, nb_keys, NULL)
+    return tmp->keys[kc->idx++];
 }
 
 void print_keys(key_control_st *kc)
@@ -195,7 +210,12 @@ void destroy_key_control(key_control_st *kc)
 ***************************************/
 const char *append_str(str_control_st *sc, const char *str)
 {
-    APPEND(str_array_link, sc, str, strings, nb_str)
+    if (str == NULL)
+    {
+        return NULL;
+    }
+    APPEND(str_array_link, sc, str, strings, nb_str, NULL)
+    return tmp->strings[sc->idx++];
 }
 
 void destroy_str_control(str_control_st *sc)
@@ -213,4 +233,30 @@ void destroy_str_control(str_control_st *sc)
         free(to_del);
     }
     free(sc);
+}
+
+/***************************************
+**                NUM                 **
+***************************************/
+long *append_num(num_control_st *nc, long num)
+{
+    APPEND(num_array_link, nc, num, numbers, nb_num, NULL)
+    return &tmp->numbers[nc->idx++];
+}
+
+void destroy_num_control(num_control_st *nc)
+{
+    if (nc == NULL)
+    {
+        return;
+    }
+
+    struct num_array_link *tmp = nc->head;
+    while (tmp != NULL)
+    {
+        struct num_array_link *to_del = tmp;
+        tmp = tmp->next;
+        free(to_del);
+    }
+    free(nc);
 }
