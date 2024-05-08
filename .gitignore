@@ -1,2 +1,4 @@
 *.o
 json-parser
+run-tests
+*.json
