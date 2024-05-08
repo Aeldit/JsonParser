@@ -10,27 +10,27 @@ int main(void)
     {
         return 1;
     }
-    printf("%lu\n", append_key(kc, "t"));
-    printf("%lu\n", append_key(kc, "te"));
-    printf("%lu\n", append_key(kc, "tes"));
-    printf("%lu\n", append_key(kc, "test"));
-    printf("%lu\n", append_key(kc, "testi"));
-    printf("%lu\n", append_key(kc, "testin"));
-    printf("%lu\n", append_key(kc, "testing"));
-    printf("%lu\n", append_key(kc, "a"));
-    printf("%lu\n", append_key(kc, "b"));
-    printf("%lu\n", append_key(kc, "c"));
-    printf("%lu\n", append_key(kc, "d"));
-    printf("%lu\n", append_key(kc, "e"));
-    printf("%lu\n", append_key(kc, "f"));
-    printf("%lu\n", append_key(kc, "g"));
-    printf("%lu\n", append_key(kc, "h"));
-    printf("%lu\n", append_key(kc, "i"));
-    printf("%lu\n", append_key(kc, "j"));
-    printf("%lu\n", append_key(kc, "k"));
-    printf("%lu\n", append_key(kc, "l"));
-    printf("%lu\n", append_key(kc, "m"));
+    append_key(kc, "t");
+    append_key(kc, "te");
+    append_key(kc, "tes");
+    append_key(kc, "test");
+    append_key(kc, "testi");
+    append_key(kc, "testin");
+    append_key(kc, "testing");
+    append_key(kc, "a");
+    append_key(kc, "b");
+    append_key(kc, "c");
+    append_key(kc, "d");
+    append_key(kc, "e");
+    append_key(kc, "f");
+    append_key(kc, "g");
+    append_key(kc, "h");
+    append_key(kc, "i");
+    append_key(kc, "j");
+    append_key(kc, "k");
+    append_key(kc, "l");
+    append_key(kc, "m");
     print_keys(kc);
-    free(kc);
+    destroy_key_control(kc);
     return 0;
 }

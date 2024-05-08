@@ -20,7 +20,9 @@ json-parser: $(OBJS)
 
 clean:
 	rm src/*.o
+	rm tests/*.o
 	rm json-parser
+	rm run-tests
 
 test: $(TESTSOBJS)
 	$(CC) $(CFLAGS) $(SANITIZE) $(TESTSOBJS) -o run-tests

@@ -9,7 +9,7 @@
 /*******************************************************************************
 **                              DEFINES / MACROS                              **
 *******************************************************************************/
-#define ARRAY_LEN 2
+#define ARRAY_LEN 8
 
 /*******************************************************************************
 **                                 STRUCTURES                                 **
@@ -48,7 +48,6 @@ struct key_control_t
 {
     size_t nb_keys;
     size_t idx;
-    struct key_array_link *head;
     struct key_array_link *tail;
 };
 
@@ -84,5 +83,7 @@ typedef struct bool_control_t bool_control_t;
 size_t append_key(key_control_t *kl, const char *key);
 
 void print_keys(key_control_t *kc);
+
+void destroy_key_control(key_control_t *kc);
 
 #endif // !LINKED_LISTS_H

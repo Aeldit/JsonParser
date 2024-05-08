@@ -16,19 +16,18 @@ size_t append_key(key_control_t *kc, const char *key)
     }
 
     // Case where there is no element
-    if (kc->head == NULL)
+    if (kc->tail == NULL)
     {
-        kc->head = calloc(1, sizeof(struct key_array_link *));
-        if (kc->head == NULL)
+        kc->tail = calloc(1, sizeof(struct key_array_link));
+        if (kc->tail == NULL)
         {
             return 0;
         }
-        kc->tail = kc->head;
     }
     // Case where the current head array is full
     else if (kc->idx == ARRAY_LEN)
     {
-        struct key_array_link *nkl = calloc(1, sizeof(struct key_array_link *));
+        struct key_array_link *nkl = calloc(1, sizeof(struct key_array_link));
         if (nkl == NULL)
         {
             return 0;
@@ -42,30 +41,51 @@ size_t append_key(key_control_t *kc, const char *key)
     return kc->idx;
 }
 
-// FIXME: SEGV when reading
 void print_keys(key_control_t *kc)
 {
-    if (kc == NULL || kc->head == NULL || kc->nb_keys == 0)
+    if (kc == NULL || kc->tail == NULL || kc->nb_keys == 0)
     {
         return;
     }
 
     struct key_array_link *tmp = kc->tail;
+    char last = 1;
     // Iterates over the arrays
     while (tmp != NULL)
     {
         printf("[ ");
         // Iterates over an array
-        for (size_t i = 0; i < (tmp->prev == NULL ? kc->idx : ARRAY_LEN); ++i)
+        for (size_t i = 0; i < (last ? kc->idx : ARRAY_LEN); ++i)
         {
-            printf("## %lu ##", i);
             printf("\"%s\"", tmp->keys[i]);
-            if (i != (tmp->prev == NULL ? kc->idx : ARRAY_LEN) - 1)
+            if (i != (last ? kc->idx : ARRAY_LEN) - 1)
             {
                 printf(", ");
+            }
+
+            if (last)
+            {
+                last = 0;
             }
         }
         printf(" ]\n");
         tmp = tmp->prev;
     }
+}
+
+void destroy_key_control(key_control_t *kc)
+{
+    if (kc == NULL)
+    {
+        return;
+    }
+
+    struct key_array_link *tmp = kc->tail;
+    while (tmp != NULL)
+    {
+        struct key_array_link *to_del = tmp;
+        tmp = tmp->prev;
+        free(to_del);
+    }
+    free(kc);
 }
