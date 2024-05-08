@@ -32,7 +32,7 @@
         {                                                                      \
             return err_ret;                                                    \
         }                                                                      \
-        st->head->list[st->idx++] = elt;                                       \
+        st->head->list[st->idx] = elt;                                         \
     }                                                                          \
     /* Case where the current array is full */                                 \
     else if (st->idx == ARRAY_LEN)                                             \
@@ -51,7 +51,7 @@
         }                                                                      \
         tmp->next = nkl;                                                       \
         st->idx = 0;                                                           \
-        nkl->list[st->idx++] = elt;                                            \
+        nkl->list[st->idx] = elt;                                              \
     }                                                                          \
     else                                                                       \
     {                                                                          \
@@ -93,35 +93,40 @@ void print_pairs(pair_control_st *pc)
         return;
     }
 
-    struct pair_array_link *tmp = pc->head;
+    struct pair_array_link *array = pc->head;
     printf("{\n");
     // Iterates over the arrays
-    while (tmp != NULL)
+    while (array != NULL)
     {
         // Iterates over an array
-        for (size_t i = 0; i < (tmp->next == NULL ? pc->idx : ARRAY_LEN); ++i)
+        for (size_t i = 0; i < (array->next == NULL ? pc->idx : ARRAY_LEN); ++i)
         {
-            switch (tmp->pairs[i]->type)
+            if (array->pairs[i] != NULL)
             {
-            case TYPE_STR:
-                printf("\t\"%s\": \"%s\"", tmp->pairs[i]->key,
-                       (const char *)tmp->pairs[i]->value);
-                break;
-            case TYPE_NUM:
-                printf("\t\"%s\": \"%ld\"", tmp->pairs[i]->key,
-                       (long)tmp->pairs[i]->value);
-                break;
-            default:
-                break;
-            }
-            // If we are not at the last element of the last array, we print a
-            // ','
-            if ((tmp->next == NULL && i != pc->idx - 1) || tmp->next != NULL)
-            {
-                printf(",\n");
+                long num = 0;
+                switch (array->pairs[i]->type)
+                {
+                case TYPE_STR:
+                    printf("\t\"%s\": \"%s\"", array->pairs[i]->key,
+                           (const char *)array->pairs[i]->value);
+                    break;
+                case TYPE_NUM:
+                    num = *(long *)array->pairs[i]->value;
+                    printf("\t\"%s\": %ld", array->pairs[i]->key, num);
+                    break;
+                default:
+                    break;
+                }
+                // If we are not at the last element of the last array, we print
+                // a ','
+                if ((array->next == NULL && i != pc->idx - 1)
+                    || array->next != NULL)
+                {
+                    printf(",\n");
+                }
             }
         }
-        tmp = tmp->next;
+        array = array->next;
     }
     printf("\n}\n");
 }

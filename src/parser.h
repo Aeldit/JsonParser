@@ -54,6 +54,8 @@ json_dict_st *init_dict(void);
 
 char add_str(json_dict_st *jd, const char *key, const char *str);
 
+char add_num(json_dict_st *jd, const char *key, long num);
+
 void destroy_dict(json_dict_st *jd);
 
 #endif // !JSON_PARSER_H

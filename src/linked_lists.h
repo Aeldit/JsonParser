@@ -98,7 +98,7 @@ typedef struct bool_control bool_control_st;
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
 /***************************************
-**               PAIRS                **
+**               PAIR                 **
 ***************************************/
 struct pair *append_pair(pair_control_st *pc, struct pair *p);
 
@@ -106,6 +106,9 @@ void print_pairs(pair_control_st *pc);
 
 void destroy_pair_control(pair_control_st *p);
 
+/***************************************
+**                KEY                 **
+***************************************/
 /**
 ** \brief  Appends the given key to the keys array
 ** \return The index of the added key + 1 (0 is the error code), so we have to
@@ -117,8 +120,18 @@ void print_keys(key_control_st *kc);
 
 void destroy_key_control(key_control_st *kc);
 
+/***************************************
+**                STR                 **
+***************************************/
 const char *append_str(str_control_st *sc, const char *str);
 
 void destroy_str_control(str_control_st *sc);
+
+/***************************************
+**                NUM                 **
+***************************************/
+long *append_num(num_control_st *nc, long num);
+
+void destroy_num_control(num_control_st *nc);
 
 #endif // !LINKED_LISTS_H

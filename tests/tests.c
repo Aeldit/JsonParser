@@ -17,19 +17,11 @@ int main(void)
     add_str(jd, "testi", "a");
     add_str(jd, "testin", "a");
     add_str(jd, "testing", "a");
-    add_str(jd, "a", "a");
-    add_str(jd, "b", "a");
-    add_str(jd, "c", "a");
-    add_str(jd, "d", "a");
-    add_str(jd, "e", "a");
-    add_str(jd, "f", "a");
-    add_str(jd, "g", "a");
-    add_str(jd, "h", "a");
-    add_str(jd, "i", "a");
-    add_str(jd, "j", "a");
-    add_str(jd, "k", "a");
-    add_str(jd, "l", "a");
-    add_str(jd, "m", "a");
+
+    for (long i = 0; i < 10; ++i)
+    {
+        add_num(jd, "a", i);
+    }
     print_pairs(jd->pairs);
     destroy_dict(jd);
     return 0;

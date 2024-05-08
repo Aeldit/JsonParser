@@ -50,6 +50,46 @@ char add_str(json_dict_st *jd, const char *key, const char *str)
     return SUCCESS;
 }
 
+char add_num(json_dict_st *jd, const char *key, long num)
+{
+    if (jd == NULL || key == NULL)
+    {
+        return FAILURE;
+    }
+
+    if (jd->pairs == NULL)
+    {
+        jd->pairs = calloc(1, sizeof(pair_control_st));
+    }
+    if (jd->keys == NULL)
+    {
+        jd->keys = calloc(1, sizeof(key_control_st));
+    }
+    if (jd->numbers == NULL)
+    {
+        jd->numbers = calloc(1, sizeof(num_control_st));
+    }
+
+    if (jd->pairs == NULL || jd->keys == NULL || jd->numbers == NULL)
+    {
+        destroy_pair_control(jd->pairs);
+        destroy_key_control(jd->keys);
+        destroy_num_control(jd->numbers);
+        return FAILURE;
+    }
+
+    struct pair *p = calloc(1, sizeof(struct pair));
+    if (p == NULL)
+    {
+        return FAILURE;
+    }
+    p->type = TYPE_NUM;
+    p->key = append_key(jd->keys, key);
+    p->value = append_num(jd->numbers, num);
+    append_pair(jd->pairs, p);
+    return SUCCESS;
+}
+
 size_t get_nb_keys(json_dict_st *jd)
 {
     return jd == NULL ? 0 : jd->keys == NULL ? 0 : jd->keys->nb_keys;
@@ -65,7 +105,9 @@ void destroy_dict(json_dict_st *jd)
 
     destroy_pair_control(jd->pairs);
     destroy_key_control(jd->keys);
+
     destroy_str_control(jd->strings);
+    destroy_num_control(jd->numbers);
     // TODO: Destroy the other types
     free(jd);
 }
