@@ -6,7 +6,7 @@
 
 int main(void)
 {
-    json_dict_t *jd = init_dict();
+    json_dict_st *jd = init_dict();
     if (jd == NULL)
     {
         return 1;

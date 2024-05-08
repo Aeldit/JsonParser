@@ -53,38 +53,38 @@ struct bool_array_link
 ** \brief Represents a linked list of the associated type (key, str, num, ...)
 **        and stores the head of the list
 */
-struct key_control_t
+struct key_control
 {
     size_t nb_keys;
     size_t idx;
     struct key_array_link *head;
 };
 
-struct str_control_t
+struct str_control
 {
     size_t nb_str;
     size_t idx;
     struct str_array_link *head;
 };
 
-struct num_control_t
+struct num_control
 {
     size_t nb_num;
     size_t idx;
     struct num_array_link *head;
 };
 
-struct bool_control_t
+struct bool_control
 {
     size_t nb_bool;
     size_t idx;
     struct bool_array_link *head;
 };
 
-typedef struct key_control_t key_control_t;
-typedef struct str_control_t str_control_t;
-typedef struct num_control_t num_control_t;
-typedef struct bool_control_t bool_control_t;
+typedef struct key_control key_control_st;
+typedef struct str_control str_control_st;
+typedef struct num_control num_control_st;
+typedef struct bool_control bool_control_st;
 
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
@@ -94,10 +94,10 @@ typedef struct bool_control_t bool_control_t;
 ** \return The index of the added key + 1 (0 is the error code), so we have to
 **         make sure later to substract 1 to the result of this function
 */
-size_t append_key(key_control_t *kl, const char *key);
+size_t append_key(key_control_st *kl, const char *key);
 
-void print_keys(key_control_t *kc);
+void print_keys(key_control_st *kc);
 
-void destroy_key_control(key_control_t *kc);
+void destroy_key_control(key_control_st *kc);
 
 #endif // !LINKED_LISTS_H

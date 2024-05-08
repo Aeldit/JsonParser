@@ -32,6 +32,8 @@ size_t append_key(key_control_t *kc, const char *key)
     // Case where the current array is full
     else if (kc->idx == ARRAY_LEN)
     {
+        // We allocate the new element, add it at the end of the linked list of
+        // its type and adds to it the given key
         struct key_array_link *nkl = calloc(1, sizeof(struct key_array_link));
         if (nkl == NULL)
         {
@@ -48,6 +50,7 @@ size_t append_key(key_control_t *kc, const char *key)
     }
     else
     {
+        // Adds the given key to the last array
         struct key_array_link *tmp = kc->head;
         while (tmp->next != NULL)
         {
