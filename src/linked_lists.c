@@ -67,22 +67,22 @@ void print_keys(key_control_t *kc)
     }
 
     struct key_array_link *tmp = kc->head;
+    printf("[ ");
     // Iterates over the arrays
     while (tmp != NULL)
     {
-        printf("[ ");
         // Iterates over an array
         for (size_t i = 0; i < (tmp->next == NULL ? kc->idx : ARRAY_LEN); ++i)
         {
             printf("\"%s\"", tmp->keys[i]);
-            if (i != (tmp->next == NULL ? kc->idx : ARRAY_LEN) - 1)
+            if ((tmp->next == NULL && i != kc->idx - 1) || tmp->next != NULL)
             {
                 printf(", ");
             }
         }
-        printf(" ]\n");
         tmp = tmp->next;
     }
+    printf(" ]\n");
 }
 
 void destroy_key_control(key_control_t *kc)
