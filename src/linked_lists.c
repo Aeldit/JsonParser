@@ -75,6 +75,8 @@ void print_keys(key_control_t *kc)
         for (size_t i = 0; i < (tmp->next == NULL ? kc->idx : ARRAY_LEN); ++i)
         {
             printf("\"%s\"", tmp->keys[i]);
+            // If we are not at the last element of the last array, we print a
+            // ','
             if ((tmp->next == NULL && i != kc->idx - 1) || tmp->next != NULL)
             {
                 printf(", ");
