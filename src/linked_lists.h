@@ -14,6 +14,11 @@
 /*******************************************************************************
 **                                 STRUCTURES                                 **
 *******************************************************************************/
+/**
+** \brief Each '..._array_link' struct represents a link of the chained list of
+**        the associated type. It contains an array of predetermined length and
+**        a pointer to the previous link.
+*/
 struct pair_array_link
 {
     struct pair *pairs[ARRAY_LEN];
@@ -23,7 +28,7 @@ struct pair_array_link
 struct key_array_link
 {
     const char *keys[ARRAY_LEN];
-    struct key_array_link *prev;
+    struct key_array_link *next;
 };
 
 struct str_array_link
@@ -44,11 +49,15 @@ struct bool_array_link
     struct bool_array_link *next;
 };
 
+/**
+** \brief Represents a linked list of the associated type (key, str, num, ...)
+**        and stores the head of the list
+*/
 struct key_control_t
 {
     size_t nb_keys;
     size_t idx;
-    struct key_array_link *tail;
+    struct key_array_link *head;
 };
 
 struct str_control_t
@@ -80,6 +89,11 @@ typedef struct bool_control_t bool_control_t;
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
+/**
+** \brief  Appends the given key to the keys array
+** \return The index of the added key + 1 (0 is the error code), so we have to
+**         make sure later to substract 1 to the result of this function
+*/
 size_t append_key(key_control_t *kl, const char *key);
 
 void print_keys(key_control_t *kc);

@@ -3,11 +3,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-/**
-** \brief  Appends the given key to the keys array
-** \return The index of the added key + 1 (0 is the error code), so we have to
-**         make sure later to substract 1 to the result of this function
-*/
 size_t append_key(key_control_t *kc, const char *key)
 {
     if (kc == NULL || key == NULL)
@@ -16,13 +11,14 @@ size_t append_key(key_control_t *kc, const char *key)
     }
 
     // Case where there is no element
-    if (kc->tail == NULL)
+    if (kc->head == NULL)
     {
-        kc->tail = calloc(1, sizeof(struct key_array_link));
-        if (kc->tail == NULL)
+        kc->head = calloc(1, sizeof(struct key_array_link));
+        if (kc->head == NULL)
         {
             return 0;
         }
+        kc->head->keys[kc->idx++] = key;
     }
     // Case where the current head array is full
     else if (kc->idx == ARRAY_LEN)
@@ -32,44 +28,51 @@ size_t append_key(key_control_t *kc, const char *key)
         {
             return 0;
         }
-        nkl->prev = kc->tail;
-        kc->tail = nkl;
+        struct key_array_link *tmp = kc->head;
+        while (tmp->next != NULL)
+        {
+            tmp = tmp->next;
+        }
+        tmp->next = nkl;
         kc->idx = 0;
+        nkl->keys[kc->idx++] = key;
     }
-    kc->tail->keys[kc->idx++] = key;
+    else
+    {
+        struct key_array_link *tmp = kc->head;
+        while (tmp->next != NULL)
+        {
+            tmp = tmp->next;
+        }
+        tmp->keys[kc->idx++] = key;
+    }
     ++kc->nb_keys;
     return kc->idx;
 }
 
 void print_keys(key_control_t *kc)
 {
-    if (kc == NULL || kc->tail == NULL || kc->nb_keys == 0)
+    if (kc == NULL || kc->head == NULL || kc->nb_keys == 0)
     {
         return;
     }
 
-    struct key_array_link *tmp = kc->tail;
-    char last = 1;
+    struct key_array_link *tmp = kc->head;
     // Iterates over the arrays
     while (tmp != NULL)
     {
         printf("[ ");
         // Iterates over an array
-        for (size_t i = 0; i < (last ? kc->idx : ARRAY_LEN); ++i)
+        for (size_t i = 0; i < (tmp->next == NULL ? kc->idx : ARRAY_LEN); ++i)
         {
             printf("\"%s\"", tmp->keys[i]);
-            if (i != (last ? kc->idx : ARRAY_LEN) - 1)
+            if (i != (tmp->next == NULL ? kc->idx : ARRAY_LEN) - 1)
             {
                 printf(", ");
             }
-
-            if (last)
-            {
-                last = 0;
-            }
         }
         printf(" ]\n");
-        tmp = tmp->prev;
+        tmp = tmp->next;
     }
 }
 
@@ -80,11 +83,11 @@ void destroy_key_control(key_control_t *kc)
         return;
     }
 
-    struct key_array_link *tmp = kc->tail;
+    struct key_array_link *tmp = kc->head;
     while (tmp != NULL)
     {
         struct key_array_link *to_del = tmp;
-        tmp = tmp->prev;
+        tmp = tmp->next;
         free(to_del);
     }
     free(kc);
