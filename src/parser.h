@@ -31,12 +31,11 @@ struct pair
 };
 
 /**
-** \brief
 ** \field strings Points to a linked list to be be able to have a new buffer
 */
 struct json_dict
 {
-    struct pair_array_link *pairs_head;
+    pair_control_st *pairs;
 
     key_control_st *keys;
 
@@ -53,7 +52,7 @@ typedef struct json_dict json_dict_st;
 *******************************************************************************/
 json_dict_st *init_dict(void);
 
-char add_key(json_dict_st *jd, const char *key);
+char add_str(json_dict_st *jd, const char *key, const char *str);
 
 void destroy_dict(json_dict_st *jd);
 

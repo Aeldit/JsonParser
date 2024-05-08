@@ -33,7 +33,7 @@ struct key_array_link
 
 struct str_array_link
 {
-    char *strings[ARRAY_LEN];
+    const char *strings[ARRAY_LEN];
     struct str_array_link *next;
 };
 
@@ -53,6 +53,13 @@ struct bool_array_link
 ** \brief Represents a linked list of the associated type (key, str, num, ...)
 **        and stores the head of the list
 */
+struct pair_control
+{
+    size_t nb_pairs;
+    size_t idx;
+    struct pair_array_link *head;
+};
+
 struct key_control
 {
     size_t nb_keys;
@@ -81,6 +88,7 @@ struct bool_control
     struct bool_array_link *head;
 };
 
+typedef struct pair_control pair_control_st;
 typedef struct key_control key_control_st;
 typedef struct str_control str_control_st;
 typedef struct num_control num_control_st;
@@ -89,6 +97,13 @@ typedef struct bool_control bool_control_st;
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
+/***************************************
+**               PAIRS                **
+***************************************/
+size_t append_pair(pair_control_st *pc, struct pair *p);
+
+void destroy_pair_control(pair_control_st *p);
+
 /**
 ** \brief  Appends the given key to the keys array
 ** \return The index of the added key + 1 (0 is the error code), so we have to
@@ -99,5 +114,9 @@ size_t append_key(key_control_st *kl, const char *key);
 void print_keys(key_control_st *kc);
 
 void destroy_key_control(key_control_st *kc);
+
+size_t append_str(str_control_st *sc, const char *str);
+
+void destroy_str_control(str_control_st *sc);
 
 #endif // !LINKED_LISTS_H
