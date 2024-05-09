@@ -10,7 +10,7 @@ json_dict_st *init_dict(void)
     return jd == NULL ? NULL : jd;
 }
 
-char add_str(json_dict_st *jd, const char *key, const char *str)
+char add_str(json_dict_st *jd, const char *key, char *str)
 {
     if (jd == NULL || key == NULL || str == NULL)
     {
@@ -86,7 +86,7 @@ char add_num(json_dict_st *jd, const char *key, long num)
     return SUCCESS;
 }
 
-char add_bool(json_dict_st *jd, const char *key, char bool)
+char add_bool(json_dict_st *jd, const char *key, char boolean)
 {
     if (jd == NULL || key == NULL)
     {
@@ -117,9 +117,9 @@ char add_bool(json_dict_st *jd, const char *key, char bool)
     {
         return FAILURE;
     }
-    p->type = TYPE_NUM;
+    p->type = TYPE_BOOL;
     p->key = append_key(jd->keys, key);
-    p->value = append_bool(jd->booleans, bool);
+    p->value = append_bool(jd->booleans, boolean);
     append_pair(jd->pairs, p);
     return SUCCESS;
 }
@@ -142,6 +142,7 @@ void destroy_dict(json_dict_st *jd)
 
     destroy_str_control(jd->strings);
     destroy_num_control(jd->numbers);
-    // TODO: Destroy the other types
+    // destroy_bool_control(jd->booleans);
+    //  TODO: Destroy the other types
     free(jd);
 }

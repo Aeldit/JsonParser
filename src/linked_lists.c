@@ -12,29 +12,30 @@
 **                              DEFINES / MACROS                              **
 *******************************************************************************/
 /**
+** \brief Destroys the given linked list
 ** \param link_type The typedef struct
 ** \param st The name of the variable of the type 'st_name'
 ** \param elt The element to add
 ** \param list the name of the list in which to add 'elt'
 ** \param nb_type The name of the field containing the number of elements
 */
-#define APPEND(link_type, st, elt, list, nb_type)                              \
-    if (st == NULL)                                                            \
+#define APPEND(link_type, list, nb_type)                                       \
+    if (ctrl == NULL)                                                          \
     {                                                                          \
         return NULL;                                                           \
     }                                                                          \
     /* Case where there is no element */                                       \
-    if (st->head == NULL)                                                      \
+    if (ctrl->head == NULL)                                                    \
     {                                                                          \
-        st->head = calloc(1, sizeof(struct link_type));                        \
-        if (st->head == NULL)                                                  \
+        ctrl->head = calloc(1, sizeof(struct link_type));                      \
+        if (ctrl->head == NULL)                                                \
         {                                                                      \
             return NULL;                                                       \
         }                                                                      \
-        st->head->list[st->idx] = elt;                                         \
+        ctrl->head->list[ctrl->idx] = value;                                   \
     }                                                                          \
     /* Case where the current array is full */                                 \
-    else if (st->idx == ARRAY_LEN)                                             \
+    else if (ctrl->idx == ARRAY_LEN)                                           \
     {                                                                          \
         /* We allocate the new element, add it at the end of the linked list   \
            of its type and adds to it the given key */                         \
@@ -43,63 +44,68 @@
         {                                                                      \
             return NULL;                                                       \
         }                                                                      \
-        struct link_type *tmp = st->head;                                      \
+        struct link_type *tmp = ctrl->head;                                    \
         while (tmp->next != NULL)                                              \
         {                                                                      \
             tmp = tmp->next;                                                   \
         }                                                                      \
         tmp->next = nkl;                                                       \
-        st->idx = 0;                                                           \
-        nkl->list[st->idx] = elt;                                              \
+        ctrl->idx = 0;                                                         \
+        nkl->list[ctrl->idx] = value;                                          \
     }                                                                          \
     else                                                                       \
     {                                                                          \
         /* Adds the given key to the last array */                             \
-        struct link_type *tmp = st->head;                                      \
+        struct link_type *tmp = ctrl->head;                                    \
         while (tmp->next != NULL)                                              \
         {                                                                      \
             tmp = tmp->next;                                                   \
         }                                                                      \
-        tmp->list[st->idx] = elt;                                              \
+        tmp->list[ctrl->idx] = value;                                          \
     }                                                                          \
-    ++st->nb_type;                                                             \
-    struct link_type *tmp = st->head;                                          \
+    ++ctrl->nb_type;                                                           \
+    struct link_type *tmp = ctrl->head;                                        \
     while (tmp->next != NULL)                                                  \
     {                                                                          \
         tmp = tmp->next;                                                       \
     }
 
-#define DESTROY(link_type, st)                                                 \
-    if (st == NULL)                                                            \
+/*
+** \brief Destroys the given linked list
+** \param link_type The typedef struct
+** \param st The name of the variable of the type 'st_name'
+*/
+#define DESTROY(link_type)                                                     \
+    if (ctrl == NULL)                                                          \
     {                                                                          \
         return;                                                                \
     }                                                                          \
-    struct link_type *tmp = st->head;                                          \
+    struct link_type *tmp = ctrl->head;                                        \
     while (tmp != NULL)                                                        \
     {                                                                          \
         struct link_type *to_del = tmp;                                        \
         tmp = tmp->next;                                                       \
         free(to_del);                                                          \
     }                                                                          \
-    free(st);
+    free(ctrl);
 
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
 /***************************************
-**               PAIRS                **
+**               PAIR                 **
 ***************************************/
-struct pair *append_pair(pair_control_st *pc, struct pair *p)
+struct pair *append_pair(pair_control_st *ctrl, struct pair *value)
 {
-    if (p == NULL)
+    if (value == NULL)
     {
         return NULL;
     }
-    APPEND(pair_array_link, pc, p, pairs, nb_pairs)
-    return tmp->pairs[pc->idx++];
+    APPEND(pair_array_link, pairs, nb_pairs)
+    return tmp->pairs[ctrl->idx++];
 }
 
-void print_pairs(pair_control_st *pc)
+void print_json(pair_control_st *pc)
 {
     if (pc == NULL || pc->head == NULL || pc->nb_pairs == 0)
     {
@@ -117,6 +123,7 @@ void print_pairs(pair_control_st *pc)
             if (array->pairs[i] != NULL)
             {
                 long num = 0;
+                char boolean = 0;
                 switch (array->pairs[i]->type)
                 {
                 case TYPE_STR:
@@ -126,6 +133,11 @@ void print_pairs(pair_control_st *pc)
                 case TYPE_NUM:
                     num = *(long *)array->pairs[i]->value;
                     printf("\t\"%s\": %ld", array->pairs[i]->key, num);
+                    break;
+                case TYPE_BOOL:
+                    boolean = *(char *)array->pairs[i]->value;
+                    printf("\t\"%s\": \"%s\"", array->pairs[i]->key,
+                           boolean ? "true" : "false");
                     break;
                 default:
                     break;
@@ -144,14 +156,14 @@ void print_pairs(pair_control_st *pc)
     printf("\n}\n");
 }
 
-void destroy_pair_control(pair_control_st *pc)
+void destroy_pair_control(pair_control_st *ctrl)
 {
-    if (pc == NULL)
+    if (ctrl == NULL)
     {
         return;
     }
 
-    struct pair_array_link *tmp = pc->head;
+    struct pair_array_link *tmp = ctrl->head;
     while (tmp != NULL)
     {
         struct pair_array_link *to_del = tmp;
@@ -162,69 +174,69 @@ void destroy_pair_control(pair_control_st *pc)
         }
         free(to_del);
     }
-    free(pc);
+    free(ctrl);
 }
 
 /***************************************
 **                KEY                 **
 ***************************************/
-const char *append_key(key_control_st *kc, const char *key)
+const char *append_key(key_control_st *ctrl, const char *value)
 {
-    if (key == NULL)
+    if (value == NULL)
     {
         return NULL;
     }
-    APPEND(key_array_link, kc, key, keys, nb_keys)
-    return tmp->keys[kc->idx++];
+    APPEND(key_array_link, keys, nb_keys)
+    return tmp->keys[ctrl->idx++];
 }
 
-void destroy_key_control(key_control_st *kc)
+void destroy_key_control(key_control_st *ctrl)
 {
-    DESTROY(key_array_link, kc)
+    DESTROY(key_array_link)
 }
 
 /***************************************
 **                STR                 **
 ***************************************/
-const char *append_str(str_control_st *sc, const char *str)
+char *append_str(str_control_st *ctrl, char *value)
 {
-    if (str == NULL)
+    if (value == NULL)
     {
         return NULL;
     }
-    APPEND(str_array_link, sc, str, strings, nb_str)
-    return tmp->strings[sc->idx++];
+    APPEND(str_array_link, strings, nb_str)
+    return tmp->strings[ctrl->idx++];
 }
 
-void destroy_str_control(str_control_st *sc)
+void destroy_str_control(str_control_st *ctrl)
 {
-    DESTROY(str_array_link, sc)
+    DESTROY(str_array_link)
 }
 
 /***************************************
 **                NUM                 **
 ***************************************/
-const long *append_num(num_control_st *nc, long num)
+long *append_num(num_control_st *ctrl, long value)
 {
-    APPEND(num_array_link, nc, num, numbers, nb_num)
-    return &tmp->numbers[nc->idx++];
+    APPEND(num_array_link, numbers, nb_num)
+    return &tmp->numbers[ctrl->idx++];
 }
 
-void destroy_num_control(num_control_st *nc)
+void destroy_num_control(num_control_st *ctrl)
 {
-    DESTROY(num_array_link, nc)
+    DESTROY(num_array_link)
 }
 
 /***************************************
 **               BOOL                 **
 ***************************************/
-const char *append_bool(bool_control_st *bc, char boolean)
+char *append_bool(bool_control_st *ctrl, char value)
 {
-    APPEND(bool_array_link, bc, boolean, booleans, nb_bool)
-    return &tmp->booleans[bc->idx++];
+    APPEND(bool_array_link, booleans, nb_bool)
+    return &tmp->booleans[ctrl->idx++];
 }
 
-void destroy_bool_control(bool_control_st *bc)
+void destroy_bool_control(bool_control_st *ctrl)
 {
-    DESTROY(bool_array_link, bc)
+    DESTROY(bool_array_link)
 }

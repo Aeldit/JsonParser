@@ -22,7 +22,10 @@ int main(void)
     {
         add_num(jd, "a", i);
     }
-    print_pairs(jd->pairs);
+
+    add_bool(jd, "bool1", 0);
+    add_bool(jd, "bool2", 1);
+    print_json(jd->pairs);
     destroy_dict(jd);
     return 0;
 }

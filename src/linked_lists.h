@@ -33,7 +33,7 @@ struct key_array_link
 
 struct str_array_link
 {
-    const char *strings[ARRAY_LEN];
+    char *strings[ARRAY_LEN];
     struct str_array_link *next;
 };
 
@@ -100,11 +100,11 @@ typedef struct bool_control bool_control_st;
 /***************************************
 **               PAIR                 **
 ***************************************/
-struct pair *append_pair(pair_control_st *pc, struct pair *p);
+struct pair *append_pair(pair_control_st *ctrl, struct pair *value);
 
-void print_pairs(pair_control_st *pc);
+void print_json(pair_control_st *ctrl);
 
-void destroy_pair_control(pair_control_st *p);
+void destroy_pair_control(pair_control_st *ctrl);
 
 /***************************************
 **                KEY                 **
@@ -114,29 +114,29 @@ void destroy_pair_control(pair_control_st *p);
 ** \return The index of the added key + 1 (0 is the error code), so we have to
 **         make sure later to substract 1 to the result of this function
 */
-const char *append_key(key_control_st *kl, const char *key);
+const char *append_key(key_control_st *ctrl, const char *value);
 
-void destroy_key_control(key_control_st *kc);
+void destroy_key_control(key_control_st *ctrl);
 
 /***************************************
 **                STR                 **
 ***************************************/
-const char *append_str(str_control_st *sc, const char *str);
+char *append_str(str_control_st *ctrl, char *value);
 
 void destroy_str_control(str_control_st *sc);
 
 /***************************************
 **                NUM                 **
 ***************************************/
-const long *append_num(num_control_st *nc, long num);
+long *append_num(num_control_st *ctrl, long value);
 
-void destroy_num_control(num_control_st *nc);
+void destroy_num_control(num_control_st *ctrl);
 
 /***************************************
 **               BOOL                 **
 ***************************************/
-const char *append_bool(bool_control_st *bc, char boolean);
+char *append_bool(bool_control_st *ctrl, char value);
 
-void destroy_bool_control(bool_control_st *nc);
+void destroy_bool_control(bool_control_st *ctrl);
 
 #endif // !LINKED_LISTS_H

@@ -26,7 +26,7 @@
 struct pair
 {
     const char *key; // Points to a key inside the 'keys' linked list
-    const void *value; // Points to a value inside the associated linked list
+    void *value; // Points to a value inside the associated linked list
     unsigned char type;
 };
 
@@ -52,9 +52,11 @@ typedef struct json_dict json_dict_st;
 *******************************************************************************/
 json_dict_st *init_dict(void);
 
-char add_str(json_dict_st *jd, const char *key, const char *str);
+char add_str(json_dict_st *jd, const char *key, char *str);
 
 char add_num(json_dict_st *jd, const char *key, long num);
+
+char add_bool(json_dict_st *jd, const char *key, char boolean);
 
 void destroy_dict(json_dict_st *jd);
 
