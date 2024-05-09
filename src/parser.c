@@ -6,7 +6,7 @@
 
 json_dict_st *init_dict(void)
 {
-    json_dict_st *jd = calloc(1, sizeof(json_dict_st *));
+    json_dict_st *jd = calloc(1, sizeof(json_dict_st));
     return jd == NULL ? NULL : jd;
 }
 
@@ -142,7 +142,7 @@ void destroy_dict(json_dict_st *jd)
 
     destroy_str_control(jd->strings);
     destroy_num_control(jd->numbers);
-    // destroy_bool_control(jd->booleans);
+    destroy_bool_control(jd->booleans);
     //  TODO: Destroy the other types
     free(jd);
 }
