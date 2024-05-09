@@ -11,12 +11,12 @@ int main(void)
         return 1;
     }
     add_str(jd, "t", "a");
-    add_str(jd, "te", "a");
-    add_str(jd, "tes", "a");
-    add_str(jd, "test", "a");
-    add_str(jd, "testi", "a");
-    add_str(jd, "testin", "a");
-    add_str(jd, "testing", "a");
+    add_str(jd, "te", "b");
+    add_str(jd, "tes", "c");
+    add_str(jd, "test", "d");
+    add_str(jd, "testi", "e");
+    add_str(jd, "testin", "f");
+    add_str(jd, "testing", "g");
 
     for (long i = 0; i < 10; ++i)
     {

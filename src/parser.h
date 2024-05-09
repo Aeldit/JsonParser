@@ -52,11 +52,11 @@ typedef struct json_dict json_dict_st;
 *******************************************************************************/
 json_dict_st *init_dict(void);
 
-char add_str(json_dict_st *jd, const char *key, char *str);
+char add_str(json_dict_st *jd, const char *key, char *value);
 
-char add_num(json_dict_st *jd, const char *key, long num);
+char add_num(json_dict_st *jd, const char *key, long value);
 
-char add_bool(json_dict_st *jd, const char *key, char boolean);
+char add_bool(json_dict_st *jd, const char *key, char value);
 
 void destroy_dict(json_dict_st *jd);
 

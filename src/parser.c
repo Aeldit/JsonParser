@@ -1,128 +1,81 @@
 #include "parser.h"
 
+/*******************************************************************************
+**                                  INCLUDES                                  **
+*******************************************************************************/
 #include <stdlib.h>
 
 #include "utils.h"
 
+/*******************************************************************************
+**                              DEFINES / MACROS                              **
+*******************************************************************************/
+/*
+** \brief Adds the key:pair value to the json dict
+** \param type_ctrl_st  The control typedef struct of the correct type
+** \param list The list in which to add the value
+** \param append_type The append function for the current type
+*/
+#define ADD(type_ctrl_st, list, append_type)                                   \
+    if (jd == NULL || key == NULL)                                             \
+    {                                                                          \
+        return FAILURE;                                                        \
+    }                                                                          \
+    if (jd->pairs == NULL)                                                     \
+    {                                                                          \
+        jd->pairs = calloc(1, sizeof(pair_control_st));                        \
+    }                                                                          \
+    if (jd->keys == NULL)                                                      \
+    {                                                                          \
+        jd->keys = calloc(1, sizeof(key_control_st));                          \
+    }                                                                          \
+    if (jd->list == NULL)                                                      \
+    {                                                                          \
+        jd->list = calloc(1, sizeof(type_ctrl_st));                            \
+    }                                                                          \
+    if (jd->pairs == NULL || jd->keys == NULL || jd->list == NULL)             \
+    {                                                                          \
+        destroy_dict(jd);                                                      \
+        return FAILURE;                                                        \
+    }                                                                          \
+    struct pair *p = calloc(1, sizeof(struct pair));                           \
+    if (p == NULL)                                                             \
+    {                                                                          \
+        return FAILURE;                                                        \
+    }                                                                          \
+    p->type = TYPE_STR;                                                        \
+    p->key = append_key(jd->keys, key);                                        \
+    p->value = append_type(jd->list, value);                                   \
+    append_pair(jd->pairs, p);                                                 \
+    return SUCCESS;
+
+/*******************************************************************************
+**                                 FUNCTIONS                                  **
+*******************************************************************************/
 json_dict_st *init_dict(void)
 {
     json_dict_st *jd = calloc(1, sizeof(json_dict_st));
     return jd == NULL ? NULL : jd;
 }
 
-char add_str(json_dict_st *jd, const char *key, char *str)
+// TODO: Prevent duplicated keys from being inserted
+
+char add_str(json_dict_st *jd, const char *key, char *value)
 {
-    if (jd == NULL || key == NULL || str == NULL)
+    if (value == NULL)
     {
         return FAILURE;
     }
-
-    if (jd->pairs == NULL)
-    {
-        jd->pairs = calloc(1, sizeof(pair_control_st));
-    }
-    if (jd->keys == NULL)
-    {
-        jd->keys = calloc(1, sizeof(key_control_st));
-    }
-    if (jd->strings == NULL)
-    {
-        jd->strings = calloc(1, sizeof(str_control_st));
-    }
-
-    if (jd->pairs == NULL || jd->keys == NULL || jd->strings == NULL)
-    {
-        destroy_dict(jd);
-        return FAILURE;
-    }
-
-    struct pair *p = calloc(1, sizeof(struct pair));
-    if (p == NULL)
-    {
-        return FAILURE;
-    }
-    p->type = TYPE_STR;
-    p->key = append_key(jd->keys, key);
-    p->value = append_str(jd->strings, str);
-    append_pair(jd->pairs, p);
-    return SUCCESS;
+    ADD(str_control_st, strings, append_str)
 }
 
-char add_num(json_dict_st *jd, const char *key, long num)
+char add_num(json_dict_st *jd, const char *key, long value)
 {
-    if (jd == NULL || key == NULL)
-    {
-        return FAILURE;
-    }
-
-    if (jd->pairs == NULL)
-    {
-        jd->pairs = calloc(1, sizeof(pair_control_st));
-    }
-    if (jd->keys == NULL)
-    {
-        jd->keys = calloc(1, sizeof(key_control_st));
-    }
-    if (jd->numbers == NULL)
-    {
-        jd->numbers = calloc(1, sizeof(num_control_st));
-    }
-
-    if (jd->pairs == NULL || jd->keys == NULL || jd->numbers == NULL)
-    {
-        destroy_dict(jd);
-        return FAILURE;
-    }
-
-    struct pair *p = calloc(1, sizeof(struct pair));
-    if (p == NULL)
-    {
-        return FAILURE;
-    }
-    p->type = TYPE_NUM;
-    p->key = append_key(jd->keys, key);
-    p->value = append_num(jd->numbers, num);
-    append_pair(jd->pairs, p);
-    return SUCCESS;
+    ADD(num_control_st, numbers, append_num)
 }
 
-char add_bool(json_dict_st *jd, const char *key, char boolean)
-{
-    if (jd == NULL || key == NULL)
-    {
-        return FAILURE;
-    }
-
-    if (jd->pairs == NULL)
-    {
-        jd->pairs = calloc(1, sizeof(pair_control_st));
-    }
-    if (jd->keys == NULL)
-    {
-        jd->keys = calloc(1, sizeof(key_control_st));
-    }
-    if (jd->booleans == NULL)
-    {
-        jd->booleans = calloc(1, sizeof(bool_control_st));
-    }
-
-    if (jd->pairs == NULL || jd->keys == NULL || jd->booleans == NULL)
-    {
-        destroy_dict(jd);
-        return FAILURE;
-    }
-
-    struct pair *p = calloc(1, sizeof(struct pair));
-    if (p == NULL)
-    {
-        return FAILURE;
-    }
-    p->type = TYPE_BOOL;
-    p->key = append_key(jd->keys, key);
-    p->value = append_bool(jd->booleans, boolean);
-    append_pair(jd->pairs, p);
-    return SUCCESS;
-}
+char add_bool(json_dict_st *jd, const char *key,
+              char value){ ADD(bool_control_st, booleans, append_bool) }
 
 size_t get_nb_keys(json_dict_st *jd)
 {
