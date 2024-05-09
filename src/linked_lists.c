@@ -105,20 +105,21 @@ struct pair *append_pair(pair_control_st *ctrl, struct pair *value)
     return tmp->pairs[ctrl->idx++];
 }
 
-void print_json(pair_control_st *pc)
+void print_json(pair_control_st *ctrl)
 {
-    if (pc == NULL || pc->head == NULL || pc->nb_pairs == 0)
+    if (ctrl == NULL || ctrl->head == NULL || ctrl->nb_pairs == 0)
     {
         return;
     }
 
-    struct pair_array_link *array = pc->head;
+    struct pair_array_link *array = ctrl->head;
     printf("{\n");
     // Iterates over the arrays
     while (array != NULL)
     {
         // Iterates over an array
-        for (size_t i = 0; i < (array->next == NULL ? pc->idx : ARRAY_LEN); ++i)
+        for (size_t i = 0; i < (array->next == NULL ? ctrl->idx : ARRAY_LEN);
+             ++i)
         {
             if (array->pairs[i] != NULL)
             {
@@ -144,7 +145,7 @@ void print_json(pair_control_st *pc)
                 }
                 // If we are not at the last element of the last array, we print
                 // a ','
-                if ((array->next == NULL && i != pc->idx - 1)
+                if ((array->next == NULL && i != ctrl->idx - 1)
                     || array->next != NULL)
                 {
                     printf(",\n");
