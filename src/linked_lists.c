@@ -17,12 +17,11 @@
 ** \param elt The element to add
 ** \param list the name of the list in which to add 'elt'
 ** \param nb_type The name of the field containing the number of elements
-** \param err_ret The value to return on error
 */
-#define APPEND(link_type, st, elt, list, nb_type, err_ret)                     \
+#define APPEND(link_type, st, elt, list, nb_type)                              \
     if (st == NULL)                                                            \
     {                                                                          \
-        return err_ret;                                                        \
+        return NULL;                                                           \
     }                                                                          \
     /* Case where there is no element */                                       \
     if (st->head == NULL)                                                      \
@@ -30,7 +29,7 @@
         st->head = calloc(1, sizeof(struct link_type));                        \
         if (st->head == NULL)                                                  \
         {                                                                      \
-            return err_ret;                                                    \
+            return NULL;                                                       \
         }                                                                      \
         st->head->list[st->idx] = elt;                                         \
     }                                                                          \
@@ -42,7 +41,7 @@
         struct link_type *nkl = calloc(1, sizeof(struct link_type));           \
         if (nkl == NULL)                                                       \
         {                                                                      \
-            return err_ret;                                                    \
+            return NULL;                                                       \
         }                                                                      \
         struct link_type *tmp = st->head;                                      \
         while (tmp->next != NULL)                                              \
@@ -70,6 +69,20 @@
         tmp = tmp->next;                                                       \
     }
 
+#define DESTROY(link_type, st)                                                 \
+    if (st == NULL)                                                            \
+    {                                                                          \
+        return;                                                                \
+    }                                                                          \
+    struct link_type *tmp = st->head;                                          \
+    while (tmp != NULL)                                                        \
+    {                                                                          \
+        struct link_type *to_del = tmp;                                        \
+        tmp = tmp->next;                                                       \
+        free(to_del);                                                          \
+    }                                                                          \
+    free(st);
+
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
@@ -82,7 +95,7 @@ struct pair *append_pair(pair_control_st *pc, struct pair *p)
     {
         return NULL;
     }
-    APPEND(pair_array_link, pc, p, pairs, nb_pairs, NULL)
+    APPEND(pair_array_link, pc, p, pairs, nb_pairs)
     return tmp->pairs[pc->idx++];
 }
 
@@ -161,53 +174,13 @@ const char *append_key(key_control_st *kc, const char *key)
     {
         return NULL;
     }
-    APPEND(key_array_link, kc, key, keys, nb_keys, NULL)
+    APPEND(key_array_link, kc, key, keys, nb_keys)
     return tmp->keys[kc->idx++];
-}
-
-void print_keys(key_control_st *kc)
-{
-    if (kc == NULL || kc->head == NULL || kc->nb_keys == 0)
-    {
-        return;
-    }
-
-    struct key_array_link *tmp = kc->head;
-    printf("[ ");
-    // Iterates over the arrays
-    while (tmp != NULL)
-    {
-        // Iterates over an array
-        for (size_t i = 0; i < (tmp->next == NULL ? kc->idx : ARRAY_LEN); ++i)
-        {
-            printf("\"%s\"", tmp->keys[i]);
-            // If we are not at the last element of the last array, we print a
-            // ','
-            if ((tmp->next == NULL && i != kc->idx - 1) || tmp->next != NULL)
-            {
-                printf(", ");
-            }
-        }
-        tmp = tmp->next;
-    }
-    printf(" ]\n");
 }
 
 void destroy_key_control(key_control_st *kc)
 {
-    if (kc == NULL)
-    {
-        return;
-    }
-
-    struct key_array_link *tmp = kc->head;
-    while (tmp != NULL)
-    {
-        struct key_array_link *to_del = tmp;
-        tmp = tmp->next;
-        free(to_del);
-    }
-    free(kc);
+    DESTROY(key_array_link, kc)
 }
 
 /***************************************
@@ -219,49 +192,39 @@ const char *append_str(str_control_st *sc, const char *str)
     {
         return NULL;
     }
-    APPEND(str_array_link, sc, str, strings, nb_str, NULL)
+    APPEND(str_array_link, sc, str, strings, nb_str)
     return tmp->strings[sc->idx++];
 }
 
 void destroy_str_control(str_control_st *sc)
 {
-    if (sc == NULL)
-    {
-        return;
-    }
-
-    struct str_array_link *tmp = sc->head;
-    while (tmp != NULL)
-    {
-        struct str_array_link *to_del = tmp;
-        tmp = tmp->next;
-        free(to_del);
-    }
-    free(sc);
+    DESTROY(str_array_link, sc)
 }
 
 /***************************************
 **                NUM                 **
 ***************************************/
-long *append_num(num_control_st *nc, long num)
+const long *append_num(num_control_st *nc, long num)
 {
-    APPEND(num_array_link, nc, num, numbers, nb_num, NULL)
+    APPEND(num_array_link, nc, num, numbers, nb_num)
     return &tmp->numbers[nc->idx++];
 }
 
 void destroy_num_control(num_control_st *nc)
 {
-    if (nc == NULL)
-    {
-        return;
-    }
+    DESTROY(num_array_link, nc)
+}
 
-    struct num_array_link *tmp = nc->head;
-    while (tmp != NULL)
-    {
-        struct num_array_link *to_del = tmp;
-        tmp = tmp->next;
-        free(to_del);
-    }
-    free(nc);
+/***************************************
+**               BOOL                 **
+***************************************/
+const char *append_bool(bool_control_st *bc, char boolean)
+{
+    APPEND(bool_array_link, bc, boolean, booleans, nb_bool)
+    return &tmp->booleans[bc->idx++];
+}
+
+void destroy_bool_control(bool_control_st *bc)
+{
+    DESTROY(bool_array_link, bc)
 }

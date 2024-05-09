@@ -32,9 +32,7 @@ char add_str(json_dict_st *jd, const char *key, const char *str)
 
     if (jd->pairs == NULL || jd->keys == NULL || jd->strings == NULL)
     {
-        destroy_pair_control(jd->pairs);
-        destroy_key_control(jd->keys);
-        destroy_str_control(jd->strings);
+        destroy_dict(jd);
         return FAILURE;
     }
 
@@ -72,9 +70,7 @@ char add_num(json_dict_st *jd, const char *key, long num)
 
     if (jd->pairs == NULL || jd->keys == NULL || jd->numbers == NULL)
     {
-        destroy_pair_control(jd->pairs);
-        destroy_key_control(jd->keys);
-        destroy_num_control(jd->numbers);
+        destroy_dict(jd);
         return FAILURE;
     }
 
@@ -86,6 +82,44 @@ char add_num(json_dict_st *jd, const char *key, long num)
     p->type = TYPE_NUM;
     p->key = append_key(jd->keys, key);
     p->value = append_num(jd->numbers, num);
+    append_pair(jd->pairs, p);
+    return SUCCESS;
+}
+
+char add_bool(json_dict_st *jd, const char *key, char bool)
+{
+    if (jd == NULL || key == NULL)
+    {
+        return FAILURE;
+    }
+
+    if (jd->pairs == NULL)
+    {
+        jd->pairs = calloc(1, sizeof(pair_control_st));
+    }
+    if (jd->keys == NULL)
+    {
+        jd->keys = calloc(1, sizeof(key_control_st));
+    }
+    if (jd->booleans == NULL)
+    {
+        jd->booleans = calloc(1, sizeof(bool_control_st));
+    }
+
+    if (jd->pairs == NULL || jd->keys == NULL || jd->booleans == NULL)
+    {
+        destroy_dict(jd);
+        return FAILURE;
+    }
+
+    struct pair *p = calloc(1, sizeof(struct pair));
+    if (p == NULL)
+    {
+        return FAILURE;
+    }
+    p->type = TYPE_NUM;
+    p->key = append_key(jd->keys, key);
+    p->value = append_bool(jd->booleans, bool);
     append_pair(jd->pairs, p);
     return SUCCESS;
 }

@@ -116,8 +116,6 @@ void destroy_pair_control(pair_control_st *p);
 */
 const char *append_key(key_control_st *kl, const char *key);
 
-void print_keys(key_control_st *kc);
-
 void destroy_key_control(key_control_st *kc);
 
 /***************************************
@@ -130,8 +128,15 @@ void destroy_str_control(str_control_st *sc);
 /***************************************
 **                NUM                 **
 ***************************************/
-long *append_num(num_control_st *nc, long num);
+const long *append_num(num_control_st *nc, long num);
 
 void destroy_num_control(num_control_st *nc);
+
+/***************************************
+**               BOOL                 **
+***************************************/
+const char *append_bool(bool_control_st *bc, char boolean);
+
+void destroy_bool_control(bool_control_st *nc);
 
 #endif // !LINKED_LISTS_H
