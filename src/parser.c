@@ -60,6 +60,23 @@ json_dict_st *init_dict(void)
 
 // TODO: Prevent duplicated keys from being inserted
 
+char add_null(json_dict_st *jd, const char *key)
+{
+    if (jd == NULL || key == NULL)
+    {
+        return FAILURE;
+    }
+    struct pair *p = calloc(1, sizeof(struct pair));
+    if (p == NULL)
+    {
+        return FAILURE;
+    }
+    p->type = TYPE_NULL;
+    p->key = key;
+    p->value = NULL;
+    return SUCCESS;
+}
+
 char add_str(json_dict_st *jd, const char *key, char *value)
 {
     if (value == NULL)
@@ -74,8 +91,46 @@ char add_num(json_dict_st *jd, const char *key, long value)
     ADD(num_control_st, numbers, append_num)
 }
 
-char add_bool(json_dict_st *jd, const char *key,
-              char value){ ADD(bool_control_st, booleans, append_bool) }
+char add_bool(json_dict_st *jd, const char *key, char value)
+{
+    ADD(bool_control_st, booleans, append_bool)
+}
+
+char add_array(json_dict_st *jd, const char *key, void *list, char type)
+{
+    if (jd == NULL || key == NULL || list == NULL)
+    {
+        return FAILURE;
+    }
+
+    if (jd == NULL || key == NULL)
+    {
+        return FAILURE;
+    }
+    if (jd->pairs == NULL)
+    {
+        jd->pairs = calloc(1, sizeof(pair_control_st));
+    }
+    if (jd->keys == NULL)
+    {
+        jd->keys = calloc(1, sizeof(key_control_st));
+    }
+    if (jd->pairs == NULL || jd->keys == NULL)
+    {
+        destroy_dict(jd);
+        return FAILURE;
+    }
+    struct pair *p = calloc(1, sizeof(struct pair));
+    if (p == NULL)
+    {
+        return FAILURE;
+    }
+    p->type = TYPE_ARR | type;
+    p->key = append_key(jd->keys, key);
+    p->value = list;
+    append_pair(jd->pairs, p);
+    return SUCCESS;
+}
 
 size_t get_nb_keys(json_dict_st *jd)
 {

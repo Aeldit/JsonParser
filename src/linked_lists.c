@@ -127,6 +127,9 @@ void print_json(pair_control_st *ctrl)
                 char boolean = 0;
                 switch (array->pairs[i]->type)
                 {
+                case TYPE_NULL:
+                    printf("\t\"%s\": \"null\"", array->pairs[i]->key);
+                    break;
                 case TYPE_STR:
                     printf("\t\"%s\": \"%s\"", array->pairs[i]->key,
                            (const char *)array->pairs[i]->value);
@@ -224,6 +227,14 @@ long *append_num(num_control_st *ctrl, long value)
 }
 
 void destroy_num_control(num_control_st *ctrl)
+{
+    DESTROY(num_array_link)
+}
+
+/***************************************
+**               ARRAY                **
+***************************************/
+void destroy_array_control(num_control_st *ctrl)
 {
     DESTROY(num_array_link)
 }

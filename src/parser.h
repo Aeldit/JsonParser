@@ -11,11 +11,19 @@
 /*******************************************************************************
 **                              DEFINES / MACROS                              **
 *******************************************************************************/
-#define TYPE_STR 0
-#define TYPE_NUM 1
-#define TYPE_OBJ 2
-#define TYPE_ARR 3
-#define TYPE_BOOL 4
+#define TYPE_NULL (1 << 0)
+#define TYPE_STR (1 << 1)
+#define TYPE_NUM (1 << 2)
+#define TYPE_BOOL (1 << 3)
+#define TYPE_ARR (1 << 4)
+// #define TYPE_OBJ 2
+
+#define BEGIN_ARRAY '['
+#define END_ARRAY ']'
+#define BEGIN_OBJECT '{'
+#define END_OBJECT '}'
+#define NAME_SEPARATOR ':'
+#define VALUE_SEPARATOR ','
 
 /*******************************************************************************
 **                                 STRUCTURES                                 **
