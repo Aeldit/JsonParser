@@ -128,7 +128,7 @@ void print_json(pair_control_st *ctrl)
                 switch (array->pairs[i]->type)
                 {
                 case TYPE_NULL:
-                    printf("\t\"%s\": \"null\"", array->pairs[i]->key);
+                    printf("\t\"%s\": null", array->pairs[i]->key);
                     break;
                 case TYPE_STR:
                     printf("\t\"%s\": \"%s\"", array->pairs[i]->key,
@@ -140,7 +140,7 @@ void print_json(pair_control_st *ctrl)
                     break;
                 case TYPE_BOOL:
                     boolean = *(char *)array->pairs[i]->value;
-                    printf("\t\"%s\": \"%s\"", array->pairs[i]->key,
+                    printf("\t\"%s\": %s", array->pairs[i]->key,
                            boolean ? "true" : "false");
                     break;
                 default:

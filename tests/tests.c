@@ -25,6 +25,9 @@ int main(void)
 
     add_bool(jd, "bool1", 0);
     add_bool(jd, "bool2", 1);
+
+    add_null(jd, "testing_nulls");
+
     print_json(jd->pairs);
     destroy_dict(jd);
     return 0;

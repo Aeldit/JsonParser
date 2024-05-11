@@ -11,11 +11,11 @@
 /*******************************************************************************
 **                              DEFINES / MACROS                              **
 *******************************************************************************/
-#define TYPE_NULL (1 << 0)
-#define TYPE_STR (1 << 1)
-#define TYPE_NUM (1 << 2)
-#define TYPE_BOOL (1 << 3)
-#define TYPE_ARR (1 << 4)
+#define TYPE_NULL 0
+#define TYPE_STR 1
+#define TYPE_NUM 2
+#define TYPE_BOOL 3
+#define TYPE_ARR 4
 // #define TYPE_OBJ 2
 
 #define BEGIN_ARRAY '['
@@ -60,11 +60,15 @@ typedef struct json_dict json_dict_st;
 *******************************************************************************/
 json_dict_st *init_dict(void);
 
+char add_null(json_dict_st *jd, const char *key);
+
 char add_str(json_dict_st *jd, const char *key, char *value);
 
 char add_num(json_dict_st *jd, const char *key, long value);
 
 char add_bool(json_dict_st *jd, const char *key, char value);
+
+char add_array(json_dict_st *jd, const char *key, void *list);
 
 void destroy_dict(json_dict_st *jd);
 

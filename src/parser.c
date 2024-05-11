@@ -16,7 +16,7 @@
 ** \param list The list in which to add the value
 ** \param append_type The append function for the current type
 */
-#define ADD(type_ctrl_st, list, append_type)                                   \
+#define ADD(type_ctrl_st, list, append_type, value_type)                       \
     if (jd == NULL || key == NULL)                                             \
     {                                                                          \
         return FAILURE;                                                        \
@@ -43,7 +43,7 @@
     {                                                                          \
         return FAILURE;                                                        \
     }                                                                          \
-    p->type = TYPE_STR;                                                        \
+    p->type = (value_type);                                                    \
     p->key = append_key(jd->keys, key);                                        \
     p->value = append_type(jd->list, value);                                   \
     append_pair(jd->pairs, p);                                                 \
@@ -74,6 +74,7 @@ char add_null(json_dict_st *jd, const char *key)
     p->type = TYPE_NULL;
     p->key = key;
     p->value = NULL;
+    append_pair(jd->pairs, p);
     return SUCCESS;
 }
 
@@ -83,20 +84,20 @@ char add_str(json_dict_st *jd, const char *key, char *value)
     {
         return FAILURE;
     }
-    ADD(str_control_st, strings, append_str)
+    ADD(str_control_st, strings, append_str, TYPE_STR)
 }
 
 char add_num(json_dict_st *jd, const char *key, long value)
 {
-    ADD(num_control_st, numbers, append_num)
+    ADD(num_control_st, numbers, append_num, TYPE_NUM)
 }
 
 char add_bool(json_dict_st *jd, const char *key, char value)
 {
-    ADD(bool_control_st, booleans, append_bool)
+    ADD(bool_control_st, booleans, append_bool, TYPE_BOOL)
 }
 
-char add_array(json_dict_st *jd, const char *key, void *list, char type)
+char add_array(json_dict_st *jd, const char *key, void *list)
 {
     if (jd == NULL || key == NULL || list == NULL)
     {
@@ -125,7 +126,7 @@ char add_array(json_dict_st *jd, const char *key, void *list, char type)
     {
         return FAILURE;
     }
-    p->type = TYPE_ARR | type;
+    p->type = TYPE_ARR;
     p->key = append_key(jd->keys, key);
     p->value = list;
     append_pair(jd->pairs, p);
@@ -137,7 +138,6 @@ size_t get_nb_keys(json_dict_st *jd)
     return jd == NULL ? 0 : jd->keys == NULL ? 0 : jd->keys->nb_keys;
 }
 
-#include <stdio.h>
 void destroy_dict(json_dict_st *jd)
 {
     if (jd == NULL)
