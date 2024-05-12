@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "json.h"
 #include "lists/generic_lists.h"
 #include "lists/linked_lists.h"
-#include "parser.h"
 
 int main(void)
 {

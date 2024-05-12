@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../parser.h"
+#include "../json.h"
 #include "generic_lists.h"
 
 /*******************************************************************************
@@ -74,7 +74,6 @@
 /*
 ** \brief Destroys the given linked list
 ** \param link_type The typedef struct
-** \param st The name of the variable of the type 'st_name'
 */
 #define DESTROY(link_type)                                                     \
     if (ctrl == NULL)                                                          \
@@ -118,21 +117,23 @@ void print_list(struct generic_list *l, char indent, char from_list)
         {
             switch (l->elts[i].type)
             {
-            case TYPE_NULL:
-                printf("%s\tnull", tabs);
-                break;
             case TYPE_STR:
                 printf("%s\t\"%s\"", tabs, (char *)l->elts[i].value);
                 break;
             case TYPE_NUM:
                 printf("%s\t%lu", tabs, *(long *)l->elts[i].value);
                 break;
+            case TYPE_ARR:
+                print_list(l->elts[i].value, indent + 1, 1);
+                break;
             case TYPE_BOOL:
                 printf("%s\t%s", tabs,
                        *(char *)l->elts[i].value ? "true" : "false");
                 break;
-            case TYPE_ARR:
-                print_list(l->elts[i].value, indent + 1, 1);
+            case TYPE_NULL:
+                printf("%s\tnull", tabs);
+                break;
+            default:
                 break;
             }
 
@@ -169,9 +170,6 @@ void print_json_rec(pair_control_st *ctrl, char indent)
                 struct generic_list *l = NULL;
                 switch (array->pairs[i]->type)
                 {
-                case TYPE_NULL:
-                    printf("\t\"%s\": null", array->pairs[i]->key);
-                    break;
                 case TYPE_STR:
                     printf("\t\"%s\": \"%s\"", array->pairs[i]->key,
                            (const char *)array->pairs[i]->value);
@@ -180,21 +178,24 @@ void print_json_rec(pair_control_st *ctrl, char indent)
                     num = *(long *)array->pairs[i]->value;
                     printf("\t\"%s\": %ld", array->pairs[i]->key, num);
                     break;
-                case TYPE_BOOL:
-                    boolean = *(char *)array->pairs[i]->value;
-                    printf("\t\"%s\": %s", array->pairs[i]->key,
-                           boolean ? "true" : "false");
-                    break;
                 case TYPE_ARR:
                     l = array->pairs[i]->value;
                     printf("\t\"%s\": ", array->pairs[i]->key);
                     print_list(l, indent + 1, 0);
                     break;
+                case TYPE_BOOL:
+                    boolean = *(char *)array->pairs[i]->value;
+                    printf("\t\"%s\": %s", array->pairs[i]->key,
+                           boolean ? "true" : "false");
+                    break;
+                case TYPE_NULL:
+                    printf("\t\"%s\": null", array->pairs[i]->key);
+                    break;
                 default:
                     break;
                 }
-                // If we are not at the last element of the last array, we print
-                // a ','
+
+                // If not at the last element of the last array, we print a ','
                 if ((array->next == NULL && i != ctrl->idx - 1)
                     || array->next != NULL)
                 {
@@ -300,20 +301,6 @@ void destroy_num_control(num_control_st *ctrl)
 }
 
 /***************************************
-**               BOOL                 **
-***************************************/
-char *append_bool(bool_control_st *ctrl, char value)
-{
-    APPEND(bool_array_link, booleans, nb_bool)
-    return &tmp->booleans[ctrl->idx++];
-}
-
-void destroy_bool_control(bool_control_st *ctrl)
-{
-    DESTROY(bool_array_link)
-}
-
-/***************************************
 **                LIST                **
 ***************************************/
 struct generic_list *append_list(list_control_st *ctrl,
@@ -346,4 +333,18 @@ void destroy_list_control(list_control_st *ctrl)
         free(to_del);
     }
     free(ctrl);
+}
+
+/***************************************
+**               BOOL                 **
+***************************************/
+char *append_bool(bool_control_st *ctrl, char value)
+{
+    APPEND(bool_array_link, booleans, nb_bool)
+    return &tmp->booleans[ctrl->idx++];
+}
+
+void destroy_bool_control(bool_control_st *ctrl)
+{
+    DESTROY(bool_array_link)
 }

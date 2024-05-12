@@ -43,16 +43,16 @@ struct num_array_link
     struct num_array_link *next;
 };
 
-struct bool_array_link
-{
-    char booleans[ARRAY_LEN];
-    struct bool_array_link *next;
-};
-
 struct list_array_link
 {
     struct generic_list *lists[ARRAY_LEN];
     struct list_array_link *next;
+};
+
+struct bool_array_link
+{
+    char booleans[ARRAY_LEN];
+    struct bool_array_link *next;
 };
 
 /**
@@ -87,13 +87,6 @@ struct num_control
     struct num_array_link *head;
 };
 
-struct bool_control
-{
-    size_t nb_bool;
-    size_t idx;
-    struct bool_array_link *head;
-};
-
 struct list_control
 {
     size_t nb_arr;
@@ -101,12 +94,20 @@ struct list_control
     struct list_array_link *head;
 };
 
+struct bool_control
+{
+    size_t nb_bool;
+    size_t idx;
+    struct bool_array_link *head;
+};
+
 typedef struct pair_control pair_control_st;
 typedef struct key_control key_control_st;
+
 typedef struct str_control str_control_st;
 typedef struct num_control num_control_st;
-typedef struct bool_control bool_control_st;
 typedef struct list_control list_control_st;
+typedef struct bool_control bool_control_st;
 
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
@@ -147,18 +148,18 @@ long *append_num(num_control_st *ctrl, long value);
 void destroy_num_control(num_control_st *ctrl);
 
 /***************************************
-**               BOOL                 **
-***************************************/
-char *append_bool(bool_control_st *ctrl, char value);
-
-void destroy_bool_control(bool_control_st *ctrl);
-
-/***************************************
 **               ARRAY                **
 ***************************************/
 struct generic_list *append_list(list_control_st *ctrl,
                                  struct generic_list *value);
 
 void destroy_list_control(list_control_st *ctrl);
+
+/***************************************
+**               BOOL                 **
+***************************************/
+char *append_bool(bool_control_st *ctrl, char value);
+
+void destroy_bool_control(bool_control_st *ctrl);
 
 #endif // !LINKED_LISTS_H
