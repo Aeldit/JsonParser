@@ -125,10 +125,10 @@ void print_list(struct generic_list *l, char indent, char from_list)
                 printf("%s\t\"%s\"", tabs, (char *)l->elts[i].value);
                 break;
             case TYPE_NUM:
-                printf("%s\t\"%lu\"", tabs, *(long *)l->elts[i].value);
+                printf("%s\t%lu", tabs, *(long *)l->elts[i].value);
                 break;
             case TYPE_BOOL:
-                printf("%s\t\"%s\"", tabs,
+                printf("%s\t%s", tabs,
                        *(char *)l->elts[i].value ? "true" : "false");
                 break;
             case TYPE_ARR:
