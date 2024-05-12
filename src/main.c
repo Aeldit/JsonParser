@@ -7,6 +7,26 @@
 
 int main(void)
 {
+    json_dict_st *j = init_dict();
+
+    add_str(j, "t", "a");
+    add_str(j, "te", "b");
+    add_str(j, "tes", "c");
+    add_str(j, "test", "d");
+    add_str(j, "testi", "e");
+    add_str(j, "testin", "f");
+    add_str(j, "testing", "g");
+
+    for (long i = 0; i < 10; ++i)
+    {
+        add_num(j, "a", i);
+    }
+
+    add_bool(j, "bool1", 0);
+    add_bool(j, "bool2", 1);
+
+    add_null(j, "testing_nulls");
+
     json_dict_st *jd = init_dict();
 
     add_str(jd, "t", "a");
@@ -16,6 +36,8 @@ int main(void)
     add_str(jd, "testi", "e");
     add_str(jd, "testin", "f");
     add_str(jd, "testing", "g");
+
+    add_json_dict(jd, "dict", j);
 
     for (long i = 0; i < 10; ++i)
     {
@@ -27,7 +49,7 @@ int main(void)
 
     add_null(jd, "testing_nulls");
 
-    struct generic_list *e = calloc(1, sizeof(struct generic_list));
+    generic_list_st *e = calloc(1, sizeof(generic_list_st));
     if (e == NULL)
     {
         return 1;
@@ -42,7 +64,7 @@ int main(void)
                                   append_str(jd->strings, "aaaaaaaaaaaaaaa") });
     append(e, (struct list_elt){ .type = TYPE_NULL, .value = NULL });
 
-    struct generic_list *l = calloc(1, sizeof(struct generic_list));
+    generic_list_st *l = calloc(1, sizeof(generic_list_st));
     if (l == NULL)
     {
         return 1;

@@ -2,7 +2,7 @@
 
 #include <stdlib.h>
 
-void append(struct generic_list *l, struct list_elt elt)
+void append(generic_list_st *l, struct list_elt elt)
 {
     if (l == NULL || l->idx >= l->size - 1)
     {

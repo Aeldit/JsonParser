@@ -94,7 +94,7 @@
 *******************************************************************************/
 void print_list(struct generic_list *l, char indent, char from_list)
 {
-    char *tabs = calloc(indent, sizeof(char *));
+    char *tabs = calloc(indent, sizeof(char));
     if (tabs == NULL)
     {
         return;
@@ -154,6 +154,16 @@ void print_json_rec(pair_control_st *ctrl, char indent)
         return;
     }
 
+    char *tabs = calloc(indent + 1, sizeof(char));
+    if (tabs == NULL)
+    {
+        return;
+    }
+    for (int i = 0; i < indent - 1; ++i)
+    {
+        tabs[i] = '\t';
+    }
+
     struct pair_array_link *array = ctrl->head;
     printf("{\n");
     // Iterates over the arrays
@@ -165,31 +175,45 @@ void print_json_rec(pair_control_st *ctrl, char indent)
         {
             if (array->pairs[i] != NULL)
             {
+                const char *key = array->pairs[i]->key;
                 long num = 0;
                 char boolean = 0;
-                struct generic_list *l = NULL;
+                generic_list_st *l = NULL;
+                json_dict_st *j = NULL;
                 switch (array->pairs[i]->type)
                 {
                 case TYPE_STR:
-                    printf("\t\"%s\": \"%s\"", array->pairs[i]->key,
+                    printf("%s\t\"%s\": \"%s\"", tabs, key,
                            (const char *)array->pairs[i]->value);
                     break;
                 case TYPE_NUM:
                     num = *(long *)array->pairs[i]->value;
-                    printf("\t\"%s\": %ld", array->pairs[i]->key, num);
+                    printf("%s\t\"%s\": %ld", tabs, key, num);
+                    break;
+                case TYPE_OBJ:
+                    j = array->pairs[i]->value;
+                    printf("%s\t\"%s\": ", tabs, key);
+                    if (j == NULL)
+                    {
+                        printf("{}");
+                    }
+                    else
+                    {
+                        print_json_rec(j->pairs, indent + 1);
+                    }
                     break;
                 case TYPE_ARR:
                     l = array->pairs[i]->value;
-                    printf("\t\"%s\": ", array->pairs[i]->key);
+                    printf("%s\t\"%s\": ", tabs, key);
                     print_list(l, indent + 1, 0);
                     break;
                 case TYPE_BOOL:
                     boolean = *(char *)array->pairs[i]->value;
-                    printf("\t\"%s\": %s", array->pairs[i]->key,
+                    printf("%s\t\"%s\": %s", tabs, key,
                            boolean ? "true" : "false");
                     break;
                 case TYPE_NULL:
-                    printf("\t\"%s\": null", array->pairs[i]->key);
+                    printf("%s\t\"%s\": null", tabs, key);
                     break;
                 default:
                     break;
@@ -205,7 +229,12 @@ void print_json_rec(pair_control_st *ctrl, char indent)
         }
         array = array->next;
     }
-    printf("\n}\n");
+    printf("\n%s}", tabs);
+    if (indent == 1)
+    {
+        printf("\n");
+    }
+    free(tabs);
 }
 
 /*******************************************************************************
@@ -295,16 +324,42 @@ long *append_num(num_control_st *ctrl, long value)
     return &tmp->numbers[ctrl->idx++];
 }
 
-void destroy_num_control(num_control_st *ctrl)
+void destroy_num_control(num_control_st *ctrl){ DESTROY(num_array_link) }
+
+/***************************************
+**             JSON DICT              **
+***************************************/
+json_dict_st *append_json_dict(json_dict_control_st *ctrl, json_dict_st *value)
 {
-    DESTROY(num_array_link)
+    APPEND(json_dict_array_link, json_dicts, nb_json_dicts)
+    return tmp->json_dicts[ctrl->idx++];
+}
+
+void destroy_json_dict_control(json_dict_control_st *ctrl)
+{
+    if (ctrl == NULL)
+    {
+        return;
+    }
+
+    struct json_dict_array_link *tmp = ctrl->head;
+    while (tmp != NULL)
+    {
+        struct json_dict_array_link *to_del = tmp;
+        tmp = tmp->next;
+        for (size_t i = 0; i < ARRAY_LEN; ++i)
+        {
+            destroy_dict(to_del->json_dicts[i]);
+        }
+        free(to_del);
+    }
+    free(ctrl);
 }
 
 /***************************************
 **                LIST                **
 ***************************************/
-struct generic_list *append_list(list_control_st *ctrl,
-                                 struct generic_list *value)
+generic_list_st *append_list(list_control_st *ctrl, generic_list_st *value)
 {
     APPEND(list_array_link, lists, nb_arr)
     return tmp->lists[ctrl->idx++];

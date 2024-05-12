@@ -5,6 +5,7 @@
 *******************************************************************************/
 #include <stdlib.h>
 
+#include "lists/linked_lists.h"
 #include "utils.h"
 
 /*******************************************************************************
@@ -73,6 +74,43 @@ char add_str(json_dict_st *jd, const char *key, char *value)
 char add_num(json_dict_st *jd, const char *key, long value)
 {
     ADD(num_control_st, numbers, append_num, TYPE_NUM)
+}
+
+char add_json_dict(json_dict_st *jd, const char *key, json_dict_st *dict)
+{
+    if (jd == NULL || key == NULL || dict == NULL)
+    {
+        return FAILURE;
+    }
+
+    if (jd->pairs == NULL)
+    {
+        jd->pairs = calloc(1, sizeof(pair_control_st));
+    }
+    if (jd->keys == NULL)
+    {
+        jd->keys = calloc(1, sizeof(key_control_st));
+    }
+    if (jd->json_dicts == NULL)
+    {
+        jd->json_dicts = calloc(1, sizeof(json_dict_control_st));
+    }
+    if (jd->pairs == NULL || jd->keys == NULL || jd->json_dicts == NULL)
+    {
+        destroy_dict(jd);
+        return FAILURE;
+    }
+
+    struct pair *p = calloc(1, sizeof(struct pair));
+    if (p == NULL)
+    {
+        return FAILURE;
+    }
+    p->type = TYPE_OBJ;
+    p->key = append_key(jd->keys, key);
+    p->value = append_json_dict(jd->json_dicts, dict);
+    append_pair(jd->pairs, p);
+    return SUCCESS;
 }
 
 char add_list(json_dict_st *jd, const char *key, struct generic_list *list)
@@ -152,6 +190,7 @@ void destroy_dict(json_dict_st *jd)
 
     destroy_str_control(jd->strings);
     destroy_num_control(jd->numbers);
+    destroy_json_dict_control(jd->json_dicts);
     destroy_list_control(jd->lists);
     destroy_bool_control(jd->booleans);
     free(jd);
