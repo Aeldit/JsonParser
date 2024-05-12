@@ -5,6 +5,7 @@
 *******************************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "../json.h"
 #include "generic_lists.h"
@@ -240,6 +241,9 @@ void print_json_rec(pair_control_st *ctrl, char indent)
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
+/***********************************************************
+**                       LILFECYCLE                       **
+***********************************************************/
 /***************************************
 **               PAIR                 **
 ***************************************/
@@ -402,4 +406,33 @@ char *append_bool(bool_control_st *ctrl, char value)
 void destroy_bool_control(bool_control_st *ctrl)
 {
     DESTROY(bool_array_link)
+}
+
+/***********************************************************
+**                         UTILS                          **
+***********************************************************/
+char key_exists(json_dict_st *jd, const char *key)
+{
+    if (jd == NULL || key == NULL || jd->keys == NULL)
+    {
+        return 0;
+    }
+
+    for (size_t i = 0; i < jd->keys->nb_keys; ++i)
+    {
+        struct key_array_link *tmp = jd->keys->head;
+        while (tmp != NULL)
+        {
+            for (size_t j = 0;
+                 j < (tmp->next == NULL ? jd->keys->idx : ARRAY_LEN); ++j)
+            {
+                if (strcmp(tmp->keys[j], key) == 0)
+                {
+                    return 1;
+                }
+            }
+            tmp = tmp->next;
+        }
+    }
+    return 0;
 }

@@ -82,6 +82,9 @@ int main(void)
     add_list(jd, "array", l);
 
     print_json(jd->pairs);
+
+    printf("\nexists : %s\n", key_exists(jd, "array") ? "true" : "false");
+
     destroy_dict(jd);
     return 0;
 }
