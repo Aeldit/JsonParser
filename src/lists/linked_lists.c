@@ -119,7 +119,7 @@ void print_list(struct generic_list *l, char indent, char from_list)
             switch (l->elts[i].type)
             {
             case TYPE_NULL:
-                printf("%snull", tabs);
+                printf("%s\tnull", tabs);
                 break;
             case TYPE_STR:
                 printf("%s\t\"%s\"", tabs, (char *)l->elts[i].value);
