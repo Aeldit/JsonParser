@@ -3,13 +3,10 @@ CFLAGS=-W -Wall -Werror -std=c99 -pedantic
 
 SANITIZE=-g -fsanitize=address
 
-CFILES=$(wildcard src/*.c)
+CFILES=$(wildcard src/*.c src/lists/*.c)
 OBJS=${CFILES:.c=.o}
 
 JSONFILES=tests/*.json
-
-CTEST=src/linked_lists.c src/parser.c tests/tests.c
-TESTSOBJS=${CTEST:.c=.o}
 
 all: json-parser
 	./json-parser $(JSONFILES)
@@ -19,11 +16,6 @@ json-parser: $(OBJS)
 	$(CC) $(CFLAGS) $(SANITIZE) $(OBJS) -o json-parser
 
 clean:
-	rm src/*.o
-	rm tests/*.o
+	rm $(OBJS)
+	rm $(TESTSOBJS)
 	rm json-parser
-	rm run-tests
-
-test: $(TESTSOBJS)
-	$(CC) $(CFLAGS) $(SANITIZE) $(TESTSOBJS) -o run-tests
-	./run-tests

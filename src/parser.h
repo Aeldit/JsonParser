@@ -6,7 +6,7 @@
 *******************************************************************************/
 #include <stddef.h>
 
-#include "linked_lists.h"
+#include "lists/linked_lists.h"
 
 /*******************************************************************************
 **                              DEFINES / MACROS                              **
@@ -44,13 +44,12 @@ struct pair
 struct json_dict
 {
     pair_control_st *pairs;
-
     key_control_st *keys;
 
     str_control_st *strings;
     num_control_st *numbers;
-    // TODO: Objects + Arrays
     bool_control_st *booleans;
+    list_control_st *lists;
 };
 
 typedef struct json_dict json_dict_st;
@@ -68,7 +67,7 @@ char add_num(json_dict_st *jd, const char *key, long value);
 
 char add_bool(json_dict_st *jd, const char *key, char value);
 
-char add_array(json_dict_st *jd, const char *key, void *list);
+char add_list(json_dict_st *jd, const char *key, struct generic_list *list);
 
 void destroy_dict(json_dict_st *jd);
 

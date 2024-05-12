@@ -6,7 +6,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "parser.h"
+#include "../parser.h"
+#include "generic_lists.h"
 
 /*******************************************************************************
 **                              DEFINES / MACROS                              **
@@ -90,22 +91,62 @@
     free(ctrl);
 
 /*******************************************************************************
-**                                 FUNCTIONS                                  **
+**                              LOCAL FUNCTIONS                               **
 *******************************************************************************/
-/***************************************
-**               PAIR                 **
-***************************************/
-struct pair *append_pair(pair_control_st *ctrl, struct pair *value)
+void print_list(struct generic_list *l, char indent, char from_list)
 {
-    if (value == NULL)
+    char *tabs = calloc(indent, sizeof(char *));
+    if (tabs == NULL)
     {
-        return NULL;
+        return;
     }
-    APPEND(pair_array_link, pairs, nb_pairs)
-    return tmp->pairs[ctrl->idx++];
+    for (int i = 0; i < indent - 1; ++i)
+    {
+        tabs[i] = '\t';
+    }
+    tabs[indent - 1] = '\0';
+
+    if (l == NULL || l->elts == NULL || l->size == 0)
+    {
+        printf("%s[]", from_list ? tabs : "");
+    }
+    else
+    {
+        printf("%s[\n", from_list ? tabs : "");
+
+        for (size_t i = 0; i < l->size; ++i)
+        {
+            switch (l->elts[i].type)
+            {
+            case TYPE_NULL:
+                printf("%snull", tabs);
+                break;
+            case TYPE_STR:
+                printf("%s\t\"%s\"", tabs, (char *)l->elts[i].value);
+                break;
+            case TYPE_NUM:
+                printf("%s\t\"%lu\"", tabs, *(long *)l->elts[i].value);
+                break;
+            case TYPE_BOOL:
+                printf("%s\t\"%s\"", tabs,
+                       *(char *)l->elts[i].value ? "true" : "false");
+                break;
+            case TYPE_ARR:
+                print_list(l->elts[i].value, indent + 1, 1);
+                break;
+            }
+
+            if (i != l->size - 1)
+            {
+                printf(",\n");
+            }
+        }
+        printf("\n%s]", tabs);
+    }
+    free(tabs);
 }
 
-void print_json(pair_control_st *ctrl)
+void print_json_rec(pair_control_st *ctrl, char indent)
 {
     if (ctrl == NULL || ctrl->head == NULL || ctrl->nb_pairs == 0)
     {
@@ -125,6 +166,7 @@ void print_json(pair_control_st *ctrl)
             {
                 long num = 0;
                 char boolean = 0;
+                struct generic_list *l = NULL;
                 switch (array->pairs[i]->type)
                 {
                 case TYPE_NULL:
@@ -143,6 +185,11 @@ void print_json(pair_control_st *ctrl)
                     printf("\t\"%s\": %s", array->pairs[i]->key,
                            boolean ? "true" : "false");
                     break;
+                case TYPE_ARR:
+                    l = array->pairs[i]->value;
+                    printf("\t\"%s\": ", array->pairs[i]->key);
+                    print_list(l, indent + 1, 0);
+                    break;
                 default:
                     break;
                 }
@@ -158,6 +205,27 @@ void print_json(pair_control_st *ctrl)
         array = array->next;
     }
     printf("\n}\n");
+}
+
+/*******************************************************************************
+**                                 FUNCTIONS                                  **
+*******************************************************************************/
+/***************************************
+**               PAIR                 **
+***************************************/
+struct pair *append_pair(pair_control_st *ctrl, struct pair *value)
+{
+    if (value == NULL)
+    {
+        return NULL;
+    }
+    APPEND(pair_array_link, pairs, nb_pairs)
+    return tmp->pairs[ctrl->idx++];
+}
+
+void print_json(pair_control_st *ctrl)
+{
+    print_json_rec(ctrl, 1);
 }
 
 void destroy_pair_control(pair_control_st *ctrl)
@@ -232,14 +300,6 @@ void destroy_num_control(num_control_st *ctrl)
 }
 
 /***************************************
-**               ARRAY                **
-***************************************/
-void destroy_array_control(num_control_st *ctrl)
-{
-    DESTROY(num_array_link)
-}
-
-/***************************************
 **               BOOL                 **
 ***************************************/
 char *append_bool(bool_control_st *ctrl, char value)
@@ -251,4 +311,39 @@ char *append_bool(bool_control_st *ctrl, char value)
 void destroy_bool_control(bool_control_st *ctrl)
 {
     DESTROY(bool_array_link)
+}
+
+/***************************************
+**                LIST                **
+***************************************/
+struct generic_list *append_list(list_control_st *ctrl,
+                                 struct generic_list *value)
+{
+    APPEND(list_array_link, lists, nb_arr)
+    return tmp->lists[ctrl->idx++];
+}
+
+void destroy_list_control(list_control_st *ctrl)
+{
+    if (ctrl == NULL)
+    {
+        return;
+    }
+
+    struct list_array_link *tmp = ctrl->head;
+    while (tmp != NULL)
+    {
+        struct list_array_link *to_del = tmp;
+        tmp = tmp->next;
+        for (size_t i = 0; i < ARRAY_LEN; ++i)
+        {
+            if (to_del->lists[i] != NULL)
+            {
+                free(to_del->lists[i]->elts);
+            }
+            free(to_del->lists[i]);
+        }
+        free(to_del);
+    }
+    free(ctrl);
 }

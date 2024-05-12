@@ -97,17 +97,13 @@ char add_bool(json_dict_st *jd, const char *key, char value)
     ADD(bool_control_st, booleans, append_bool, TYPE_BOOL)
 }
 
-char add_array(json_dict_st *jd, const char *key, void *list)
+char add_list(json_dict_st *jd, const char *key, struct generic_list *list)
 {
     if (jd == NULL || key == NULL || list == NULL)
     {
         return FAILURE;
     }
 
-    if (jd == NULL || key == NULL)
-    {
-        return FAILURE;
-    }
     if (jd->pairs == NULL)
     {
         jd->pairs = calloc(1, sizeof(pair_control_st));
@@ -116,11 +112,16 @@ char add_array(json_dict_st *jd, const char *key, void *list)
     {
         jd->keys = calloc(1, sizeof(key_control_st));
     }
-    if (jd->pairs == NULL || jd->keys == NULL)
+    if (jd->lists == NULL)
+    {
+        jd->lists = calloc(1, sizeof(list_control_st));
+    }
+    if (jd->pairs == NULL || jd->keys == NULL || jd->lists == NULL)
     {
         destroy_dict(jd);
         return FAILURE;
     }
+
     struct pair *p = calloc(1, sizeof(struct pair));
     if (p == NULL)
     {
@@ -128,7 +129,7 @@ char add_array(json_dict_st *jd, const char *key, void *list)
     }
     p->type = TYPE_ARR;
     p->key = append_key(jd->keys, key);
-    p->value = list;
+    p->value = append_list(jd->lists, list);
     append_pair(jd->pairs, p);
     return SUCCESS;
 }
@@ -151,6 +152,6 @@ void destroy_dict(json_dict_st *jd)
     destroy_str_control(jd->strings);
     destroy_num_control(jd->numbers);
     destroy_bool_control(jd->booleans);
-    //  TODO: Destroy the other types
+    destroy_list_control(jd->lists);
     free(jd);
 }
