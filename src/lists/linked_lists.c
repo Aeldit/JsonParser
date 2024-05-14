@@ -436,3 +436,30 @@ char key_exists(json_dict_st *jd, const char *key)
     }
     return 0;
 }
+
+typed_value_st get_value(json_dict_st *jd, const char *key)
+{
+    if (key == NULL)
+    {
+        return (typed_value_st){ .type = TYPE_NONEXISTANT, .value = NULL };
+    }
+
+    for (size_t i = 0; i < jd->pairs->nb_pairs; ++i)
+    {
+        struct pair_array_link *tmp = jd->pairs->head;
+        while (tmp != NULL)
+        {
+            for (size_t j = 0;
+                 j < (tmp->next == NULL ? jd->keys->idx : ARRAY_LEN); ++j)
+            {
+                if (strcmp(tmp->pairs[j]->key, key) == 0)
+                {
+                    return (typed_value_st){ .type = tmp->pairs[i]->type,
+                                             .value = tmp->pairs[i]->value };
+                }
+            }
+            tmp = tmp->next;
+        }
+    }
+    return (typed_value_st){ .type = TYPE_NONEXISTANT, .value = NULL };
+}

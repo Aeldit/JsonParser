@@ -85,6 +85,14 @@ int main(void)
 
     printf("\nexists : %s\n", key_exists(jd, "array") ? "true" : "false");
 
+    typed_value_st tv = get_value(jd, "bool1");
+    switch (tv.type)
+    {
+    case TYPE_STR:
+        printf("%s\n", (char *)tv.value);
+        break;
+    }
+
     destroy_dict(jd);
     return 0;
 }

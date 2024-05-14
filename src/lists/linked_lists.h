@@ -9,6 +9,17 @@
 #include "../json.h"
 
 /*******************************************************************************
+**                                 STRUCTURES                                 **
+*******************************************************************************/
+struct typed_value
+{
+    void *value;
+    unsigned char type;
+};
+
+typedef struct typed_value typed_value_st;
+
+/*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
 /***********************************************************
@@ -74,5 +85,7 @@ void destroy_bool_control(bool_control_st *ctrl);
 **                         UTILS                          **
 ***********************************************************/
 char key_exists(json_dict_st *jd, const char *key);
+
+typed_value_st get_value(json_dict_st *jd, const char *key);
 
 #endif // !LINKED_LISTS_H

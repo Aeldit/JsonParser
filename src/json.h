@@ -18,6 +18,9 @@
 #define TYPE_BOOL 4
 #define TYPE_NULL 5
 
+// Errors
+#define TYPE_NONEXISTANT 6
+
 #define ARRAY_LEN 8
 
 /*******************************************************************************
