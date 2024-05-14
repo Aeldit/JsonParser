@@ -104,7 +104,7 @@ struct json_dict_control
 
 struct list_control
 {
-    size_t nb_arr;
+    size_t nb_arrays;
     size_t idx;
     struct array_link *head;
 };

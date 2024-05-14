@@ -86,7 +86,7 @@ int main(void)
 
     printf("\nexists : %s\n", key_exists(jd, "array") ? "true" : "false");
 
-    typed_value_st tv = get_value(jd, "number");
+    typed_value_st tv = get_value(jd, "array");
     switch (tv.type)
     {
     case TYPE_STR:
@@ -99,7 +99,7 @@ int main(void)
         print_json(((json_dict_st *)tv.value)->pairs);
         break;
     case TYPE_ARR:
-        array_print((json_array_st *)tv.value, 1, 0);
+        array_print((json_array_st *)tv.value);
         break;
     case TYPE_BOOL:
         printf("%s\n", *(char *)tv.value ? "true" : "false");
@@ -107,6 +107,16 @@ int main(void)
     case TYPE_NULL:
         printf("null\n");
         break;
+    case TYPE_ERROR:
+        puts("Error");
+        break;
+    }
+
+    typed_value_st t = array_get(get_value(jd, "array").value, 0);
+    printf("%d\n", t.type);
+    if (t.type == TYPE_ARR)
+    {
+        array_print(t.value);
     }
 
     destroy_dict(jd);

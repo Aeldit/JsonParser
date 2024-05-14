@@ -6,6 +6,8 @@
 *******************************************************************************/
 #include <stddef.h>
 
+#include "../types.h"
+
 /*******************************************************************************
 **                                 STRUCTURES                                 **
 *******************************************************************************/
@@ -33,6 +35,10 @@ typedef struct json_array json_array_st;
 *******************************************************************************/
 void array_append(json_array_st *l, struct list_elt elt);
 
-void array_print(json_array_st *l, char indent, char from_list);
+typed_value_st array_get(json_array_st *ja, size_t index);
+
+void array_print(json_array_st *l);
+
+void array_print_indent(json_array_st *l, char indent, char from_list);
 
 #endif // !GENERIC_LISTS_H

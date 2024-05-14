@@ -7,17 +7,7 @@
 #include <stddef.h>
 
 #include "../json.h"
-
-/*******************************************************************************
-**                                 STRUCTURES                                 **
-*******************************************************************************/
-struct typed_value
-{
-    void *value;
-    unsigned char type;
-};
-
-typedef struct typed_value typed_value_st;
+#include "../types.h"
 
 /*******************************************************************************
 **                                 FUNCTIONS                                  **

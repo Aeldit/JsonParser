@@ -12,6 +12,17 @@
 #define TYPE_NULL 5
 
 // Errors
-#define TYPE_NONEXISTANT 6
+#define TYPE_ERROR 6
+
+/*******************************************************************************
+**                                 STRUCTURES                                 **
+*******************************************************************************/
+struct typed_value
+{
+    void *value;
+    unsigned char type;
+};
+
+typedef struct typed_value typed_value_st;
 
 #endif // !JSON_TYPES_H

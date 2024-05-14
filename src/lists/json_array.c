@@ -6,8 +6,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../types.h"
-
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
@@ -28,7 +26,22 @@ void array_append(json_array_st *l, struct list_elt elt)
     l->elts[l->idx++] = elt;
 }
 
-void array_print(json_array_st *l, char indent, char from_list)
+typed_value_st array_get(json_array_st *ja, size_t index)
+{
+    if (ja == NULL || index >= ja->size)
+    {
+        return (typed_value_st){ .type = TYPE_ERROR, .value = NULL };
+    }
+    return (typed_value_st){ .type = ja->elts[index].type,
+                             .value = ja->elts[index].value };
+}
+
+void array_print(json_array_st *l)
+{
+    array_print_indent(l, 1, 0);
+}
+
+void array_print_indent(json_array_st *l, char indent, char from_list)
 {
     char *tabs = calloc(indent, sizeof(char));
     if (tabs == NULL)
@@ -60,7 +73,7 @@ void array_print(json_array_st *l, char indent, char from_list)
                 printf("%s\t%lu", tabs, *(long *)l->elts[i].value);
                 break;
             case TYPE_ARR:
-                array_print(l->elts[i].value, indent + 1, 1);
+                array_print_indent(l->elts[i].value, indent + 1, 1);
                 break;
             case TYPE_BOOL:
                 printf("%s\t%s", tabs,

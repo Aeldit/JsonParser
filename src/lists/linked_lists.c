@@ -156,7 +156,7 @@ void print_json_rec(pair_control_st *ctrl, char indent)
                 case TYPE_ARR:
                     l = array->pairs[i]->value;
                     printf("%s\t\"%s\": ", tabs, key);
-                    array_print(l, indent + 1, 0);
+                    array_print_indent(l, indent + 1, 0);
                     break;
                 case TYPE_BOOL:
                     boolean = *(char *)array->pairs[i]->value;
@@ -328,7 +328,7 @@ json_array_st *append_array(json_dict_st *jd, json_array_st *value)
     {
         return NULL;
     }
-    APPEND(list_control_st, array_link, lists, jd->lists->nb_arr, 0)
+    APPEND(list_control_st, array_link, lists, jd->lists->nb_arrays, 0)
     return tmp->lists[ctrl->idx++];
 }
 
@@ -408,25 +408,25 @@ typed_value_st get_value(json_dict_st *jd, const char *key)
 {
     if (key == NULL)
     {
-        return (typed_value_st){ .type = TYPE_NONEXISTANT, .value = NULL };
+        return (typed_value_st){ .type = TYPE_ERROR, .value = NULL };
     }
 
-    for (size_t i = 0; i < jd->nb_pairs; ++i)
+    // Iterates over the pairs
+    struct pair_link *tmp = jd->pairs->head;
+    while (tmp != NULL)
     {
-        struct pair_link *tmp = jd->pairs->head;
-        while (tmp != NULL)
+        // Iterates over the keys
+        for (size_t j = 0; j < (tmp->next == NULL ? jd->pairs->idx : ARRAY_LEN);
+             ++j)
         {
-            for (size_t j = 0;
-                 j < (tmp->next == NULL ? jd->keys->idx : ARRAY_LEN); ++j)
+            if (strcmp(tmp->pairs[j]->key, key) == 0)
             {
-                if (strcmp(tmp->pairs[j]->key, key) == 0)
-                {
-                    return (typed_value_st){ .type = tmp->pairs[j]->type,
-                                             .value = tmp->pairs[j]->value };
-                }
+                printf("%d\n", tmp->pairs[j]->type);
+                return (typed_value_st){ .type = tmp->pairs[j]->type,
+                                         .value = tmp->pairs[j]->value };
             }
-            tmp = tmp->next;
         }
+        tmp = tmp->next;
     }
-    return (typed_value_st){ .type = TYPE_NONEXISTANT, .value = NULL };
+    return (typed_value_st){ .type = TYPE_ERROR, .value = NULL };
 }
