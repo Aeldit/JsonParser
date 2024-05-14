@@ -93,61 +93,6 @@
 /*******************************************************************************
 **                              LOCAL FUNCTIONS                               **
 *******************************************************************************/
-void print_list(struct generic_list *l, char indent, char from_list)
-{
-    char *tabs = calloc(indent, sizeof(char));
-    if (tabs == NULL)
-    {
-        return;
-    }
-    for (int i = 0; i < indent - 1; ++i)
-    {
-        tabs[i] = '\t';
-    }
-    tabs[indent - 1] = '\0';
-
-    if (l == NULL || l->elts == NULL || l->size == 0)
-    {
-        printf("%s[]", from_list ? tabs : "");
-    }
-    else
-    {
-        printf("%s[\n", from_list ? tabs : "");
-
-        for (size_t i = 0; i < l->size; ++i)
-        {
-            switch (l->elts[i].type)
-            {
-            case TYPE_STR:
-                printf("%s\t\"%s\"", tabs, (char *)l->elts[i].value);
-                break;
-            case TYPE_NUM:
-                printf("%s\t%lu", tabs, *(long *)l->elts[i].value);
-                break;
-            case TYPE_ARR:
-                print_list(l->elts[i].value, indent + 1, 1);
-                break;
-            case TYPE_BOOL:
-                printf("%s\t%s", tabs,
-                       *(char *)l->elts[i].value ? "true" : "false");
-                break;
-            case TYPE_NULL:
-                printf("%s\tnull", tabs);
-                break;
-            default:
-                break;
-            }
-
-            if (i != l->size - 1)
-            {
-                printf(",\n");
-            }
-        }
-        printf("\n%s]", tabs);
-    }
-    free(tabs);
-}
-
 void print_json_rec(pair_control_st *ctrl, char indent)
 {
     if (ctrl == NULL || ctrl->head == NULL || ctrl->nb_pairs == 0)
@@ -206,7 +151,7 @@ void print_json_rec(pair_control_st *ctrl, char indent)
                 case TYPE_ARR:
                     l = array->pairs[i]->value;
                     printf("%s\t\"%s\": ", tabs, key);
-                    print_list(l, indent + 1, 0);
+                    print_array(l, indent + 1, 0);
                     break;
                 case TYPE_BOOL:
                     boolean = *(char *)array->pairs[i]->value;
@@ -411,6 +356,61 @@ void destroy_bool_control(bool_control_st *ctrl)
 /***********************************************************
 **                         UTILS                          **
 ***********************************************************/
+void print_array(generic_list_st *l, char indent, char from_list)
+{
+    char *tabs = calloc(indent, sizeof(char));
+    if (tabs == NULL)
+    {
+        return;
+    }
+    for (int i = 0; i < indent - 1; ++i)
+    {
+        tabs[i] = '\t';
+    }
+    tabs[indent - 1] = '\0';
+
+    if (l == NULL || l->elts == NULL || l->size == 0)
+    {
+        printf("%s[]", from_list ? tabs : "");
+    }
+    else
+    {
+        printf("%s[\n", from_list ? tabs : "");
+
+        for (size_t i = 0; i < l->size; ++i)
+        {
+            switch (l->elts[i].type)
+            {
+            case TYPE_STR:
+                printf("%s\t\"%s\"", tabs, (char *)l->elts[i].value);
+                break;
+            case TYPE_NUM:
+                printf("%s\t%lu", tabs, *(long *)l->elts[i].value);
+                break;
+            case TYPE_ARR:
+                print_array(l->elts[i].value, indent + 1, 1);
+                break;
+            case TYPE_BOOL:
+                printf("%s\t%s", tabs,
+                       *(char *)l->elts[i].value ? "true" : "false");
+                break;
+            case TYPE_NULL:
+                printf("%s\tnull", tabs);
+                break;
+            default:
+                break;
+            }
+
+            if (i != l->size - 1)
+            {
+                printf(",\n");
+            }
+        }
+        printf("\n%s]", tabs);
+    }
+    free(tabs);
+}
+
 char key_exists(json_dict_st *jd, const char *key)
 {
     if (jd == NULL || key == NULL || jd->keys == NULL)
@@ -454,8 +454,8 @@ typed_value_st get_value(json_dict_st *jd, const char *key)
             {
                 if (strcmp(tmp->pairs[j]->key, key) == 0)
                 {
-                    return (typed_value_st){ .type = tmp->pairs[i]->type,
-                                             .value = tmp->pairs[i]->value };
+                    return (typed_value_st){ .type = tmp->pairs[j]->type,
+                                             .value = tmp->pairs[j]->value };
                 }
             }
             tmp = tmp->next;

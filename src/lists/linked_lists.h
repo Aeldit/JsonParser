@@ -84,6 +84,8 @@ void destroy_bool_control(bool_control_st *ctrl);
 /***********************************************************
 **                         UTILS                          **
 ***********************************************************/
+void print_array(generic_list_st *l, char indent, char from_list);
+
 char key_exists(json_dict_st *jd, const char *key);
 
 typed_value_st get_value(json_dict_st *jd, const char *key);

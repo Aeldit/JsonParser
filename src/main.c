@@ -91,6 +91,21 @@ int main(void)
     case TYPE_STR:
         printf("%s\n", (char *)tv.value);
         break;
+    case TYPE_NUM:
+        printf("%lu\n", *(long *)tv.value);
+        break;
+    case TYPE_OBJ:
+        print_json((pair_control_st *)tv.value);
+        break;
+    case TYPE_ARR:
+        print_array((generic_list_st *)tv.value, 1, 0);
+        break;
+    case TYPE_BOOL:
+        printf("%s\n", *(char *)tv.value ? "true" : "false");
+        break;
+    case TYPE_NULL:
+        printf("null\n");
+        break;
     }
 
     destroy_dict(jd);
