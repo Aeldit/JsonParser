@@ -19,18 +19,20 @@ struct list_elt
 ** \brief Represents a JSON array. It must be initialized with the correct
 **        capacity before adding elements to it
 */
-struct generic_list
+struct json_array
 {
     size_t size;
     size_t idx;
     struct list_elt *elts;
 };
 
-typedef struct generic_list generic_list_st;
+typedef struct json_array json_array_st;
 
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
-void append(generic_list_st *l, struct list_elt elt);
+void array_append(json_array_st *l, struct list_elt elt);
+
+void array_print(json_array_st *l, char indent, char from_list);
 
 #endif // !GENERIC_LISTS_H

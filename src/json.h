@@ -6,21 +6,11 @@
 *******************************************************************************/
 #include <stddef.h>
 
-#include "lists/generic_lists.h"
+#include "lists/json_array.h"
 
 /*******************************************************************************
 **                              DEFINES / MACROS                              **
 *******************************************************************************/
-#define TYPE_STR 0
-#define TYPE_NUM 1
-#define TYPE_OBJ 2
-#define TYPE_ARR 3
-#define TYPE_BOOL 4
-#define TYPE_NULL 5
-
-// Errors
-#define TYPE_NONEXISTANT 6
-
 #define ARRAY_LEN 8
 
 /*******************************************************************************
@@ -33,46 +23,46 @@ typedef struct json_dict json_dict_st;
 **        the associated type. It contains an array of predetermined length and
 **        a pointer to the previous link.
 */
-struct pair_array_link
+struct pair_link
 {
     struct pair *pairs[ARRAY_LEN];
-    struct pair_array_link *next;
+    struct pair_link *next;
 };
 
-struct key_array_link
+struct key_link
 {
     const char *keys[ARRAY_LEN];
-    struct key_array_link *next;
+    struct key_link *next;
 };
 
-struct str_array_link
+struct str_link
 {
     char *strings[ARRAY_LEN];
-    struct str_array_link *next;
+    struct str_link *next;
 };
 
-struct num_array_link
+struct num_link
 {
     long numbers[ARRAY_LEN];
-    struct num_array_link *next;
+    struct num_link *next;
 };
 
-struct json_dict_array_link
+struct json_dict_link
 {
     json_dict_st *json_dicts[ARRAY_LEN];
-    struct json_dict_array_link *next;
+    struct json_dict_link *next;
 };
 
-struct list_array_link
+struct array_link
 {
-    generic_list_st *lists[ARRAY_LEN];
-    struct list_array_link *next;
+    json_array_st *lists[ARRAY_LEN];
+    struct array_link *next;
 };
 
-struct bool_array_link
+struct bool_link
 {
     char booleans[ARRAY_LEN];
-    struct bool_array_link *next;
+    struct bool_link *next;
 };
 
 /**
@@ -82,48 +72,48 @@ struct bool_array_link
 struct pair_control
 {
     size_t idx;
-    struct pair_array_link *head;
+    struct pair_link *head;
 };
 
 struct key_control
 {
     size_t idx;
-    struct key_array_link *head;
+    struct key_link *head;
 };
 
 struct str_control
 {
     size_t nb_str;
     size_t idx;
-    struct str_array_link *head;
+    struct str_link *head;
 };
 
 struct num_control
 {
     size_t nb_num;
     size_t idx;
-    struct num_array_link *head;
+    struct num_link *head;
 };
 
 struct json_dict_control
 {
     size_t nb_json_dicts;
     size_t idx;
-    struct json_dict_array_link *head;
+    struct json_dict_link *head;
 };
 
 struct list_control
 {
     size_t nb_arr;
     size_t idx;
-    struct list_array_link *head;
+    struct array_link *head;
 };
 
 struct bool_control
 {
     size_t nb_bool;
     size_t idx;
-    struct bool_array_link *head;
+    struct bool_link *head;
 };
 
 typedef struct pair_control pair_control_st;
@@ -195,7 +185,7 @@ char add_json_dict(json_dict_st *jd, const char *key, json_dict_st *dict);
 /**
 ** \brief Adds a key:value pair of list type to the 'jd' json dict
 */
-char add_list(json_dict_st *jd, const char *key, struct generic_list *list);
+char add_array(json_dict_st *jd, const char *key, json_array_st *list);
 
 /**
 ** \brief Adds a key:value pair of boolean type to the 'jd' json dict

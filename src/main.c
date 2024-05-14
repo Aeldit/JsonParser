@@ -2,8 +2,9 @@
 #include <stdlib.h>
 
 #include "json.h"
-#include "lists/generic_lists.h"
+#include "lists/json_array.h"
 #include "lists/linked_lists.h"
+#include "types.h"
 
 int main(void)
 {
@@ -51,33 +52,35 @@ int main(void)
 
     add_num(jd, "number", 1596843165152);
 
-    generic_list_st *e = calloc(1, sizeof(generic_list_st));
+    json_array_st *e = calloc(1, sizeof(json_array_st));
     if (e == NULL)
     {
         return 1;
     }
     e->size = 3;
-    append(e,
-           (struct list_elt){ .type = TYPE_NUM, .value = append_num(jd, 150) });
-    append(e,
-           (struct list_elt){ .type = TYPE_STR,
-                              .value = append_str(jd, "aaaaaaaaaaaaaaa") });
-    append(e, (struct list_elt){ .type = TYPE_NULL, .value = NULL });
+    array_append(
+        e, (struct list_elt){ .type = TYPE_NUM, .value = append_num(jd, 150) });
+    array_append(
+        e,
+        (struct list_elt){ .type = TYPE_STR,
+                           .value = append_str(jd, "aaaaaaaaaaaaaaa") });
+    array_append(e, (struct list_elt){ .type = TYPE_NULL, .value = NULL });
 
-    generic_list_st *l = calloc(1, sizeof(generic_list_st));
+    json_array_st *l = calloc(1, sizeof(json_array_st));
     if (l == NULL)
     {
         return 1;
     }
     l->size = 4;
-    append(l,
-           (struct list_elt){ .type = TYPE_NUM, .value = append_num(jd, 150) });
-    append(l,
-           (struct list_elt){ .type = TYPE_STR,
-                              .value = append_str(jd, "aaaaaaaaaaaaaaa") });
-    append(l, (struct list_elt){ .type = TYPE_ARR, .value = e });
-    append(l, (struct list_elt){ .type = TYPE_NULL, .value = NULL });
-    add_list(jd, "array", l);
+    array_append(
+        l, (struct list_elt){ .type = TYPE_NUM, .value = append_num(jd, 150) });
+    array_append(
+        l,
+        (struct list_elt){ .type = TYPE_STR,
+                           .value = append_str(jd, "aaaaaaaaaaaaaaa") });
+    array_append(l, (struct list_elt){ .type = TYPE_ARR, .value = e });
+    array_append(l, (struct list_elt){ .type = TYPE_NULL, .value = NULL });
+    add_array(jd, "array", l);
 
     print_json(jd->pairs);
 
@@ -96,7 +99,7 @@ int main(void)
         print_json(((json_dict_st *)tv.value)->pairs);
         break;
     case TYPE_ARR:
-        print_array((generic_list_st *)tv.value, 1, 0);
+        array_print((json_array_st *)tv.value, 1, 0);
         break;
     case TYPE_BOOL:
         printf("%s\n", *(char *)tv.value ? "true" : "false");

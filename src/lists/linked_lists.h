@@ -70,9 +70,9 @@ void destroy_json_dict_control(json_dict_control_st *ctrl);
 /***************************************
 **               ARRAY                **
 ***************************************/
-generic_list_st *append_list(json_dict_st *jd, generic_list_st *value);
+json_array_st *append_array(json_dict_st *jd, json_array_st *value);
 
-void destroy_list_control(list_control_st *ctrl);
+void destroy_array_control(list_control_st *ctrl);
 
 /***************************************
 **               BOOL                 **
@@ -84,7 +84,7 @@ void destroy_bool_control(bool_control_st *ctrl);
 /***********************************************************
 **                         UTILS                          **
 ***********************************************************/
-void print_array(generic_list_st *l, char indent, char from_list);
+void print_array(json_array_st *l, char indent, char from_list);
 
 char key_exists(json_dict_st *jd, const char *key);
 
