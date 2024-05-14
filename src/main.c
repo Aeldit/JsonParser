@@ -49,6 +49,8 @@ int main(void)
 
     add_null(jd, "testing_nulls");
 
+    add_num(jd, "number", 1596843165152);
+
     generic_list_st *e = calloc(1, sizeof(generic_list_st));
     if (e == NULL)
     {
@@ -85,7 +87,7 @@ int main(void)
 
     printf("\nexists : %s\n", key_exists(jd, "array") ? "true" : "false");
 
-    typed_value_st tv = get_value(jd, "bool1");
+    typed_value_st tv = get_value(jd, "number");
     switch (tv.type)
     {
     case TYPE_STR:
@@ -95,7 +97,7 @@ int main(void)
         printf("%lu\n", *(long *)tv.value);
         break;
     case TYPE_OBJ:
-        print_json((pair_control_st *)tv.value);
+        print_json(((json_dict_st *)tv.value)->pairs);
         break;
     case TYPE_ARR:
         print_array((generic_list_st *)tv.value, 1, 0);
