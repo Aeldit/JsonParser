@@ -109,6 +109,7 @@ struct list_control
     struct array_link *head;
 };
 
+// TODO: Use bits instead of entire chars to store the booleans
 struct bool_control
 {
     size_t nb_bool;
