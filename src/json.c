@@ -126,7 +126,7 @@ char add_null(json_dict_st *jd, const char *key)
 
 size_t get_nb_pairs(json_dict_st *jd)
 {
-    return jd == NULL ? 0 : jd->keys == NULL ? 0 : jd->nb_pairs;
+    return jd == NULL ? 0 : jd->nb_pairs;
 }
 
 void destroy_dict(json_dict_st *jd)

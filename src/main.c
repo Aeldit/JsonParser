@@ -113,7 +113,6 @@ int main(void)
     }
 
     typed_value_st t = array_get(get_value(jd, "array").value, 0);
-    printf("%d\n", t.type);
     if (t.type == TYPE_ARR)
     {
         array_print(t.value);
