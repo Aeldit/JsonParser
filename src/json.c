@@ -46,9 +46,9 @@
         return FAILURE;                                                        \
     }                                                                          \
     p->type = (value_type);                                                    \
-    p->key = append_key(jd->keys, key);                                        \
-    p->value = append_type(jd->list, value);                                   \
-    append_pair(jd->pairs, p);                                                 \
+    p->key = append_key(jd, key);                                              \
+    p->value = append_type(jd, value);                                         \
+    append_pair(jd, p);                                                        \
     return SUCCESS;
 
 /*******************************************************************************
@@ -76,14 +76,15 @@ char add_num(json_dict_st *jd, const char *key, long value)
     ADD(num_control_st, numbers, append_num, TYPE_NUM)
 }
 
-char add_json_dict(json_dict_st *jd, const char *key, json_dict_st *dict)
+char add_json_dict(json_dict_st *jd, const char *key, json_dict_st *value)
 {
-    if (jd == NULL || key == NULL || dict == NULL)
+    if (value == NULL)
     {
         return FAILURE;
     }
+    ADD(json_dict_control_st, json_dicts, append_json_dict, TYPE_OBJ)
 
-    if (jd->pairs == NULL)
+    /*if (jd->pairs == NULL)
     {
         jd->pairs = calloc(1, sizeof(pair_control_st));
     }
@@ -107,20 +108,21 @@ char add_json_dict(json_dict_st *jd, const char *key, json_dict_st *dict)
         return FAILURE;
     }
     p->type = TYPE_OBJ;
-    p->key = append_key(jd->keys, key);
-    p->value = append_json_dict(jd->json_dicts, dict);
-    append_pair(jd->pairs, p);
-    return SUCCESS;
+    p->key = append_key(jd, key);
+    p->value = append_json_dict(jd, value);
+    append_pair(jd, p);
+    return SUCCESS;*/
 }
 
-char add_list(json_dict_st *jd, const char *key, struct generic_list *list)
+char add_list(json_dict_st *jd, const char *key, struct generic_list *value)
 {
-    if (jd == NULL || key == NULL || list == NULL)
+    if (value == NULL)
     {
         return FAILURE;
     }
+    ADD(list_control_st, lists, append_list, TYPE_ARR)
 
-    if (jd->pairs == NULL)
+    /*if (jd->pairs == NULL)
     {
         jd->pairs = calloc(1, sizeof(pair_control_st));
     }
@@ -144,10 +146,10 @@ char add_list(json_dict_st *jd, const char *key, struct generic_list *list)
         return FAILURE;
     }
     p->type = TYPE_ARR;
-    p->key = append_key(jd->keys, key);
-    p->value = append_list(jd->lists, list);
-    append_pair(jd->pairs, p);
-    return SUCCESS;
+    p->key = append_key(jd, key);
+    p->value = append_list(jd, value);
+    append_pair(jd, p);
+    return SUCCESS;*/
 }
 
 char add_bool(json_dict_st *jd, const char *key, char value)
@@ -169,13 +171,13 @@ char add_null(json_dict_st *jd, const char *key)
     p->type = TYPE_NULL;
     p->key = key;
     p->value = NULL;
-    append_pair(jd->pairs, p);
+    append_pair(jd, p);
     return SUCCESS;
 }
 
-size_t get_nb_keys(json_dict_st *jd)
+size_t get_nb_pairs(json_dict_st *jd)
 {
-    return jd == NULL ? 0 : jd->keys == NULL ? 0 : jd->keys->nb_keys;
+    return jd == NULL ? 0 : jd->keys == NULL ? 0 : jd->nb_pairs;
 }
 
 void destroy_dict(json_dict_st *jd)

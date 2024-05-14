@@ -58,12 +58,10 @@ int main(void)
     }
     e->size = 3;
     append(e,
-           (struct list_elt){ .type = TYPE_NUM,
-                              .value = append_num(jd->numbers, 150) });
+           (struct list_elt){ .type = TYPE_NUM, .value = append_num(jd, 150) });
     append(e,
            (struct list_elt){ .type = TYPE_STR,
-                              .value =
-                                  append_str(jd->strings, "aaaaaaaaaaaaaaa") });
+                              .value = append_str(jd, "aaaaaaaaaaaaaaa") });
     append(e, (struct list_elt){ .type = TYPE_NULL, .value = NULL });
 
     generic_list_st *l = calloc(1, sizeof(generic_list_st));
@@ -73,12 +71,10 @@ int main(void)
     }
     l->size = 4;
     append(l,
-           (struct list_elt){ .type = TYPE_NUM,
-                              .value = append_num(jd->numbers, 150) });
+           (struct list_elt){ .type = TYPE_NUM, .value = append_num(jd, 150) });
     append(l,
            (struct list_elt){ .type = TYPE_STR,
-                              .value =
-                                  append_str(jd->strings, "aaaaaaaaaaaaaaa") });
+                              .value = append_str(jd, "aaaaaaaaaaaaaaa") });
     append(l, (struct list_elt){ .type = TYPE_ARR, .value = e });
     append(l, (struct list_elt){ .type = TYPE_NULL, .value = NULL });
     add_list(jd, "array", l);

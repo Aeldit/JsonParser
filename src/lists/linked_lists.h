@@ -28,7 +28,7 @@ typedef struct typed_value typed_value_st;
 /***************************************
 **               PAIR                 **
 ***************************************/
-struct pair *append_pair(pair_control_st *ctrl, struct pair *value);
+struct pair *append_pair(json_dict_st *jd, struct pair *value);
 
 void print_json(pair_control_st *ctrl);
 
@@ -42,42 +42,42 @@ void destroy_pair_control(pair_control_st *ctrl);
 ** \return The index of the added key + 1 (0 is the error code), so we have to
 **         make sure later to substract 1 to the result of this function
 */
-const char *append_key(key_control_st *ctrl, const char *value);
+const char *append_key(json_dict_st *jd, const char *value);
 
 void destroy_key_control(key_control_st *ctrl);
 
 /***************************************
 **                STR                 **
 ***************************************/
-char *append_str(str_control_st *ctrl, char *value);
+char *append_str(json_dict_st *jd, char *value);
 
 void destroy_str_control(str_control_st *sc);
 
 /***************************************
 **                NUM                 **
 ***************************************/
-long *append_num(num_control_st *ctrl, long value);
+long *append_num(json_dict_st *jd, long value);
 
 void destroy_num_control(num_control_st *ctrl);
 
 /***************************************
 **             JSON DICT              **
 ***************************************/
-json_dict_st *append_json_dict(json_dict_control_st *ctrl, json_dict_st *value);
+json_dict_st *append_json_dict(json_dict_st *jd, json_dict_st *value);
 
 void destroy_json_dict_control(json_dict_control_st *ctrl);
 
 /***************************************
 **               ARRAY                **
 ***************************************/
-generic_list_st *append_list(list_control_st *ctrl, generic_list_st *value);
+generic_list_st *append_list(json_dict_st *jd, generic_list_st *value);
 
 void destroy_list_control(list_control_st *ctrl);
 
 /***************************************
 **               BOOL                 **
 ***************************************/
-char *append_bool(bool_control_st *ctrl, char value);
+char *append_bool(json_dict_st *jd, char value);
 
 void destroy_bool_control(bool_control_st *ctrl);
 

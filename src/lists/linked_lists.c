@@ -15,13 +15,15 @@
 *******************************************************************************/
 /**
 ** \brief Destroys the given linked list
+** \param ctrl_type The typedef struct for the ctrl variable
 ** \param link_type The typedef struct
-** \param st The name of the variable of the type 'st_name'
-** \param elt The element to add
 ** \param list the name of the list in which to add 'elt'
 ** \param nb_type The name of the field containing the number of elements
+** \param is_key If we are inserting a key, we don't need to increment the
+**               number of pairs, as it is done when adding the associated pair
 */
-#define APPEND(link_type, list, nb_type)                                       \
+#define APPEND(ctrl_type, link_type, list, nb_type, is_key)                    \
+    ctrl_type *ctrl = jd->list;                                                \
     if (ctrl == NULL)                                                          \
     {                                                                          \
         return NULL;                                                           \
@@ -65,7 +67,10 @@
         }                                                                      \
         tmp->list[ctrl->idx] = value;                                          \
     }                                                                          \
-    ++ctrl->nb_type;                                                           \
+    if (is_key)                                                                \
+    {                                                                          \
+        ++nb_type;                                                             \
+    }                                                                          \
     struct link_type *tmp = ctrl->head;                                        \
     while (tmp->next != NULL)                                                  \
     {                                                                          \
@@ -95,7 +100,7 @@
 *******************************************************************************/
 void print_json_rec(pair_control_st *ctrl, char indent)
 {
-    if (ctrl == NULL || ctrl->head == NULL || ctrl->nb_pairs == 0)
+    if (ctrl == NULL || ctrl->head == NULL)
     {
         return;
     }
@@ -192,13 +197,13 @@ void print_json_rec(pair_control_st *ctrl, char indent)
 /***************************************
 **               PAIR                 **
 ***************************************/
-struct pair *append_pair(pair_control_st *ctrl, struct pair *value)
+struct pair *append_pair(json_dict_st *jd, struct pair *value)
 {
-    if (value == NULL)
+    if (jd == NULL || value == NULL)
     {
         return NULL;
     }
-    APPEND(pair_array_link, pairs, nb_pairs)
+    APPEND(pair_control_st, pair_array_link, pairs, jd->nb_pairs, 0)
     return tmp->pairs[ctrl->idx++];
 }
 
@@ -231,14 +236,14 @@ void destroy_pair_control(pair_control_st *ctrl)
 /***************************************
 **                KEY                 **
 ***************************************/
-const char *append_key(key_control_st *ctrl, const char *value)
+const char *append_key(json_dict_st *jd, const char *value)
 {
-    if (value == NULL)
+    if (jd == NULL || value == NULL)
     {
         return NULL;
     }
-    APPEND(key_array_link, keys, nb_keys)
-    return tmp->keys[ctrl->idx++];
+    APPEND(key_control_st, key_array_link, keys, jd->nb_pairs, 1)
+    return tmp->keys[jd->keys->idx++];
 }
 
 void destroy_key_control(key_control_st *ctrl)
@@ -249,13 +254,13 @@ void destroy_key_control(key_control_st *ctrl)
 /***************************************
 **                STR                 **
 ***************************************/
-char *append_str(str_control_st *ctrl, char *value)
+char *append_str(json_dict_st *jd, char *value)
 {
-    if (value == NULL)
+    if (jd == NULL || value == NULL)
     {
         return NULL;
     }
-    APPEND(str_array_link, strings, nb_str)
+    APPEND(str_control_st, str_array_link, strings, jd->strings->nb_str, 0)
     return tmp->strings[ctrl->idx++];
 }
 
@@ -267,9 +272,13 @@ void destroy_str_control(str_control_st *ctrl)
 /***************************************
 **                NUM                 **
 ***************************************/
-long *append_num(num_control_st *ctrl, long value)
+long *append_num(json_dict_st *jd, long value)
 {
-    APPEND(num_array_link, numbers, nb_num)
+    if (jd == NULL)
+    {
+        return NULL;
+    }
+    APPEND(num_control_st, num_array_link, numbers, jd->numbers->nb_num, 0)
     return &tmp->numbers[ctrl->idx++];
 }
 
@@ -278,9 +287,14 @@ void destroy_num_control(num_control_st *ctrl){ DESTROY(num_array_link) }
 /***************************************
 **             JSON DICT              **
 ***************************************/
-json_dict_st *append_json_dict(json_dict_control_st *ctrl, json_dict_st *value)
+json_dict_st *append_json_dict(json_dict_st *jd, json_dict_st *value)
 {
-    APPEND(json_dict_array_link, json_dicts, nb_json_dicts)
+    if (jd == NULL || value == NULL)
+    {
+        return NULL;
+    }
+    APPEND(json_dict_control_st, json_dict_array_link, json_dicts,
+           jd->json_dicts->nb_json_dicts, 0)
     return tmp->json_dicts[ctrl->idx++];
 }
 
@@ -308,9 +322,13 @@ void destroy_json_dict_control(json_dict_control_st *ctrl)
 /***************************************
 **                LIST                **
 ***************************************/
-generic_list_st *append_list(list_control_st *ctrl, generic_list_st *value)
+generic_list_st *append_list(json_dict_st *jd, generic_list_st *value)
 {
-    APPEND(list_array_link, lists, nb_arr)
+    if (jd == NULL || value == NULL)
+    {
+        return NULL;
+    }
+    APPEND(list_control_st, list_array_link, lists, jd->lists->nb_arr, 0)
     return tmp->lists[ctrl->idx++];
 }
 
@@ -342,9 +360,13 @@ void destroy_list_control(list_control_st *ctrl)
 /***************************************
 **               BOOL                 **
 ***************************************/
-char *append_bool(bool_control_st *ctrl, char value)
+char *append_bool(json_dict_st *jd, char value)
 {
-    APPEND(bool_array_link, booleans, nb_bool)
+    if (jd == NULL)
+    {
+        return NULL;
+    }
+    APPEND(bool_control_st, bool_array_link, booleans, jd->booleans->nb_bool, 0)
     return &tmp->booleans[ctrl->idx++];
 }
 
@@ -418,7 +440,7 @@ char key_exists(json_dict_st *jd, const char *key)
         return 0;
     }
 
-    for (size_t i = 0; i < jd->keys->nb_keys; ++i)
+    for (size_t i = 0; i < jd->nb_pairs; ++i)
     {
         struct key_array_link *tmp = jd->keys->head;
         while (tmp != NULL)
@@ -444,7 +466,7 @@ typed_value_st get_value(json_dict_st *jd, const char *key)
         return (typed_value_st){ .type = TYPE_NONEXISTANT, .value = NULL };
     }
 
-    for (size_t i = 0; i < jd->pairs->nb_pairs; ++i)
+    for (size_t i = 0; i < jd->nb_pairs; ++i)
     {
         struct pair_array_link *tmp = jd->pairs->head;
         while (tmp != NULL)

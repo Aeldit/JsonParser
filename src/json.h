@@ -81,14 +81,12 @@ struct bool_array_link
 */
 struct pair_control
 {
-    size_t nb_pairs;
     size_t idx;
     struct pair_array_link *head;
 };
 
 struct key_control
 {
-    size_t nb_keys;
     size_t idx;
     struct key_array_link *head;
 };
@@ -160,6 +158,7 @@ struct pair
 */
 struct json_dict
 {
+    size_t nb_pairs;
     pair_control_st *pairs;
     key_control_st *keys;
 
@@ -207,6 +206,8 @@ char add_bool(json_dict_st *jd, const char *key, char value);
 ** \brief Adds a key:value pair of null type to the 'jd' json dict
 */
 char add_null(json_dict_st *jd, const char *key);
+
+size_t get_nb_pairs(json_dict_st *jd);
 
 /**
 ** \brief Frees all the allocated parts of the 'jd' json dict
