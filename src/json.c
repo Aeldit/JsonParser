@@ -20,7 +20,7 @@
 ** \param value_type The type of the value
 */
 #define ADD(type_ctrl_st, list, append_type, value_type)                       \
-    if (jd == NULL || key == NULL)                                             \
+    if (jd == NULL || key == NULL || key_exists(jd, key))                      \
     {                                                                          \
         return FAILURE;                                                        \
     }                                                                          \
@@ -63,7 +63,7 @@ json_dict_st *init_dict(void)
 
 char add_str(json_dict_st *jd, const char *key, char *value)
 {
-    if (value == NULL || key_exists(jd, key))
+    if (value == NULL)
     {
         return FAILURE;
     }
@@ -72,16 +72,12 @@ char add_str(json_dict_st *jd, const char *key, char *value)
 
 char add_num(json_dict_st *jd, const char *key, long value)
 {
-    if (key_exists(jd, key))
-    {
-        return FAILURE;
-    }
     ADD(num_control_st, numbers, append_num, TYPE_NUM)
 }
 
 char add_json_dict(json_dict_st *jd, const char *key, json_dict_st *value)
 {
-    if (value == NULL || key_exists(jd, key))
+    if (value == NULL)
     {
         return FAILURE;
     }
@@ -90,7 +86,7 @@ char add_json_dict(json_dict_st *jd, const char *key, json_dict_st *value)
 
 char add_array(json_dict_st *jd, const char *key, json_array_st *value)
 {
-    if (value == NULL || key_exists(jd, key))
+    if (value == NULL)
     {
         return FAILURE;
     }
@@ -99,10 +95,6 @@ char add_array(json_dict_st *jd, const char *key, json_array_st *value)
 
 char add_bool(json_dict_st *jd, const char *key, char value)
 {
-    if (key_exists(jd, key))
-    {
-        return FAILURE;
-    }
     ADD(bool_control_st, booleans, append_bool, TYPE_BOOL)
 }
 
