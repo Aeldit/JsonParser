@@ -19,7 +19,7 @@
 */
 struct file_content
 {
-    char payload[READ_BUFF_LEN];
+    char buffer[READ_BUFF_LEN];
     struct file_content *next;
 };
 
@@ -30,7 +30,7 @@ struct file_content
 */
 struct fc_control
 {
-    size_t nb_payloads;
+    size_t nb_buffers;
     struct file_content *head;
     struct file_content *tail;
 };

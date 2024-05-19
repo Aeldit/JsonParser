@@ -19,9 +19,9 @@
 typedef struct json_dict json_dict_st;
 
 /**
-** \brief Each '..._array_link' struct represents a link of the chained list of
+** \brief Each '..._link' struct represents a link of the chained list of
 **        the associated type. It contains an array of predetermined length and
-**        a pointer to the previous link.
+**        a pointer to the next link.
 */
 struct pair_link
 {
@@ -109,7 +109,6 @@ struct list_control
     struct array_link *head;
 };
 
-// TODO: Use bits instead of entire chars to store the booleans
 struct bool_control
 {
     size_t nb_bool;

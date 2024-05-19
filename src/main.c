@@ -1,14 +1,13 @@
-#include <stdio.h>
-#include <stdlib.h>
-
-#include "json.h"
-#include "lists/json_array.h"
 #include "lists/linked_lists.h"
-#include "types.h"
+#include "parser.h"
 
-int main(void)
+int main(int argc, char *argv[])
 {
-    json_dict_st *j = init_dict();
+    if (argc < 2)
+    {
+        return 1;
+    }
+    /*json_dict_st *j = init_dict();
 
     add_str(j, "t", "a");
     add_str(j, "te", "b");
@@ -110,13 +109,11 @@ int main(void)
     case TYPE_ERROR:
         puts("Error");
         break;
-    }
+    }*/
 
-    typed_value_st t = array_get(get_value(jd, "array").value, 0);
-    if (t.type == TYPE_ARR)
-    {
-        array_print(t.value);
-    }
+    json_dict_st *jd = parse(argv[1]);
+
+    print_json(jd->pairs);
 
     destroy_dict(jd);
     return 0;

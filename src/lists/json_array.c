@@ -39,6 +39,7 @@ typed_value_st array_get(json_array_st *ja, size_t index)
 void array_print(json_array_st *l)
 {
     array_print_indent(l, 1, 0);
+    printf("\n");
 }
 
 void array_print_indent(json_array_st *l, char indent, char from_list)

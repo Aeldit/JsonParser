@@ -7,7 +7,6 @@
 
 #include "lists/linked_lists.h"
 #include "types.h"
-#include "utils.h"
 
 /*******************************************************************************
 **                              DEFINES / MACROS                              **

@@ -30,7 +30,7 @@ struct fc_control *init_fc_control(void)
         return NULL;
     }
 
-    fcc->nb_payloads = 1;
+    fcc->nb_buffers = 1;
     fcc->head = fc;
     fcc->tail = fc;
     return fcc;
@@ -45,7 +45,7 @@ void add_fc_to_fc_control(struct fc_control *fcc, struct file_content *fc)
 
     fcc->tail->next = fc;
     fcc->tail = fc;
-    ++fcc->nb_payloads;
+    ++fcc->nb_buffers;
 }
 
 void destroy_fc_control(struct fc_control *fcc)
@@ -119,7 +119,7 @@ struct fc_control *read_file(char *path)
             current_fc = new_fc;
             last_fc = new_fc;
         }
-        current_fc->payload[buff_idx++] = c;
+        current_fc->buffer[buff_idx++] = c;
     }
     add_fc_to_fc_control(fcc, last_fc);
     return fcc;
@@ -136,7 +136,7 @@ void print_file_content(struct fc_control *fcc)
     struct file_content *tmp = fcc->head;
     while (tmp != NULL)
     {
-        printf("%s", tmp->payload);
+        printf("%s", tmp->buffer);
         tmp = tmp->next;
     }
 }

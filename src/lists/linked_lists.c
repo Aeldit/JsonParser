@@ -406,7 +406,7 @@ char key_exists(json_dict_st *jd, const char *key)
 
 typed_value_st get_value(json_dict_st *jd, const char *key)
 {
-    if (key == NULL)
+    if (jd == NULL || key == NULL)
     {
         return (typed_value_st){ .type = TYPE_ERROR, .value = NULL };
     }
@@ -421,7 +421,6 @@ typed_value_st get_value(json_dict_st *jd, const char *key)
         {
             if (strcmp(tmp->pairs[j]->key, key) == 0)
             {
-                printf("%d\n", tmp->pairs[j]->type);
                 return (typed_value_st){ .type = tmp->pairs[j]->type,
                                          .value = tmp->pairs[j]->value };
             }
