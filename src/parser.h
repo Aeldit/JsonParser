@@ -16,6 +16,8 @@
 #define NAME_SEPARATOR ':'
 #define VALUE_SEPARATOR ','
 
+#define WRITE_BUFF_LEN 512
+
 /*******************************************************************************
 **                                 STRUCTURES                                 **
 *******************************************************************************/
@@ -23,6 +25,9 @@ struct states
 {
     char is_in_json;
     char is_in_array;
+    char is_in_string;
+    char is_waiting_key;
+    char is_waiting_value;
 };
 
 /*******************************************************************************

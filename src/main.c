@@ -111,10 +111,11 @@ int main(int argc, char *argv[])
         break;
     }*/
 
-    json_dict_st *jd = parse(argv[1]);
+    parse(argv[1]);
+    // json_dict_st *jd = parse(argv[1]);
 
-    print_json(jd->pairs);
+    // print_json(jd->pairs);
 
-    destroy_dict(jd);
+    // destroy_dict(jd);
     return 0;
 }
