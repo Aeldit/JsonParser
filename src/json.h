@@ -31,7 +31,7 @@ struct pair_link
 
 struct key_link
 {
-    const char *keys[ARRAY_LEN];
+    char *keys[ARRAY_LEN];
     struct key_link *next;
 };
 
@@ -134,7 +134,7 @@ typedef struct bool_control bool_control_st;
 */
 struct pair
 {
-    const char *key;
+    char *key;
     void *value;
     unsigned char type;
 };
@@ -170,32 +170,32 @@ json_dict_st *init_dict(void);
 /**
 ** \brief Adds a key:value pair of string type to the 'jd' json dict
 */
-char add_str(json_dict_st *jd, const char *key, char *value);
+char add_str(json_dict_st *jd, char *key, char *value);
 
 /**
 ** \brief Adds a key:value pair of number type to the 'jd' json dict
 */
-char add_num(json_dict_st *jd, const char *key, long value);
+char add_num(json_dict_st *jd, char *key, long value);
 
 /**
 ** \brief Adds a key:value pair of json dict type to the 'jd' json dict
 */
-char add_json_dict(json_dict_st *jd, const char *key, json_dict_st *dict);
+char add_json_dict(json_dict_st *jd, char *key, json_dict_st *dict);
 
 /**
 ** \brief Adds a key:value pair of list type to the 'jd' json dict
 */
-char add_array(json_dict_st *jd, const char *key, json_array_st *list);
+char add_array(json_dict_st *jd, char *key, json_array_st *list);
 
 /**
 ** \brief Adds a key:value pair of boolean type to the 'jd' json dict
 */
-char add_bool(json_dict_st *jd, const char *key, char value);
+char add_bool(json_dict_st *jd, char *key, char value);
 
 /**
 ** \brief Adds a key:value pair of null type to the 'jd' json dict
 */
-char add_null(json_dict_st *jd, const char *key);
+char add_null(json_dict_st *jd, char *key);
 
 size_t get_nb_pairs(json_dict_st *jd);
 

@@ -9,13 +9,6 @@
 /*******************************************************************************
 **                              DEFINES / MACROS                              **
 *******************************************************************************/
-#define BEGIN_OBJECT '{'
-#define END_OBJECT '}'
-#define BEGIN_ARRAY '['
-#define END_ARRAY ']'
-#define NAME_SEPARATOR ':'
-#define VALUE_SEPARATOR ','
-
 #define WRITE_BUFF_LEN 512
 
 /*******************************************************************************
@@ -25,7 +18,9 @@ struct states
 {
     char is_in_json;
     char is_in_array;
-    char is_in_string;
+    char is_in_str;
+    char is_in_key;
+    char is_in_value;
     char is_waiting_key;
     char is_waiting_value;
 };

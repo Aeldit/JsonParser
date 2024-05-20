@@ -60,7 +60,7 @@ json_dict_st *init_dict(void)
     return jd == NULL ? NULL : jd;
 }
 
-char add_str(json_dict_st *jd, const char *key, char *value)
+char add_str(json_dict_st *jd, char *key, char *value)
 {
     if (value == NULL)
     {
@@ -69,12 +69,12 @@ char add_str(json_dict_st *jd, const char *key, char *value)
     ADD(str_control_st, strings, append_str, TYPE_STR)
 }
 
-char add_num(json_dict_st *jd, const char *key, long value)
+char add_num(json_dict_st *jd, char *key, long value)
 {
     ADD(num_control_st, numbers, append_num, TYPE_NUM)
 }
 
-char add_json_dict(json_dict_st *jd, const char *key, json_dict_st *value)
+char add_json_dict(json_dict_st *jd, char *key, json_dict_st *value)
 {
     if (value == NULL)
     {
@@ -83,7 +83,7 @@ char add_json_dict(json_dict_st *jd, const char *key, json_dict_st *value)
     ADD(json_dict_control_st, json_dicts, append_json_dict, TYPE_OBJ)
 }
 
-char add_array(json_dict_st *jd, const char *key, json_array_st *value)
+char add_array(json_dict_st *jd, char *key, json_array_st *value)
 {
     if (value == NULL)
     {
@@ -92,12 +92,12 @@ char add_array(json_dict_st *jd, const char *key, json_array_st *value)
     ADD(list_control_st, lists, append_array, TYPE_ARR)
 }
 
-char add_bool(json_dict_st *jd, const char *key, char value)
+char add_bool(json_dict_st *jd, char *key, char value)
 {
     ADD(bool_control_st, booleans, append_bool, TYPE_BOOL)
 }
 
-char add_null(json_dict_st *jd, const char *key)
+char add_null(json_dict_st *jd, char *key)
 {
     if (jd == NULL || key == NULL || key_exists(jd, key))
     {

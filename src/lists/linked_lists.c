@@ -236,7 +236,7 @@ void destroy_pair_control(pair_control_st *ctrl)
 /***************************************
 **                KEY                 **
 ***************************************/
-const char *append_key(json_dict_st *jd, const char *value)
+char *append_key(json_dict_st *jd, char *value)
 {
     if (jd == NULL || value == NULL)
     {
@@ -248,7 +248,23 @@ const char *append_key(json_dict_st *jd, const char *value)
 
 void destroy_key_control(key_control_st *ctrl)
 {
-    DESTROY(key_link)
+    if (ctrl == NULL)
+    {
+        return;
+    }
+
+    struct key_link *tmp = ctrl->head;
+    while (tmp != NULL)
+    {
+        struct key_link *to_del = tmp;
+        tmp = tmp->next;
+        for (size_t i = 0; i < ARRAY_LEN; ++i)
+        {
+            free(to_del->keys[i]);
+        }
+        free(to_del);
+    }
+    free(ctrl);
 }
 
 /***************************************
@@ -378,7 +394,7 @@ void destroy_bool_control(bool_control_st *ctrl)
 /***********************************************************
 **                         UTILS                          **
 ***********************************************************/
-char key_exists(json_dict_st *jd, const char *key)
+char key_exists(json_dict_st *jd, char *key)
 {
     if (jd == NULL || key == NULL || jd->keys == NULL)
     {
@@ -404,7 +420,7 @@ char key_exists(json_dict_st *jd, const char *key)
     return 0;
 }
 
-typed_value_st get_value(json_dict_st *jd, const char *key)
+typed_value_st get_value(json_dict_st *jd, char *key)
 {
     if (jd == NULL || key == NULL)
     {
@@ -428,4 +444,116 @@ typed_value_st get_value(json_dict_st *jd, const char *key)
         tmp = tmp->next;
     }
     return (typed_value_st){ .type = TYPE_ERROR, .value = NULL };
+}
+
+/***********************************************************
+**                    LINKED LISTS STR                    **
+***********************************************************/
+ll_char_ctrl *init_ll(void)
+{
+    ll_char_ctrl *llcc = calloc(1, sizeof(ll_char_ctrl));
+    if (llcc == NULL)
+    {
+        return NULL;
+    }
+    return llcc;
+}
+
+void add_char_to_ll(ll_char_ctrl *llcc, char c)
+{
+    if (llcc == NULL)
+    {
+        return;
+    }
+
+    if (llcc->head == NULL)
+    {
+        llcc->head = calloc(1, sizeof(struct linked_list_char));
+        if (llcc->head == NULL)
+        {
+            return;
+        }
+        llcc->idx = 0;
+        llcc->head->buff[llcc->idx++] = c;
+    }
+    else if (llcc->idx == CHAR_BUFF_LEN)
+    {
+        struct linked_list_char *llc =
+            calloc(1, sizeof(struct linked_list_char));
+        if (llc == NULL)
+        {
+            return;
+        }
+
+        struct linked_list_char *tmp = llcc->head;
+        while (tmp->next != NULL)
+        {
+            tmp = tmp->next;
+        }
+        tmp->next = llc;
+        llcc->idx = 0;
+        llc->buff[llcc->idx++] = c;
+    }
+    else
+    {
+        struct linked_list_char *tmp = llcc->head;
+        while (tmp->next != NULL)
+        {
+            tmp = tmp->next;
+        }
+        tmp->buff[llcc->idx++] = c;
+    }
+    ++llcc->len;
+}
+
+char *get_final_string(ll_char_ctrl *llcc)
+{
+    if (llcc == NULL || llcc->len == 0)
+    {
+        return NULL;
+    }
+
+    // + 1 for the '\0'
+    char *str = calloc(llcc->len + 1, sizeof(char));
+    if (str == NULL)
+    {
+        return NULL;
+    }
+    size_t idx = 0;
+
+    struct linked_list_char *tmp = llcc->head;
+    while (tmp != NULL)
+    {
+        struct linked_list_char *to_del = tmp;
+        for (int i = 0; i < CHAR_BUFF_LEN; ++i)
+        {
+            str[idx + i] = tmp->buff[i];
+            tmp->buff[i] = 0;
+        }
+        idx += CHAR_BUFF_LEN;
+        tmp = tmp->next;
+        free(to_del);
+    }
+    str[llcc->len] = '\0';
+    llcc->len = 0;
+    llcc->idx = 0;
+    llcc->head = NULL;
+    return str;
+}
+
+void destroy_llcc(ll_char_ctrl *llcc)
+{
+    if (llcc == NULL)
+    {
+        return;
+    }
+
+    struct linked_list_char *tmp = llcc->head;
+    while (tmp != NULL)
+    {
+        struct linked_list_char *to_del = tmp;
+        tmp = tmp->next;
+        free(to_del);
+    }
+    free(llcc);
 }

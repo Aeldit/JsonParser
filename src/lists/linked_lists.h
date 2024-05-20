@@ -10,6 +10,30 @@
 #include "../types.h"
 
 /*******************************************************************************
+**                              DEFINES / MACROS                              **
+*******************************************************************************/
+#define CHAR_BUFF_LEN 64
+
+/*******************************************************************************
+**                                 STRUCTURES                                 **
+*******************************************************************************/
+struct linked_list_char
+{
+    char buff[CHAR_BUFF_LEN];
+    struct linked_list_char *next;
+};
+
+// Represents a string of undefined length
+struct linked_list_char_ctrl
+{
+    size_t len;
+    size_t idx;
+    struct linked_list_char *head;
+};
+
+typedef struct linked_list_char_ctrl ll_char_ctrl;
+
+/*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
 /***********************************************************
@@ -32,7 +56,7 @@ void destroy_pair_control(pair_control_st *ctrl);
 ** \return The index of the added key + 1 (0 is the error code), so we have to
 **         make sure later to substract 1 to the result of this function
 */
-const char *append_key(json_dict_st *jd, const char *value);
+char *append_key(json_dict_st *jd, char *value);
 
 void destroy_key_control(key_control_st *ctrl);
 
@@ -76,8 +100,24 @@ void destroy_bool_control(bool_control_st *ctrl);
 ***********************************************************/
 void print_array(json_array_st *l, char indent, char from_list);
 
-char key_exists(json_dict_st *jd, const char *key);
+char key_exists(json_dict_st *jd, char *key);
 
-typed_value_st get_value(json_dict_st *jd, const char *key);
+typed_value_st get_value(json_dict_st *jd, char *key);
+
+/***********************************************************
+**                    LINKED LISTS STR                    **
+***********************************************************/
+ll_char_ctrl *init_ll(void);
+
+void add_char_to_ll(ll_char_ctrl *llcc, char c);
+
+/**
+** \brief Creates an allocated string and frees the linked list links
+** \return An allocated string created from all the caracters found in the
+**         linked list
+*/
+char *get_final_string(ll_char_ctrl *llcc);
+
+void destroy_llcc(ll_char_ctrl *llcc);
 
 #endif // !LINKED_LISTS_H
