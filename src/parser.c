@@ -6,6 +6,19 @@
 
 #include "lists/linked_lists.h"
 
+void handle_non_str_value(json_dict_st *jd, char *key, char *value)
+{
+    // Booleans
+    if (!strcmp(value, "true"))
+    {
+        add_bool(jd, key, 1);
+    }
+    else if (!strcmp(value, "false"))
+    {
+        add_bool(jd, key, 0);
+    }
+}
+
 json_dict_st *parse(char *file)
 {
     FILE *f = fopen(file, "r");
@@ -21,6 +34,10 @@ json_dict_st *parse(char *file)
     }
 
     json_dict_st *jd = init_dict();
+    if (jd == NULL)
+    {
+        return NULL;
+    }
     struct states s = (struct states){ 0 };
     s.is_waiting_key = 1;
 
@@ -32,8 +49,8 @@ json_dict_st *parse(char *file)
 
     // Possible elements
     char *key = NULL;
-    char *str = NULL;
-    /*long num = 0;
+    /*char *str = NULL;
+    long num = 0;
     json_dict_control_st *jc = NULL;
     list_control_st *l = NULL;
     char bool = 0;*/
@@ -50,45 +67,62 @@ json_dict_st *parse(char *file)
         switch (c)
         {
         case '{':
-            ++s.is_in_json;
+            if (!s.is_in_str)
+            {
+                ++s.is_in_json;
+            }
             break;
         case '}':
-            --s.is_in_json;
+            if (!s.is_in_str)
+            {
+                --s.is_in_json;
+            }
             break;
         case '[':
-            ++s.is_in_array;
+            if (!s.is_in_str)
+            {
+                ++s.is_in_array;
+            }
             break;
         case ']':
-            --s.is_in_array;
+            if (!s.is_in_str)
+            {
+                --s.is_in_array;
+            }
             break;
         case ':':
-            if (!s.is_in_key)
+            if (!s.is_in_str)
             {
-                s.is_waiting_value = 1;
+                s.is_in_value = 1;
             }
             break;
         case ',':
-            if (!s.is_in_key)
+            if (!s.is_in_str)
             {
+                if (s.is_in_value)
+                {
+                    handle_non_str_value(jd, key, get_final_string(llcc));
+                    s.is_in_value = 0;
+                }
                 s.is_waiting_key = 1;
             }
             break;
 
         // Special characters
         case '\n':
-            if (!s.is_in_key)
+            if (!s.is_in_str)
             {
                 continue;
             }
             break;
         case '\t':
-            if (!s.is_in_key)
+            if (!s.is_in_str)
             {
                 continue;
             }
             break;
         case ' ':
-            if (!s.is_in_key)
+            if (!s.is_in_str)
             {
                 continue;
             }
@@ -97,23 +131,17 @@ json_dict_st *parse(char *file)
         case '"':
             if (prev_c != '\\')
             {
-                if (!s.is_in_str)
-                {
-                    s.is_in_str = 1;
-                }
+                s.is_in_str = !s.is_in_str;
 
                 if (s.is_in_key)
                 {
                     s.is_in_key = 0;
                     key = get_final_string(llcc);
-                    printf("key : %s\n", key);
                 }
                 else if (s.is_in_value)
                 {
                     s.is_in_value = 0;
-                    str = get_final_string(llcc);
-                    printf("str : %s\n", str);
-                    add_str(jd, key, str);
+                    add_str(jd, key, get_final_string(llcc));
                 }
                 // Prepare key acquisition
                 else if (s.is_waiting_key)
@@ -121,22 +149,22 @@ json_dict_st *parse(char *file)
                     s.is_waiting_key = 0;
                     s.is_in_key = 1;
                 }
-                // Prepare value acquisition
-                else if (s.is_waiting_value)
-                {
-                    s.is_waiting_value = 0;
-                    s.is_in_value = 1;
-                }
             }
             break;
 
         default:
-            if (s.is_in_str)
+            if (!s.is_in_str
+                && (('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z')
+                    || ('0' <= c && c <= '9') || c == '-'))
+            {}
+
+            if (s.is_in_str || s.is_in_value)
             {
                 add_char_to_ll(llcc, c);
             }
             break;
         }
+        // printf("%c", c);
         prev_c = c;
     }
 
