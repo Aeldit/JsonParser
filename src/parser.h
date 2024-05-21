@@ -22,6 +22,7 @@ struct states
     char is_in_key;
     char is_in_value;
     char is_waiting_key;
+    char is_waiting_value;
 };
 
 /*******************************************************************************

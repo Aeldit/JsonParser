@@ -8,6 +8,7 @@
 
 void handle_non_str_value(json_dict_st *jd, char *key, char *value)
 {
+    printf("\n%s\n", value);
     // Booleans
     if (!strcmp(value, "true"))
     {
@@ -108,26 +109,6 @@ json_dict_st *parse(char *file)
             }
             break;
 
-        // Special characters
-        case '\n':
-            if (!s.is_in_str)
-            {
-                continue;
-            }
-            break;
-        case '\t':
-            if (!s.is_in_str)
-            {
-                continue;
-            }
-            break;
-        case ' ':
-            if (!s.is_in_str)
-            {
-                continue;
-            }
-            break;
-
         case '"':
             if (prev_c != '\\')
             {
@@ -153,15 +134,27 @@ json_dict_st *parse(char *file)
             break;
 
         default:
-            if (!s.is_in_str
-                && (('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z')
-                    || ('0' <= c && c <= '9') || c == '-'))
-            {}
-
-            if (s.is_in_str || s.is_in_value)
+            if (c == '\t' || c == ' ')
             {
-                add_char_to_ll(llcc, c);
+                if (!s.is_in_str)
+                {
+                    continue;
+                }
             }
+            else if (c == '\n')
+            {
+                if (!s.is_in_str)
+                {
+                    if (s.is_in_value)
+                    {
+                        handle_non_str_value(jd, key, get_final_string(llcc));
+                        s.is_in_value = 0;
+                    }
+                    continue;
+                }
+            }
+            printf("%c ", c);
+            add_char_to_ll(llcc, c);
             break;
         }
         // printf("%c", c);
