@@ -224,7 +224,7 @@ void destroy_pair_control(pair_control_st *ctrl)
     {
         struct pair_link *to_del = tmp;
         tmp = tmp->next;
-        for (size_t i = 0; i < ARRAY_LEN; ++i)
+        for (int i = 0; i < ARRAY_LEN; ++i)
         {
             free(to_del->pairs[i]);
         }
@@ -258,7 +258,7 @@ void destroy_key_control(key_control_st *ctrl)
     {
         struct key_link *to_del = tmp;
         tmp = tmp->next;
-        for (size_t i = 0; i < ARRAY_LEN; ++i)
+        for (int i = 0; i < ARRAY_LEN; ++i)
         {
             free(to_del->keys[i]);
         }
@@ -326,7 +326,7 @@ void destroy_json_dict_control(json_dict_control_st *ctrl)
     {
         struct json_dict_link *to_del = tmp;
         tmp = tmp->next;
-        for (size_t i = 0; i < ARRAY_LEN; ++i)
+        for (int i = 0; i < ARRAY_LEN; ++i)
         {
             destroy_dict(to_del->json_dicts[i]);
         }
@@ -360,7 +360,7 @@ void destroy_array_control(list_control_st *ctrl)
     {
         struct array_link *to_del = tmp;
         tmp = tmp->next;
-        for (size_t i = 0; i < ARRAY_LEN; ++i)
+        for (int i = 0; i < ARRAY_LEN; ++i)
         {
             if (to_del->lists[i] != NULL)
             {
@@ -508,8 +508,24 @@ void add_char_to_ll(ll_char_ctrl *llcc, char c)
 
 char *get_final_string(ll_char_ctrl *llcc)
 {
-    if (llcc == NULL || llcc->len == 0)
+    if (llcc == NULL)
     {
+        return NULL;
+    }
+
+    // If the length is 0, we simply ignore the current string and errase it
+    if (llcc->len == 0)
+    {
+        struct linked_list_char *tmp = llcc->head;
+        while (tmp != NULL)
+        {
+            struct linked_list_char *to_del = tmp;
+            tmp = tmp->next;
+            free(to_del);
+        }
+        llcc->len = 0;
+        llcc->idx = 0;
+        llcc->head = NULL;
         return NULL;
     }
 
