@@ -80,17 +80,26 @@
 /*
 ** \brief Destroys the given linked list
 ** \param link_type The typedef struct
+** \param list The name of the list field in the structure link_type
 */
-#define DESTROY(link_type)                                                     \
+#define DESTROY(type_link, list)                                               \
     if (ctrl == NULL)                                                          \
     {                                                                          \
         return;                                                                \
     }                                                                          \
-    struct link_type *tmp = ctrl->head;                                        \
+    struct type_link *tmp = ctrl->head;                                        \
     while (tmp != NULL)                                                        \
     {                                                                          \
-        struct link_type *to_del = tmp;                                        \
+        struct type_link *to_del = tmp;                                        \
         tmp = tmp->next;                                                       \
+        for (int i = 0; i < ARRAY_LEN; ++i)                                    \
+        {                                                                      \
+            if (to_del->list[i] != NULL)                                       \
+            {                                                                  \
+                free(to_del->list[i]);                                         \
+            }                                                                  \
+            free(to_del->list[i]);                                             \
+        }                                                                      \
         free(to_del);                                                          \
     }                                                                          \
     free(ctrl);
@@ -214,23 +223,7 @@ void print_json(pair_control_st *ctrl)
 
 void destroy_pair_control(pair_control_st *ctrl)
 {
-    if (ctrl == NULL)
-    {
-        return;
-    }
-
-    struct pair_link *tmp = ctrl->head;
-    while (tmp != NULL)
-    {
-        struct pair_link *to_del = tmp;
-        tmp = tmp->next;
-        for (int i = 0; i < ARRAY_LEN; ++i)
-        {
-            free(to_del->pairs[i]);
-        }
-        free(to_del);
-    }
-    free(ctrl);
+    DESTROY(pair_link, pairs)
 }
 
 /***************************************
@@ -248,23 +241,7 @@ char *append_key(json_dict_st *jd, char *value)
 
 void destroy_key_control(key_control_st *ctrl)
 {
-    if (ctrl == NULL)
-    {
-        return;
-    }
-
-    struct key_link *tmp = ctrl->head;
-    while (tmp != NULL)
-    {
-        struct key_link *to_del = tmp;
-        tmp = tmp->next;
-        for (int i = 0; i < ARRAY_LEN; ++i)
-        {
-            free(to_del->keys[i]);
-        }
-        free(to_del);
-    }
-    free(ctrl);
+    DESTROY(key_link, keys)
 }
 
 /***************************************
@@ -282,7 +259,7 @@ char *append_str(json_dict_st *jd, char *value)
 
 void destroy_str_control(str_control_st *ctrl)
 {
-    DESTROY(str_link)
+    DESTROY(str_link, strings)
 }
 
 /***************************************
@@ -298,7 +275,21 @@ long *append_num(json_dict_st *jd, long value)
     return &tmp->numbers[ctrl->idx++];
 }
 
-void destroy_num_control(num_control_st *ctrl){ DESTROY(num_link) }
+void destroy_num_control(num_control_st *ctrl)
+{
+    if (ctrl == NULL)
+    {
+        return;
+    }
+    struct num_link *tmp = ctrl->head;
+    while (tmp != NULL)
+    {
+        struct num_link *to_del = tmp;
+        tmp = tmp->next;
+        free(to_del);
+    }
+    free(ctrl);
+}
 
 /***************************************
 **             JSON DICT              **
@@ -388,7 +379,18 @@ char *append_bool(json_dict_st *jd, char value)
 
 void destroy_bool_control(bool_control_st *ctrl)
 {
-    DESTROY(bool_link)
+    if (ctrl == NULL)
+    {
+        return;
+    }
+    struct bool_link *tmp = ctrl->head;
+    while (tmp != NULL)
+    {
+        struct bool_link *to_del = tmp;
+        tmp = tmp->next;
+        free(to_del);
+    }
+    free(ctrl);
 }
 
 /***********************************************************
