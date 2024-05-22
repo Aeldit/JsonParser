@@ -94,10 +94,6 @@
         tmp = tmp->next;                                                       \
         for (int i = 0; i < ARRAY_LEN; ++i)                                    \
         {                                                                      \
-            if (to_del->list[i] != NULL)                                       \
-            {                                                                  \
-                free(to_del->list[i]);                                         \
-            }                                                                  \
             free(to_del->list[i]);                                             \
         }                                                                      \
         free(to_del);                                                          \
