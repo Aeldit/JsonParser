@@ -93,12 +93,52 @@ void handle_non_str_value(json_dict_st *jd, char *key, char *value)
     }
     else
     {
+        // Arrays
         if (is_str_number(value, len))
         {
             add_num(jd, key, str_to_long(value, len));
         }
     }
     free(value);
+}
+
+size_t get_array_size(char *str, size_t len)
+{
+    if (str == NULL)
+    {
+        return 0;
+    }
+
+    size_t size = 0;
+    // TODO: Handle nested arrays
+    for (size_t i = 0; i < len; ++i)
+    {
+        if (str[i] == ',')
+        {
+            ++size;
+        }
+    }
+    return size;
+}
+
+void handle_array(json_dict_st *jd, char *key, char *array)
+{
+    if (jd == NULL || key == NULL || array == NULL)
+    {
+        return;
+    }
+
+    size_t len = strlen(array);
+    printf("'%s'\n", array);
+    size_t size = get_array_size(array, len);
+    printf("%lu\n", size);
+
+    free(array);
+}
+
+void parse_list(char *buff)
+{
+    printf("%s\n", buff);
 }
 
 /*******************************************************************************
@@ -112,7 +152,7 @@ json_dict_st *parse(char *file)
         return NULL;
     }
 
-    int offset = 0;
+    unsigned offset = 0;
     if (fseek(f, offset++, SEEK_SET) != 0)
     {
         return NULL;
@@ -133,6 +173,9 @@ json_dict_st *parse(char *file)
     }
 
     char *key = NULL;
+
+    unsigned array_buff_size = 0;
+    unsigned array_braces_count = 0;
 
     char c = '\0';
     char prev_c = '\0';
@@ -160,13 +203,59 @@ json_dict_st *parse(char *file)
         case '[':
             if (!s.is_in_str)
             {
-                ++s.is_in_array;
+                // If we are already inside an array, we add 1 to the number of
+                // braces found so we can count to the correct ']'
+                if (s.is_in_array)
+                {
+                    ++array_braces_count;
+                }
+                else
+                {
+                    s.is_in_array = 1;
+                    array_buff_size = offset - 1;
+                }
             }
             break;
         case ']':
             if (!s.is_in_str)
             {
-                --s.is_in_array;
+                if (array_braces_count)
+                {
+                    --array_braces_count;
+                }
+                else
+                {
+                    if (array_buff_size != 0)
+                    {
+                        s.is_in_array = 0;
+
+                        unsigned tmp_offset = array_buff_size;
+                        // This is the final size of the buffer we are going to
+                        // fill wit the array
+                        array_buff_size = offset - 1 - array_buff_size;
+
+                        char *array_buffer =
+                            calloc(array_buff_size + 1, sizeof(char *));
+                        if (array_buffer == NULL)
+                        {
+                            break;
+                        }
+
+                        for (unsigned i = 0; i < array_buff_size; ++i)
+                        {
+                            array_buffer[i] = fgetc(f);
+                            if (fseek(f, tmp_offset++, SEEK_SET) != 0)
+                            {
+                                break;
+                            }
+                        }
+                        array_buffer[array_buff_size] = '\0';
+
+                        parse_list(array_buffer);
+                        free(array_buffer);
+                        array_buff_size = 0;
+                    }
+                }
             }
             break;
         case ':':
@@ -176,14 +265,26 @@ json_dict_st *parse(char *file)
             }
             break;
         case ',':
+            /*if (!s.is_in_array)
+            {
+                s.is_in_value = 0;
+                --s.is_in_array;
+                handle_array(jd, key, get_final_string(llcc));
+            }
+            else*/
             if (!s.is_in_str)
             {
                 if (s.is_in_value)
                 {
                     s.is_in_value = 0;
-                    handle_non_str_value(jd, key, get_final_string(llcc));
+                    // handle_non_str_value(jd, key, get_final_string(llcc));
                 }
                 s.is_waiting_key = 1;
+            }
+            // Case where we are inside an array
+            else
+            {
+                add_char_to_ll(llcc, c);
             }
             break;
 
@@ -212,27 +313,31 @@ json_dict_st *parse(char *file)
             break;
 
         default:
-            if (c == '\t' || c == ' ')
+            if (!s.is_in_array)
             {
-                if (!s.is_in_str)
+                if (c == '\t' || c == ' ')
                 {
-                    continue;
-                }
-            }
-            else if (c == '\n')
-            {
-                if (!s.is_in_str)
-                {
-                    // Last pair of the json object
-                    if (s.is_in_value)
+                    if (!s.is_in_str)
                     {
-                        s.is_in_value = 0;
-                        handle_non_str_value(jd, key, get_final_string(llcc));
+                        continue;
                     }
-                    continue;
                 }
+                else if (c == '\n')
+                {
+                    if (!s.is_in_str)
+                    {
+                        // Last pair of the json object
+                        if (s.is_in_value && !s.is_in_array)
+                        {
+                            s.is_in_value = 0;
+                            // handle_non_str_value(jd, key,
+                            // get_final_string(llcc));
+                        }
+                        continue;
+                    }
+                }
+                add_char_to_ll(llcc, c);
             }
-            add_char_to_ll(llcc, c);
             break;
         }
         prev_c = c;
@@ -240,7 +345,7 @@ json_dict_st *parse(char *file)
 
     destroy_llcc(llcc);
     puts("");
-    print_json(jd->pairs);
+    // print_json(jd->pairs);
     destroy_dict(jd);
     return jd;
 }
