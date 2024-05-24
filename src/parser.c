@@ -136,9 +136,105 @@ void handle_array(json_dict_st *jd, char *key, char *array)
     free(array);
 }
 
-void parse_list(char *buff)
+void parse_array(json_dict_st *jd, char *buff, size_t buff_size, char *key)
 {
-    printf("%s\n", buff);
+    printf("'%s'\n", buff);
+
+    char is_in_str = 0;
+    char prev_c = '\0';
+    unsigned size = 0;
+
+    // Counts the number of ',' in the array that are not inside a string
+    for (size_t i = 0; i < buff_size; ++i)
+    {
+        switch (buff[i])
+        {
+        case ',':
+            if (!is_in_str)
+            {
+                ++size;
+            }
+            break;
+        case '"':
+            if (prev_c != '\\')
+            {
+                is_in_str = !is_in_str;
+            }
+            break;
+        default:
+            break;
+        }
+        prev_c = buff[i];
+    }
+    // The last element doesn't have a ',' after, so we add 1 manually
+    if (size != 0)
+    {
+        ++size;
+    }
+    prev_c = '\0';
+
+    json_array_st *ja = array_init(size);
+    if (ja == NULL)
+    {
+        return;
+    }
+
+    ll_char_ctrl *llcc = init_ll();
+    if (llcc == NULL)
+    {
+        return;
+    }
+
+    char is_str = 0;
+
+    // TODO: Implement
+    for (size_t i = 0; i < buff_size; ++i)
+    {
+        struct array_elt ae = { 0 };
+
+        switch (buff[i])
+        {
+        case ',':
+            if (is_str)
+            {
+                is_str = 0;
+                char *value = get_final_string(llcc);
+                if (value == NULL)
+                {
+                    break;
+                }
+                ae.value = append_str(jd, value);
+                ae.type = TYPE_STR;
+            }
+            else
+            {
+                char *value = get_final_string(llcc);
+                if (value == NULL)
+                {
+                    break;
+                }
+                char is_boolean = is_str_boolean(value, strlen(value));
+                if (is_boolean)
+                {
+                    ae.value = append_bool(jd, is_boolean == 1 ? 1 : 0);
+                    ae.type = TYPE_BOOL;
+                }
+            }
+            break;
+        case '"':
+            if (prev_c != '\\')
+            {
+                is_str = 1;
+            }
+            break;
+        default:
+            add_char_to_ll(llcc, buff[i]);
+            break;
+        }
+        prev_c = buff[i];
+        array_append(ja, ae);
+    }
+    add_array(jd, key, ja);
 }
 
 /*******************************************************************************
@@ -232,7 +328,7 @@ json_dict_st *parse(char *file)
                         unsigned tmp_offset = array_buff_size;
                         // This is the final size of the buffer we are going to
                         // fill wit the array
-                        array_buff_size = offset - 1 - array_buff_size;
+                        array_buff_size = offset - 2 - array_buff_size;
 
                         char *array_buffer =
                             calloc(array_buff_size + 1, sizeof(char *));
@@ -243,15 +339,15 @@ json_dict_st *parse(char *file)
 
                         for (unsigned i = 0; i < array_buff_size; ++i)
                         {
-                            array_buffer[i] = fgetc(f);
                             if (fseek(f, tmp_offset++, SEEK_SET) != 0)
                             {
                                 break;
                             }
+                            array_buffer[i] = fgetc(f);
                         }
                         array_buffer[array_buff_size] = '\0';
 
-                        parse_list(array_buffer);
+                        parse_array(jd, array_buffer, array_buff_size, key);
                         free(array_buffer);
                         array_buff_size = 0;
                     }

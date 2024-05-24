@@ -11,7 +11,7 @@
 /*******************************************************************************
 **                                 STRUCTURES                                 **
 *******************************************************************************/
-struct list_elt
+struct array_elt
 {
     void *value;
     unsigned char type;
@@ -25,7 +25,7 @@ struct json_array
 {
     size_t size;
     size_t idx;
-    struct list_elt *elts;
+    struct array_elt *elts;
 };
 
 typedef struct json_array json_array_st;
@@ -33,7 +33,9 @@ typedef struct json_array json_array_st;
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
-void array_append(json_array_st *l, struct list_elt elt);
+json_array_st *array_init(size_t size);
+
+void array_append(json_array_st *l, struct array_elt elt);
 
 typed_value_st array_get(json_array_st *ja, size_t index);
 

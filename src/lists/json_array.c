@@ -9,19 +9,28 @@
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
-void array_append(json_array_st *l, struct list_elt elt)
+json_array_st *array_init(size_t size)
+{
+    json_array_st *ja = calloc(1, sizeof(json_array_st));
+    if (ja == NULL)
+    {
+        return NULL;
+    }
+    ja->size = size;
+    ja->elts = calloc(size, sizeof(struct array_elt));
+    if (ja->elts == NULL)
+    {
+        free(ja);
+        return NULL;
+    }
+    return ja;
+}
+
+void array_append(json_array_st *l, struct array_elt elt)
 {
     if (l == NULL || l->idx >= l->size - 1)
     {
         return;
-    }
-    if (l->elts == NULL)
-    {
-        l->elts = calloc(l->size, sizeof(struct list_elt));
-        if (l->elts == NULL)
-        {
-            return;
-        }
     }
     l->elts[l->idx++] = elt;
 }
