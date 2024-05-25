@@ -167,6 +167,9 @@ struct json_dict
 */
 json_dict_st *init_dict(void);
 
+/***************************************
+**             JSON OBJECT            **
+***************************************/
 /**
 ** \brief Adds a key:value pair of string type to the 'jd' json dict
 */
@@ -196,6 +199,23 @@ char add_bool(json_dict_st *jd, char *key, char value);
 ** \brief Adds a key:value pair of null type to the 'jd' json dict
 */
 char add_null(json_dict_st *jd, char *key);
+
+/***************************************
+**                ARRAY               **
+***************************************/
+char add_str_to_array(json_dict_st *jd, json_array_st *ja, char *value);
+
+char add_num_to_array(json_dict_st *jd, json_array_st *ja, long value);
+
+char add_json_dict_to_array(json_dict_st *jd, json_array_st *ja,
+                            json_dict_st *value);
+
+char add_array_to_array(json_dict_st *jd, json_array_st *ja,
+                        json_array_st *value);
+
+char add_bool_to_array(json_dict_st *jd, json_array_st *ja, char value);
+
+char add_null_to_array(json_dict_st *jd, json_array_st *ja);
 
 size_t get_nb_pairs(json_dict_st *jd);
 

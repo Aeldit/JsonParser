@@ -26,6 +26,7 @@
     ctrl_type *ctrl = jd->list;                                                \
     if (ctrl == NULL)                                                          \
     {                                                                          \
+        printf("a");                                                           \
         return NULL;                                                           \
     }                                                                          \
     /* Case where there is no element */                                       \
@@ -34,6 +35,7 @@
         ctrl->head = calloc(1, sizeof(struct link_type));                      \
         if (ctrl->head == NULL)                                                \
         {                                                                      \
+            printf("b");                                                       \
             return NULL;                                                       \
         }                                                                      \
         ctrl->head->list[ctrl->idx] = value;                                   \
@@ -46,6 +48,7 @@
         struct link_type *nkl = calloc(1, sizeof(struct link_type));           \
         if (nkl == NULL)                                                       \
         {                                                                      \
+            printf("c");                                                       \
             return NULL;                                                       \
         }                                                                      \
         struct link_type *tmp = ctrl->head;                                    \

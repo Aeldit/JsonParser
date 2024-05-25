@@ -186,44 +186,76 @@ void parse_array(json_dict_st *jd, char *buff, size_t buff_size, char *key)
     }
 
     char is_str = 0;
+    is_in_str = 0;
 
-    // TODO: Implement
-    for (size_t i = 0; i < buff_size; ++i)
+    // <= because we add 1 because of the '\0'
+    for (size_t i = 0; i <= buff_size; ++i)
     {
-        struct array_elt ae = { 0 };
-
         switch (buff[i])
         {
+        case ' ':
+            break;
+        case '\n':
+            break;
+
         case ',':
+            if (!is_in_str)
+            {
+                if (is_str)
+                {
+                    is_str = 0;
+                    add_str_to_array(jd, ja, get_final_string(llcc));
+                }
+                else
+                {
+                    char *value = get_final_string(llcc);
+                    size_t len = strlen(value);
+
+                    char is_boolean = is_str_boolean(value, len);
+                    if (is_boolean)
+                    {
+                        add_bool_to_array(jd, ja, is_boolean == 1 ? 1 : 0);
+                    }
+                    else
+                    {
+                        if (is_str_number(value, len))
+                        {
+                            add_num_to_array(jd, ja, str_to_long(value, len));
+                        }
+                    }
+                }
+            }
+            break;
+        case '\0':
             if (is_str)
             {
                 is_str = 0;
-                char *value = get_final_string(llcc);
-                if (value == NULL)
-                {
-                    break;
-                }
-                ae.value = append_str(jd, value);
-                ae.type = TYPE_STR;
+                add_str_to_array(jd, ja, get_final_string(llcc));
             }
             else
             {
                 char *value = get_final_string(llcc);
-                if (value == NULL)
-                {
-                    break;
-                }
-                char is_boolean = is_str_boolean(value, strlen(value));
+                size_t len = strlen(value);
+
+                char is_boolean = is_str_boolean(value, len);
                 if (is_boolean)
                 {
-                    ae.value = append_bool(jd, is_boolean == 1 ? 1 : 0);
-                    ae.type = TYPE_BOOL;
+                    add_bool_to_array(jd, ja, is_boolean == 1 ? 1 : 0);
+                }
+                else
+                {
+                    if (is_str_number(value, len))
+                    {
+                        add_num_to_array(jd, ja, str_to_long(value, len));
+                    }
                 }
             }
             break;
+
         case '"':
             if (prev_c != '\\')
             {
+                is_in_str = !is_in_str;
                 is_str = 1;
             }
             break;
@@ -232,9 +264,9 @@ void parse_array(json_dict_st *jd, char *buff, size_t buff_size, char *key)
             break;
         }
         prev_c = buff[i];
-        array_append(ja, ae);
     }
     add_array(jd, key, ja);
+    array_print(ja);
 }
 
 /*******************************************************************************
