@@ -26,13 +26,13 @@ json_array_st *array_init(size_t size)
     return ja;
 }
 
-void array_append(json_array_st *l, struct array_elt elt)
+void array_append(json_array_st *ja, struct array_elt elt)
 {
-    if (l == NULL || l->idx >= l->size - 1)
+    if (ja == NULL || ja->idx >= ja->size || elt.value == NULL)
     {
         return;
     }
-    l->elts[l->idx++] = elt;
+    ja->elts[ja->idx++] = elt;
 }
 
 typed_value_st array_get(json_array_st *ja, size_t index)
@@ -45,13 +45,13 @@ typed_value_st array_get(json_array_st *ja, size_t index)
                              .value = ja->elts[index].value };
 }
 
-void array_print(json_array_st *l)
+void array_print(json_array_st *ja)
 {
-    array_print_indent(l, 1, 0);
+    array_print_indent(ja, 1, 0);
     printf("\n");
 }
 
-void array_print_indent(json_array_st *l, char indent, char from_list)
+void array_print_indent(json_array_st *ja, char indent, char from_list)
 {
     char *tabs = calloc(indent, sizeof(char));
     if (tabs == NULL)
@@ -64,7 +64,7 @@ void array_print_indent(json_array_st *l, char indent, char from_list)
     }
     tabs[indent - 1] = '\0';
 
-    if (l == NULL || l->elts == NULL || l->size == 0)
+    if (ja == NULL || ja->elts == NULL || ja->size == 0)
     {
         printf("%s[]", from_list ? tabs : "");
     }
@@ -72,22 +72,22 @@ void array_print_indent(json_array_st *l, char indent, char from_list)
     {
         printf("%s[\n", from_list ? tabs : "");
 
-        for (size_t i = 0; i < l->size; ++i)
+        for (size_t i = 0; i < ja->size; ++i)
         {
-            switch (l->elts[i].type)
+            switch (ja->elts[i].type)
             {
             case TYPE_STR:
-                printf("%s\t\"%s\"", tabs, (char *)l->elts[i].value);
+                printf("%s\t\"%s\"", tabs, (char *)ja->elts[i].value);
                 break;
             case TYPE_NUM:
-                printf("%s\t%lu", tabs, *(long *)l->elts[i].value);
+                printf("%s\t%lu", tabs, *(long *)ja->elts[i].value);
                 break;
             case TYPE_ARR:
-                array_print_indent(l->elts[i].value, indent + 1, 1);
+                array_print_indent(ja->elts[i].value, indent + 1, 1);
                 break;
             case TYPE_BOOL:
                 printf("%s\t%s", tabs,
-                       *(char *)l->elts[i].value ? "true" : "false");
+                       *(char *)ja->elts[i].value ? "true" : "false");
                 break;
             case TYPE_NULL:
                 printf("%s\tnull", tabs);
@@ -96,7 +96,7 @@ void array_print_indent(json_array_st *l, char indent, char from_list)
                 break;
             }
 
-            if (i != l->size - 1)
+            if (i != ja->size - 1)
             {
                 printf(",\n");
             }

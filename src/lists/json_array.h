@@ -35,12 +35,12 @@ typedef struct json_array json_array_st;
 *******************************************************************************/
 json_array_st *array_init(size_t size);
 
-void array_append(json_array_st *l, struct array_elt elt);
+void array_append(json_array_st *ja, struct array_elt elt);
 
 typed_value_st array_get(json_array_st *ja, size_t index);
 
-void array_print(json_array_st *l);
+void array_print(json_array_st *ja);
 
-void array_print_indent(json_array_st *l, char indent, char from_list);
+void array_print_indent(json_array_st *ja, char indent, char from_list);
 
 #endif // !GENERIC_LISTS_H
