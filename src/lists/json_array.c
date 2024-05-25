@@ -28,7 +28,8 @@ json_array_st *array_init(size_t size)
 
 void array_append(json_array_st *ja, struct array_elt elt)
 {
-    if (ja == NULL || ja->idx >= ja->size || elt.value == NULL)
+    if (ja == NULL || ja->idx >= ja->size
+        || (elt.value == NULL && elt.type != TYPE_NULL))
     {
         return;
     }
