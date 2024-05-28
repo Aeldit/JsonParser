@@ -211,6 +211,7 @@ void parse_array(json_dict_st *jd, char *buff, size_t buff_size, char *key)
                         add_num_to_array(jd, ja, str_to_long(value, len));
                     }
                 }
+                free(value);
             }
             continue;
         }
@@ -250,6 +251,7 @@ void parse_array(json_dict_st *jd, char *buff, size_t buff_size, char *key)
                         add_num_to_array(jd, ja, str_to_long(value, len));
                     }
                 }
+                free(value);
             }
             break;
 
@@ -475,7 +477,7 @@ json_dict_st *parse(char *file)
                 if (!s.is_in_str)
                 {
                     // Last pair of the json object
-                    if (s.is_in_value && !s.is_in_array)
+                    if (s.is_in_value)
                     {
                         s.is_in_value = 0;
                         handle_non_str_value(jd, key, get_final_string(llcc));
