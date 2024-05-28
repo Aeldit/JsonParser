@@ -81,7 +81,7 @@ void array_print_indent(json_array_st *ja, char indent, char from_list)
                 printf("%s\t\"%s\"", tabs, (char *)ja->elts[i].value);
                 break;
             case TYPE_NUM:
-                printf("%s\t%lu", tabs, *(long *)ja->elts[i].value);
+                printf("%s\t%ld", tabs, *(long *)ja->elts[i].value);
                 break;
             case TYPE_ARR:
                 array_print_indent(ja->elts[i].value, indent + 1, 1);
