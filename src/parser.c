@@ -126,14 +126,14 @@ size_t get_array_size(char *str, size_t len)
 
 void parse_array(json_dict_st *jd, char *buff, size_t buff_size, char *key)
 {
-    if (jd == NULL || buff == NULL || key == NULL)
+    if (jd == NULL || buff == NULL || key == NULL || buff_size == 0)
     {
         return;
     }
 
     char is_in_str = 0;
     char prev_c = '\0';
-    unsigned size = 0;
+    size_t size = 0;
 
     // Counts the number of ',' in the array that are not inside a string
     for (size_t i = 0; i < buff_size; ++i)
@@ -182,46 +182,8 @@ void parse_array(json_dict_st *jd, char *buff, size_t buff_size, char *key)
     // <= because we add 1 because of the '\0'
     for (size_t i = 0; i <= buff_size; ++i)
     {
-        switch (buff[i])
+        if (i == buff_size)
         {
-        case ' ':
-            if (is_in_str)
-            {
-                add_char_to_ll(llcc, buff[i]);
-            }
-            break;
-        case '\n':
-            break;
-
-        case ',':
-            if (!is_in_str)
-            {
-                if (is_str)
-                {
-                    is_str = 0;
-                    add_str_to_array(jd, ja, get_final_string(llcc));
-                }
-                else
-                {
-                    char *value = get_final_string(llcc);
-                    size_t len = strlen(value);
-
-                    char is_boolean = is_str_boolean(value, len);
-                    if (is_boolean)
-                    {
-                        add_bool_to_array(jd, ja, is_boolean == 1 ? 1 : 0);
-                    }
-                    else
-                    {
-                        if (is_str_number(value, len))
-                        {
-                            add_num_to_array(jd, ja, str_to_long(value, len));
-                        }
-                    }
-                }
-            }
-            break;
-        case '\0':
             if (is_str)
             {
                 is_str = 0;
@@ -230,6 +192,10 @@ void parse_array(json_dict_st *jd, char *buff, size_t buff_size, char *key)
             else
             {
                 char *value = get_final_string(llcc);
+                if (value == NULL)
+                {
+                    continue;
+                }
                 size_t len = strlen(value);
 
                 char is_boolean = is_str_boolean(value, len);
@@ -245,6 +211,48 @@ void parse_array(json_dict_st *jd, char *buff, size_t buff_size, char *key)
                     }
                 }
             }
+            continue;
+        }
+
+        if (is_in_str && (buff[i] != '"' && prev_c != '\\'))
+        {
+            add_char_to_ll(llcc, buff[i]);
+            continue;
+        }
+
+        switch (buff[i])
+        {
+        case ',':
+            if (is_str)
+            {
+                is_str = 0;
+                add_str_to_array(jd, ja, get_final_string(llcc));
+            }
+            else
+            {
+                char *value = get_final_string(llcc);
+                if (value == NULL)
+                {
+                    continue;
+                }
+                size_t len = strlen(value);
+
+                char is_boolean = is_str_boolean(value, len);
+                if (is_boolean)
+                {
+                    add_bool_to_array(jd, ja, is_boolean == 1 ? 1 : 0);
+                }
+                else
+                {
+                    if (is_str_number(value, len))
+                    {
+                        add_num_to_array(jd, ja, str_to_long(value, len));
+                    }
+                }
+            }
+            break;
+
+        case ' ':
             break;
 
         case '"':
@@ -269,17 +277,18 @@ size_t get_array_buff_size(size_t offset, FILE *f)
     {
         return 0;
     }
-    size_t array_buff_size = offset;
 
-    size_t nb_array_brackets = 0;
-    char is_in_str = 0;
-    char c = '\0';
-    char prev_c = '\0';
+    size_t initial_offset = offset;
 
     if (fseek(f, offset++, SEEK_SET) != 0)
     {
         return 0;
     }
+
+    size_t nb_array_brackets = 0;
+    char is_in_str = 0;
+    char c = '\0';
+    char prev_c = '\0';
     while ((c = fgetc(f)))
     {
         if (fseek(f, offset++, SEEK_SET) != 0)
@@ -301,7 +310,7 @@ size_t get_array_buff_size(size_t offset, FILE *f)
         case ']':
             if (nb_array_brackets == 0)
             {
-                return offset - 2 - array_buff_size;
+                return offset - 2 - initial_offset;
             }
             --nb_array_brackets;
             break;
@@ -331,12 +340,14 @@ json_dict_st *parse(char *file)
     size_t offset = 0;
     if (fseek(f, offset++, SEEK_SET) != 0)
     {
+        fclose(f);
         return NULL;
     }
 
     json_dict_st *jd = init_dict();
     if (jd == NULL)
     {
+        fclose(f);
         return NULL;
     }
     struct states s = (struct states){ 0 };
@@ -345,12 +356,14 @@ json_dict_st *parse(char *file)
     ll_char_ctrl *llcc = init_ll();
     if (llcc == NULL)
     {
+        destroy_dict(jd);
         return NULL;
     }
 
     char *key = NULL;
 
     size_t array_buff_size = 0;
+    size_t tmp_offset = 0;
 
     char c = '\0';
     char prev_c = '\0';
@@ -376,18 +389,16 @@ json_dict_st *parse(char *file)
             --s.is_in_json;
             break;
         case '[':
-            // This is the final size of the buffer we are going to
-            // fill wit the array
+            tmp_offset = offset - 1;
+            //  This is the final size of the buffer we are going to
+            //  fill wit the array
             array_buff_size = get_array_buff_size(offset - 1, f);
-            printf("%lu\n", array_buff_size);
             // + 1 because this skips the ',' so we are able to go to the
             // next pair directly
             offset += array_buff_size + 1;
-            printf("offset = %lu\n", offset);
 
             if (array_buff_size != 0)
             {
-                size_t tmp_offset = array_buff_size - 2;
                 // + 1 because we have to add '\0'
                 char *array_buffer =
                     calloc(array_buff_size + 1, sizeof(char *));
@@ -405,7 +416,6 @@ json_dict_st *parse(char *file)
                     array_buffer[i] = fgetc(f);
                 }
                 array_buffer[array_buff_size] = '\0';
-                printf("%s\n", array_buffer);
 
                 parse_array(jd, array_buffer, array_buff_size, key);
                 free(array_buffer);
@@ -413,8 +423,6 @@ json_dict_st *parse(char *file)
 
                 s.is_waiting_key = 1;
             }
-            break;
-        case ']':
             break;
         case ':':
             s.is_in_value = 1;
@@ -438,7 +446,7 @@ json_dict_st *parse(char *file)
                     s.is_in_key = 0;
                     key = get_final_string(llcc);
                 }
-                else if (!s.is_in_str && s.is_in_value)
+                else if (s.is_in_value)
                 {
                     s.is_in_value = 0;
                     add_str(jd, key, get_final_string(llcc));
