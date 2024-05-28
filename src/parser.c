@@ -173,6 +173,7 @@ void parse_array(json_dict_st *jd, char *buff, size_t buff_size, char *key)
     ll_char_ctrl *llcc = init_ll();
     if (llcc == NULL)
     {
+        free(ja);
         return;
     }
 
@@ -269,6 +270,7 @@ void parse_array(json_dict_st *jd, char *buff, size_t buff_size, char *key)
         prev_c = buff[i];
     }
     add_array(jd, key, ja);
+    destroy_llcc(llcc);
 }
 
 size_t get_array_buff_size(size_t offset, FILE *f)
