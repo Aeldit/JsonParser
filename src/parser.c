@@ -257,6 +257,10 @@ void parse_array(json_dict_st *jd, char *buff, size_t buff_size, char *key)
 
         case ' ':
             break;
+        case '\n':
+            break;
+        case '\t':
+            break;
 
         case '"':
             if (prev_c != '\\')
@@ -404,8 +408,7 @@ json_dict_st *parse(char *file)
             if (array_buff_size != 0)
             {
                 // + 1 because we have to add '\0'
-                char *array_buffer =
-                    calloc(array_buff_size + 1, sizeof(char *));
+                char *array_buffer = calloc(array_buff_size + 1, sizeof(char));
                 if (array_buffer == NULL)
                 {
                     break;
