@@ -113,14 +113,29 @@ size_t get_array_size(char *str, size_t len)
     }
 
     size_t size = 0;
-    // TODO: Handle nested arrays
+    unsigned is_in_array_brackets = 0;
+    // Counts the number of ',' in the array that are not inside a string
     for (size_t i = 0; i < len; ++i)
     {
-        if (str[i] == ',')
+        if (str[i] == '[')
+        {
+            ++is_in_array_brackets;
+        }
+        else if (str[i] == ']')
+        {
+            --is_in_array_brackets;
+        }
+        else if (str[i] == ',' && !is_in_array_brackets)
         {
             ++size;
         }
     }
+    // The last element doesn't have a ',' after, so we add 1 manually
+    if (size != 0)
+    {
+        ++size;
+    }
+    printf("size : %lu\n", size);
     return size;
 }
 
@@ -133,35 +148,8 @@ void parse_array(json_dict_st *jd, char *buff, size_t buff_size, char *key)
 
     char is_in_str = 0;
     char prev_c = '\0';
-    size_t size = 0;
+    size_t size = get_array_size(buff, buff_size);
 
-    // Counts the number of ',' in the array that are not inside a string
-    for (size_t i = 0; i < buff_size; ++i)
-    {
-        switch (buff[i])
-        {
-        case ',':
-            if (!is_in_str)
-            {
-                ++size;
-            }
-            break;
-        case '"':
-            if (prev_c != '\\')
-            {
-                is_in_str = !is_in_str;
-            }
-            break;
-        default:
-            break;
-        }
-        prev_c = buff[i];
-    }
-    // The last element doesn't have a ',' after, so we add 1 manually
-    if (size != 0)
-    {
-        ++size;
-    }
     prev_c = '\0';
 
     json_array_st *ja = array_init(size);
