@@ -450,9 +450,9 @@ typed_value_st get_value(json_dict_st *jd, char *key)
 /***********************************************************
 **                    LINKED LISTS STR                    **
 ***********************************************************/
-ll_char_ctrl *init_ll(void)
+ll_char_ctrl_st *init_ll(void)
 {
-    ll_char_ctrl *llcc = calloc(1, sizeof(ll_char_ctrl));
+    ll_char_ctrl_st *llcc = calloc(1, sizeof(ll_char_ctrl_st));
     if (llcc == NULL)
     {
         return NULL;
@@ -460,7 +460,7 @@ ll_char_ctrl *init_ll(void)
     return llcc;
 }
 
-void add_char_to_ll(ll_char_ctrl *llcc, char c)
+void add_char_to_ll(ll_char_ctrl_st *llcc, char c)
 {
     if (llcc == NULL)
     {
@@ -507,7 +507,7 @@ void add_char_to_ll(ll_char_ctrl *llcc, char c)
     ++llcc->len;
 }
 
-char *get_final_string(ll_char_ctrl *llcc)
+char *get_final_string(ll_char_ctrl_st *llcc)
 {
     if (llcc == NULL)
     {
@@ -558,7 +558,7 @@ char *get_final_string(ll_char_ctrl *llcc)
     return str;
 }
 
-void destroy_llcc(ll_char_ctrl *llcc)
+void destroy_llcc(ll_char_ctrl_st *llcc)
 {
     if (llcc == NULL)
     {

@@ -1,5 +1,5 @@
-#ifndef JSON_PARSER_H
-#define JSON_PARSER_H
+#ifndef JSON_PARSER2_H
+#define JSON_PARSER2_H
 
 /*******************************************************************************
 **                                  INCLUDES                                  **
@@ -22,6 +22,6 @@ struct states
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
-// json_dict_st *parse(char *file);
+json_dict_st *parse(char *file);
 
-#endif // !JSON_PARSER_H
+#endif // !JSON_PARSER2_H

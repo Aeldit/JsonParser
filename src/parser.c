@@ -87,11 +87,11 @@ void handle_non_str_value(json_dict_st *jd, char *key, char *value)
 
     // Booleans
     char is_boolean = is_str_boolean(value, len);
-    if (is_boolean == 1)
+    if (is_boolean == 1) // true
     {
         add_bool(jd, key, 1);
     }
-    else if (is_boolean == 2)
+    else if (is_boolean == 2) // false
     {
         add_bool(jd, key, 0);
     }
@@ -137,134 +137,6 @@ size_t get_array_size(char *str, size_t len)
     }
     printf("size : %lu\n", size);
     return size;
-}
-
-void parse_array(json_dict_st *jd, char *buff, size_t buff_size, char *key)
-{
-    if (jd == NULL || buff == NULL || key == NULL || buff_size == 0)
-    {
-        return;
-    }
-
-    char is_in_str = 0;
-    char prev_c = '\0';
-    size_t size = get_array_size(buff, buff_size);
-
-    prev_c = '\0';
-
-    json_array_st *ja = array_init(size);
-    if (ja == NULL)
-    {
-        return;
-    }
-
-    ll_char_ctrl *llcc = init_ll();
-    if (llcc == NULL)
-    {
-        free(ja);
-        return;
-    }
-
-    char is_str = 0;
-    is_in_str = 0;
-
-    // <= because we add 1 because of the '\0'
-    for (size_t i = 0; i <= buff_size; ++i)
-    {
-        if (i == buff_size)
-        {
-            if (is_str)
-            {
-                is_str = 0;
-                add_str_to_array(jd, ja, get_final_string(llcc));
-            }
-            else
-            {
-                char *value = get_final_string(llcc);
-                if (value == NULL)
-                {
-                    continue;
-                }
-                size_t len = strlen(value);
-
-                char is_boolean = is_str_boolean(value, len);
-                if (is_boolean)
-                {
-                    add_bool_to_array(jd, ja, is_boolean == 1 ? 1 : 0);
-                }
-                else
-                {
-                    if (is_str_number(value, len))
-                    {
-                        add_num_to_array(jd, ja, str_to_long(value, len));
-                    }
-                }
-                free(value);
-            }
-            continue;
-        }
-
-        if (is_in_str && (buff[i] != '"' && prev_c != '\\'))
-        {
-            add_char_to_ll(llcc, buff[i]);
-            continue;
-        }
-
-        switch (buff[i])
-        {
-        case ',':
-            if (is_str)
-            {
-                is_str = 0;
-                add_str_to_array(jd, ja, get_final_string(llcc));
-            }
-            else
-            {
-                char *value = get_final_string(llcc);
-                if (value == NULL)
-                {
-                    continue;
-                }
-                size_t len = strlen(value);
-
-                char is_boolean = is_str_boolean(value, len);
-                if (is_boolean)
-                {
-                    add_bool_to_array(jd, ja, is_boolean == 1 ? 1 : 0);
-                }
-                else
-                {
-                    if (is_str_number(value, len))
-                    {
-                        add_num_to_array(jd, ja, str_to_long(value, len));
-                    }
-                }
-                free(value);
-            }
-            break;
-
-        case ' ':
-            break;
-        case '\n':
-            break;
-        case '\t':
-            break;
-
-        case '"':
-            if (prev_c != '\\')
-            {
-                is_in_str = !is_in_str;
-                is_str = 1;
-            }
-            break;
-        default:
-            add_char_to_ll(llcc, buff[i]);
-            break;
-        }
-        prev_c = buff[i];
-    }
-    add_array(jd, key, ja);
-    destroy_llcc(llcc);
 }
 
 size_t get_array_buff_size(size_t offset, FILE *f)
@@ -322,6 +194,258 @@ size_t get_array_buff_size(size_t offset, FILE *f)
     return 0;
 }
 
+size_t parse_nested_array(json_dict_st *jd, json_array_st *nested_ja,
+                          char *buff, size_t buff_size, size_t pos)
+{
+    if (nested_ja == NULL)
+    {
+        return 0;
+    }
+
+    ll_char_ctrl_st *llcc = init_ll();
+    if (llcc == NULL)
+    {
+        return 0;
+    }
+
+    char is_in_str = 0;
+    char is_str = 0; // Stores whether the previous value was a string
+    // char is_in_nested_array = 0;
+    char prev_c = '\0';
+    for (; pos < buff_size; ++pos)
+    {
+        printf("at pos : %c\n", buff[pos]);
+        // If we are in a string
+        if (is_in_str && (buff[pos] != '"' && prev_c != '\\'))
+        {
+            add_char_to_ll(llcc, buff[pos]);
+            continue;
+        }
+
+        switch (buff[pos])
+        {
+        case ']':
+            if (is_str)
+            {
+                is_str = 0;
+                add_str_to_array(jd, nested_ja, get_final_string(llcc));
+            }
+            else
+            {
+                char *value = get_final_string(llcc);
+                if (value == NULL)
+                {
+                    continue;
+                }
+                size_t len = strlen(value);
+
+                char is_boolean = is_str_boolean(value, len);
+                if (is_boolean)
+                {
+                    add_bool_to_array(jd, nested_ja, is_boolean == 1 ? 1 : 0);
+                }
+                else
+                {
+                    if (is_str_number(value, len))
+                    {
+                        add_num_to_array(jd, nested_ja,
+                                         str_to_long(value, len));
+                    }
+                    else
+                    {
+                        add_array_to_array(jd, nested_ja, nested_ja);
+                    }
+                }
+                free(value);
+            }
+            return pos;
+        case ',':
+            if (is_str)
+            {
+                is_str = 0;
+                add_str_to_array(jd, nested_ja, get_final_string(llcc));
+            }
+            else
+            {
+                char *value = get_final_string(llcc);
+                if (value == NULL)
+                {
+                    continue;
+                }
+                size_t len = strlen(value);
+
+                char is_boolean = is_str_boolean(value, len);
+                if (is_boolean)
+                {
+                    add_bool_to_array(jd, nested_ja, is_boolean == 1 ? 1 : 0);
+                }
+                else
+                {
+                    if (is_str_number(value, len))
+                    {
+                        add_num_to_array(jd, nested_ja,
+                                         str_to_long(value, len));
+                    }
+                    else
+                    {
+                        add_array_to_array(jd, nested_ja, nested_ja);
+                    }
+                }
+                free(value);
+            }
+            break;
+        case '"':
+            if (prev_c != '\\')
+            {
+                is_in_str = !is_in_str;
+                is_str = 1;
+            }
+            break;
+        }
+    }
+    return pos;
+}
+
+void parse_array(json_dict_st *jd, char *buff, size_t buff_size, char *key)
+{
+    if (jd == NULL || buff == NULL || key == NULL || buff_size == 0)
+    {
+        return;
+    }
+    size_t size = get_array_size(buff, buff_size);
+
+    json_array_st *ja = array_init(size);
+    if (ja == NULL)
+    {
+        return;
+    }
+
+    ll_char_ctrl_st *llcc = init_ll();
+    if (llcc == NULL)
+    {
+        free(ja);
+        return;
+    }
+
+    json_array_st *nested_ja;
+    char is_in_str = 0;
+    char prev_c = '\0';
+    char is_str = 0;
+    // <= because we add 1 because of the '\0'
+    for (size_t i = 0; i <= buff_size; ++i)
+    {
+        // End of the string
+        if (i == buff_size)
+        {
+            if (is_str)
+            {
+                is_str = 0;
+                add_str_to_array(jd, ja, get_final_string(llcc));
+            }
+            else
+            {
+                char *value = get_final_string(llcc);
+                if (value == NULL)
+                {
+                    continue;
+                }
+                size_t len = strlen(value);
+
+                char is_boolean = is_str_boolean(value, len);
+                if (is_boolean)
+                {
+                    add_bool_to_array(jd, ja, is_boolean == 1 ? 1 : 0);
+                }
+                else
+                {
+                    if (is_str_number(value, len))
+                    {
+                        add_num_to_array(jd, ja, str_to_long(value, len));
+                    }
+                }
+                free(value);
+            }
+            continue;
+        }
+
+        // If in a str and not a '"'
+        if (is_in_str && (buff[i] != '"' && prev_c != '\\'))
+        {
+            add_char_to_ll(llcc, buff[i]);
+            continue;
+        }
+
+        switch (buff[i])
+        {
+        case '[':
+            nested_ja = calloc(1, sizeof(json_array_st));
+            if (nested_ja == NULL)
+            {
+                return;
+            }
+            printf("i = %lu\n", i);
+            i += parse_nested_array(jd, nested_ja, buff, buff_size, i + 1) + 1;
+            printf("i = %lu %d\n", i, buff[i]);
+            break;
+        case ',':
+            if (is_str)
+            {
+                is_str = 0;
+                add_str_to_array(jd, ja, get_final_string(llcc));
+            }
+            else
+            {
+                char *value = get_final_string(llcc);
+                if (value == NULL)
+                {
+                    continue;
+                }
+                size_t len = strlen(value);
+
+                char is_boolean = is_str_boolean(value, len);
+                if (is_boolean)
+                {
+                    add_bool_to_array(jd, ja, is_boolean == 1 ? 1 : 0);
+                }
+                else
+                {
+                    if (is_str_number(value, len))
+                    {
+                        add_num_to_array(jd, ja, str_to_long(value, len));
+                    }
+                    else
+                    {
+                        add_array_to_array(jd, ja, nested_ja);
+                    }
+                }
+                free(value);
+            }
+            break;
+
+        case ' ':
+            break;
+        case '\n':
+            break;
+        case '\t':
+            break;
+
+        case '"':
+            if (prev_c != '\\')
+            {
+                is_in_str = !is_in_str;
+                is_str = 1;
+            }
+            break;
+        default:
+            add_char_to_ll(llcc, buff[i]);
+            break;
+        }
+        prev_c = buff[i];
+    }
+    add_array(jd, key, ja);
+    destroy_llcc(llcc);
+}
+
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
@@ -349,7 +473,7 @@ json_dict_st *parse(char *file)
     struct states s = (struct states){ 0 };
     s.is_waiting_key = 1;
 
-    ll_char_ctrl *llcc = init_ll();
+    ll_char_ctrl_st *llcc = init_ll();
     if (llcc == NULL)
     {
         destroy_dict(jd);

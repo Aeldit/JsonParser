@@ -1,5 +1,4 @@
-#include "lists/linked_lists.h"
-#include "parser.h"
+#include "parser2.h"
 
 int main(int argc, char *argv[])
 {

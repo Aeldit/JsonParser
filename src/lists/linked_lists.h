@@ -31,7 +31,7 @@ struct linked_list_char_ctrl
     struct linked_list_char *head;
 };
 
-typedef struct linked_list_char_ctrl ll_char_ctrl;
+typedef struct linked_list_char_ctrl ll_char_ctrl_st;
 
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
@@ -107,17 +107,17 @@ typed_value_st get_value(json_dict_st *jd, char *key);
 /***********************************************************
 **                    LINKED LISTS STR                    **
 ***********************************************************/
-ll_char_ctrl *init_ll(void);
+ll_char_ctrl_st *init_ll(void);
 
-void add_char_to_ll(ll_char_ctrl *llcc, char c);
+void add_char_to_ll(ll_char_ctrl_st *llcc, char c);
 
 /**
 ** \brief Creates an allocated string and frees the linked list links
 ** \return An allocated string created from all the caracters found in the
 **         linked list
 */
-char *get_final_string(ll_char_ctrl *llcc);
+char *get_final_string(ll_char_ctrl_st *llcc);
 
-void destroy_llcc(ll_char_ctrl *llcc);
+void destroy_llcc(ll_char_ctrl_st *llcc);
 
 #endif // !LINKED_LISTS_H
