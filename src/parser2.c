@@ -186,7 +186,7 @@ char parse_boolean(json_dict_st *jd, FILE *f, uint64_t *pos)
         return 0;
     }
 
-    // Because we already read the first character)
+    // Because we already read the first character
     --(*pos);
 
     uint64_t len = jval_len(f, *pos);
@@ -200,6 +200,66 @@ char parse_boolean(json_dict_st *jd, FILE *f, uint64_t *pos)
         return 1; // true
     }
     return 2;
+}
+
+uint64_t jarray_len(FILE *f, uint64_t pos)
+{
+    if (f == NULL)
+    {
+        return 0;
+    }
+
+    uint64_t size = pos;
+    if (fseek(f, size++, SEEK_SET) != 0)
+    {
+        return 0;
+    }
+
+    char c = '\0';
+    char is_in_array = 0;
+    char is_in_string = 0;
+    while ((c = fgetc(f)) != EOF)
+    {
+        if (!is_in_string && !is_in_array && (c == ',' || c == '\n'))
+        {
+            break;
+        }
+
+        if (c == '"')
+        {
+            is_in_string = !is_in_string;
+        }
+        else if (c == '[')
+        {
+            ++is_in_array;
+        }
+        else if (c == ']')
+        {
+            --is_in_array;
+        }
+
+        if (fseek(f, size++, SEEK_SET) != 0)
+        {
+            break;
+        }
+    }
+    return size - pos - 1;
+}
+
+json_array_st *parse_array(json_dict_st *jd, FILE *f, uint64_t *pos)
+{
+    if (jd == NULL || f == NULL || pos == NULL)
+    {
+        return NULL;
+    }
+
+    // Because we already read the first character
+    --(*pos);
+
+    uint64_t len = jarray_len(f, *pos);
+    printf("array len = %lu\n", len);
+    (*pos) += len;
+    return 0;
 }
 
 /*******************************************************************************
@@ -261,7 +321,9 @@ json_dict_st *parse(char *file)
             --s.is_in_json;
         }
         else if (c == '[')
-        {}
+        {
+            parse_array(jd, f, &offset);
+        }
         else if (IS_NUMBER_START(c))
         {
             add_num(jd, key, parse_number(jd, f, &offset));
