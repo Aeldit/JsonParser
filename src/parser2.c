@@ -165,15 +165,14 @@ long parse_number(json_dict_st *jd, FILE *f, size_t *pos)
     {
         return 0;
     }
-    size_t idx = 0;
 
     for (size_t i = 0; i < len; ++i)
     {
+        str[i] = fgetc(f);
         if (fseek(f, (*pos)++, SEEK_SET) != 0)
         {
             break;
         }
-        str[idx++] = fgetc(f);
     }
     long res = str_to_long(str, len);
     free(str);
@@ -261,6 +260,8 @@ json_dict_st *parse(char *file)
         {
             --s.is_in_json;
         }
+        else if (c == '[')
+        {}
         else if (IS_NUMBER_START(c))
         {
             add_num(jd, key, parse_number(jd, f, &offset));
