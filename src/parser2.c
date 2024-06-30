@@ -3,6 +3,7 @@
 /*******************************************************************************
 **                                  INCLUDES                                  **
 *******************************************************************************/
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -24,14 +25,14 @@
 ** \param pos The pos of the '"' that starts the string of which we are
 **            currently acquiring the length
 */
-size_t jstr_len(FILE *f, size_t pos)
+uint64_t jstr_len(FILE *f, size_t pos)
 {
     if (f == NULL)
     {
         return 0;
     }
 
-    size_t size = 0;
+    uint64_t size = 0;
     char c = '\0';
     char prev_c = '\0';
     while ((c = fgetc(f)) != EOF)
@@ -60,14 +61,14 @@ size_t jstr_len(FILE *f, size_t pos)
 ** \param pos The pos of the '"' that starts the string of which we are
 **            currently acquiring the length
 */
-char *parse_string(json_dict_st *jd, FILE *f, size_t *pos)
+char *parse_string(json_dict_st *jd, FILE *f, uint64_t *pos)
 {
     if (jd == NULL || f == NULL || pos == NULL)
     {
         return NULL;
     }
 
-    size_t len = jstr_len(f, *pos);
+    uint64_t len = jstr_len(f, *pos);
     if (len == 0)
     {
         return NULL;
@@ -78,28 +79,27 @@ char *parse_string(json_dict_st *jd, FILE *f, size_t *pos)
     {
         return NULL;
     }
-    size_t idx = 0;
 
-    for (size_t i = 0; i < len; ++i)
+    for (uint64_t i = 0; i < len; ++i)
     {
         if (fseek(f, (*pos)++, SEEK_SET) != 0)
         {
             break;
         }
-        str[idx++] = fgetc(f);
+        str[i] = fgetc(f);
     }
     ++(*pos); // Because otherwise, we endu up reading the last '"' of the str
     return str;
 }
 
-size_t jval_len(FILE *f, size_t pos)
+uint64_t jval_len(FILE *f, uint64_t pos)
 {
     if (f == NULL)
     {
         return 0;
     }
 
-    size_t size = pos;
+    uint64_t size = pos;
     if (fseek(f, size++, SEEK_SET) != 0)
     {
         return 0;
@@ -121,16 +121,16 @@ size_t jval_len(FILE *f, size_t pos)
     return size - pos - 1;
 }
 
-long str_to_long(char *str, size_t len)
+int64_t str_to_long(char *str, uint64_t len)
 {
     if (str == NULL || len == 0)
     {
         return 0;
     }
-    long res = 0;
+    int64_t res = 0;
     char is_negative = 1;
 
-    for (size_t i = 0; i < len; ++i)
+    for (uint64_t i = 0; i < len; ++i)
     {
         if (str[i] == '-')
         {
@@ -144,7 +144,7 @@ long str_to_long(char *str, size_t len)
     return res * is_negative;
 }
 
-long parse_number(json_dict_st *jd, FILE *f, size_t *pos)
+int64_t parse_number(json_dict_st *jd, FILE *f, uint64_t *pos)
 {
     if (jd == NULL || f == NULL || pos == NULL)
     {
@@ -154,7 +154,7 @@ long parse_number(json_dict_st *jd, FILE *f, size_t *pos)
     // Because we already read the first digit (or sign)
     --(*pos);
 
-    size_t len = jval_len(f, *pos);
+    uint64_t len = jval_len(f, *pos);
     if (len == 0)
     {
         return 0;
@@ -166,20 +166,20 @@ long parse_number(json_dict_st *jd, FILE *f, size_t *pos)
         return 0;
     }
 
-    for (size_t i = 0; i < len; ++i)
+    for (uint64_t i = 0; i < len; ++i)
     {
-        str[i] = fgetc(f);
         if (fseek(f, (*pos)++, SEEK_SET) != 0)
         {
             break;
         }
+        str[i] = fgetc(f);
     }
-    long res = str_to_long(str, len);
+    int64_t res = str_to_long(str, len);
     free(str);
     return res;
 }
 
-char parse_boolean(json_dict_st *jd, FILE *f, size_t *pos)
+char parse_boolean(json_dict_st *jd, FILE *f, uint64_t *pos)
 {
     if (jd == NULL || f == NULL || pos == NULL)
     {
@@ -189,7 +189,7 @@ char parse_boolean(json_dict_st *jd, FILE *f, size_t *pos)
     // Because we already read the first character)
     --(*pos);
 
-    size_t len = jval_len(f, *pos);
+    uint64_t len = jval_len(f, *pos);
     (*pos) += len;
     if (len == 5)
     {
@@ -213,7 +213,7 @@ json_dict_st *parse(char *file)
         return NULL;
     }
 
-    size_t offset = 0;
+    uint64_t offset = 0;
     if (fseek(f, offset++, SEEK_SET) != 0)
     {
         fclose(f);
