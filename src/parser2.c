@@ -223,6 +223,56 @@ uint64_t jarray_len(FILE *f, uint64_t pos)
     return size - pos - 1;
 }
 
+uint64_t get_array_size(FILE *f, uint64_t pos)
+{
+    if (f == NULL)
+    {
+        return 0;
+    }
+
+    uint64_t offset = pos;
+    if (fseek(f, offset++, SEEK_SET) != 0)
+    {
+        return 0;
+    }
+
+    uint64_t size = 0;
+
+    char c = '\0';
+    char is_in_array = 0;
+    char is_in_string = 0;
+    while ((c = fgetc(f)) != EOF)
+    {
+        if (!is_in_string && !is_in_array && (c == ',' || c == '\n'))
+        {
+            break;
+        }
+
+        if (c == '"')
+        {
+            is_in_string = !is_in_string;
+        }
+        else if (c == '[')
+        {
+            ++is_in_array;
+        }
+        else if (c == ']')
+        {
+            --is_in_array;
+        }
+        else if (!is_in_string && is_in_array == 1 && c == ',')
+        {
+            ++size;
+        }
+
+        if (fseek(f, offset++, SEEK_SET) != 0)
+        {
+            break;
+        }
+    }
+    return size == 0 ? 0 : size + 1;
+}
+
 json_array_st *parse_array(json_dict_st *jd, FILE *f, uint64_t *pos)
 {
     if (jd == NULL || f == NULL || pos == NULL)
@@ -234,9 +284,44 @@ json_array_st *parse_array(json_dict_st *jd, FILE *f, uint64_t *pos)
     --(*pos);
 
     uint64_t len = jarray_len(f, *pos);
-    printf("array len = %lu\n", len);
-    (*pos) += len;
-    return 0;
+
+    json_array_st *ja = array_init(get_array_size(f, *pos));
+    if (ja == NULL)
+    {
+        return NULL;
+    }
+
+    char c = '\0';
+    for (uint64_t i = 0; i < len; ++i)
+    {
+        c = fgetc(f);
+        if (IS_NUMBER_START(c))
+        {
+            add_num_to_array(jd, ja, parse_number(jd, f, pos));
+        }
+        else if (IS_BOOL_START(c))
+        {
+            char bool = parse_boolean(jd, f, pos);
+            if (bool < 2)
+            {
+                add_bool_to_array(jd, ja, bool);
+            }
+        }
+        else if (c == '[')
+        {
+            // FIX: Stack overflow
+            add_array_to_array(jd, ja, parse_array(jd, f, pos));
+        }
+        else if (c == '{') // TODO: Implement
+        {}
+
+        if (fseek(f, (*pos)++, SEEK_SET) != 0)
+        {
+            break;
+        }
+    }
+    --(*pos); // We get an extra 1 on pos because we use pos++ in the fseek
+    return ja;
 }
 
 /*******************************************************************************
@@ -299,7 +384,7 @@ json_dict_st *parse(char *file)
         }
         else if (c == '[')
         {
-            parse_array(jd, f, &offset);
+            add_array(jd, key, parse_array(jd, f, &offset));
         }
         else if (IS_NUMBER_START(c))
         {
