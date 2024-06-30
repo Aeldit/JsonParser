@@ -20,6 +20,7 @@ json-parser: $(OBJS)
 	$(CC) $(CFLAGS) $(SANITIZE) $(OBJS) -o json-parser
 
 clean:
-	rm $(OBJS)
+	rm src/*.o
+	rm -r src/lists/*.o
 	rm $(TESTSOBJS)
 	rm json-parser
