@@ -16,45 +16,51 @@
 #define IS_NUMBER_START(c) (('0' <= (c) && (c) <= '9') || (c) == '-')
 #define IS_BOOL_START(c) ((c) == 't' || (c) == 'f')
 
+/**
+** \def Calculates the size of the given value (number or boolean)
+**      It is used to limit the number of function calls
+*/
+#define STR_LEN                                                                \
+    uint64_t size = (*pos);                                                    \
+    char c = '\0';                                                             \
+    char prev_c = '\0';                                                        \
+    while ((c = fgetc(f)) != EOF)                                              \
+    {                                                                          \
+        if (c == '"' && prev_c != '\\')                                        \
+        {                                                                      \
+            break;                                                             \
+        }                                                                      \
+        if (fseek(f, size++, SEEK_SET) != 0)                                   \
+        {                                                                      \
+            break;                                                             \
+        }                                                                      \
+        prev_c = c;                                                            \
+    }                                                                          \
+    uint64_t len = size - (*pos) - 1
+
+#define VAL_LEN                                                                \
+    uint64_t size = (*pos);                                                    \
+    if (fseek(f, size++, SEEK_SET) != 0)                                       \
+    {                                                                          \
+        return 0;                                                              \
+    }                                                                          \
+    char c = '\0';                                                             \
+    while ((c = fgetc(f)) != EOF)                                              \
+    {                                                                          \
+        if (c == ',' || c == '\n')                                             \
+        {                                                                      \
+            break;                                                             \
+        }                                                                      \
+        if (fseek(f, size++, SEEK_SET) != 0)                                   \
+        {                                                                      \
+            break;                                                             \
+        }                                                                      \
+    }                                                                          \
+    uint64_t len = size - (*pos) - 1
+
 /*******************************************************************************
 **                              LOCAL FUNCTIONS                               **
 *******************************************************************************/
-/**
-** \brief Reads the string at position 'pos' in the given file, and returns its
-**        size
-** \param pos The pos of the '"' that starts the string of which we are
-**            currently acquiring the length
-*/
-uint64_t jstr_len(FILE *f, size_t pos)
-{
-    if (f == NULL)
-    {
-        return 0;
-    }
-
-    uint64_t size = 0;
-    char c = '\0';
-    char prev_c = '\0';
-    while ((c = fgetc(f)) != EOF)
-    {
-        if (fseek(f, pos++, SEEK_SET) != 0)
-        {
-            break;
-        }
-
-        if (c == '"' && prev_c != '\\')
-        {
-            break;
-        }
-        else
-        {
-            ++size;
-        }
-        prev_c = c;
-    }
-    return size - 1;
-}
-
 /**
 ** \brief Reads the string at position 'pos' in the given file, and adds it to
 **        the given dict
@@ -68,7 +74,7 @@ char *parse_string(json_dict_st *jd, FILE *f, uint64_t *pos)
         return NULL;
     }
 
-    uint64_t len = jstr_len(f, *pos);
+    STR_LEN;
     if (len == 0)
     {
         return NULL;
@@ -90,35 +96,6 @@ char *parse_string(json_dict_st *jd, FILE *f, uint64_t *pos)
     }
     ++(*pos); // Because otherwise, we endu up reading the last '"' of the str
     return str;
-}
-
-uint64_t jval_len(FILE *f, uint64_t pos)
-{
-    if (f == NULL)
-    {
-        return 0;
-    }
-
-    uint64_t size = pos;
-    if (fseek(f, size++, SEEK_SET) != 0)
-    {
-        return 0;
-    }
-
-    char c = '\0';
-    while ((c = fgetc(f)) != EOF)
-    {
-        if (c == ',' || c == '\n')
-        {
-            break;
-        }
-
-        if (fseek(f, size++, SEEK_SET) != 0)
-        {
-            break;
-        }
-    }
-    return size - pos - 1;
 }
 
 int64_t str_to_long(char *str, uint64_t len)
@@ -154,7 +131,7 @@ int64_t parse_number(json_dict_st *jd, FILE *f, uint64_t *pos)
     // Because we already read the first digit (or sign)
     --(*pos);
 
-    uint64_t len = jval_len(f, *pos);
+    VAL_LEN;
     if (len == 0)
     {
         return 0;
@@ -189,7 +166,7 @@ char parse_boolean(json_dict_st *jd, FILE *f, uint64_t *pos)
     // Because we already read the first character
     --(*pos);
 
-    uint64_t len = jval_len(f, *pos);
+    VAL_LEN;
     (*pos) += len;
     if (len == 5)
     {
