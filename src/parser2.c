@@ -16,6 +16,9 @@
 #define IS_NUMBER_START(c) (('0' <= (c) && (c) <= '9') || (c) == '-')
 #define IS_BOOL_START(c) ((c) == 't' || (c) == 'f')
 
+#define ARRAY_END_REACHED                                                      \
+    (!is_in_string && !is_in_array && (c == ',' || c == '\n' || c == ']'))
+
 /**
 ** \def Calculates the size of the given value (number or boolean)
 **      It is used to limit the number of function calls
@@ -94,7 +97,7 @@ char *parse_string(json_dict_st *jd, FILE *f, uint64_t *pos)
         }
         str[i] = fgetc(f);
     }
-    ++(*pos); // Because otherwise, we endu up reading the last '"' of the str
+    ++(*pos); // Because otherwise, we end up reading the last '"' of the str
     return str;
 }
 
@@ -197,7 +200,7 @@ uint64_t jarray_len(FILE *f, uint64_t pos)
     char is_in_string = 0;
     while ((c = fgetc(f)) != EOF)
     {
-        if (!is_in_string && !is_in_array && (c == ',' || c == '\n'))
+        if (ARRAY_END_REACHED)
         {
             break;
         }
@@ -243,7 +246,7 @@ uint64_t get_array_size(FILE *f, uint64_t pos)
     char is_in_string = 0;
     while ((c = fgetc(f)) != EOF)
     {
-        if (!is_in_string && !is_in_array && (c == ',' || c == '\n'))
+        if (ARRAY_END_REACHED)
         {
             break;
         }
@@ -273,35 +276,42 @@ uint64_t get_array_size(FILE *f, uint64_t pos)
     return size == 0 ? 0 : size + 1;
 }
 
-json_array_st *parse_array(json_dict_st *jd, FILE *f, uint64_t *pos)
+json_array_st *parse_array(json_dict_st *jd, FILE *f, uint64_t *pos, char root)
 {
     if (jd == NULL || f == NULL || pos == NULL)
     {
         return NULL;
     }
 
-    // Because we already read the first character
-    --(*pos);
+    // -1 because we already read the first character
+    uint64_t ipos = (*pos) - 1;
 
-    uint64_t len = jarray_len(f, *pos);
+    uint64_t len = jarray_len(f, ipos);
 
-    json_array_st *ja = array_init(get_array_size(f, *pos));
+    json_array_st *ja = array_init(get_array_size(f, ipos));
     if (ja == NULL)
     {
         return NULL;
     }
+    // We wanted the first '[' character to get the array len and size, but we
+    // don't want it when parsing, so we go to the next character
+    ++ipos;
 
     char c = '\0';
     for (uint64_t i = 0; i < len; ++i)
     {
         c = fgetc(f);
-        if (IS_NUMBER_START(c))
+        if (c == '"')
         {
-            add_num_to_array(jd, ja, parse_number(jd, f, pos));
+            add_str_to_array(jd, ja, parse_string(jd, f, &ipos));
+        }
+        else if (IS_NUMBER_START(c))
+        {
+            add_num_to_array(jd, ja, parse_number(jd, f, &ipos));
         }
         else if (IS_BOOL_START(c))
         {
-            char bool = parse_boolean(jd, f, pos);
+            char bool = parse_boolean(jd, f, &ipos);
             if (bool < 2)
             {
                 add_bool_to_array(jd, ja, bool);
@@ -309,18 +319,24 @@ json_array_st *parse_array(json_dict_st *jd, FILE *f, uint64_t *pos)
         }
         else if (c == '[')
         {
-            // FIX: Stack overflow
-            add_array_to_array(jd, ja, parse_array(jd, f, pos));
+            add_array_to_array(jd, ja, parse_array(jd, f, &ipos, 0));
         }
         else if (c == '{') // TODO: Implement
         {}
 
-        if (fseek(f, (*pos)++, SEEK_SET) != 0)
+        if (fseek(f, ipos++, SEEK_SET) != 0)
         {
             break;
         }
     }
-    --(*pos); // We get an extra 1 on pos because we use pos++ in the fseek
+    --ipos; // We get an extra 1 on pos because we use pos++ in the fseek
+
+    // We only increment the pos if we are in the root array (and thus have the
+    // total length, nested arrays comprised)
+    if (root)
+    {
+        (*pos) += len - 1;
+    }
     return ja;
 }
 
@@ -384,7 +400,7 @@ json_dict_st *parse(char *file)
         }
         else if (c == '[')
         {
-            add_array(jd, key, parse_array(jd, f, &offset));
+            add_array(jd, key, parse_array(jd, f, &offset, 1));
         }
         else if (IS_NUMBER_START(c))
         {
