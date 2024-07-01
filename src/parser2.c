@@ -61,6 +61,40 @@
     }                                                                          \
     uint64_t len = size - (*pos) - 1
 
+#define ARR_LEN                                                                \
+    uint64_t size = ipos;                                                      \
+    if (fseek(f, size++, SEEK_SET) != 0)                                       \
+    {                                                                          \
+        return 0;                                                              \
+    }                                                                          \
+    char c = '\0';                                                             \
+    char is_in_array = 0;                                                      \
+    char is_in_string = 0;                                                     \
+    while ((c = fgetc(f)) != EOF)                                              \
+    {                                                                          \
+        if (ARRAY_END_REACHED)                                                 \
+        {                                                                      \
+            break;                                                             \
+        }                                                                      \
+        if (c == '"')                                                          \
+        {                                                                      \
+            is_in_string = !is_in_string;                                      \
+        }                                                                      \
+        else if (c == '[')                                                     \
+        {                                                                      \
+            ++is_in_array;                                                     \
+        }                                                                      \
+        else if (c == ']')                                                     \
+        {                                                                      \
+            --is_in_array;                                                     \
+        }                                                                      \
+        if (fseek(f, size++, SEEK_SET) != 0)                                   \
+        {                                                                      \
+            break;                                                             \
+        }                                                                      \
+    }                                                                          \
+    uint64_t len = size - ipos - 1
+
 /*******************************************************************************
 **                              LOCAL FUNCTIONS                               **
 *******************************************************************************/
@@ -182,50 +216,6 @@ char parse_boolean(json_dict_st *jd, FILE *f, uint64_t *pos)
     return 2;
 }
 
-uint64_t jarray_len(FILE *f, uint64_t pos)
-{
-    if (f == NULL)
-    {
-        return 0;
-    }
-
-    uint64_t size = pos;
-    if (fseek(f, size++, SEEK_SET) != 0)
-    {
-        return 0;
-    }
-
-    char c = '\0';
-    char is_in_array = 0;
-    char is_in_string = 0;
-    while ((c = fgetc(f)) != EOF)
-    {
-        if (ARRAY_END_REACHED)
-        {
-            break;
-        }
-
-        if (c == '"')
-        {
-            is_in_string = !is_in_string;
-        }
-        else if (c == '[')
-        {
-            ++is_in_array;
-        }
-        else if (c == ']')
-        {
-            --is_in_array;
-        }
-
-        if (fseek(f, size++, SEEK_SET) != 0)
-        {
-            break;
-        }
-    }
-    return size - pos - 1;
-}
-
 uint64_t get_array_size(FILE *f, uint64_t pos)
 {
     if (f == NULL)
@@ -286,7 +276,7 @@ json_array_st *parse_array(json_dict_st *jd, FILE *f, uint64_t *pos, char root)
     // -1 because we already read the first character
     uint64_t ipos = (*pos) - 1;
 
-    uint64_t len = jarray_len(f, ipos);
+    ARR_LEN;
 
     json_array_st *ja = array_init(get_array_size(f, ipos));
     if (ja == NULL)
@@ -297,10 +287,12 @@ json_array_st *parse_array(json_dict_st *jd, FILE *f, uint64_t *pos, char root)
     // don't want it when parsing, so we go to the next character
     ++ipos;
 
-    char c = '\0';
+    // Defined and used in the ARR_LEN macro
+    c = '\0';
     for (uint64_t i = 0; i < len; ++i)
     {
         c = fgetc(f);
+
         if (c == '"')
         {
             add_str_to_array(jd, ja, parse_string(jd, f, &ipos));
