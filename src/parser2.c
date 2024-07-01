@@ -62,7 +62,7 @@
     uint64_t len = size - (*pos) - 1
 
 #define ARR_LEN                                                                \
-    uint64_t size = ipos;                                                      \
+    uint64_t size = offset;                                                    \
     if (fseek(f, size++, SEEK_SET) != 0)                                       \
     {                                                                          \
         return 0;                                                              \
@@ -93,7 +93,7 @@
             break;                                                             \
         }                                                                      \
     }                                                                          \
-    uint64_t len = size - ipos - 1
+    uint64_t len = size - offset - 1
 
 /*******************************************************************************
 **                              LOCAL FUNCTIONS                               **
@@ -274,18 +274,19 @@ json_array_st *parse_array(json_dict_st *jd, FILE *f, uint64_t *pos, char root)
     }
 
     // -1 because we already read the first character
-    uint64_t ipos = (*pos) - 1;
+    uint64_t offset = (*pos) - 1;
 
+    // Macro that obtains the length in characters of the array
     ARR_LEN;
 
-    json_array_st *ja = array_init(get_array_size(f, ipos));
+    json_array_st *ja = array_init(get_array_size(f, offset));
     if (ja == NULL)
     {
         return NULL;
     }
     // We wanted the first '[' character to get the array len and size, but we
     // don't want it when parsing, so we go to the next character
-    ++ipos;
+    ++offset;
 
     // Defined and used in the ARR_LEN macro
     c = '\0';
@@ -295,15 +296,15 @@ json_array_st *parse_array(json_dict_st *jd, FILE *f, uint64_t *pos, char root)
 
         if (c == '"')
         {
-            add_str_to_array(jd, ja, parse_string(jd, f, &ipos));
+            add_str_to_array(jd, ja, parse_string(jd, f, &offset));
         }
         else if (IS_NUMBER_START(c))
         {
-            add_num_to_array(jd, ja, parse_number(jd, f, &ipos));
+            add_num_to_array(jd, ja, parse_number(jd, f, &offset));
         }
         else if (IS_BOOL_START(c))
         {
-            char bool = parse_boolean(jd, f, &ipos);
+            char bool = parse_boolean(jd, f, &offset);
             if (bool < 2)
             {
                 add_bool_to_array(jd, ja, bool);
@@ -311,17 +312,17 @@ json_array_st *parse_array(json_dict_st *jd, FILE *f, uint64_t *pos, char root)
         }
         else if (c == '[')
         {
-            add_array_to_array(jd, ja, parse_array(jd, f, &ipos, 0));
+            add_array_to_array(jd, ja, parse_array(jd, f, &offset, 0));
         }
         else if (c == '{') // TODO: Implement
         {}
 
-        if (fseek(f, ipos++, SEEK_SET) != 0)
+        if (fseek(f, offset++, SEEK_SET) != 0)
         {
             break;
         }
     }
-    --ipos; // We get an extra 1 on pos because we use pos++ in the fseek
+    --offset; // We get an extra 1 on pos because we use pos++ in the fseek
 
     // We only increment the pos if we are in the root array (and thus have the
     // total length, nested arrays comprised)
