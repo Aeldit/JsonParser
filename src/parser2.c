@@ -1,10 +1,8 @@
-#include "parser.h"
+#include "parser2.h"
 
 /*******************************************************************************
 **                                  INCLUDES                                  **
 *******************************************************************************/
-#include <stdint.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -18,6 +16,8 @@
 
 #define ARRAY_END_REACHED                                                      \
     (!is_in_string && !is_in_array && (c == ',' || c == '\n' || c == ']'))
+#define DICT_END_REACHED                                                       \
+    (!is_in_string && !is_in_dict && (c == ',' || c == '\n' || c == '}'))
 
 /**
 ** \def Calculates the size of the given value (number or boolean)
@@ -87,6 +87,40 @@
         else if (c == ']')                                                     \
         {                                                                      \
             --is_in_array;                                                     \
+        }                                                                      \
+        if (fseek(f, size++, SEEK_SET) != 0)                                   \
+        {                                                                      \
+            break;                                                             \
+        }                                                                      \
+    }                                                                          \
+    uint64_t len = size - offset - 1
+
+#define DICT_LEN                                                               \
+    uint64_t size = offset;                                                    \
+    if (fseek(f, size++, SEEK_SET) != 0)                                       \
+    {                                                                          \
+        return 0;                                                              \
+    }                                                                          \
+    char c = '\0';                                                             \
+    char is_in_dict = 0;                                                       \
+    char is_in_string = 0;                                                     \
+    while ((c = fgetc(f)) != EOF)                                              \
+    {                                                                          \
+        if (DICT_END_REACHED)                                                  \
+        {                                                                      \
+            break;                                                             \
+        }                                                                      \
+        if (c == '"')                                                          \
+        {                                                                      \
+            is_in_string = !is_in_string;                                      \
+        }                                                                      \
+        else if (c == '{')                                                     \
+        {                                                                      \
+            ++is_in_dict;                                                      \
+        }                                                                      \
+        else if (c == '}')                                                     \
+        {                                                                      \
+            --is_in_dict;                                                      \
         }                                                                      \
         if (fseek(f, size++, SEEK_SET) != 0)                                   \
         {                                                                      \
@@ -216,7 +250,8 @@ char parse_boolean(json_dict_st *jd, FILE *f, uint64_t *pos)
     return 2;
 }
 
-uint64_t get_array_size(FILE *f, uint64_t pos)
+// TODO: Handle empty arrays
+uint64_t get_nb_elts_array(FILE *f, uint64_t pos)
 {
     if (f == NULL)
     {
@@ -232,7 +267,7 @@ uint64_t get_array_size(FILE *f, uint64_t pos)
     uint64_t size = 0;
 
     char c = '\0';
-    char is_in_array = 0;
+    char is_in_array = 1;
     char is_in_string = 0;
     while ((c = fgetc(f)) != EOF)
     {
@@ -266,45 +301,42 @@ uint64_t get_array_size(FILE *f, uint64_t pos)
     return size == 0 ? 0 : size + 1;
 }
 
-json_array_st *parse_array(json_dict_st *jd, FILE *f, uint64_t *pos, char root)
+json_array_st *parse_array(json_dict_st *jd, FILE *f, uint64_t *pos)
 {
     if (jd == NULL || f == NULL || pos == NULL)
     {
         return NULL;
     }
 
-    // -1 because we already read the first character
-    uint64_t offset = (*pos) - 1;
+    uint64_t nb_elts = get_nb_elts_array(f, *pos);
+    printf("array elts = %lu\n", nb_elts);
+    uint64_t nb_elts_parsed = 0;
 
-    // Macro that obtains the length in characters of the array
-    ARR_LEN;
-
-    json_array_st *ja = array_init(get_array_size(f, offset));
+    json_array_st *ja = array_init(nb_elts);
     if (ja == NULL)
     {
         return NULL;
     }
-    // We wanted the first '[' character to get the array len and size, but we
-    // don't want it when parsing, so we go to the next character
-    ++offset;
 
-    // Defined and used in the ARR_LEN macro
-    c = '\0';
-    for (uint64_t i = 0; i < len; ++i)
+    if (fseek(f, (*pos)++, SEEK_SET) != 0)
     {
-        c = fgetc(f);
+        return NULL;
+    }
 
+    char c = '\0';
+    while ((c = fgetc(f)) != EOF)
+    {
         if (c == '"')
         {
-            add_str_to_array(jd, ja, parse_string(jd, f, &offset));
+            add_str_to_array(jd, ja, parse_string(jd, f, pos));
         }
         else if (IS_NUMBER_START(c))
         {
-            add_num_to_array(jd, ja, parse_number(jd, f, &offset));
+            add_num_to_array(jd, ja, parse_number(jd, f, pos));
         }
         else if (IS_BOOL_START(c))
         {
-            char bool = parse_boolean(jd, f, &offset);
+            char bool = parse_boolean(jd, f, pos);
             if (bool < 2)
             {
                 add_bool_to_array(jd, ja, bool);
@@ -312,25 +344,158 @@ json_array_st *parse_array(json_dict_st *jd, FILE *f, uint64_t *pos, char root)
         }
         else if (c == '[')
         {
-            add_array_to_array(jd, ja, parse_array(jd, f, &offset, 0));
+            add_array_to_array(jd, ja, parse_array(jd, f, pos));
         }
-        else if (c == '{') // TODO: Implement
-        {}
+        else if (c == '{')
+        {
+            add_json_dict_to_array(jd, ja, parse_json_dict(f, pos));
+        }
+        else if (c == ',')
+        {
+            ++nb_elts_parsed;
+        }
+
+        if (nb_elts_parsed >= nb_elts)
+        {
+            break;
+        }
+
+        if (fseek(f, (*pos)++, SEEK_SET) != 0)
+        {
+            break;
+        }
+    }
+    --(*pos);
+    return ja;
+}
+
+uint64_t get_nb_elts_dict(FILE *f, uint64_t pos)
+{
+    if (f == NULL)
+    {
+        return 0;
+    }
+
+    uint64_t offset = pos;
+    if (fseek(f, offset++, SEEK_SET) != 0)
+    {
+        return 0;
+    }
+
+    uint64_t size = 0;
+
+    char c = '\0';
+    char is_in_dict = 1;
+    char is_in_string = 0;
+    while ((c = fgetc(f)) != EOF)
+    {
+        if (DICT_END_REACHED)
+        {
+            break;
+        }
+
+        if (c == '"')
+        {
+            is_in_string = !is_in_string;
+        }
+        else if (c == '{')
+        {
+            ++is_in_dict;
+        }
+        else if (c == '}')
+        {
+            --is_in_dict;
+        }
+        else if (!is_in_string && is_in_dict == 1 && c == ',')
+        {
+            ++size;
+        }
 
         if (fseek(f, offset++, SEEK_SET) != 0)
         {
             break;
         }
     }
-    --offset; // We get an extra 1 on pos because we use pos++ in the fseek
+    return size == 0 ? 0 : size + 1;
+}
 
-    // We only increment the pos if we are in the root array (and thus have the
-    // total length, nested arrays comprised)
-    if (root)
+json_dict_st *parse_json_dict(FILE *f, uint64_t *pos)
+{
+    if (f == NULL || pos == NULL)
     {
-        (*pos) += len - 1;
+        return NULL;
     }
-    return ja;
+
+    json_dict_st *jd = init_dict();
+    if (jd == NULL)
+    {
+        return NULL;
+    }
+
+    char *key = NULL;
+    uint64_t nb_elts = get_nb_elts_dict(f, *pos);
+    printf("dict elts = %lu\n", nb_elts);
+    uint64_t nb_elts_parsed = 0;
+
+    if (fseek(f, (*pos)++, SEEK_SET) != 0)
+    {
+        return NULL;
+    }
+
+    char c = '\0';
+    char is_waiting_key = 1;
+    while ((c = fgetc(f)) != EOF)
+    {
+        if (c == '"')
+        {
+            if (is_waiting_key)
+            {
+                key = parse_string(jd, f, pos);
+                is_waiting_key = 0;
+            }
+            else
+            {
+                add_str(jd, key, parse_string(jd, f, pos));
+            }
+        }
+        else if (IS_NUMBER_START(c))
+        {
+            add_num(jd, key, parse_number(jd, f, pos));
+        }
+        else if (IS_BOOL_START(c))
+        {
+            char bool = parse_boolean(jd, f, pos);
+            if (bool < 2)
+            {
+                add_bool(jd, key, bool);
+            }
+        }
+        else if (c == '[')
+        {
+            add_array(jd, key, parse_array(jd, f, pos));
+        }
+        else if (c == '{')
+        {
+            add_json_dict(jd, key, parse_json_dict(f, pos));
+        }
+        else if (c == ',')
+        {
+            is_waiting_key = 1;
+            ++nb_elts_parsed;
+        }
+
+        if (nb_elts_parsed >= nb_elts)
+        {
+            break;
+        }
+
+        if (fseek(f, (*pos)++, SEEK_SET) != 0)
+        {
+            break;
+        }
+    }
+    --(*pos);
+    return jd;
 }
 
 /*******************************************************************************
@@ -351,67 +516,17 @@ json_dict_st *parse(char *file)
         return NULL;
     }
 
-    json_dict_st *jd = init_dict();
-    if (jd == NULL)
+    if (fgetc(f) != '{')
     {
         fclose(f);
         return NULL;
     }
-    struct states s = (struct states){ 0 };
-    s.is_waiting_key = 1;
 
-    char *key = NULL;
-    char *str = NULL;
-
-    char c = '\0';
-    while ((c = fgetc(f)) != EOF)
+    json_dict_st *jd = parse_json_dict(f, &offset);
+    if (jd == NULL)
     {
-        if (c == '"')
-        {
-            if (s.is_waiting_key)
-            {
-                key = parse_string(jd, f, &offset);
-                s.is_waiting_key = 0;
-            }
-            else
-            {
-                str = parse_string(jd, f, &offset);
-                add_str(jd, key, str);
-            }
-        }
-        else if (c == ',')
-        {
-            s.is_waiting_key = 1;
-        }
-        else if (c == '{')
-        {
-            ++s.is_in_json;
-        }
-        else if (c == '}')
-        {
-            --s.is_in_json;
-        }
-        else if (c == '[')
-        {
-            add_array(jd, key, parse_array(jd, f, &offset, 1));
-        }
-        else if (IS_NUMBER_START(c))
-        {
-            add_num(jd, key, parse_number(jd, f, &offset));
-        }
-        else if (IS_BOOL_START(c))
-        {
-            char bool = parse_boolean(jd, f, &offset);
-            if (bool < 2)
-            {
-                add_bool(jd, key, bool);
-            }
-        }
-
-        if (fseek(f, offset++, SEEK_SET) != 0)
-        {
-            break;
-        }
+        fclose(f);
+        return NULL;
     }
 
     puts("");
