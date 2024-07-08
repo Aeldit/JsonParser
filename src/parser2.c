@@ -234,7 +234,7 @@ uint64_t get_nb_elts_array(FILE *f, uint64_t pos)
 
     char c = '\0';
     char is_in_array = 1;
-    char is_in_dict = 1;
+    char is_in_dict = 0;
     char is_in_string = 0;
     while ((c = fgetc(f)) != EOF)
     {
@@ -263,7 +263,7 @@ uint64_t get_nb_elts_array(FILE *f, uint64_t pos)
         {
             --is_in_dict;
         }
-        else if (!is_in_string && is_in_array == 1 && c == ',')
+        else if (!is_in_string && !is_in_dict && is_in_array == 1 && c == ',')
         {
             ++size;
         }
