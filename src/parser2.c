@@ -95,40 +95,6 @@
     }                                                                          \
     uint64_t len = size - offset - 1
 
-#define DICT_LEN                                                               \
-    uint64_t size = offset;                                                    \
-    if (fseek(f, size++, SEEK_SET) != 0)                                       \
-    {                                                                          \
-        return 0;                                                              \
-    }                                                                          \
-    char c = '\0';                                                             \
-    char is_in_dict = 0;                                                       \
-    char is_in_string = 0;                                                     \
-    while ((c = fgetc(f)) != EOF)                                              \
-    {                                                                          \
-        if (DICT_END_REACHED)                                                  \
-        {                                                                      \
-            break;                                                             \
-        }                                                                      \
-        if (c == '"')                                                          \
-        {                                                                      \
-            is_in_string = !is_in_string;                                      \
-        }                                                                      \
-        else if (c == '{')                                                     \
-        {                                                                      \
-            ++is_in_dict;                                                      \
-        }                                                                      \
-        else if (c == '}')                                                     \
-        {                                                                      \
-            --is_in_dict;                                                      \
-        }                                                                      \
-        if (fseek(f, size++, SEEK_SET) != 0)                                   \
-        {                                                                      \
-            break;                                                             \
-        }                                                                      \
-    }                                                                          \
-    uint64_t len = size - offset - 1
-
 /*******************************************************************************
 **                              LOCAL FUNCTIONS                               **
 *******************************************************************************/
@@ -268,6 +234,7 @@ uint64_t get_nb_elts_array(FILE *f, uint64_t pos)
 
     char c = '\0';
     char is_in_array = 1;
+    char is_in_dict = 1;
     char is_in_string = 0;
     while ((c = fgetc(f)) != EOF)
     {
@@ -287,6 +254,14 @@ uint64_t get_nb_elts_array(FILE *f, uint64_t pos)
         else if (c == ']')
         {
             --is_in_array;
+        }
+        else if (c == '{')
+        {
+            ++is_in_dict;
+        }
+        else if (c == '}')
+        {
+            --is_in_dict;
         }
         else if (!is_in_string && is_in_array == 1 && c == ',')
         {
@@ -386,6 +361,7 @@ uint64_t get_nb_elts_dict(FILE *f, uint64_t pos)
 
     char c = '\0';
     char is_in_dict = 1;
+    char is_in_array = 0;
     char is_in_string = 0;
     while ((c = fgetc(f)) != EOF)
     {
@@ -398,6 +374,14 @@ uint64_t get_nb_elts_dict(FILE *f, uint64_t pos)
         {
             is_in_string = !is_in_string;
         }
+        else if (c == '[')
+        {
+            ++is_in_array;
+        }
+        else if (c == ']')
+        {
+            --is_in_array;
+        }
         else if (c == '{')
         {
             ++is_in_dict;
@@ -406,7 +390,7 @@ uint64_t get_nb_elts_dict(FILE *f, uint64_t pos)
         {
             --is_in_dict;
         }
-        else if (!is_in_string && is_in_dict == 1 && c == ',')
+        else if (!is_in_string && !is_in_array && is_in_dict == 1 && c == ',')
         {
             ++size;
         }
