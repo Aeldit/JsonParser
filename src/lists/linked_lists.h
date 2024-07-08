@@ -44,8 +44,6 @@ typedef struct linked_list_char_ctrl ll_char_ctrl_st;
 ***************************************/
 struct pair *append_pair(json_dict_st *jd, struct pair *value);
 
-void print_json(pair_control_st *ctrl);
-
 void destroy_pair_control(pair_control_st *ctrl);
 
 /***************************************

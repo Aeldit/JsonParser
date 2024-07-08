@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "lists/linked_lists.h"
+#include "printing.h"
 
 /*******************************************************************************
 **                              DEFINES / MACROS                              **
@@ -500,21 +500,26 @@ json_dict_st *parse(char *file)
         return NULL;
     }
 
-    if (fgetc(f) != '{')
+    char c = fgetc(f);
+    if (c == '{')
+    {
+        json_dict_st *jd = parse_json_dict(f, &offset);
+        if (jd == NULL)
+        {
+            fclose(f);
+            return NULL;
+        }
+
+        puts("");
+        print_json(jd->pairs);
+        destroy_dict(jd);
+    }
+    else if (c == '[')
+    {}
+    else
     {
         fclose(f);
         return NULL;
     }
-
-    json_dict_st *jd = parse_json_dict(f, &offset);
-    if (jd == NULL)
-    {
-        fclose(f);
-        return NULL;
-    }
-
-    puts("");
-    print_json(jd->pairs);
-    destroy_dict(jd);
-    return jd;
+    return NULL;
 }
