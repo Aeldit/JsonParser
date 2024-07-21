@@ -17,7 +17,7 @@ void array_print_indent(json_array_st *ja, char indent, char from_list)
     }
     tabs[indent - 1] = '\0';
 
-    if (ja == NULL || ja->elts == NULL || ja->size == 0)
+    if (ja == NULL || ja->elts == NULL)
     {
         printf("%s[]", from_list ? tabs : "");
     }
@@ -28,18 +28,31 @@ void array_print_indent(json_array_st *ja, char indent, char from_list)
         json_dict_st *j = NULL;
         for (size_t i = 0; i < ja->size; ++i)
         {
-            switch (ja->elts[i].type)
+            unsigned char type = ja->elts[i].type;
+
+            if (type == TYPE_STR)
             {
-            case TYPE_STR:
                 printf("%s\t\"%s\"", tabs, (char *)ja->elts[i].value);
-                break;
-            case TYPE_NUM:
+            }
+            else if (type == TYPE_NUM)
+            {
                 printf("%s\t%ld", tabs, *(long *)ja->elts[i].value);
-                break;
-            case TYPE_ARR:
+            }
+            else if (type == TYPE_NULL)
+            {
+                printf("%s\tnull", tabs);
+            }
+            else if (type == TYPE_BOOL)
+            {
+                printf("%s\t%s", tabs,
+                       *(char *)ja->elts[i].value ? "true" : "false");
+            }
+            else if (type == TYPE_ARR)
+            {
                 array_print_indent(ja->elts[i].value, indent + 1, 1);
-                break;
-            case TYPE_OBJ:
+            }
+            else if (type == TYPE_OBJ)
+            {
                 j = ja->elts[i].value;
                 printf("%s\t", tabs);
                 if (j == NULL)
@@ -48,18 +61,8 @@ void array_print_indent(json_array_st *ja, char indent, char from_list)
                 }
                 else
                 {
-                    print_json_rec(j->pairs, indent + 1);
+                    print_json_rec(j->items, indent + 1);
                 }
-                break;
-            case TYPE_BOOL:
-                printf("%s\t%s", tabs,
-                       *(char *)ja->elts[i].value ? "true" : "false");
-                break;
-            case TYPE_NULL:
-                printf("%s\tnull", tabs);
-                break;
-            default:
-                break;
             }
 
             if (i != ja->size - 1)
@@ -78,7 +81,7 @@ void array_print(json_array_st *ja)
     printf("\n");
 }
 
-void print_json_rec(pair_control_st *ctrl, char indent)
+void print_json_rec(item_control_st *ctrl, char indent)
 {
     if (ctrl == NULL || ctrl->head == NULL)
     {
@@ -95,34 +98,50 @@ void print_json_rec(pair_control_st *ctrl, char indent)
         tabs[i] = '\t';
     }
 
-    struct pair_link *array = ctrl->head;
+    struct item_link *array = ctrl->head;
     printf("{\n");
     // Iterates over the arrays
     while (array != NULL)
     {
         // Iterates over an array
-        for (size_t i = 0; i < (array->next == NULL ? ctrl->idx : ARRAY_LEN);
-             ++i)
+        size_t end_case = (array->next == NULL ? ctrl->idx : ARRAY_LEN);
+        for (size_t i = 0; i < end_case; ++i)
         {
-            if (array->pairs[i] != NULL)
+            struct item *pair = array->items[i];
+            if (pair != NULL)
             {
-                const char *key = array->pairs[i]->key;
-                long num = 0;
-                char boolean = 0;
-                json_array_st *l = NULL;
+                const char *key = pair->key;
                 json_dict_st *j = NULL;
-                switch (array->pairs[i]->type)
+
+                unsigned char type = pair->type;
+
+                // Prints the value in the correct form depending on its type
+                if (type == TYPE_STR)
                 {
-                case TYPE_STR:
                     printf("%s\t\"%s\": \"%s\"", tabs, key,
-                           (const char *)array->pairs[i]->value);
-                    break;
-                case TYPE_NUM:
-                    num = *(long *)array->pairs[i]->value;
-                    printf("%s\t\"%s\": %ld", tabs, key, num);
-                    break;
-                case TYPE_OBJ:
-                    j = array->pairs[i]->value;
+                           (const char *)pair->value);
+                }
+                else if (type == TYPE_NUM)
+                {
+                    printf("%s\t\"%s\": %ld", tabs, key, *(long *)pair->value);
+                }
+                else if (type == TYPE_NULL)
+                {
+                    printf("%s\t\"%s\": null", tabs, key);
+                }
+                else if (type == TYPE_BOOL)
+                {
+                    printf("%s\t\"%s\": %s", tabs, key,
+                           *(char *)pair->value ? "true" : "false");
+                }
+                else if (type == TYPE_ARR)
+                {
+                    printf("%s\t\"%s\": ", tabs, key);
+                    array_print_indent(pair->value, indent + 1, 0);
+                }
+                else if (type == TYPE_OBJ)
+                {
+                    j = pair->value;
                     printf("%s\t\"%s\": ", tabs, key);
                     if (j == NULL)
                     {
@@ -130,24 +149,8 @@ void print_json_rec(pair_control_st *ctrl, char indent)
                     }
                     else
                     {
-                        print_json_rec(j->pairs, indent + 1);
+                        print_json_rec(j->items, indent + 1);
                     }
-                    break;
-                case TYPE_ARR:
-                    l = array->pairs[i]->value;
-                    printf("%s\t\"%s\": ", tabs, key);
-                    array_print_indent(l, indent + 1, 0);
-                    break;
-                case TYPE_BOOL:
-                    boolean = *(char *)array->pairs[i]->value;
-                    printf("%s\t\"%s\": %s", tabs, key,
-                           boolean ? "true" : "false");
-                    break;
-                case TYPE_NULL:
-                    printf("%s\t\"%s\": null", tabs, key);
-                    break;
-                default:
-                    break;
                 }
 
                 // If not at the last element of the last array, we print a ','
@@ -168,7 +171,7 @@ void print_json_rec(pair_control_st *ctrl, char indent)
     free(tabs);
 }
 
-void print_json(pair_control_st *ctrl)
+void print_json(item_control_st *ctrl)
 {
     print_json_rec(ctrl, 1);
 }

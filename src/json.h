@@ -23,10 +23,10 @@ typedef struct json_dict json_dict_st;
 **        the associated type. It contains an array of predetermined length and
 **        a pointer to the next link.
 */
-struct pair_link
+struct item_link
 {
-    struct pair *pairs[ARRAY_LEN];
-    struct pair_link *next;
+    struct item *items[ARRAY_LEN];
+    struct item_link *next;
 };
 
 struct key_link
@@ -69,10 +69,10 @@ struct bool_link
 ** \brief Represents a linked list of the associated type (key, str, num, ...)
 **        and stores the head of the list
 */
-struct pair_control
+struct item_control
 {
     size_t idx;
-    struct pair_link *head;
+    struct item_link *head;
 };
 
 struct key_control
@@ -116,7 +116,7 @@ struct bool_control
     struct bool_link *head;
 };
 
-typedef struct pair_control pair_control_st;
+typedef struct item_control item_control_st;
 typedef struct key_control key_control_st;
 
 typedef struct str_control str_control_st;
@@ -126,13 +126,13 @@ typedef struct list_control list_control_st;
 typedef struct bool_control bool_control_st;
 
 /**
-** \brief Represents a key:value pair
+** \brief Represents a key:value item
 ** \param key The key
 ** \param value Points to the value of the type 'type' inside the corresponding
 **        linked list
 ** \param type The type of the data to which 'value' points
 */
-struct pair
+struct item
 {
     char *key;
     void *value;
@@ -149,7 +149,7 @@ struct pair
 struct json_dict
 {
     size_t nb_pairs;
-    pair_control_st *pairs;
+    item_control_st *items;
     key_control_st *keys;
 
     str_control_st *strings;

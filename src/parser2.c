@@ -358,6 +358,8 @@ uint64_t get_nb_elts_dict(FILE *f, uint64_t pos)
     }
 
     uint64_t size = 0;
+    // Used for the case where the dict contains only one element, and so does
+    // not contain a ','
     uint64_t single_elt_found = 0;
 
     char c = '\0';
@@ -513,7 +515,7 @@ json_dict_st *parse(char *file)
         }
 
         puts("");
-        print_json(jd->pairs);
+        print_json(jd->items);
         destroy_dict(jd);
     }
     else if (c == '[')
