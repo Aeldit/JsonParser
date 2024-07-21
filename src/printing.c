@@ -5,6 +5,7 @@
 
 void array_print_indent(json_array_st *ja, char indent, char from_list)
 {
+    // Obtains the number of tab characters that will be printed
     char *tabs = calloc(indent, sizeof(char));
     if (tabs == NULL)
     {
@@ -47,7 +48,6 @@ void array_print_indent(json_array_st *ja, char indent, char from_list)
                 }
                 else
                 {
-                    printf("is null : %d\n", j->pairs == NULL);
                     print_json_rec(j->pairs, indent + 1);
                 }
                 break;

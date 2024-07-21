@@ -358,6 +358,7 @@ uint64_t get_nb_elts_dict(FILE *f, uint64_t pos)
     }
 
     uint64_t size = 0;
+    uint64_t single_elt_found = 0;
 
     char c = '\0';
     char is_in_dict = 1;
@@ -373,6 +374,7 @@ uint64_t get_nb_elts_dict(FILE *f, uint64_t pos)
         if (c == '"')
         {
             is_in_string = !is_in_string;
+            single_elt_found = 1;
         }
         else if (c == '[')
         {
@@ -400,7 +402,7 @@ uint64_t get_nb_elts_dict(FILE *f, uint64_t pos)
             break;
         }
     }
-    return size == 0 ? 0 : size + 1;
+    return size == 0 ? single_elt_found : size + 1;
 }
 
 json_dict_st *parse_json_dict(FILE *f, uint64_t *pos)
