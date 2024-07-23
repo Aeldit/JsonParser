@@ -16,6 +16,6 @@ void array_print_indent(json_array_st *ja, char indent, char from_list);
 
 void print_json(item_control_st *ctrl);
 
-void print_json_rec(item_control_st *ctrl, char indent);
+void print_json_indent(item_control_st *ctrl, char indent);
 
 #endif // !PRINTING_H

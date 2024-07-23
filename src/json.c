@@ -13,7 +13,7 @@
 **                              DEFINES / MACROS                              **
 *******************************************************************************/
 /*
-** \brief Adds the key:pair value to the json dict
+** \brief Adds the key:item value to the json dict
 ** \param type_ctrl_st  The control typedef struct of the correct type
 ** \param list The list in which to add the value
 ** \param append_type The append function for the current type
@@ -24,9 +24,9 @@
     {                                                                          \
         return FAILURE;                                                        \
     }                                                                          \
-    if (jd->pairs == NULL)                                                     \
+    if (jd->items == NULL)                                                     \
     {                                                                          \
-        jd->pairs = calloc(1, sizeof(pair_control_st));                        \
+        jd->items = calloc(1, sizeof(item_control_st));                        \
     }                                                                          \
     if (jd->keys == NULL)                                                      \
     {                                                                          \
@@ -36,12 +36,12 @@
     {                                                                          \
         jd->list = calloc(1, sizeof(type_ctrl_st));                            \
     }                                                                          \
-    if (jd->pairs == NULL || jd->keys == NULL || jd->list == NULL)             \
+    if (jd->items == NULL || jd->keys == NULL || jd->list == NULL)             \
     {                                                                          \
         destroy_dict(jd);                                                      \
         return FAILURE;                                                        \
     }                                                                          \
-    struct pair *p = calloc(1, sizeof(struct pair));                           \
+    struct item *p = calloc(1, sizeof(struct item));                           \
     if (p == NULL)                                                             \
     {                                                                          \
         return FAILURE;                                                        \
@@ -49,7 +49,7 @@
     p->type = (value_type);                                                    \
     p->key = append_key(jd, key);                                              \
     p->value = append_type(jd, value);                                         \
-    append_pair(jd, p);                                                        \
+    append_item(jd, p);                                                        \
     return SUCCESS;
 
 /*******************************************************************************
@@ -104,7 +104,7 @@ char add_null(json_dict_st *jd, char *key)
     {
         return FAILURE;
     }
-    struct pair *p = calloc(1, sizeof(struct pair));
+    struct item *p = calloc(1, sizeof(struct item));
     if (p == NULL)
     {
         return FAILURE;
@@ -112,7 +112,7 @@ char add_null(json_dict_st *jd, char *key)
     p->type = TYPE_NULL;
     p->key = key;
     p->value = NULL;
-    append_pair(jd, p);
+    append_item(jd, p);
     return SUCCESS;
 }
 
@@ -238,7 +238,7 @@ char add_null_to_array(json_dict_st *jd, json_array_st *ja)
 
 size_t get_nb_pairs(json_dict_st *jd)
 {
-    return jd == NULL ? 0 : jd->nb_pairs;
+    return jd == NULL ? 0 : jd->nb_items;
 }
 
 void destroy_dict(json_dict_st *jd)
@@ -248,7 +248,7 @@ void destroy_dict(json_dict_st *jd)
         return;
     }
 
-    destroy_pair_control(jd->pairs);
+    destroy_pair_control(jd->items);
     destroy_key_control(jd->keys);
 
     destroy_str_control(jd->strings);

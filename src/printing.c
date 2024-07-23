@@ -17,7 +17,7 @@ void array_print_indent(json_array_st *ja, char indent, char from_list)
     }
     tabs[indent - 1] = '\0';
 
-    if (ja == NULL || ja->elts == NULL)
+    if (ja == NULL || ja->elts == NULL || ja->size == 0)
     {
         printf("%s[]", from_list ? tabs : "");
     }
@@ -55,13 +55,13 @@ void array_print_indent(json_array_st *ja, char indent, char from_list)
             {
                 j = ja->elts[i].value;
                 printf("%s\t", tabs);
-                if (j == NULL)
+                if (j->nb_items == 0)
                 {
                     printf("{}");
                 }
                 else
                 {
-                    print_json_rec(j->items, indent + 1);
+                    print_json_indent(j->items, indent + 1);
                 }
             }
 
@@ -81,7 +81,7 @@ void array_print(json_array_st *ja)
     printf("\n");
 }
 
-void print_json_rec(item_control_st *ctrl, char indent)
+void print_json_indent(item_control_st *ctrl, char indent)
 {
     if (ctrl == NULL || ctrl->head == NULL)
     {
@@ -143,13 +143,13 @@ void print_json_rec(item_control_st *ctrl, char indent)
                 {
                     j = pair->value;
                     printf("%s\t\"%s\": ", tabs, key);
-                    if (j == NULL)
+                    if (j->nb_items == 0)
                     {
                         printf("{}");
                     }
                     else
                     {
-                        print_json_rec(j->items, indent + 1);
+                        print_json_indent(j->items, indent + 1);
                     }
                 }
 
@@ -173,5 +173,5 @@ void print_json_rec(item_control_st *ctrl, char indent)
 
 void print_json(item_control_st *ctrl)
 {
-    print_json_rec(ctrl, 1);
+    print_json_indent(ctrl, 1);
 }

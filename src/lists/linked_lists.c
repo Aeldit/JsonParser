@@ -20,7 +20,7 @@
 ** \param list the name of the list in which to add 'elt'
 ** \param nb_type The name of the field containing the number of elements
 ** \param is_key If we are inserting a key, we don't need to increment the
-**               number of pairs, as it is done when adding the associated pair
+**               number of items, as it is done when adding the associated pair
 */
 #define APPEND(ctrl_type, link_type, list, nb_type, is_key)                    \
     ctrl_type *ctrl = jd->list;                                                \
@@ -110,21 +110,21 @@
 **                       LILFECYCLE                       **
 ***********************************************************/
 /***************************************
-**               PAIR                 **
+**               item                 **
 ***************************************/
-struct pair *append_pair(json_dict_st *jd, struct pair *value)
+struct item *append_item(json_dict_st *jd, struct item *value)
 {
     if (jd == NULL || value == NULL)
     {
         return NULL;
     }
-    APPEND(pair_control_st, pair_link, pairs, jd->nb_pairs, 0)
-    return tmp->pairs[ctrl->idx++];
+    APPEND(item_control_st, item_link, items, jd->nb_items, 0)
+    return tmp->items[ctrl->idx++];
 }
 
-void destroy_pair_control(pair_control_st *ctrl)
+void destroy_item_control(item_control_st *ctrl)
 {
-    DESTROY(pair_link, pairs)
+    DESTROY(item_link, items)
 }
 
 /***************************************
@@ -136,7 +136,7 @@ char *append_key(json_dict_st *jd, char *value)
     {
         return NULL;
     }
-    APPEND(key_control_st, key_link, keys, jd->nb_pairs, 1)
+    APPEND(key_control_st, key_link, keys, jd->nb_items, 1)
     return tmp->keys[jd->keys->idx++];
 }
 
@@ -304,7 +304,7 @@ char key_exists(json_dict_st *jd, char *key)
         return 0;
     }
 
-    for (size_t i = 0; i < jd->nb_pairs; ++i)
+    for (size_t i = 0; i < jd->nb_items; ++i)
     {
         struct key_link *tmp = jd->keys->head;
         while (tmp != NULL)
@@ -330,18 +330,18 @@ typed_value_st get_value(json_dict_st *jd, char *key)
         return (typed_value_st){ .type = TYPE_ERROR, .value = NULL };
     }
 
-    // Iterates over the pairs
-    struct pair_link *tmp = jd->pairs->head;
+    // Iterates over the items
+    struct item_link *tmp = jd->items->head;
     while (tmp != NULL)
     {
         // Iterates over the keys
-        for (size_t j = 0; j < (tmp->next == NULL ? jd->pairs->idx : ARRAY_LEN);
+        for (size_t j = 0; j < (tmp->next == NULL ? jd->items->idx : ARRAY_LEN);
              ++j)
         {
-            if (strcmp(tmp->pairs[j]->key, key) == 0)
+            if (strcmp(tmp->items[j]->key, key) == 0)
             {
-                return (typed_value_st){ .type = tmp->pairs[j]->type,
-                                         .value = tmp->pairs[j]->value };
+                return (typed_value_st){ .type = tmp->items[j]->type,
+                                         .value = tmp->items[j]->value };
             }
         }
         tmp = tmp->next;

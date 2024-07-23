@@ -148,7 +148,7 @@ struct item
 */
 struct json_dict
 {
-    size_t nb_pairs;
+    size_t nb_items;
     item_control_st *items;
     key_control_st *keys;
 
