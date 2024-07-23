@@ -236,7 +236,7 @@ char add_null_to_array(json_dict_st *jd, json_array_st *ja)
     return SUCCESS;
 }
 
-size_t get_nb_pairs(json_dict_st *jd)
+size_t get_nb_items(json_dict_st *jd)
 {
     return jd == NULL ? 0 : jd->nb_items;
 }
@@ -248,7 +248,7 @@ void destroy_dict(json_dict_st *jd)
         return;
     }
 
-    destroy_pair_control(jd->items);
+    destroy_item_control(jd->items);
     destroy_key_control(jd->keys);
 
     destroy_str_control(jd->strings);

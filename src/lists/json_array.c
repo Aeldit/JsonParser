@@ -11,11 +11,6 @@
 *******************************************************************************/
 json_array_st *array_init(size_t size)
 {
-    if (size == 0)
-    {
-        return NULL;
-    }
-
     json_array_st *ja = calloc(1, sizeof(json_array_st));
     if (ja == NULL)
     {

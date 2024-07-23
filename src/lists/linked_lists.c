@@ -48,7 +48,6 @@
         struct link_type *nkl = calloc(1, sizeof(struct link_type));           \
         if (nkl == NULL)                                                       \
         {                                                                      \
-            printf("c");                                                       \
             return NULL;                                                       \
         }                                                                      \
         struct link_type *tmp = ctrl->head;                                    \

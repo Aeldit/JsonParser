@@ -44,7 +44,7 @@ typedef struct linked_list_char_ctrl ll_char_ctrl_st;
 ***************************************/
 struct item *append_item(json_dict_st *jd, struct item *value);
 
-void destroy_pair_control(item_control_st *ctrl);
+void destroy_item_control(item_control_st *ctrl);
 
 /***************************************
 **                KEY                 **

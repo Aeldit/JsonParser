@@ -217,7 +217,7 @@ char add_bool_to_array(json_dict_st *jd, json_array_st *ja, char value);
 
 char add_null_to_array(json_dict_st *jd, json_array_st *ja);
 
-size_t get_nb_pairs(json_dict_st *jd);
+size_t get_nb_items(json_dict_st *jd);
 
 /**
 ** \brief Frees all the allocated parts of the 'jd' json dict
