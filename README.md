@@ -8,6 +8,12 @@ The goal of this project is to allow its user to give the script a `json` file a
 > [!WARNING]\
 > This parser does not sanitize the content it reads (for now, at least). Use at your own risk.
 
+## Description
+
+For now, the best way to see the script working is to print the contents of the json in the terminal, which is what the script does when launched.
+
+User friendly usage has not been thought about yet, but I will
+
 ## Usage
 
 To use the script, clone the repository on your computer :
