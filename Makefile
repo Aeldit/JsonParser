@@ -7,7 +7,8 @@ CFILES=src/lists/json_array.c \
 	   src/lists/linked_lists.c \
 	   src/json.c \
 	   src/main.c \
-	   src/parser2.c
+	   src/parser2.c \
+	   src/printing.c
 OBJS=${CFILES:.c=.o}
 
 JSONFILES=tests/*.json
