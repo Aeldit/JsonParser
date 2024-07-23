@@ -1,0 +1,20 @@
+#!/bin/sh
+
+DEBUG=0
+
+CC="gcc"
+CFLAGS="-W -Wall -Werror -std=c99 -pedantic"
+
+if [ $# -eq 1 ] && [ "$1" = "DEBUG" ]; then
+	DEBUG=1
+	CFLAGS="$CFLAGS -g -ggdb -fsanitize=address"
+fi
+
+if [ $DEBUG -eq 1 ]; then
+	echo "DEBUG mode"
+fi
+
+echo "CC=${CC}" >Makefile.rules
+echo "CFLAGS=${CFLAGS}" >>Makefile.rules
+
+echo "CC=$CC\nCFLAGS=$CFLAGS"

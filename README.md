@@ -25,8 +25,16 @@ cd JsonParser
 
 Then run the following commands :
 
+> Make sure the `configure` file has execution permission (`chmod +x configure`)
+
 ```shell
+./configure
 make
 ./json-parser <your_file.json>
+```
+
+If you want to build using the address sanitizer and gdb, run
+```shell
+./configure DEBUG
 ```
 

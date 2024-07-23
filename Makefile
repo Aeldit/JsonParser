@@ -1,7 +1,4 @@
-CC=gcc
-CFLAGS=-W -Wall -Werror -std=c99 -pedantic
-
-SANITIZE=-g -fsanitize=address
+-include Makefile.rules
 
 CFILES=src/lists/json_array.c \
 	src/lists/linked_lists.c \
