@@ -1,5 +1,5 @@
-#ifndef JSON_PARSER2_H
-#define JSON_PARSER2_H
+#ifndef JSON_PARSER_H
+#define JSON_PARSER_H
 
 /*******************************************************************************
 **                                  INCLUDES                                  **
@@ -29,4 +29,4 @@ json_dict_st *parse_json_dict(FILE *f, uint64_t *pos);
 
 json_dict_st *parse(char *file);
 
-#endif // !JSON_PARSER2_H
+#endif // !JSON_PARSER_H
