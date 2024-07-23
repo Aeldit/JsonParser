@@ -6,7 +6,7 @@
 The goal of this project is to allow its user to give the script a `json` file and be able to store it and access its elements in C.
 
 > [!WARNING]\
-> This parser does not sanitize the content it reads (yet, at least). Use at your own risk.
+> This parser does not sanitize the content it reads (for now, at least). Use at your own risk.
 
 ## Usage
 
