@@ -4,11 +4,11 @@ CFLAGS=-W -Wall -Werror -std=c99 -pedantic
 SANITIZE=-g -fsanitize=address
 
 CFILES=src/lists/json_array.c \
-	   src/lists/linked_lists.c \
-	   src/json.c \
-	   src/main.c \
-	   src/parser.c \
-	   src/printing.c
+	src/lists/linked_lists.c \
+	src/json.c \
+	src/main.c \
+	src/parser.c \
+	src/printing.c
 OBJS=${CFILES:.c=.o}
 
 JSONFILES=tests/*.json
