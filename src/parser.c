@@ -1,69 +1,150 @@
-#include "parser.h"
+#include "parser2.h"
 
 /*******************************************************************************
 **                                  INCLUDES                                  **
 *******************************************************************************/
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "lists/linked_lists.h"
+#include "printing.h"
+
+/*******************************************************************************
+**                              DEFINES / MACROS                              **
+*******************************************************************************/
+#define IS_NUMBER_START(c) (('0' <= (c) && (c) <= '9') || (c) == '-')
+#define IS_BOOL_START(c) ((c) == 't' || (c) == 'f')
+
+#define ARRAY_END_REACHED                                                      \
+    (!is_in_string && !is_in_array && (c == ',' || c == '\n' || c == ']'))
+#define DICT_END_REACHED                                                       \
+    (!is_in_string && !is_in_dict && (c == ',' || c == '\n' || c == '}'))
+
+/**
+** \def Calculates the size of the given value (number or boolean)
+**      It is used to limit the number of function calls
+*/
+#define STR_LEN                                                                \
+    uint64_t size = (*pos);                                                    \
+    char c = '\0';                                                             \
+    char prev_c = '\0';                                                        \
+    while ((c = fgetc(f)) != EOF)                                              \
+    {                                                                          \
+        if (c == '"' && prev_c != '\\')                                        \
+        {                                                                      \
+            break;                                                             \
+        }                                                                      \
+        if (fseek(f, size++, SEEK_SET) != 0)                                   \
+        {                                                                      \
+            break;                                                             \
+        }                                                                      \
+        prev_c = c;                                                            \
+    }                                                                          \
+    uint64_t len = size - (*pos) - 1
+
+#define VAL_LEN                                                                \
+    uint64_t size = (*pos);                                                    \
+    if (fseek(f, size++, SEEK_SET) != 0)                                       \
+    {                                                                          \
+        return 0;                                                              \
+    }                                                                          \
+    char c = '\0';                                                             \
+    while ((c = fgetc(f)) != EOF)                                              \
+    {                                                                          \
+        if (c == ',' || c == '\n')                                             \
+        {                                                                      \
+            break;                                                             \
+        }                                                                      \
+        if (fseek(f, size++, SEEK_SET) != 0)                                   \
+        {                                                                      \
+            break;                                                             \
+        }                                                                      \
+    }                                                                          \
+    uint64_t len = size - (*pos) - 1
+
+#define ARR_LEN                                                                \
+    uint64_t size = offset;                                                    \
+    if (fseek(f, size++, SEEK_SET) != 0)                                       \
+    {                                                                          \
+        return 0;                                                              \
+    }                                                                          \
+    char c = '\0';                                                             \
+    char is_in_array = 0;                                                      \
+    char is_in_string = 0;                                                     \
+    while ((c = fgetc(f)) != EOF)                                              \
+    {                                                                          \
+        if (ARRAY_END_REACHED)                                                 \
+        {                                                                      \
+            break;                                                             \
+        }                                                                      \
+        if (c == '"')                                                          \
+        {                                                                      \
+            is_in_string = !is_in_string;                                      \
+        }                                                                      \
+        else if (c == '[')                                                     \
+        {                                                                      \
+            ++is_in_array;                                                     \
+        }                                                                      \
+        else if (c == ']')                                                     \
+        {                                                                      \
+            --is_in_array;                                                     \
+        }                                                                      \
+        if (fseek(f, size++, SEEK_SET) != 0)                                   \
+        {                                                                      \
+            break;                                                             \
+        }                                                                      \
+    }                                                                          \
+    uint64_t len = size - offset - 1
 
 /*******************************************************************************
 **                              LOCAL FUNCTIONS                               **
 *******************************************************************************/
-char is_str_number(char *str, size_t len)
-{
-    if (str == NULL || len == 0)
-    {
-        return 0;
-    }
-
-    for (size_t i = 0; i < len; ++i)
-    {
-        // If not a minus sign ('-') or a number, we return false
-        if (str[i] != '-' && (str[i] < '0' || '9' < str[i]))
-        {
-            return 0;
-        }
-    }
-    return 1;
-}
-
 /**
-** \return 1 if the given string is "true", 2 if the given string is "false",
-**         and 0 otherwise
+** \brief Reads the string at position 'pos' in the given file, and adds it to
+**        the given dict
+** \param pos The pos of the '"' that starts the string of which we are
+**            currently acquiring the length
 */
-char is_str_boolean(char *str, size_t len)
+char *parse_string(json_dict_st *jd, FILE *f, uint64_t *pos)
 {
-    if (str == NULL || len < 4 || len > 5)
+    if (jd == NULL || f == NULL || pos == NULL)
     {
-        return 0;
+        return NULL;
     }
 
-    if (len == 4 && str[0] == 't' && str[1] == 'r' && str[2] == 'u'
-        && str[3] == 'e')
+    STR_LEN;
+    if (len == 0)
     {
-        return 1;
+        return NULL;
     }
-    if (len == 5 && str[0] == 'f' && str[1] == 'a' && str[2] == 'l'
-        && str[3] == 's' && str[4] == 'e')
+
+    char *str = calloc(len + 1, sizeof(char));
+    if (str == NULL)
     {
-        return 2;
+        return NULL;
     }
-    return 0;
+
+    for (uint64_t i = 0; i < len; ++i)
+    {
+        if (fseek(f, (*pos)++, SEEK_SET) != 0)
+        {
+            break;
+        }
+        str[i] = fgetc(f);
+    }
+    ++(*pos); // Because otherwise, we end up reading the last '"' of the str
+    return str;
 }
 
-long str_to_long(char *str, size_t len)
+int64_t str_to_long(char *str, uint64_t len)
 {
     if (str == NULL || len == 0)
     {
         return 0;
     }
-    long res = 0;
+    int64_t res = 0;
     char is_negative = 1;
 
-    for (size_t i = 0; i < len; ++i)
+    for (uint64_t i = 0; i < len; ++i)
     {
         if (str[i] == '-')
         {
@@ -77,373 +158,332 @@ long str_to_long(char *str, size_t len)
     return res * is_negative;
 }
 
-void handle_non_str_value(json_dict_st *jd, char *key, char *value)
+int64_t parse_number(json_dict_st *jd, FILE *f, uint64_t *pos)
 {
-    if (jd == NULL || key == NULL || value == NULL)
+    if (jd == NULL || f == NULL || pos == NULL)
     {
-        return;
+        return 0;
     }
-    size_t len = strlen(value);
 
-    // Booleans
-    char is_boolean = is_str_boolean(value, len);
-    if (is_boolean == 1) // true
-    {
-        add_bool(jd, key, 1);
-    }
-    else if (is_boolean == 2) // false
-    {
-        add_bool(jd, key, 0);
-    }
-    else
-    {
-        if (is_str_number(value, len))
-        {
-            add_num(jd, key, str_to_long(value, len));
-        }
-    }
-    free(value);
-}
+    // Because we already read the first digit (or sign)
+    --(*pos);
 
-size_t get_array_size(char *str, size_t len)
-{
+    VAL_LEN;
+    if (len == 0)
+    {
+        return 0;
+    }
+
+    char *str = calloc(len + 1, sizeof(char));
     if (str == NULL)
     {
         return 0;
     }
 
-    size_t size = 0;
-    unsigned is_in_array_brackets = 0;
-    // Counts the number of ',' in the array that are not inside a string
-    for (size_t i = 0; i < len; ++i)
+    for (uint64_t i = 0; i < len; ++i)
     {
-        if (str[i] == '[')
+        if (fseek(f, (*pos)++, SEEK_SET) != 0)
         {
-            ++is_in_array_brackets;
+            break;
         }
-        else if (str[i] == ']')
-        {
-            --is_in_array_brackets;
-        }
-        else if (str[i] == ',' && !is_in_array_brackets)
-        {
-            ++size;
-        }
+        str[i] = fgetc(f);
     }
-    // The last element doesn't have a ',' after, so we add 1 manually
-    if (size != 0)
-    {
-        ++size;
-    }
-    printf("size : %lu\n", size);
-    return size;
+    int64_t res = str_to_long(str, len);
+    free(str);
+    return res;
 }
 
-size_t get_array_buff_size(size_t offset, FILE *f)
+char parse_boolean(json_dict_st *jd, FILE *f, uint64_t *pos)
+{
+    if (jd == NULL || f == NULL || pos == NULL)
+    {
+        return 0;
+    }
+
+    // Because we already read the first character
+    --(*pos);
+
+    VAL_LEN;
+    (*pos) += len;
+    if (len == 5)
+    {
+        return 0; // false
+    }
+    else if (len == 4)
+    {
+        return 1; // true
+    }
+    return 2;
+}
+
+// TODO: Handle empty arrays
+uint64_t get_nb_elts_array(FILE *f, uint64_t pos)
 {
     if (f == NULL)
     {
         return 0;
     }
 
-    size_t initial_offset = offset;
-
+    uint64_t offset = pos;
     if (fseek(f, offset++, SEEK_SET) != 0)
     {
         return 0;
     }
 
-    size_t nb_array_brackets = 0;
-    char is_in_str = 0;
+    uint64_t size = 0;
+
     char c = '\0';
-    char prev_c = '\0';
-    while ((c = fgetc(f)))
+    char is_in_array = 1;
+    char is_in_dict = 0;
+    char is_in_string = 0;
+    while ((c = fgetc(f)) != EOF)
     {
+        if (ARRAY_END_REACHED)
+        {
+            break;
+        }
+
+        if (c == '"')
+        {
+            is_in_string = !is_in_string;
+        }
+        else if (c == '[')
+        {
+            ++is_in_array;
+        }
+        else if (c == ']')
+        {
+            --is_in_array;
+        }
+        else if (c == '{')
+        {
+            ++is_in_dict;
+        }
+        else if (c == '}')
+        {
+            --is_in_dict;
+        }
+        else if (!is_in_string && !is_in_dict && is_in_array == 1 && c == ',')
+        {
+            ++size;
+        }
+
         if (fseek(f, offset++, SEEK_SET) != 0)
         {
             break;
         }
-
-        if (is_in_str && (c != '"' && prev_c != '\\'))
-        {
-            prev_c = c;
-            continue;
-        }
-
-        switch (c)
-        {
-        case '[':
-            ++nb_array_brackets;
-            break;
-        case ']':
-            if (nb_array_brackets == 0)
-            {
-                return offset - 2 - initial_offset;
-            }
-            --nb_array_brackets;
-            break;
-        case '"':
-            if (prev_c != '\\')
-            {
-                is_in_str = !is_in_str;
-            }
-            break;
-        }
-        prev_c = c;
     }
-    return 0;
+    return size == 0 ? 0 : size + 1;
 }
 
-size_t parse_nested_array(json_dict_st *jd, json_array_st *nested_ja,
-                          char *buff, size_t buff_size, size_t pos)
+json_array_st *parse_array(json_dict_st *jd, FILE *f, uint64_t *pos)
 {
-    if (nested_ja == NULL)
+    if (jd == NULL || f == NULL || pos == NULL)
     {
-        return 0;
+        return NULL;
     }
 
-    ll_char_ctrl_st *llcc = init_ll();
-    if (llcc == NULL)
-    {
-        return 0;
-    }
+    uint64_t nb_elts = get_nb_elts_array(f, *pos);
+    printf("array elts = %lu\n", nb_elts);
+    uint64_t nb_elts_parsed = 0;
 
-    char is_in_str = 0;
-    char is_str = 0; // Stores whether the previous value was a string
-    // char is_in_nested_array = 0;
-    char prev_c = '\0';
-    for (; pos < buff_size; ++pos)
-    {
-        printf("at pos : %c\n", buff[pos]);
-        // If we are in a string
-        if (is_in_str && (buff[pos] != '"' && prev_c != '\\'))
-        {
-            add_char_to_ll(llcc, buff[pos]);
-            continue;
-        }
-
-        switch (buff[pos])
-        {
-        case ']':
-            if (is_str)
-            {
-                is_str = 0;
-                add_str_to_array(jd, nested_ja, get_final_string(llcc));
-            }
-            else
-            {
-                char *value = get_final_string(llcc);
-                if (value == NULL)
-                {
-                    continue;
-                }
-                size_t len = strlen(value);
-
-                char is_boolean = is_str_boolean(value, len);
-                if (is_boolean)
-                {
-                    add_bool_to_array(jd, nested_ja, is_boolean == 1 ? 1 : 0);
-                }
-                else
-                {
-                    if (is_str_number(value, len))
-                    {
-                        add_num_to_array(jd, nested_ja,
-                                         str_to_long(value, len));
-                    }
-                    else
-                    {
-                        add_array_to_array(jd, nested_ja, nested_ja);
-                    }
-                }
-                free(value);
-            }
-            return pos;
-        case ',':
-            if (is_str)
-            {
-                is_str = 0;
-                add_str_to_array(jd, nested_ja, get_final_string(llcc));
-            }
-            else
-            {
-                char *value = get_final_string(llcc);
-                if (value == NULL)
-                {
-                    continue;
-                }
-                size_t len = strlen(value);
-
-                char is_boolean = is_str_boolean(value, len);
-                if (is_boolean)
-                {
-                    add_bool_to_array(jd, nested_ja, is_boolean == 1 ? 1 : 0);
-                }
-                else
-                {
-                    if (is_str_number(value, len))
-                    {
-                        add_num_to_array(jd, nested_ja,
-                                         str_to_long(value, len));
-                    }
-                    else
-                    {
-                        add_array_to_array(jd, nested_ja, nested_ja);
-                    }
-                }
-                free(value);
-            }
-            break;
-        case '"':
-            if (prev_c != '\\')
-            {
-                is_in_str = !is_in_str;
-                is_str = 1;
-            }
-            break;
-        }
-    }
-    return pos;
-}
-
-void parse_array(json_dict_st *jd, char *buff, size_t buff_size, char *key)
-{
-    if (jd == NULL || buff == NULL || key == NULL || buff_size == 0)
-    {
-        return;
-    }
-    size_t size = get_array_size(buff, buff_size);
-
-    json_array_st *ja = array_init(size);
+    json_array_st *ja = array_init(nb_elts);
     if (ja == NULL)
     {
-        return;
+        return NULL;
     }
 
-    ll_char_ctrl_st *llcc = init_ll();
-    if (llcc == NULL)
+    if (fseek(f, (*pos)++, SEEK_SET) != 0)
     {
-        free(ja);
-        return;
+        return NULL;
     }
 
-    json_array_st *nested_ja;
-    char is_in_str = 0;
-    char prev_c = '\0';
-    char is_str = 0;
-    // <= because we add 1 because of the '\0'
-    for (size_t i = 0; i <= buff_size; ++i)
+    char c = '\0';
+    while ((c = fgetc(f)) != EOF)
     {
-        // End of the string
-        if (i == buff_size)
+        if (c == '"')
         {
-            if (is_str)
+            add_str_to_array(jd, ja, parse_string(jd, f, pos));
+        }
+        else if (IS_NUMBER_START(c))
+        {
+            add_num_to_array(jd, ja, parse_number(jd, f, pos));
+        }
+        else if (IS_BOOL_START(c))
+        {
+            char bool = parse_boolean(jd, f, pos);
+            if (bool < 2)
             {
-                is_str = 0;
-                add_str_to_array(jd, ja, get_final_string(llcc));
+                add_bool_to_array(jd, ja, bool);
+            }
+        }
+        else if (c == '[')
+        {
+            add_array_to_array(jd, ja, parse_array(jd, f, pos));
+        }
+        else if (c == '{')
+        {
+            add_json_dict_to_array(jd, ja, parse_json_dict(f, pos));
+        }
+        else if (c == ',')
+        {
+            ++nb_elts_parsed;
+        }
+
+        if (nb_elts_parsed >= nb_elts)
+        {
+            break;
+        }
+
+        if (fseek(f, (*pos)++, SEEK_SET) != 0)
+        {
+            break;
+        }
+    }
+    --(*pos);
+    return ja;
+}
+
+uint64_t get_nb_elts_dict(FILE *f, uint64_t pos)
+{
+    if (f == NULL)
+    {
+        return 0;
+    }
+
+    uint64_t offset = pos;
+    if (fseek(f, offset++, SEEK_SET) != 0)
+    {
+        return 0;
+    }
+
+    uint64_t size = 0;
+    // Used for the case where the dict contains only one element, and so does
+    // not contain a ','
+    uint64_t single_elt_found = 0;
+
+    char c = '\0';
+    char is_in_dict = 1;
+    char is_in_array = 0;
+    char is_in_string = 0;
+    while ((c = fgetc(f)) != EOF)
+    {
+        if (DICT_END_REACHED)
+        {
+            break;
+        }
+
+        if (c == '"')
+        {
+            is_in_string = !is_in_string;
+            single_elt_found = 1;
+        }
+        else if (c == '[')
+        {
+            ++is_in_array;
+        }
+        else if (c == ']')
+        {
+            --is_in_array;
+        }
+        else if (c == '{')
+        {
+            ++is_in_dict;
+        }
+        else if (c == '}')
+        {
+            --is_in_dict;
+        }
+        else if (!is_in_string && !is_in_array && is_in_dict == 1 && c == ',')
+        {
+            ++size;
+        }
+
+        if (fseek(f, offset++, SEEK_SET) != 0)
+        {
+            break;
+        }
+    }
+    return size == 0 ? single_elt_found : size + 1;
+}
+
+json_dict_st *parse_json_dict(FILE *f, uint64_t *pos)
+{
+    if (f == NULL || pos == NULL)
+    {
+        return NULL;
+    }
+
+    json_dict_st *jd = init_dict();
+    if (jd == NULL)
+    {
+        return NULL;
+    }
+
+    char *key = NULL;
+    uint64_t nb_elts = get_nb_elts_dict(f, *pos);
+    printf("dict elts = %lu\n", nb_elts);
+    uint64_t nb_elts_parsed = 0;
+
+    if (fseek(f, (*pos)++, SEEK_SET) != 0)
+    {
+        return NULL;
+    }
+
+    char c = '\0';
+    char is_waiting_key = 1;
+    while ((c = fgetc(f)) != EOF)
+    {
+        if (c == '"')
+        {
+            if (is_waiting_key)
+            {
+                key = parse_string(jd, f, pos);
+                is_waiting_key = 0;
             }
             else
             {
-                char *value = get_final_string(llcc);
-                if (value == NULL)
-                {
-                    continue;
-                }
-                size_t len = strlen(value);
-
-                char is_boolean = is_str_boolean(value, len);
-                if (is_boolean)
-                {
-                    add_bool_to_array(jd, ja, is_boolean == 1 ? 1 : 0);
-                }
-                else
-                {
-                    if (is_str_number(value, len))
-                    {
-                        add_num_to_array(jd, ja, str_to_long(value, len));
-                    }
-                }
-                free(value);
+                add_str(jd, key, parse_string(jd, f, pos));
             }
-            continue;
         }
-
-        // If in a str and not a '"'
-        if (is_in_str && (buff[i] != '"' && prev_c != '\\'))
+        else if (IS_NUMBER_START(c))
         {
-            add_char_to_ll(llcc, buff[i]);
-            continue;
+            add_num(jd, key, parse_number(jd, f, pos));
         }
-
-        switch (buff[i])
+        else if (IS_BOOL_START(c))
         {
-        case '[':
-            nested_ja = calloc(1, sizeof(json_array_st));
-            if (nested_ja == NULL)
+            char bool = parse_boolean(jd, f, pos);
+            if (bool < 2)
             {
-                return;
+                add_bool(jd, key, bool);
             }
-            printf("i = %lu\n", i);
-            i += parse_nested_array(jd, nested_ja, buff, buff_size, i + 1) + 1;
-            printf("i = %lu %d\n", i, buff[i]);
-            break;
-        case ',':
-            if (is_str)
-            {
-                is_str = 0;
-                add_str_to_array(jd, ja, get_final_string(llcc));
-            }
-            else
-            {
-                char *value = get_final_string(llcc);
-                if (value == NULL)
-                {
-                    continue;
-                }
-                size_t len = strlen(value);
+        }
+        else if (c == '[')
+        {
+            add_array(jd, key, parse_array(jd, f, pos));
+        }
+        else if (c == '{')
+        {
+            add_json_dict(jd, key, parse_json_dict(f, pos));
+        }
+        else if (c == ',')
+        {
+            is_waiting_key = 1;
+            ++nb_elts_parsed;
+        }
 
-                char is_boolean = is_str_boolean(value, len);
-                if (is_boolean)
-                {
-                    add_bool_to_array(jd, ja, is_boolean == 1 ? 1 : 0);
-                }
-                else
-                {
-                    if (is_str_number(value, len))
-                    {
-                        add_num_to_array(jd, ja, str_to_long(value, len));
-                    }
-                    else
-                    {
-                        add_array_to_array(jd, ja, nested_ja);
-                    }
-                }
-                free(value);
-            }
-            break;
-
-        case ' ':
-            break;
-        case '\n':
-            break;
-        case '\t':
-            break;
-
-        case '"':
-            if (prev_c != '\\')
-            {
-                is_in_str = !is_in_str;
-                is_str = 1;
-            }
-            break;
-        default:
-            add_char_to_ll(llcc, buff[i]);
+        if (nb_elts_parsed >= nb_elts)
+        {
             break;
         }
-        prev_c = buff[i];
+
+        if (fseek(f, (*pos)++, SEEK_SET) != 0)
+        {
+            break;
+        }
     }
-    add_array(jd, key, ja);
-    destroy_llcc(llcc);
+    --(*pos);
+    return jd;
 }
 
 /*******************************************************************************
@@ -457,158 +497,33 @@ json_dict_st *parse(char *file)
         return NULL;
     }
 
-    size_t offset = 0;
+    uint64_t offset = 0;
     if (fseek(f, offset++, SEEK_SET) != 0)
     {
         fclose(f);
         return NULL;
     }
 
-    json_dict_st *jd = init_dict();
-    if (jd == NULL)
+    char c = fgetc(f);
+    if (c == '{')
+    {
+        json_dict_st *jd = parse_json_dict(f, &offset);
+        if (jd == NULL)
+        {
+            fclose(f);
+            return NULL;
+        }
+
+        puts("");
+        print_json(jd->items);
+        destroy_dict(jd);
+    }
+    else if (c == '[')
+    {}
+    else
     {
         fclose(f);
         return NULL;
     }
-    struct states s = (struct states){ 0 };
-    s.is_waiting_key = 1;
-
-    ll_char_ctrl_st *llcc = init_ll();
-    if (llcc == NULL)
-    {
-        destroy_dict(jd);
-        return NULL;
-    }
-
-    char *key = NULL;
-
-    size_t array_buff_size = 0;
-    size_t tmp_offset = 0;
-
-    char c = '\0';
-    char prev_c = '\0';
-    while ((c = fgetc(f)) != EOF)
-    {
-        if (fseek(f, offset++, SEEK_SET) != 0)
-        {
-            break;
-        }
-
-        if (s.is_in_str && (c != '"' && prev_c != '\\'))
-        {
-            add_char_to_ll(llcc, c);
-            continue;
-        }
-
-        switch (c)
-        {
-        case '{':
-            ++s.is_in_json;
-            break;
-        case '}':
-            --s.is_in_json;
-            break;
-        case '[':
-            tmp_offset = offset - 1;
-            //  This is the final size of the buffer we are going to
-            //  fill wit the array
-            array_buff_size = get_array_buff_size(offset - 1, f);
-            // + 1 because this skips the ',' so we are able to go to the
-            // next pair directly
-            offset += array_buff_size + 1;
-
-            if (array_buff_size != 0)
-            {
-                // + 1 because we have to add '\0'
-                char *array_buffer = calloc(array_buff_size + 1, sizeof(char));
-                if (array_buffer == NULL)
-                {
-                    break;
-                }
-
-                for (size_t i = 0; i < array_buff_size; ++i)
-                {
-                    if (fseek(f, tmp_offset++, SEEK_SET) != 0)
-                    {
-                        break;
-                    }
-                    array_buffer[i] = fgetc(f);
-                }
-                array_buffer[array_buff_size] = '\0';
-
-                parse_array(jd, array_buffer, array_buff_size, key);
-                free(array_buffer);
-                array_buff_size = 0;
-
-                s.is_waiting_key = 1;
-            }
-            break;
-        case ':':
-            s.is_in_value = 1;
-            break;
-        case ',':
-            if (s.is_in_value)
-            {
-                s.is_in_value = 0;
-                handle_non_str_value(jd, key, get_final_string(llcc));
-            }
-            s.is_waiting_key = 1;
-            break;
-
-        case '"':
-            if (prev_c != '\\')
-            {
-                s.is_in_str = !s.is_in_str;
-
-                if (s.is_in_key)
-                {
-                    s.is_in_key = 0;
-                    key = get_final_string(llcc);
-                }
-                else if (s.is_in_value)
-                {
-                    s.is_in_value = 0;
-                    add_str(jd, key, get_final_string(llcc));
-                }
-                // Prepare key acquisition
-                else if (s.is_waiting_key)
-                {
-                    s.is_waiting_key = 0;
-                    s.is_in_key = 1;
-                }
-            }
-            break;
-
-        default:
-            if (c == '\t' || c == ' ')
-            {
-                if (!s.is_in_str)
-                {
-                    continue;
-                }
-            }
-            else if (c == '\n')
-            {
-                if (!s.is_in_str)
-                {
-                    // Last pair of the json object
-                    if (s.is_in_value)
-                    {
-                        s.is_in_value = 0;
-                        handle_non_str_value(jd, key, get_final_string(llcc));
-                    }
-                    continue;
-                }
-            }
-            add_char_to_ll(llcc, c);
-            break;
-        }
-        prev_c = c;
-    }
-
-    destroy_llcc(llcc);
-    puts("");
-    print_json(jd->pairs);
-    destroy_dict(jd);
-    return jd;
+    return NULL;
 }
