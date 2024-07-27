@@ -6,8 +6,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "printing.h"
-
 /*******************************************************************************
 **                              DEFINES / MACROS                              **
 *******************************************************************************/
@@ -20,8 +18,8 @@
     (!is_in_string && !is_in_dict && (c == ',' || c == '\n' || c == '}'))
 
 /**
-** \def Calculates the size of the given value (number or boolean)
-**      It is used to limit the number of function calls
+** \def Calculates the size of the given value (string, number or boolean).
+**      These defines are used to limit the number of function calls
 */
 #define STR_LEN                                                                \
     uint64_t size = (*pos);                                                    \
@@ -216,7 +214,6 @@ char parse_boolean(json_dict_st *jd, FILE *f, uint64_t *pos)
     return 2;
 }
 
-// TODO: Handle empty arrays
 uint64_t get_nb_elts_array(FILE *f, uint64_t pos)
 {
     if (f == NULL)
@@ -284,7 +281,6 @@ json_array_st *parse_array(json_dict_st *jd, FILE *f, uint64_t *pos)
     }
 
     uint64_t nb_elts = get_nb_elts_array(f, *pos);
-    printf("array elts = %lu\n", nb_elts);
     uint64_t nb_elts_parsed = 0;
 
     json_array_st *ja = array_init(nb_elts);
@@ -422,7 +418,6 @@ json_dict_st *parse_json_dict(FILE *f, uint64_t *pos)
 
     char *key = NULL;
     uint64_t nb_elts = get_nb_elts_dict(f, *pos);
-    printf("dict elts = %lu\n", nb_elts);
     uint64_t nb_elts_parsed = 0;
 
     if (fseek(f, (*pos)++, SEEK_SET) != 0)
@@ -513,10 +508,7 @@ json_dict_st *parse(char *file)
             fclose(f);
             return NULL;
         }
-
-        puts("");
-        print_json(jd->items);
-        destroy_dict(jd);
+        return jd;
     }
     else if (c == '[')
     {}
