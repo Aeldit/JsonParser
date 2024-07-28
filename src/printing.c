@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void array_print_indent(json_array_st *ja, char indent, char from_list)
+void print_array_indent(json_array_st *ja, char indent, char from_list)
 {
     // Obtains the number of tab characters that will be printed
     char *tabs = calloc(indent, sizeof(char));
@@ -49,7 +49,7 @@ void array_print_indent(json_array_st *ja, char indent, char from_list)
             }
             else if (type == TYPE_ARR)
             {
-                array_print_indent(ja->elts[i].value, indent + 1, 1);
+                print_array_indent(ja->elts[i].value, indent + 1, 1);
             }
             else if (type == TYPE_OBJ)
             {
@@ -77,7 +77,7 @@ void array_print_indent(json_array_st *ja, char indent, char from_list)
 
 void array_print(json_array_st *ja)
 {
-    array_print_indent(ja, 1, 0);
+    print_array_indent(ja, 1, 0);
     printf("\n");
 }
 
@@ -137,7 +137,7 @@ void print_json_indent(item_control_st *ctrl, char indent)
                 else if (type == TYPE_ARR)
                 {
                     printf("%s\t\"%s\": ", tabs, key);
-                    array_print_indent(pair->value, indent + 1, 0);
+                    print_array_indent(pair->value, indent + 1, 0);
                 }
                 else if (type == TYPE_OBJ)
                 {

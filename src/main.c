@@ -1,3 +1,4 @@
+#include "api.h"
 #include "parser.h"
 #include "printing.h"
 
@@ -14,8 +15,9 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    puts("");
-    print_json(jd->items);
+    typed_value_st tv = get_value(jd, "array", 5);
+    print_array((json_array_st *)tv.value);
+
     destroy_dict(jd);
     return 0;
 }

@@ -6,8 +6,8 @@
 *******************************************************************************/
 #include <stddef.h>
 
+#include "../api.h"
 #include "../json.h"
-#include "../types.h"
 
 /*******************************************************************************
 **                              DEFINES / MACROS                              **
@@ -96,11 +96,7 @@ void destroy_bool_control(bool_control_st *ctrl);
 /***********************************************************
 **                         UTILS                          **
 ***********************************************************/
-void print_array(json_array_st *l, char indent, char from_list);
-
 char key_exists(json_dict_st *jd, char *key);
-
-typed_value_st get_value(json_dict_st *jd, char *key);
 
 /***********************************************************
 **                    LINKED LISTS STR                    **

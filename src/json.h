@@ -68,6 +68,7 @@ struct bool_link
 /**
 ** \brief Represents a linked list of the associated type (key, str, num, ...)
 **        and stores the head of the list
+** \param idx Stores the index of the next object that will be allocated
 */
 struct item_control
 {
@@ -140,7 +141,6 @@ struct item
 };
 
 /**
-** \field strings Points to a linked list to be be able to have a new buffer
 ** \param strings Contains all the string values of the json object
 ** \param numbers Contains all the number values of the json object
 ** \param lists Contains all the list values of the json object

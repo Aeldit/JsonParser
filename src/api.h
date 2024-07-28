@@ -1,21 +1,15 @@
-#ifndef PRINTING_H
-#define PRINTING_H
+#ifndef API_H
+#define API_H
 
 /*******************************************************************************
 **                                  INCLUDES                                  **
 *******************************************************************************/
-#include "lists/json_array.h"
-#include "lists/linked_lists.h"
+#include "json.h"
+#include "types.h"
 
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
-void print_array(json_array_st *ja);
+typed_value_st get_value(json_dict_st *jd, char *key, size_t key_len);
 
-void print_array_indent(json_array_st *ja, char indent, char from_list);
-
-void print_json(item_control_st *ctrl);
-
-void print_json_indent(item_control_st *ctrl, char indent);
-
-#endif // !PRINTING_H
+#endif // !API_H

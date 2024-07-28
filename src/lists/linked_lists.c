@@ -7,7 +7,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../types.h"
 #include "json_array.h"
 
 /*******************************************************************************
@@ -318,32 +317,6 @@ char key_exists(json_dict_st *jd, char *key)
         }
     }
     return 0;
-}
-
-typed_value_st get_value(json_dict_st *jd, char *key)
-{
-    if (jd == NULL || key == NULL)
-    {
-        return (typed_value_st){ .type = TYPE_ERROR, .value = NULL };
-    }
-
-    // Iterates over the items
-    struct item_link *tmp = jd->items->head;
-    while (tmp != NULL)
-    {
-        // Iterates over the keys
-        for (size_t j = 0; j < (tmp->next == NULL ? jd->items->idx : ARRAY_LEN);
-             ++j)
-        {
-            if (strcmp(tmp->items[j]->key, key) == 0)
-            {
-                return (typed_value_st){ .type = tmp->items[j]->type,
-                                         .value = tmp->items[j]->value };
-            }
-        }
-        tmp = tmp->next;
-    }
-    return (typed_value_st){ .type = TYPE_ERROR, .value = NULL };
 }
 
 /***********************************************************
