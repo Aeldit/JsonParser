@@ -47,4 +47,50 @@ cd <your_code_directory>
 mv src/ json-parser/
 ```
 
+To read a json file in your code, call the `parse()` function :
+```c
+json_dict_st *jd = parse(file_path);
+if (jd == NULL)
+{
+    return 1;
+}
+```
+
+If you want to access a value of the parsed Json object, you can do this :
+```c
+// Replace 'key' by the name of the element you want to access
+typed_value_st tv = get_value(jd, "key", 5);
+```
+
+A basic main file reading the file, accessing its content and printing it would look like this :
+
+```c
+#include "json_api.h"
+#include "parser.h"
+#include "printing.h"
+
+int main(int argc, char *argv[])
+{
+    if (argc < 2)
+    {
+        return 1;
+    }
+
+    json_dict_st *jd = parse(argv[1]);
+    if (jd == NULL)
+    {
+        return 1;
+    }
+
+    typed_value_st tv = get_value(jd, "array", 5);
+    // Check if the value is of the expected type
+    if (tv.type == TYPE_ARR)
+    {
+        print_array((json_array_st *)tv.value);
+    }
+
+    destroy_dict(jd);
+    return 0;
+}
+```
 

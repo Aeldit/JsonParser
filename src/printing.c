@@ -75,7 +75,7 @@ void print_array_indent(json_array_st *ja, char indent, char from_list)
     free(tabs);
 }
 
-void array_print(json_array_st *ja)
+void print_array(json_array_st *ja)
 {
     print_array_indent(ja, 1, 0);
     printf("\n");

@@ -1,4 +1,4 @@
-#include "api.h"
+#include "json_api.h"
 #include "parser.h"
 #include "printing.h"
 
@@ -16,7 +16,10 @@ int main(int argc, char *argv[])
     }
 
     typed_value_st tv = get_value(jd, "array", 5);
-    print_array((json_array_st *)tv.value);
+    if (tv.type == TYPE_ARR)
+    {
+        print_array((json_array_st *)tv.value);
+    }
 
     destroy_dict(jd);
     return 0;

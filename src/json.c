@@ -5,15 +5,13 @@
 *******************************************************************************/
 #include <stdlib.h>
 
-#include "lists/json_array.h"
 #include "lists/linked_lists.h"
-#include "types.h"
 
 /*******************************************************************************
 **                              DEFINES / MACROS                              **
 *******************************************************************************/
 /*
-** \brief Adds the key:item value to the json dict
+** \def Adds the key:item value to the json dict
 ** \param type_ctrl_st  The control typedef struct of the correct type
 ** \param list The list in which to add the value
 ** \param append_type The append function for the current type
@@ -125,6 +123,7 @@ char add_str_to_array(json_dict_st *jd, json_array_st *ja, char *value)
     {
         return FAILURE;
     }
+
     if (jd->strings == NULL)
     {
         jd->strings = calloc(1, sizeof(str_control_st));
@@ -134,6 +133,7 @@ char add_str_to_array(json_dict_st *jd, json_array_st *ja, char *value)
             return FAILURE;
         }
     }
+
     array_append(
         ja,
         (struct array_elt){ .value = append_str(jd, value), .type = TYPE_STR });
@@ -146,6 +146,7 @@ char add_num_to_array(json_dict_st *jd, json_array_st *ja, long value)
     {
         return FAILURE;
     }
+
     if (jd->numbers == NULL)
     {
         jd->numbers = calloc(1, sizeof(num_control_st));
@@ -155,6 +156,7 @@ char add_num_to_array(json_dict_st *jd, json_array_st *ja, long value)
             return FAILURE;
         }
     }
+
     array_append(
         ja,
         (struct array_elt){ .value = append_num(jd, value), .type = TYPE_NUM });
@@ -168,6 +170,7 @@ char add_json_dict_to_array(json_dict_st *jd, json_array_st *ja,
     {
         return FAILURE;
     }
+
     if (jd->json_dicts == NULL)
     {
         jd->json_dicts = calloc(1, sizeof(json_dict_control_st));
@@ -177,6 +180,7 @@ char add_json_dict_to_array(json_dict_st *jd, json_array_st *ja,
             return FAILURE;
         }
     }
+
     array_append(ja,
                  (struct array_elt){ .value = append_json_dict(jd, value),
                                      .type = TYPE_OBJ });
@@ -190,6 +194,7 @@ char add_array_to_array(json_dict_st *jd, json_array_st *ja,
     {
         return FAILURE;
     }
+
     if (jd->lists == NULL)
     {
         jd->lists = calloc(1, sizeof(list_control_st));
@@ -199,6 +204,7 @@ char add_array_to_array(json_dict_st *jd, json_array_st *ja,
             return FAILURE;
         }
     }
+
     array_append(ja,
                  (struct array_elt){ .value = append_array(jd, value),
                                      .type = TYPE_ARR });
@@ -211,6 +217,7 @@ char add_bool_to_array(json_dict_st *jd, json_array_st *ja, char value)
     {
         return FAILURE;
     }
+
     if (jd->booleans == NULL)
     {
         jd->booleans = calloc(1, sizeof(bool_control_st));
@@ -220,6 +227,7 @@ char add_bool_to_array(json_dict_st *jd, json_array_st *ja, char value)
             return FAILURE;
         }
     }
+
     array_append(ja,
                  (struct array_elt){ .value = append_bool(jd, value),
                                      .type = TYPE_BOOL });
@@ -232,6 +240,7 @@ char add_null_to_array(json_dict_st *jd, json_array_st *ja)
     {
         return FAILURE;
     }
+
     array_append(ja, (struct array_elt){ .value = NULL, .type = TYPE_NULL });
     return SUCCESS;
 }
@@ -239,22 +248,4 @@ char add_null_to_array(json_dict_st *jd, json_array_st *ja)
 size_t get_nb_items(json_dict_st *jd)
 {
     return jd == NULL ? 0 : jd->nb_items;
-}
-
-void destroy_dict(json_dict_st *jd)
-{
-    if (jd == NULL)
-    {
-        return;
-    }
-
-    destroy_item_control(jd->items);
-    destroy_key_control(jd->keys);
-
-    destroy_str_control(jd->strings);
-    destroy_num_control(jd->numbers);
-    destroy_json_dict_control(jd->json_dicts);
-    destroy_array_control(jd->lists);
-    destroy_bool_control(jd->booleans);
-    free(jd);
 }

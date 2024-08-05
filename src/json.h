@@ -143,6 +143,7 @@ struct item
 /**
 ** \param strings Contains all the string values of the json object
 ** \param numbers Contains all the number values of the json object
+** \param json_dicts Contains all the json_dicts of the json object
 ** \param lists Contains all the list values of the json object
 ** \param booleans Contains all the boolean values of the json dict
 */
@@ -218,10 +219,5 @@ char add_bool_to_array(json_dict_st *jd, json_array_st *ja, char value);
 char add_null_to_array(json_dict_st *jd, json_array_st *ja);
 
 size_t get_nb_items(json_dict_st *jd);
-
-/**
-** \brief Frees all the allocated parts of the 'jd' json dict
-*/
-void destroy_dict(json_dict_st *jd);
 
 #endif // !JSON_H
