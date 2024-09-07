@@ -24,4 +24,6 @@ char *store_boolean(storage_st *s, char b);
 json_array_st *store_array(storage_st *s, json_array_st ja);
 json_dict_st *store_dict(storage_st *s, json_dict_st jd);
 
+void destroy_storage(storage_st *s);
+
 #endif // !VALUES_STORAGE_H

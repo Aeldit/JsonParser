@@ -55,3 +55,57 @@ json_dict_st *store_dict(storage_st *s, json_dict_st jd)
     STORE(ll_dict_st, dicts, link_dict, jd, jd);
     return &l->tail->jd;
 }
+
+void destroy_storage(storage_st *s)
+{
+    struct link_string *a = s->strings.head;
+    while (a != NULL)
+    {
+        struct link_string *tmp = a;
+        a = a->next;
+        free(tmp->string);
+        free(tmp);
+    }
+
+    struct link_int *b = s->integers.head;
+    while (b != NULL)
+    {
+        struct link_int *tmp = b;
+        b = b->next;
+        free(tmp);
+    }
+
+    struct link_double *c = s->doubles.head;
+    while (c != NULL)
+    {
+        struct link_double *tmp = c;
+        c = c->next;
+        free(tmp);
+    }
+
+    struct link_bool *d = s->booleans.head;
+    while (d != NULL)
+    {
+        struct link_bool *tmp = d;
+        d = d->next;
+        free(tmp);
+    }
+
+    struct link_array *e = s->arrays.head;
+    while (e != NULL)
+    {
+        struct link_array *tmp = e;
+        e = e->next;
+        destroy_json_array(&e->ja);
+        free(tmp);
+    }
+
+    struct link_dict *f = s->dicts.head;
+    while (f != NULL)
+    {
+        struct link_dict *tmp = f;
+        f = f->next;
+        destroy_json_dict(&f->jd);
+        free(tmp);
+    }
+}

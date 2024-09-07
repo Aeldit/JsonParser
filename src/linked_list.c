@@ -188,6 +188,11 @@ void removeItem(json_dict_st *jd, uint64_t index)
 
 void destroy_json_array(json_array_st *ja)
 {
+    if (ja == NULL)
+    {
+        return;
+    }
+
     struct link_value *tmp = ja->head;
     while (tmp != NULL)
     {
@@ -199,6 +204,11 @@ void destroy_json_array(json_array_st *ja)
 
 void destroy_json_dict(json_dict_st *jd)
 {
+    if (jd == NULL)
+    {
+        return;
+    }
+
     struct link_item *tmp = jd->head;
     while (tmp != NULL)
     {
