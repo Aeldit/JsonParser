@@ -1,4 +1,5 @@
 #include "json_api.h"
+#include "printing.h"
 
 int main(int argc, char *argv[])
 {
@@ -10,11 +11,11 @@ int main(int argc, char *argv[])
     json_st j = parse(argv[1]);
     if (j.is_array)
     {
-        // print_array(ja);
+        print_array(j.ja);
     }
     else
     {
-        // print_json(jd->items);
+        print_json(j.jd);
 
         /*typed_value_st tv = get_value(jd, "array", 5);
         if (tv.type == TYPE_ARR)
