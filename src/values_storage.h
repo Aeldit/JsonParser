@@ -21,8 +21,8 @@ char *store_string(storage_st *s, char *str);
 int64_t *store_int(storage_st *s, int64_t i);
 double *store_double(storage_st *s, double d);
 char *store_boolean(storage_st *s, char b);
-json_array_st *store_array(storage_st *s, json_array_st ja);
-json_dict_st *store_dict(storage_st *s, json_dict_st jd);
+json_array_st *store_array(storage_st *s, json_array_st *ja);
+json_dict_st *store_dict(storage_st *s, json_dict_st *jd);
 
 void destroy_storage(storage_st *s);
 

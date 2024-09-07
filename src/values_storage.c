@@ -9,12 +9,22 @@
         return NULL;                                                           \
     }                                                                          \
     ll_type_st *l = &s->type_array;                                            \
-    if (l->size == 0)                                                          \
+    if (l->head == 0)                                                          \
     {                                                                          \
         l->head = calloc(1, sizeof(struct link_type));                         \
         l->tail = l->head;                                                     \
     }                                                                          \
-    l->tail->value_name = value
+    else                                                                       \
+    {                                                                          \
+        l->tail->next = calloc(1, sizeof(struct link_type));                   \
+        if (l->tail->next == NULL)                                             \
+        {                                                                      \
+            return NULL;                                                       \
+        }                                                                      \
+        l->tail = l->tail->next;                                               \
+    }                                                                          \
+    l->tail->value_name = value;                                               \
+    ++(l->size);
 
 char *store_string(storage_st *s, char *str)
 {
@@ -44,16 +54,16 @@ char *store_boolean(storage_st *s, char b)
     return &l->tail->b;
 }
 
-json_array_st *store_array(storage_st *s, json_array_st ja)
+json_array_st *store_array(storage_st *s, json_array_st *ja)
 {
     STORE(ll_array_st, arrays, link_array, ja, ja);
-    return &l->tail->ja;
+    return l->tail->ja;
 }
 
-json_dict_st *store_dict(storage_st *s, json_dict_st jd)
+json_dict_st *store_dict(storage_st *s, json_dict_st *jd)
 {
     STORE(ll_dict_st, dicts, link_dict, jd, jd);
-    return &l->tail->jd;
+    return l->tail->jd;
 }
 
 void destroy_storage(storage_st *s)
@@ -96,7 +106,7 @@ void destroy_storage(storage_st *s)
     {
         struct link_array *tmp = e;
         e = e->next;
-        destroy_json_array(&e->ja);
+        destroy_json_array(tmp->ja);
         free(tmp);
     }
 
@@ -105,7 +115,9 @@ void destroy_storage(storage_st *s)
     {
         struct link_dict *tmp = f;
         f = f->next;
-        destroy_json_dict(&f->jd);
+        destroy_json_dict(tmp->jd);
         free(tmp);
     }
+
+    free(s);
 }

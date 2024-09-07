@@ -3,7 +3,6 @@
 CC=gcc
 CFILES=src/linked_list.c \
 	src/values_storage.c \
-	src/type_linked_lists.c \
 	src/main.c \
 	src/parser.c
 

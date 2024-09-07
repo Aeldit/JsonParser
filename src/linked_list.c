@@ -77,7 +77,7 @@ void addValue(json_array_st *ja, typed_value_st value)
     }
 
     ja->tail->elts[ja->insert_idx++] = value;
-    ++ja->size;
+    ++(ja->size);
 }
 
 void addItem(json_dict_st *jd, item_st value)
@@ -136,9 +136,9 @@ void removeValue(json_array_st *ja, uint64_t index)
         }
         link = link->next;
     }
-    --ja->size;
+    --(ja->size);
 
-    ++ja->nb_deletion;
+    ++(ja->nb_deletion);
     if (ja->nb_deletion == BASE_ARRAY_LEN)
     {
         // defragment();
@@ -177,9 +177,9 @@ void removeItem(json_dict_st *jd, uint64_t index)
         }
         link = link->next;
     }
-    --jd->size;
+    --(jd->size);
 
-    ++jd->nb_deletion;
+    ++(jd->nb_deletion);
     if (jd->nb_deletion == BASE_ARRAY_LEN)
     {
         // defragment();
@@ -200,6 +200,7 @@ void destroy_json_array(json_array_st *ja)
         tmp = tmp->next;
         free(t);
     }
+    free(ja);
 }
 
 void destroy_json_dict(json_dict_st *jd)
@@ -214,6 +215,11 @@ void destroy_json_dict(json_dict_st *jd)
     {
         struct link_item *t = tmp;
         tmp = tmp->next;
+        for (uint64_t i = 0; i < BASE_ARRAY_LEN; ++i)
+        {
+            free(t->elts[i].key);
+        }
         free(t);
     }
+    free(jd);
 }

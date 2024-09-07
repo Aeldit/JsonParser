@@ -43,13 +43,13 @@ struct link_bool
 
 struct link_array
 {
-    json_array_st ja;
+    json_array_st *ja;
     struct link_array *next;
 };
 
 struct link_dict
 {
-    json_dict_st jd;
+    json_dict_st *jd;
     struct link_dict *next;
 };
 

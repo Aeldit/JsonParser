@@ -13,9 +13,9 @@
 struct json
 {
     char is_array;
-    storage_st storage;
-    json_array_st ja;
-    json_dict_st jd;
+    storage_st *storage;
+    json_array_st *ja;
+    json_dict_st *jd;
 };
 
 typedef struct json json_st;

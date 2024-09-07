@@ -17,11 +17,11 @@ int main(int argc, char *argv[])
     if (j.is_array)
     {
         // print_array(ja);
-        destroy_json_array(&j.ja);
+        destroy_json_array(j.ja);
     }
     else
     {
-        destroy_json_dict(&j.jd);
+        destroy_json_dict(j.jd);
         // print_json(jd->items);
 
         /*typed_value_st tv = get_value(jd, "array", 5);
@@ -31,6 +31,6 @@ int main(int argc, char *argv[])
         }
         destroy_dict(jd);*/
     }
-    destroy_storage(&j.storage);
+    destroy_storage(j.storage);
     return 0;
 }
