@@ -26,13 +26,20 @@ typedef struct json json_st;
 json_st parse(char *file);
 
 /**
+** \brief Searches for the value at the given index and returns it if it exists.
+** \param ja A pointer to the json array
+** \param index The index to search for
+*/
+typed_value_st get_value_at(json_array_st *ja, uint64_t index);
+
+/**
 ** \brief Searches for the value associated with the given key and returns it if
 **        it exists.
 ** \param jd A pointer to the json dict
 ** \param key The key
 ** \param key_len The length of the key
 */
-typed_value_st get_value_at(json_array_st *ja, uint64_t index);
+item_st get_item(json_dict_st *jd, char *key, uint64_t key_len);
 
 /**
 ** \brief Frees all the allocated parts of the json object

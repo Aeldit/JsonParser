@@ -18,7 +18,8 @@
 #define IS_END_CHAR(c) ((c) == ',' || (c) == '\n' || (c) == ']' || (c) == '}')
 
 #define TYPED_VALUE_OF(v, t) ((typed_value_st){ .value = (v), .type = (t) })
-#define ITEM_OF(k, v, t) ((item_st){ .key = (k), .value = (v), .type = (t) })
+#define ITEM_OF(k, kl, v, t)                                                   \
+    ((item_st){ .key = (k), .key_len = (kl), .value = (v), .type = (t) })
 
 /*******************************************************************************
 **                                 STRUCTURES                                 **
@@ -35,6 +36,12 @@ struct str_and_len_tuple
     char has_exponent;
 };
 
+struct str_and_len
+{
+    char *str;
+    uint64_t len;
+};
+
 /*******************************************************************************
 **                              LOCAL FUNCTIONS                               **
 *******************************************************************************/
@@ -44,11 +51,11 @@ struct str_and_len_tuple
 ** \param pos The pos of the '"' that starts the string we are currently
 **            acquiring
 */
-char *parse_string(FILE *f, uint64_t *pos)
+struct str_and_len parse_string(FILE *f, uint64_t *pos)
 {
     if (f == NULL || pos == NULL)
     {
-        return NULL;
+        return (struct str_and_len){ .str = NULL, .len = 0 };
     }
 
     uint64_t size = (*pos);
@@ -71,13 +78,13 @@ char *parse_string(FILE *f, uint64_t *pos)
     uint64_t len = size - (*pos) - 1;
     if (len == 0)
     {
-        return NULL;
+        return (struct str_and_len){ .str = NULL, .len = 0 };
     }
 
     char *str = calloc(len + 1, sizeof(char));
     if (str == NULL)
     {
-        return NULL;
+        return (struct str_and_len){ .str = NULL, .len = 0 };
     }
 
     for (uint64_t i = 0; i < len; ++i)
@@ -89,7 +96,7 @@ char *parse_string(FILE *f, uint64_t *pos)
         str[i] = fgetc(f);
     }
     ++(*pos); // Because otherwise, we end up reading the last '"' of the str
-    return str;
+    return (struct str_and_len){ .str = str, .len = len };
 }
 
 /**
@@ -548,7 +555,7 @@ json_array_st *parse_array(storage_st *s, FILE *f, uint64_t *pos)
         // If we are not in a string or if the string just ended
         if (c == '"')
         {
-            char *value = parse_string(f, pos);
+            char *value = parse_string(f, pos).str;
             char *stored = store_string(s, value);
             if (stored != NULL)
             {
@@ -644,7 +651,7 @@ json_dict_st *parse_json_dict(storage_st *s, FILE *f, uint64_t *pos)
         return NULL;
     }
 
-    char *key = NULL;
+    struct str_and_len key = { 0 };
     uint64_t nb_elts = get_nb_elts_dict(f, *pos);
     uint64_t nb_elts_parsed = 0;
 
@@ -667,11 +674,11 @@ json_dict_st *parse_json_dict(storage_st *s, FILE *f, uint64_t *pos)
             }
             else
             {
-                char *value = parse_string(f, pos);
+                char *value = parse_string(f, pos).str;
                 char *stored = store_string(s, value);
                 if (stored != NULL)
                 {
-                    addItem(jd, ITEM_OF(key, stored, TYPE_STR));
+                    addItem(jd, ITEM_OF(key.str, key.len, stored, TYPE_STR));
                 }
                 ++nb_elts_parsed;
             }
@@ -690,7 +697,7 @@ json_dict_st *parse_json_dict(storage_st *s, FILE *f, uint64_t *pos)
                 double *stored = store_double(s, value);
                 if (stored != NULL)
                 {
-                    addItem(jd, ITEM_OF(key, stored, TYPE_DOUBLE));
+                    addItem(jd, ITEM_OF(key.str, key.len, stored, TYPE_DOUBLE));
                 }
             }
             else
@@ -699,7 +706,7 @@ json_dict_st *parse_json_dict(storage_st *s, FILE *f, uint64_t *pos)
                 int64_t *stored = store_int(s, value);
                 if (stored != NULL)
                 {
-                    addItem(jd, ITEM_OF(key, stored, TYPE_INT));
+                    addItem(jd, ITEM_OF(key.str, key.len, stored, TYPE_INT));
                 }
             }
             free(sl.str);
@@ -717,13 +724,13 @@ json_dict_st *parse_json_dict(storage_st *s, FILE *f, uint64_t *pos)
             char *stored = store_boolean(s, value);
             if (stored != NULL)
             {
-                addItem(jd, ITEM_OF(key, stored, TYPE_BOOL));
+                addItem(jd, ITEM_OF(key.str, key.len, stored, TYPE_BOOL));
             }
             ++nb_elts_parsed;
         }
         else if (c == 'n')
         {
-            addItem(jd, ITEM_OF(key, NULL, TYPE_NULL));
+            addItem(jd, ITEM_OF(key.str, key.len, NULL, TYPE_NULL));
             (*pos) += 3;
             ++nb_elts_parsed;
         }
@@ -733,7 +740,7 @@ json_dict_st *parse_json_dict(storage_st *s, FILE *f, uint64_t *pos)
             json_array_st *stored = store_array(s, value);
             if (stored != NULL)
             {
-                addItem(jd, ITEM_OF(key, stored, TYPE_ARR));
+                addItem(jd, ITEM_OF(key.str, key.len, stored, TYPE_ARR));
             }
             ++nb_elts_parsed;
         }
@@ -743,7 +750,7 @@ json_dict_st *parse_json_dict(storage_st *s, FILE *f, uint64_t *pos)
             json_dict_st *stored = store_dict(s, value);
             if (stored != NULL)
             {
-                addItem(jd, ITEM_OF(key, stored, TYPE_DICT));
+                addItem(jd, ITEM_OF(key.str, key.len, stored, TYPE_DICT));
             }
             ++nb_elts_parsed;
         }
