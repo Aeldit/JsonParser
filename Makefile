@@ -18,9 +18,9 @@ json-parser:
 clean:
 	if [ -f "json-parser" ]; then rm json-parser; fi
 
-valgrind: clean
-	valgrind --tool=callgrind --dump-instr=yes \
-		--simulate-cache=yes --collect-jumps=yes ./json-parser big.json
+valgrind: clean json-parser
+	valgrind --tool=callgrind --dump-instr=yes --simulate-cache=yes \
+		--collect-jumps=yes ./json-parser ../JsonParserCPP/big.json
 
 leaks: clean json-parser
 	valgrind --leak-check=full --show-leak-kinds=all \
