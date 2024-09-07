@@ -5,7 +5,31 @@
 *******************************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+
+/*******************************************************************************
+**                              LOCAL FUNCTIONS                               **
+*******************************************************************************/
+char strings_equal(const char *a, uint64_t len_a, const char *b, uint64_t len_b)
+{
+    if (a == NULL || b == NULL)
+    {
+        return 0;
+    }
+
+    if (len_a != len_b)
+    {
+        return 0;
+    }
+
+    for (uint64_t i = 0; i < len_a; ++i)
+    {
+        if (a[i] != b[i])
+        {
+            return 0;
+        }
+    }
+    return 1;
+}
 
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
@@ -64,6 +88,30 @@ typed_value_st get_value_at(json_array_st *ja, uint64_t index)
         link = link->next;
     }
     return (typed_value_st){ .value = NULL, .type = TYPE_ERROR };
+}
+
+item_st get_item(json_dict_st *jd, char *key, uint64_t key_len)
+{
+    if (jd == NULL)
+    {
+        return (item_st){ .key = NULL, .value = NULL, .type = TYPE_ERROR };
+    }
+
+    // Iterates over the items
+    struct link_item *link = jd->head;
+    while (link != NULL)
+    {
+        for (uint64_t i = 0; i < BASE_ARRAY_LEN; ++i)
+        {
+            item_st it = link->elts[i];
+            if (strings_equal(key, key_len, it.key, it.key_len))
+            {
+                return link->elts[i];
+            }
+        }
+        link = link->next;
+    }
+    return (item_st){ .key = NULL, .value = NULL, .type = TYPE_ERROR };
 }
 
 void destroy_json(json_st *j)
