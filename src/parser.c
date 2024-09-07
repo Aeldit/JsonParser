@@ -490,6 +490,7 @@ json_array_st *parse_array(json_dict_st *jd, FILE *f, uint64_t *pos)
             {
                 add_int_to_array(jd, ja, str_to_long(&sl));
             }
+            free(sl.str);
             ++nb_elts_parsed;
         }
         else if (IS_BOOL_START(c))
@@ -664,6 +665,7 @@ json_dict_st *parse_json_dict(FILE *f, uint64_t *pos)
             {
                 add_int(jd, key, str_to_long(&sl));
             }
+            free(sl.str);
             ++nb_elts_parsed;
         }
         else if (IS_BOOL_START(c))
@@ -737,15 +739,14 @@ json_st parse(char *file)
     }
     else if (c == '[')
     {
-        /*
-        // TODO: Fix parsing when dicts without keys are inside an array
-        JSONArray *ja = parse_array(f, &offset);
+        json_dict_st *jd = init_dict();
+        json_array_st *ja = parse_array(jd, f, &offset);
         fclose(f);
         if (ja == NULL)
         {
             return (json_st){ .is_array = 0, .jd = NULL, .ja = NULL };
         }
-        return (json_st){ .is_array = 1, .jd = NULL, .ja = ja };*/
+        return (json_st){ .is_array = 1, .jd = jd, .ja = ja };
     }
     fclose(f);
     return (json_st){ .is_array = 0, .jd = NULL, .ja = NULL };
