@@ -1,16 +1,14 @@
 -include Makefile.rules
 
 CC=gcc
-CFILES=src/lists/json_array.c \
-	src/lists/linked_lists.c \
-	src/json_api.c \
-	src/json.c \
+CFILES=src/linked_list.c \
+	src/values_storage.c \
+	src/type_linked_lists.c \
 	src/main.c \
-	src/parser.c \
-	src/printing.c
+	src/parser.c
 
 all: clean json-parser
-	./json-parser ../JsonParserCPP/big.json
+	./json-parser t.json
 
 .PHONY:
 json-parser:
@@ -19,3 +17,11 @@ json-parser:
 
 clean:
 	if [ -f "json-parser" ]; then rm json-parser; fi
+
+valgrind:
+	valgrind --tool=callgrind --dump-instr=yes \
+		--simulate-cache=yes --collect-jumps=yes ./json-parser big.json
+
+leaks: json-parser
+	valgrind --leak-check=full --show-leak-kinds=all \
+         --track-origins=yes ./json-parser t.json

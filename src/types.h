@@ -27,6 +27,21 @@ struct typed_value
     unsigned char type;
 };
 
+/**
+** \brief Represents a key:value item
+** \param key The key
+** \param value Points to the value of the type 'type' inside the corresponding
+**        linked list
+** \param type The type of the data to which 'value' points
+*/
+struct item
+{
+    char *key;
+    void *value;
+    unsigned char type;
+};
+
 typedef struct typed_value typed_value_st;
+typedef struct item item_st;
 
 #endif // !JSON_TYPES_H

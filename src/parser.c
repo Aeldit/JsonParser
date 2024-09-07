@@ -7,7 +7,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "json.h"
+#include "linked_list.h"
+#include "values_storage.h"
 
 /*******************************************************************************
 **                              DEFINES / MACROS                              **
@@ -16,6 +17,9 @@
 #define IS_BOOL_START(c) ((c) == 't' || (c) == 'f')
 
 #define IS_END_CHAR(c) ((c) == ',' || (c) == '\n' || (c) == ']' || (c) == '}')
+
+#define TYPED_VALUE_OF(v, t) ((typed_value_st){ .value = (v), .type = (t) })
+#define ITEM_OF(k, v, t) ((item_st){ .key = (k), .value = (v), .type = (t) })
 
 /*******************************************************************************
 **                                 STRUCTURES                                 **
@@ -35,7 +39,7 @@ struct str_and_len_tuple
 /*******************************************************************************
 **                              LOCAL FUNCTIONS                               **
 *******************************************************************************/
-json_dict_st *parse_json_dict(FILE *f, uint64_t *pos);
+json_dict_st parse_json_dict(storage_st *s, FILE *f, uint64_t *pos);
 
 /**
 ** \brief Reads the string at position 'pos' in the given file, and returns it
@@ -444,17 +448,17 @@ uint64_t get_nb_elts_array(FILE *f, uint64_t pos)
 **            current array
 ** \returns The json array parsed at the pos
 */
-json_array_st *parse_array(json_dict_st *jd, FILE *f, uint64_t *pos)
+json_array_st parse_array(storage_st *s, FILE *f, uint64_t *pos)
 {
     if (f == NULL || pos == NULL)
     {
-        return NULL;
+        return (json_array_st){ 0 };
     }
 
     uint64_t nb_elts = get_nb_elts_array(f, *pos);
     uint64_t nb_elts_parsed = 0;
 
-    json_array_st *ja = array_init(nb_elts);
+    json_array_st ja = { 0 };
     if (nb_elts == 0)
     {
         return ja;
@@ -462,7 +466,7 @@ json_array_st *parse_array(json_dict_st *jd, FILE *f, uint64_t *pos)
 
     if (fseek(f, (*pos)++, SEEK_SET) != 0)
     {
-        return NULL;
+        return ja;
     }
 
     char c = '\0';
@@ -471,7 +475,12 @@ json_array_st *parse_array(json_dict_st *jd, FILE *f, uint64_t *pos)
         // If we are not in a string or if the string just ended
         if (c == '"')
         {
-            add_str_to_array(jd, ja, parse_string(f, pos));
+            char *value = parse_string(f, pos);
+            char *stored = store_string(s, value);
+            if (stored != NULL)
+            {
+                addValue(&ja, TYPED_VALUE_OF(stored, TYPE_STR));
+            }
             ++nb_elts_parsed;
         }
         else if (IS_NUMBER_START(c))
@@ -484,11 +493,21 @@ json_array_st *parse_array(json_dict_st *jd, FILE *f, uint64_t *pos)
 
             if (sl.is_float)
             {
-                add_double_to_array(jd, ja, str_to_double(&sl));
+                double value = str_to_double(&sl);
+                double *stored = store_double(s, value);
+                if (stored != NULL)
+                {
+                    addValue(&ja, TYPED_VALUE_OF(stored, TYPE_DOUBLE));
+                }
             }
             else
             {
-                add_int_to_array(jd, ja, str_to_long(&sl));
+                int64_t value = str_to_long(&sl);
+                int64_t *stored = store_int(s, value);
+                if (stored != NULL)
+                {
+                    addValue(&ja, TYPED_VALUE_OF(stored, TYPE_INT));
+                }
             }
             free(sl.str);
             ++nb_elts_parsed;
@@ -500,23 +519,39 @@ json_array_st *parse_array(json_dict_st *jd, FILE *f, uint64_t *pos)
             {
                 continue;
             }
-            add_bool_to_array(jd, ja, len == 4 ? 1 : 0);
+
+            char value = len == 4 ? 1 : 0;
+            char *stored = store_boolean(s, value);
+            if (stored != NULL)
+            {
+                addValue(&ja, TYPED_VALUE_OF(stored, TYPE_BOOL));
+            }
             ++nb_elts_parsed;
         }
         else if (c == 'n')
         {
-            add_null_to_array(jd, ja);
+            addValue(&ja, TYPED_VALUE_OF(NULL, TYPE_NULL));
             (*pos) += 3;
             ++nb_elts_parsed;
         }
         else if (c == '[')
         {
-            add_array_to_array(jd, ja, parse_array(jd, f, pos));
+            json_array_st value = parse_array(s, f, pos);
+            json_array_st *stored = store_array(s, value);
+            if (stored != NULL)
+            {
+                addValue(&ja, TYPED_VALUE_OF(stored, TYPE_ARR));
+            }
             ++nb_elts_parsed;
         }
         else if (c == '{')
         {
-            add_json_dict_to_array(jd, ja, parse_json_dict(f, pos));
+            json_dict_st value = parse_json_dict(s, f, pos);
+            json_dict_st *stored = store_dict(s, value);
+            if (stored != NULL)
+            {
+                addValue(&ja, TYPED_VALUE_OF(stored, TYPE_DICT));
+            }
             ++nb_elts_parsed;
         }
 
@@ -614,22 +649,21 @@ uint64_t get_nb_elts_dict(FILE *f, uint64_t pos)
 **            current array
 ** \returns The json dict parsed at the pos
 */
-json_dict_st *parse_json_dict(FILE *f, uint64_t *pos)
+json_dict_st parse_json_dict(storage_st *s, FILE *f, uint64_t *pos)
 {
     if (f == NULL || pos == NULL)
     {
-        return NULL;
+        return (json_dict_st){ 0 };
     }
 
     char *key = NULL;
     uint64_t nb_elts = get_nb_elts_dict(f, *pos);
     uint64_t nb_elts_parsed = 0;
 
-    json_dict_st *jd = init_dict();
-
+    json_dict_st jd = { 0 };
     if (fseek(f, (*pos)++, SEEK_SET) != 0)
     {
-        return NULL;
+        return jd;
     }
 
     char c = '\0';
@@ -645,7 +679,13 @@ json_dict_st *parse_json_dict(FILE *f, uint64_t *pos)
             }
             else
             {
-                add_str(jd, key, parse_string(f, pos));
+                char *value = parse_string(f, pos);
+                char *stored = store_string(s, value);
+                printf("%s\n", stored);
+                if (stored != NULL)
+                {
+                    addItem(&jd, ITEM_OF(key, stored, TYPE_STR));
+                }
                 ++nb_elts_parsed;
             }
         }
@@ -659,11 +699,21 @@ json_dict_st *parse_json_dict(FILE *f, uint64_t *pos)
 
             if (sl.is_float)
             {
-                add_double(jd, key, str_to_double(&sl));
+                double value = str_to_double(&sl);
+                double *stored = store_double(s, value);
+                if (stored != NULL)
+                {
+                    addItem(&jd, ITEM_OF(key, stored, TYPE_DOUBLE));
+                }
             }
             else
             {
-                add_int(jd, key, str_to_long(&sl));
+                int64_t value = str_to_long(&sl);
+                int64_t *stored = store_int(s, value);
+                if (stored != NULL)
+                {
+                    addItem(&jd, ITEM_OF(key, stored, TYPE_INT));
+                }
             }
             free(sl.str);
             ++nb_elts_parsed;
@@ -675,23 +725,39 @@ json_dict_st *parse_json_dict(FILE *f, uint64_t *pos)
             {
                 continue;
             }
-            add_bool(jd, key, len == 4 ? 1 : 0);
+
+            char value = len == 4 ? 1 : 0;
+            char *stored = store_boolean(s, value);
+            if (stored != NULL)
+            {
+                addItem(&jd, ITEM_OF(key, stored, TYPE_BOOL));
+            }
             ++nb_elts_parsed;
         }
         else if (c == 'n')
         {
-            add_null(jd, key);
+            addItem(&jd, ITEM_OF(key, NULL, TYPE_NULL));
             (*pos) += 3;
             ++nb_elts_parsed;
         }
         else if (c == '[')
         {
-            add_array(jd, key, parse_array(jd, f, pos));
+            json_array_st value = parse_array(s, f, pos);
+            json_array_st *stored = store_array(s, value);
+            if (stored != NULL)
+            {
+                addItem(&jd, ITEM_OF(key, stored, TYPE_ARR));
+            }
             ++nb_elts_parsed;
         }
         else if (c == '{')
         {
-            add_json_dict(jd, key, parse_json_dict(f, pos));
+            json_dict_st value = parse_json_dict(s, f, pos);
+            json_dict_st *stored = store_dict(s, value);
+            if (stored != NULL)
+            {
+                addItem(&jd, ITEM_OF(key, stored, TYPE_DICT));
+            }
             ++nb_elts_parsed;
         }
         else if (c == ',')
@@ -714,40 +780,30 @@ json_dict_st *parse_json_dict(FILE *f, uint64_t *pos)
 json_st parse(char *file)
 {
     FILE *f = fopen(file, "r");
+    json_st j = { 0 };
     if (f == NULL)
     {
-        return (json_st){ .is_array = 0, .jd = NULL, .ja = NULL };
+        return j;
     }
 
     uint64_t offset = 0;
     if (fseek(f, offset++, SEEK_SET) != 0)
     {
         fclose(f);
-        return (json_st){ .is_array = 0, .jd = NULL, .ja = NULL };
+        return j;
     }
 
     char c = fgetc(f);
     if (c == '{')
     {
-        json_dict_st *jd = parse_json_dict(f, &offset);
-        fclose(f);
-        if (jd == NULL)
-        {
-            return (json_st){ .is_array = 0, .jd = NULL, .ja = NULL };
-        }
-        return (json_st){ .is_array = 0, .jd = jd, .ja = NULL };
+        j.is_array = 0;
+        j.jd = parse_json_dict(&j.storage, f, &offset);
     }
     else if (c == '[')
     {
-        json_dict_st *jd = init_dict();
-        json_array_st *ja = parse_array(jd, f, &offset);
-        fclose(f);
-        if (ja == NULL)
-        {
-            return (json_st){ .is_array = 0, .jd = NULL, .ja = NULL };
-        }
-        return (json_st){ .is_array = 1, .jd = jd, .ja = ja };
+        j.is_array = 1;
+        j.ja = parse_array(&j.storage, f, &offset);
     }
     fclose(f);
-    return (json_st){ .is_array = 0, .jd = NULL, .ja = NULL };
+    return j;
 }

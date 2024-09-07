@@ -82,7 +82,7 @@ void addValue(json_array_st *ja, typed_value_st value)
 
 void addItem(json_dict_st *jd, item_st value)
 {
-    if (value.type == TYPE_ERROR)
+    if (jd == NULL || value.type == TYPE_ERROR)
     {
         return;
     }
@@ -101,7 +101,7 @@ void addItem(json_dict_st *jd, item_st value)
     }
 
     jd->tail->elts[jd->insert_idx++] = value;
-    ++jd->size;
+    ++(jd->size);
 }
 
 void removeValue(json_array_st *ja, uint64_t index)

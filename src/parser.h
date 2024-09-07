@@ -4,26 +4,18 @@
 /*******************************************************************************
 **                                  INCLUDES                                  **
 *******************************************************************************/
-#include "json.h"
+#include "linked_list.h"
+#include "values_storage.h"
 
 /*******************************************************************************
 **                                 STRUCTURES                                 **
 *******************************************************************************/
-struct states
-{
-    char is_in_json;
-    char is_in_array;
-    char is_in_str;
-    char is_in_key;
-    char is_in_value;
-    char is_waiting_key;
-};
-
 struct json
 {
     char is_array;
-    json_dict_st *jd;
-    json_array_st *ja;
+    storage_st storage;
+    json_array_st ja;
+    json_dict_st jd;
 };
 
 typedef struct json json_st;
