@@ -34,9 +34,13 @@ void print_array_indent(json_array_st *ja, char indent, char from_list)
             {
                 printf("%s\t\"%s\"", tabs, (char *)ja->elts[i].value);
             }
-            else if (type == TYPE_NUM)
+            else if (type == TYPE_INT)
             {
                 printf("%s\t%ld", tabs, *(long *)ja->elts[i].value);
+            }
+            else if (type == TYPE_DOUBLE)
+            {
+                printf("%s\t%f", tabs, *(double *)ja->elts[i].value);
             }
             else if (type == TYPE_NULL)
             {
@@ -51,7 +55,7 @@ void print_array_indent(json_array_st *ja, char indent, char from_list)
             {
                 print_array_indent(ja->elts[i].value, indent + 1, 1);
             }
-            else if (type == TYPE_OBJ)
+            else if (type == TYPE_DICT)
             {
                 j = ja->elts[i].value;
                 printf("%s\t", tabs);
@@ -121,9 +125,13 @@ void print_json_indent(item_control_st *ctrl, char indent)
                     printf("%s\t\"%s\": \"%s\"", tabs, key,
                            (const char *)pair->value);
                 }
-                else if (type == TYPE_NUM)
+                else if (type == TYPE_INT)
                 {
                     printf("%s\t\"%s\": %ld", tabs, key, *(long *)pair->value);
+                }
+                else if (type == TYPE_DOUBLE)
+                {
+                    printf("%s\t\"%s\": %f", tabs, key, *(double *)pair->value);
                 }
                 else if (type == TYPE_NULL)
                 {
@@ -139,7 +147,7 @@ void print_json_indent(item_control_st *ctrl, char indent)
                     printf("%s\t\"%s\": ", tabs, key);
                     print_array_indent(pair->value, indent + 1, 0);
                 }
-                else if (type == TYPE_OBJ)
+                else if (type == TYPE_DICT)
                 {
                     j = pair->value;
                     printf("%s\t\"%s\": ", tabs, key);

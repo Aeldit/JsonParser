@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include "json_api.h"
 #include "parser.h"
 #include "printing.h"
@@ -11,20 +13,21 @@ int main(int argc, char *argv[])
 
     printf("%s\n", argv[0]);
 
-    /*json_dict_st *jd = parse(argv[1]);
-    if (jd == NULL)
+    json_st j = parse(argv[1]);
+    if (j.is_array)
+    {}
+    else
     {
-        return 1;
+        json_dict_st *jd = j.jd;
+
+        print_json(jd->items);
+
+        typed_value_st tv = get_value(jd, "array", 5);
+        if (tv.type == TYPE_ARR)
+        {
+            print_array((json_array_st *)tv.value);
+        }
+        destroy_dict(jd);
     }
-
-    typed_value_st tv = get_value(jd, "array", 5);
-    if (tv.type == TYPE_ARR)
-    {
-        print_array((json_array_st *)tv.value);
-    }
-
-    destroy_dict(jd);*/
-
-    printf("%lu\n", sizeof(struct json_dict));
     return 0;
 }

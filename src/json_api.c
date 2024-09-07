@@ -48,7 +48,8 @@ void destroy_dict(json_dict_st *jd)
     destroy_key_control(jd->keys);
 
     destroy_str_control(jd->strings);
-    destroy_num_control(jd->numbers);
+    destroy_int_control(jd->integers);
+    destroy_double_control(jd->doubles);
     destroy_json_dict_control(jd->json_dicts);
     destroy_array_control(jd->lists);
     destroy_bool_control(jd->booleans);

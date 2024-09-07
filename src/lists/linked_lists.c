@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../json_api.h"
 #include "json_array.h"
 
 /*******************************************************************************

@@ -17,7 +17,7 @@ json_array_st *array_init(size_t size)
         return NULL;
     }
     ja->size = size;
-    ja->elts = calloc(size, sizeof(struct array_elt));
+    ja->elts = calloc(size, sizeof(typed_value_st));
     if (ja->elts == NULL)
     {
         free(ja);
@@ -26,7 +26,7 @@ json_array_st *array_init(size_t size)
     return ja;
 }
 
-void array_append(json_array_st *ja, struct array_elt elt)
+void array_append(json_array_st *ja, typed_value_st elt)
 {
     if (ja == NULL || ja->idx >= ja->size
         || (elt.value == NULL && elt.type != TYPE_NULL))
