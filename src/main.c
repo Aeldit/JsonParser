@@ -14,8 +14,18 @@ int main(int argc, char *argv[])
     printf("%s\n", argv[0]);
 
     json_st j = parse(argv[1]);
+    if (j.jd == NULL && j.ja == NULL)
+    {
+        return 1;
+    }
+
     if (j.is_array)
-    {}
+    {
+        json_array_st *ja = j.ja;
+
+        print_array(ja);
+        destroy_dict(j.jd);
+    }
     else
     {
         json_dict_st *jd = j.jd;
