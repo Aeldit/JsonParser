@@ -68,27 +68,14 @@ char add_str(json_dict_st *jd, char *key, char *value)
     ADD(str_control_st, strings, append_str, TYPE_STR)
 }
 
-char add_num(json_dict_st *jd, char *key, long value)
+char add_int(json_dict_st *jd, char *key, int64_t value)
 {
-    ADD(num_control_st, numbers, append_num, TYPE_NUM)
+    ADD(int64_t_control_st, integers, append_int, TYPE_INT)
 }
 
-char add_json_dict(json_dict_st *jd, char *key, json_dict_st *value)
+char add_double(json_dict_st *jd, char *key, double value)
 {
-    if (value == NULL)
-    {
-        return FAILURE;
-    }
-    ADD(json_dict_control_st, json_dicts, append_json_dict, TYPE_OBJ)
-}
-
-char add_array(json_dict_st *jd, char *key, json_array_st *value)
-{
-    if (value == NULL)
-    {
-        return FAILURE;
-    }
-    ADD(list_control_st, lists, append_array, TYPE_ARR)
+    ADD(double_control_st, doubles, append_double, TYPE_DOUBLE)
 }
 
 char add_bool(json_dict_st *jd, char *key, char value)
@@ -102,16 +89,36 @@ char add_null(json_dict_st *jd, char *key)
     {
         return FAILURE;
     }
+
     struct item *p = calloc(1, sizeof(struct item));
     if (p == NULL)
     {
         return FAILURE;
     }
+
     p->type = TYPE_NULL;
     p->key = key;
     p->value = NULL;
     append_item(jd, p);
     return SUCCESS;
+}
+
+char add_array(json_dict_st *jd, char *key, json_array_st *value)
+{
+    if (value == NULL)
+    {
+        return FAILURE;
+    }
+    ADD(list_control_st, lists, append_array, TYPE_ARR)
+}
+
+char add_json_dict(json_dict_st *jd, char *key, json_dict_st *value)
+{
+    if (value == NULL)
+    {
+        return FAILURE;
+    }
+    ADD(json_dict_control_st, json_dicts, append_json_dict, TYPE_DICT)
 }
 
 /***************************************
@@ -136,21 +143,21 @@ char add_str_to_array(json_dict_st *jd, json_array_st *ja, char *value)
 
     array_append(
         ja,
-        (struct array_elt){ .value = append_str(jd, value), .type = TYPE_STR });
+        (typed_value_st){ .value = append_str(jd, value), .type = TYPE_STR });
     return SUCCESS;
 }
 
-char add_num_to_array(json_dict_st *jd, json_array_st *ja, long value)
+char add_int_to_array(json_dict_st *jd, json_array_st *ja, int64_t value)
 {
     if (jd == NULL || ja == NULL)
     {
         return FAILURE;
     }
 
-    if (jd->numbers == NULL)
+    if (jd->integers == NULL)
     {
-        jd->numbers = calloc(1, sizeof(num_control_st));
-        if (jd->numbers == NULL)
+        jd->integers = calloc(1, sizeof(int64_t_control_st));
+        if (jd->integers == NULL)
         {
             destroy_dict(jd);
             return FAILURE;
@@ -159,7 +166,88 @@ char add_num_to_array(json_dict_st *jd, json_array_st *ja, long value)
 
     array_append(
         ja,
-        (struct array_elt){ .value = append_num(jd, value), .type = TYPE_NUM });
+        (typed_value_st){ .value = append_int(jd, value), .type = TYPE_INT });
+    return SUCCESS;
+}
+
+char add_double_to_array(json_dict_st *jd, json_array_st *ja, double value)
+{
+    if (jd == NULL || ja == NULL)
+    {
+        return FAILURE;
+    }
+
+    if (jd->doubles == NULL)
+    {
+        jd->doubles = calloc(1, sizeof(double_control_st));
+        if (jd->doubles == NULL)
+        {
+            destroy_dict(jd);
+            return FAILURE;
+        }
+    }
+
+    array_append(ja,
+                 (typed_value_st){ .value = append_double(jd, value),
+                                   .type = TYPE_DOUBLE });
+    return SUCCESS;
+}
+
+char add_bool_to_array(json_dict_st *jd, json_array_st *ja, char value)
+{
+    if (jd == NULL || ja == NULL)
+    {
+        return FAILURE;
+    }
+
+    if (jd->booleans == NULL)
+    {
+        jd->booleans = calloc(1, sizeof(bool_control_st));
+        if (jd->booleans == NULL)
+        {
+            destroy_dict(jd);
+            return FAILURE;
+        }
+    }
+
+    array_append(
+        ja,
+        (typed_value_st){ .value = append_bool(jd, value), .type = TYPE_BOOL });
+    return SUCCESS;
+}
+
+char add_null_to_array(json_dict_st *jd, json_array_st *ja)
+{
+    if (jd == NULL || ja == NULL)
+    {
+        return FAILURE;
+    }
+
+    array_append(ja, (typed_value_st){ .value = NULL, .type = TYPE_NULL });
+    return SUCCESS;
+}
+
+char add_array_to_array(json_dict_st *jd, json_array_st *ja,
+                        json_array_st *value)
+{
+    if (jd == NULL || ja == NULL || value == NULL)
+    {
+        return FAILURE;
+    }
+
+    if (jd->lists == NULL)
+    {
+        jd->lists = calloc(1, sizeof(list_control_st));
+        if (jd->lists == NULL)
+        {
+            destroy_dict(jd);
+            return FAILURE;
+        }
+    }
+
+    array_append(
+        ja,
+        (typed_value_st){ .value = append_array(jd, value), .type = TYPE_ARR });
     return SUCCESS;
 }
 
@@ -182,66 +270,8 @@ char add_json_dict_to_array(json_dict_st *jd, json_array_st *ja,
     }
 
     array_append(ja,
-                 (struct array_elt){ .value = append_json_dict(jd, value),
-                                     .type = TYPE_OBJ });
-    return SUCCESS;
-}
-
-char add_array_to_array(json_dict_st *jd, json_array_st *ja,
-                        json_array_st *value)
-{
-    if (jd == NULL || ja == NULL || value == NULL)
-    {
-        return FAILURE;
-    }
-
-    if (jd->lists == NULL)
-    {
-        jd->lists = calloc(1, sizeof(list_control_st));
-        if (jd->lists == NULL)
-        {
-            destroy_dict(jd);
-            return FAILURE;
-        }
-    }
-
-    array_append(ja,
-                 (struct array_elt){ .value = append_array(jd, value),
-                                     .type = TYPE_ARR });
-    return SUCCESS;
-}
-
-char add_bool_to_array(json_dict_st *jd, json_array_st *ja, char value)
-{
-    if (jd == NULL || ja == NULL)
-    {
-        return FAILURE;
-    }
-
-    if (jd->booleans == NULL)
-    {
-        jd->booleans = calloc(1, sizeof(bool_control_st));
-        if (jd->booleans == NULL)
-        {
-            destroy_dict(jd);
-            return FAILURE;
-        }
-    }
-
-    array_append(ja,
-                 (struct array_elt){ .value = append_bool(jd, value),
-                                     .type = TYPE_BOOL });
-    return SUCCESS;
-}
-
-char add_null_to_array(json_dict_st *jd, json_array_st *ja)
-{
-    if (jd == NULL || ja == NULL)
-    {
-        return FAILURE;
-    }
-
-    array_append(ja, (struct array_elt){ .value = NULL, .type = TYPE_NULL });
+                 (typed_value_st){ .value = append_json_dict(jd, value),
+                                   .type = TYPE_DICT });
     return SUCCESS;
 }
 

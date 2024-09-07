@@ -66,18 +66,25 @@ char *append_str(json_dict_st *jd, char *value);
 void destroy_str_control(str_control_st *sc);
 
 /***************************************
-**                NUM                 **
+**                INT                 **
 ***************************************/
-long *append_num(json_dict_st *jd, long value);
+int64_t *append_int(json_dict_st *jd, int64_t value);
 
-void destroy_num_control(num_control_st *ctrl);
+void destroy_int_control(int64_t_control_st *ctrl);
 
 /***************************************
-**             JSON DICT              **
+**               DOUBLE               **
 ***************************************/
-json_dict_st *append_json_dict(json_dict_st *jd, json_dict_st *value);
+double *append_double(json_dict_st *jd, double value);
 
-void destroy_json_dict_control(json_dict_control_st *ctrl);
+void destroy_double_control(double_control_st *ctrl);
+
+/***************************************
+**               BOOL                 **
+***************************************/
+char *append_bool(json_dict_st *jd, char value);
+
+void destroy_bool_control(bool_control_st *ctrl);
 
 /***************************************
 **               ARRAY                **
@@ -87,11 +94,11 @@ json_array_st *append_array(json_dict_st *jd, json_array_st *value);
 void destroy_array_control(list_control_st *ctrl);
 
 /***************************************
-**               BOOL                 **
+**             JSON DICT              **
 ***************************************/
-char *append_bool(json_dict_st *jd, char value);
+json_dict_st *append_json_dict(json_dict_st *jd, json_dict_st *value);
 
-void destroy_bool_control(bool_control_st *ctrl);
+void destroy_json_dict_control(json_dict_control_st *ctrl);
 
 /***********************************************************
 **                         UTILS                          **

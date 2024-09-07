@@ -106,7 +106,7 @@
 **                       LILFECYCLE                       **
 ***********************************************************/
 /***************************************
-**               item                 **
+**               ITEM                 **
 ***************************************/
 struct item *append_item(json_dict_st *jd, struct item *value)
 {
@@ -154,34 +154,32 @@ char *append_str(json_dict_st *jd, char *value)
     return tmp->strings[ctrl->idx++];
 }
 
-void destroy_str_control(str_control_st *ctrl)
-{
-    DESTROY(str_link, strings)
-}
+void destroy_str_control(str_control_st *ctrl){ DESTROY(str_link, strings) }
 
 /***************************************
 **                NUM                 **
 ***************************************/
-long *append_num(json_dict_st *jd, long value)
+int64_t *append_int(json_dict_st *jd, int64_t value)
 {
     if (jd == NULL)
     {
         return NULL;
     }
-    APPEND(num_control_st, num_link, numbers, jd->numbers->nb_num, 0)
-    return &tmp->numbers[ctrl->idx++];
+    APPEND(int64_t_control_st, int64_t_link, integers, jd->integers->nb_int, 0)
+    return &tmp->integers[ctrl->idx++];
 }
 
-void destroy_num_control(num_control_st *ctrl)
+void destroy_int_control(int64_t_control_st *ctrl)
 {
     if (ctrl == NULL)
     {
         return;
     }
-    struct num_link *tmp = ctrl->head;
+
+    struct int64_t_link *tmp = ctrl->head;
     while (tmp != NULL)
     {
-        struct num_link *to_del = tmp;
+        struct int64_t_link *to_del = tmp;
         tmp = tmp->next;
         free(to_del);
     }
@@ -189,35 +187,59 @@ void destroy_num_control(num_control_st *ctrl)
 }
 
 /***************************************
-**             JSON DICT              **
+**               DOUBLE               **
 ***************************************/
-json_dict_st *append_json_dict(json_dict_st *jd, json_dict_st *value)
+double *append_double(json_dict_st *jd, double value)
 {
-    if (jd == NULL || value == NULL)
+    if (jd == NULL)
     {
         return NULL;
     }
-    APPEND(json_dict_control_st, json_dict_link, json_dicts,
-           jd->json_dicts->nb_json_dicts, 0)
-    return tmp->json_dicts[ctrl->idx++];
+    APPEND(double_control_st, double_link, doubles, jd->doubles->nb_double, 0)
+    return &tmp->doubles[ctrl->idx++];
 }
 
-void destroy_json_dict_control(json_dict_control_st *ctrl)
+void destroy_double_control(double_control_st *ctrl)
 {
     if (ctrl == NULL)
     {
         return;
     }
 
-    struct json_dict_link *tmp = ctrl->head;
+    struct double_link *tmp = ctrl->head;
     while (tmp != NULL)
     {
-        struct json_dict_link *to_del = tmp;
+        struct double_link *to_del = tmp;
         tmp = tmp->next;
-        for (int i = 0; i < ARRAY_LEN; ++i)
-        {
-            destroy_dict(to_del->json_dicts[i]);
-        }
+        free(to_del);
+    }
+    free(ctrl);
+}
+
+/***************************************
+**               BOOL                 **
+***************************************/
+char *append_bool(json_dict_st *jd, char value)
+{
+    if (jd == NULL)
+    {
+        return NULL;
+    }
+    APPEND(bool_control_st, bool_link, booleans, jd->booleans->nb_bool, 0)
+    return &tmp->booleans[ctrl->idx++];
+}
+
+void destroy_bool_control(bool_control_st *ctrl)
+{
+    if (ctrl == NULL)
+    {
+        return;
+    }
+    struct bool_link *tmp = ctrl->head;
+    while (tmp != NULL)
+    {
+        struct bool_link *to_del = tmp;
+        tmp = tmp->next;
         free(to_del);
     }
     free(ctrl);
@@ -262,29 +284,35 @@ void destroy_array_control(list_control_st *ctrl)
 }
 
 /***************************************
-**               BOOL                 **
+**             JSON DICT              **
 ***************************************/
-char *append_bool(json_dict_st *jd, char value)
+json_dict_st *append_json_dict(json_dict_st *jd, json_dict_st *value)
 {
-    if (jd == NULL)
+    if (jd == NULL || value == NULL)
     {
         return NULL;
     }
-    APPEND(bool_control_st, bool_link, booleans, jd->booleans->nb_bool, 0)
-    return &tmp->booleans[ctrl->idx++];
+    APPEND(json_dict_control_st, json_dict_link, json_dicts,
+           jd->json_dicts->nb_json_dicts, 0)
+    return tmp->json_dicts[ctrl->idx++];
 }
 
-void destroy_bool_control(bool_control_st *ctrl)
+void destroy_json_dict_control(json_dict_control_st *ctrl)
 {
     if (ctrl == NULL)
     {
         return;
     }
-    struct bool_link *tmp = ctrl->head;
+
+    struct json_dict_link *tmp = ctrl->head;
     while (tmp != NULL)
     {
-        struct bool_link *to_del = tmp;
+        struct json_dict_link *to_del = tmp;
         tmp = tmp->next;
+        for (int i = 0; i < ARRAY_LEN; ++i)
+        {
+            destroy_dict(to_del->json_dicts[i]);
+        }
         free(to_del);
     }
     free(ctrl);

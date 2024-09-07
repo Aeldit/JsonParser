@@ -9,7 +9,9 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    json_dict_st *jd = parse(argv[1]);
+    printf("%s\n", argv[0]);
+
+    /*json_dict_st *jd = parse(argv[1]);
     if (jd == NULL)
     {
         return 1;
@@ -21,6 +23,8 @@ int main(int argc, char *argv[])
         print_array((json_array_st *)tv.value);
     }
 
-    destroy_dict(jd);
+    destroy_dict(jd);*/
+
+    printf("%lu\n", sizeof(struct json_dict));
     return 0;
 }

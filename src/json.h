@@ -4,7 +4,7 @@
 /*******************************************************************************
 **                                  INCLUDES                                  **
 *******************************************************************************/
-#include <stddef.h>
+#include <stdint.h>
 
 #include "lists/json_array.h"
 
@@ -41,16 +41,22 @@ struct str_link
     struct str_link *next;
 };
 
-struct num_link
+struct int64_t_link
 {
-    long numbers[ARRAY_LEN];
-    struct num_link *next;
+    int64_t integers[ARRAY_LEN];
+    struct int64_t_link *next;
 };
 
-struct json_dict_link
+struct double_link
 {
-    json_dict_st *json_dicts[ARRAY_LEN];
-    struct json_dict_link *next;
+    double doubles[ARRAY_LEN];
+    struct double_link *next;
+};
+
+struct bool_link
+{
+    char booleans[ARRAY_LEN];
+    struct bool_link *next;
 };
 
 struct array_link
@@ -59,10 +65,10 @@ struct array_link
     struct array_link *next;
 };
 
-struct bool_link
+struct json_dict_link
 {
-    char booleans[ARRAY_LEN];
-    struct bool_link *next;
+    json_dict_st *json_dicts[ARRAY_LEN];
+    struct json_dict_link *next;
 };
 
 /**
@@ -89,25 +95,18 @@ struct str_control
     struct str_link *head;
 };
 
-struct num_control
+struct int64_t_control
 {
-    size_t nb_num;
+    size_t nb_int;
     size_t idx;
-    struct num_link *head;
+    struct int64_t_link *head;
 };
 
-struct json_dict_control
+struct double_control
 {
-    size_t nb_json_dicts;
+    size_t nb_double;
     size_t idx;
-    struct json_dict_link *head;
-};
-
-struct list_control
-{
-    size_t nb_arrays;
-    size_t idx;
-    struct array_link *head;
+    struct double_link *head;
 };
 
 struct bool_control
@@ -117,14 +116,29 @@ struct bool_control
     struct bool_link *head;
 };
 
+struct list_control
+{
+    size_t nb_arrays;
+    size_t idx;
+    struct array_link *head;
+};
+
+struct json_dict_control
+{
+    size_t nb_json_dicts;
+    size_t idx;
+    struct json_dict_link *head;
+};
+
 typedef struct item_control item_control_st;
 typedef struct key_control key_control_st;
 
 typedef struct str_control str_control_st;
-typedef struct num_control num_control_st;
-typedef struct json_dict_control json_dict_control_st;
-typedef struct list_control list_control_st;
+typedef struct int64_t_control int64_t_control_st;
+typedef struct double_control double_control_st;
 typedef struct bool_control bool_control_st;
+typedef struct list_control list_control_st;
+typedef struct json_dict_control json_dict_control_st;
 
 /**
 ** \brief Represents a key:value item
@@ -140,13 +154,6 @@ struct item
     unsigned char type;
 };
 
-/**
-** \param strings Contains all the string values of the json object
-** \param numbers Contains all the number values of the json object
-** \param json_dicts Contains all the json_dicts of the json object
-** \param lists Contains all the list values of the json object
-** \param booleans Contains all the boolean values of the json dict
-*/
 struct json_dict
 {
     size_t nb_items;
@@ -154,10 +161,11 @@ struct json_dict
     key_control_st *keys;
 
     str_control_st *strings;
-    num_control_st *numbers;
-    json_dict_control_st *json_dicts;
-    list_control_st *lists;
+    int64_t_control_st *integers;
+    double_control_st *doubles;
     bool_control_st *booleans;
+    list_control_st *lists;
+    json_dict_control_st *json_dicts;
 };
 
 /*******************************************************************************
@@ -179,17 +187,12 @@ char add_str(json_dict_st *jd, char *key, char *value);
 /**
 ** \brief Adds a key:value pair of number type to the 'jd' json dict
 */
-char add_num(json_dict_st *jd, char *key, long value);
+char add_int(json_dict_st *jd, char *key, int64_t value);
 
 /**
-** \brief Adds a key:value pair of json dict type to the 'jd' json dict
+** \brief Adds a key:value pair of double type to the 'jd' json dict
 */
-char add_json_dict(json_dict_st *jd, char *key, json_dict_st *dict);
-
-/**
-** \brief Adds a key:value pair of list type to the 'jd' json dict
-*/
-char add_array(json_dict_st *jd, char *key, json_array_st *list);
+char add_double(json_dict_st *jd, char *key, double value);
 
 /**
 ** \brief Adds a key:value pair of boolean type to the 'jd' json dict
@@ -201,22 +204,34 @@ char add_bool(json_dict_st *jd, char *key, char value);
 */
 char add_null(json_dict_st *jd, char *key);
 
+/**
+** \brief Adds a key:value pair of list type to the 'jd' json dict
+*/
+char add_array(json_dict_st *jd, char *key, json_array_st *list);
+
+/**
+** \brief Adds a key:value pair of json dict type to the 'jd' json dict
+*/
+char add_json_dict(json_dict_st *jd, char *key, json_dict_st *dict);
+
 /***************************************
 **                ARRAY               **
 ***************************************/
 char add_str_to_array(json_dict_st *jd, json_array_st *ja, char *value);
 
-char add_num_to_array(json_dict_st *jd, json_array_st *ja, long value);
+char add_int_to_array(json_dict_st *jd, json_array_st *ja, int64_t value);
 
-char add_json_dict_to_array(json_dict_st *jd, json_array_st *ja,
-                            json_dict_st *value);
-
-char add_array_to_array(json_dict_st *jd, json_array_st *ja,
-                        json_array_st *value);
+char add_double_to_array(json_dict_st *jd, json_array_st *ja, double value);
 
 char add_bool_to_array(json_dict_st *jd, json_array_st *ja, char value);
 
 char add_null_to_array(json_dict_st *jd, json_array_st *ja);
+
+char add_array_to_array(json_dict_st *jd, json_array_st *ja,
+                        json_array_st *value);
+
+char add_json_dict_to_array(json_dict_st *jd, json_array_st *ja,
+                            json_dict_st *value);
 
 size_t get_nb_items(json_dict_st *jd);
 
