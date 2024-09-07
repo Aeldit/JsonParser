@@ -8,7 +8,6 @@
 #include <stdlib.h>
 
 #include "linked_list.h"
-#include "values_storage.h"
 
 /*******************************************************************************
 **                              DEFINES / MACROS                              **
@@ -39,8 +38,6 @@ struct str_and_len_tuple
 /*******************************************************************************
 **                              LOCAL FUNCTIONS                               **
 *******************************************************************************/
-json_dict_st *parse_json_dict(storage_st *s, FILE *f, uint64_t *pos);
-
 /**
 ** \brief Reads the string at position 'pos' in the given file, and returns it
 ** \param f The file stream
@@ -444,10 +441,86 @@ uint64_t get_nb_elts_array(FILE *f, uint64_t pos)
 
 /**
 ** \param f The file stream
-** \param pos The pos of the character just after the '[' that begins the
-**            current array
-** \returns The json array parsed at the pos
+** \param pos The pos of the character just after the '{' that begins the
+**            current dict
+** \returns The number of elements of the current dict
 */
+uint64_t get_nb_elts_dict(FILE *f, uint64_t pos)
+{
+    if (f == NULL)
+    {
+        return 0;
+    }
+
+    uint64_t offset = pos;
+    if (fseek(f, offset++, SEEK_SET) != 0)
+    {
+        return 0;
+    }
+
+    uint64_t size = 0;
+    // Used for the case where the dict contains only one element, and so does
+    // not contain a ','
+    uint64_t single_elt_found = 0;
+
+    char c = '\0';
+    char is_in_dict = 1;
+    char is_in_array = 0;
+    char is_in_string = 0;
+    char is_backslashing = 0;
+    while ((c = fgetc(f)) != EOF)
+    {
+        if (!is_in_dict)
+        {
+            break;
+        }
+
+        if (c == '\\')
+        {
+            is_backslashing = !is_backslashing;
+        }
+
+        // If we are not in a string or if the string just ended
+        if (!is_in_string || (is_in_string && c == '"' && !is_backslashing))
+        {
+            if (c == '"')
+            {
+                is_in_string = !is_in_string;
+                single_elt_found = 1;
+            }
+            else if (c == '[')
+            {
+                ++is_in_array;
+            }
+            else if (c == ']')
+            {
+                --is_in_array;
+            }
+            else if (c == '{')
+            {
+                ++is_in_dict;
+            }
+            else if (c == '}')
+            {
+                --is_in_dict;
+            }
+            else if (!is_in_array && is_in_dict == 1 && c == ',')
+            {
+                ++size;
+            }
+        }
+
+        if (fseek(f, offset++, SEEK_SET) != 0)
+        {
+            break;
+        }
+    }
+    return size == 0 ? single_elt_found : size + 1;
+}
+
+/*******************************************************************************
+**                                 FUNCTIONS                                  **
+*******************************************************************************/
 json_array_st *parse_array(storage_st *s, FILE *f, uint64_t *pos)
 {
     if (f == NULL || pos == NULL)
@@ -564,91 +637,6 @@ json_array_st *parse_array(storage_st *s, FILE *f, uint64_t *pos)
     return ja;
 }
 
-/**
-** \param f The file stream
-** \param pos The pos of the character just after the '{' that begins the
-**            current dict
-** \returns The number of elements of the current dict
-*/
-uint64_t get_nb_elts_dict(FILE *f, uint64_t pos)
-{
-    if (f == NULL)
-    {
-        return 0;
-    }
-
-    uint64_t offset = pos;
-    if (fseek(f, offset++, SEEK_SET) != 0)
-    {
-        return 0;
-    }
-
-    uint64_t size = 0;
-    // Used for the case where the dict contains only one element, and so does
-    // not contain a ','
-    uint64_t single_elt_found = 0;
-
-    char c = '\0';
-    char is_in_dict = 1;
-    char is_in_array = 0;
-    char is_in_string = 0;
-    char is_backslashing = 0;
-    while ((c = fgetc(f)) != EOF)
-    {
-        if (!is_in_dict)
-        {
-            break;
-        }
-
-        if (c == '\\')
-        {
-            is_backslashing = !is_backslashing;
-        }
-
-        // If we are not in a string or if the string just ended
-        if (!is_in_string || (is_in_string && c == '"' && !is_backslashing))
-        {
-            if (c == '"')
-            {
-                is_in_string = !is_in_string;
-                single_elt_found = 1;
-            }
-            else if (c == '[')
-            {
-                ++is_in_array;
-            }
-            else if (c == ']')
-            {
-                --is_in_array;
-            }
-            else if (c == '{')
-            {
-                ++is_in_dict;
-            }
-            else if (c == '}')
-            {
-                --is_in_dict;
-            }
-            else if (!is_in_array && is_in_dict == 1 && c == ',')
-            {
-                ++size;
-            }
-        }
-
-        if (fseek(f, offset++, SEEK_SET) != 0)
-        {
-            break;
-        }
-    }
-    return size == 0 ? single_elt_found : size + 1;
-}
-
-/**
-** \param f The file stream
-** \param pos The pos of the character just after the '[' that begins the
-**            current array
-** \returns The json dict parsed at the pos
-*/
 json_dict_st *parse_json_dict(storage_st *s, FILE *f, uint64_t *pos)
 {
     if (f == NULL || pos == NULL)
@@ -681,7 +669,6 @@ json_dict_st *parse_json_dict(storage_st *s, FILE *f, uint64_t *pos)
             {
                 char *value = parse_string(f, pos);
                 char *stored = store_string(s, value);
-                printf("%s\n", stored);
                 if (stored != NULL)
                 {
                     addItem(jd, ITEM_OF(key, stored, TYPE_STR));
@@ -772,39 +759,4 @@ json_dict_st *parse_json_dict(storage_st *s, FILE *f, uint64_t *pos)
     }
     --(*pos);
     return jd;
-}
-
-/*******************************************************************************
-**                                 FUNCTIONS                                  **
-*******************************************************************************/
-json_st parse(char *file)
-{
-    FILE *f = fopen(file, "r");
-    json_st j = { 0 };
-    j.storage = calloc(1, sizeof(storage_st));
-    if (f == NULL)
-    {
-        return j;
-    }
-
-    uint64_t offset = 0;
-    if (fseek(f, offset++, SEEK_SET) != 0)
-    {
-        fclose(f);
-        return j;
-    }
-
-    char c = fgetc(f);
-    if (c == '{')
-    {
-        j.is_array = 0;
-        j.jd = parse_json_dict(j.storage, f, &offset);
-    }
-    else if (c == '[')
-    {
-        j.is_array = 1;
-        j.ja = parse_array(j.storage, f, &offset);
-    }
-    fclose(f);
-    return j;
 }

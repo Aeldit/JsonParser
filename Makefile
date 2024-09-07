@@ -4,6 +4,7 @@ CC=gcc
 CFILES=src/linked_list.c \
 	src/values_storage.c \
 	src/main.c \
+	src/json_api.c \
 	src/parser.c
 
 all: clean json-parser

@@ -4,11 +4,27 @@
 /*******************************************************************************
 **                                  INCLUDES                                  **
 *******************************************************************************/
-#include "json.h"
+#include "linked_list.h"
+#include "parser.h"
+
+/*******************************************************************************
+**                                 STRUCTURES                                 **
+*******************************************************************************/
+struct json
+{
+    char is_array;
+    storage_st *storage;
+    json_array_st *ja;
+    json_dict_st *jd;
+};
+
+typedef struct json json_st;
 
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
+json_st parse(char *file);
+
 /**
 ** \brief Searches for the value associated with the given key and returns it if
 **        it exists.
@@ -16,11 +32,11 @@
 ** \param key The key
 ** \param key_len The length of the key
 */
-typed_value_st get_value(json_dict_st *jd, char *key, size_t key_len);
+typed_value_st get_value_at(json_array_st *ja, uint64_t index);
 
 /**
-** \brief Frees all the allocated parts of the 'jd' json dict
+** \brief Frees all the allocated parts of the json object
 */
-void destroy_dict(json_dict_st *jd);
+void destroy_json(json_st *j);
 
 #endif // !JSON_API_H

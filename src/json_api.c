@@ -3,55 +3,76 @@
 /*******************************************************************************
 **                                  INCLUDES                                  **
 *******************************************************************************/
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include "lists/linked_lists.h"
 
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
-typed_value_st get_value(json_dict_st *jd, char *key, size_t key_len)
+json_st parse(char *file)
 {
-    if (jd == NULL || key == NULL)
+    FILE *f = fopen(file, "r");
+    json_st j = { 0 };
+    j.storage = calloc(1, sizeof(storage_st));
+    if (f == NULL)
     {
-        return (typed_value_st){ .type = TYPE_ERROR, .value = NULL };
+        return j;
+    }
+
+    uint64_t offset = 0;
+    if (fseek(f, offset++, SEEK_SET) != 0)
+    {
+        fclose(f);
+        return j;
+    }
+
+    char c = fgetc(f);
+    if (c == '{')
+    {
+        j.is_array = 0;
+        j.jd = parse_json_dict(j.storage, f, &offset);
+    }
+    else if (c == '[')
+    {
+        j.is_array = 1;
+        j.ja = parse_array(j.storage, f, &offset);
+    }
+    fclose(f);
+    return j;
+}
+
+typed_value_st get_value_at(json_array_st *ja, uint64_t index)
+{
+    if (ja == NULL || index >= ja->size)
+    {
+        return (typed_value_st){ .value = NULL, .type = TYPE_ERROR };
     }
 
     // Iterates over the items
-    struct item_link *tmp = jd->items->head;
-    while (tmp != NULL)
+    uint64_t current_index = 0;
+    struct link_value *link = ja->head;
+    while (link != NULL)
     {
-        // Iterates over the keys
-        size_t len = tmp->next == NULL ? jd->items->idx : ARRAY_LEN;
-        for (size_t j = 0; j < len; ++j)
+        for (uint64_t i = 0; i < BASE_ARRAY_LEN; ++i, ++current_index)
         {
-            if (!strncmp(tmp->items[j]->key, key, key_len))
+            if (current_index == index)
             {
-                return (typed_value_st){ .type = tmp->items[j]->type,
-                                         .value = tmp->items[j]->value };
+                return link->elts[i];
             }
         }
-        tmp = tmp->next;
+        link = link->next;
     }
-    return (typed_value_st){ .type = TYPE_ERROR, .value = NULL };
+    return (typed_value_st){ .value = NULL, .type = TYPE_ERROR };
 }
 
-void destroy_dict(json_dict_st *jd)
+void destroy_json(json_st *j)
 {
-    if (jd == NULL)
+    if (j == NULL)
     {
         return;
     }
-
-    destroy_item_control(jd->items);
-    destroy_key_control(jd->keys);
-
-    destroy_str_control(jd->strings);
-    destroy_int_control(jd->integers);
-    destroy_double_control(jd->doubles);
-    destroy_json_dict_control(jd->json_dicts);
-    destroy_array_control(jd->lists);
-    destroy_bool_control(jd->booleans);
-    free(jd);
+    destroy_json_array(j->ja);
+    destroy_json_dict(j->jd);
+    destroy_storage(j->storage);
 }
