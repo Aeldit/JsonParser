@@ -89,6 +89,7 @@ struct str_and_len parse_string(FILE *f, uint64_t *pos)
 
     for (uint64_t i = 0; i < len; ++i)
     {
+        // TODO: Use fread or the likes to read all at once
         if (fseek(f, (*pos)++, SEEK_SET) != 0)
         {
             break;
@@ -530,7 +531,7 @@ uint64_t get_nb_elts_dict(FILE *f, uint64_t pos)
 *******************************************************************************/
 json_array_st *parse_array(storage_st *s, FILE *f, uint64_t *pos)
 {
-    if (f == NULL || pos == NULL)
+    if (s == NULL || f == NULL || pos == NULL)
     {
         return NULL;
     }
@@ -646,7 +647,7 @@ json_array_st *parse_array(storage_st *s, FILE *f, uint64_t *pos)
 
 json_dict_st *parse_json_dict(storage_st *s, FILE *f, uint64_t *pos)
 {
-    if (f == NULL || pos == NULL)
+    if (s == NULL || f == NULL || pos == NULL)
     {
         return NULL;
     }
@@ -656,6 +657,11 @@ json_dict_st *parse_json_dict(storage_st *s, FILE *f, uint64_t *pos)
     uint64_t nb_elts_parsed = 0;
 
     json_dict_st *jd = calloc(1, sizeof(json_dict_st));
+    if (nb_elts == 0)
+    {
+        return jd;
+    }
+
     if (fseek(f, (*pos)++, SEEK_SET) != 0)
     {
         return jd;
