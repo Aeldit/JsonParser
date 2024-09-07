@@ -2,6 +2,11 @@
 #define JSON_TYPES_H
 
 /*******************************************************************************
+**                                  INCLUDES                                  **
+*******************************************************************************/
+#include <stdint.h>
+
+/*******************************************************************************
 **                              DEFINES / MACROS                              **
 *******************************************************************************/
 #define TYPE_STR 0
@@ -27,6 +32,22 @@ struct typed_value
     unsigned char type;
 };
 
+/**
+** \brief Represents a key:value item
+** \param key The key
+** \param value Points to the value of the type 'type' inside the corresponding
+**        linked list
+** \param type The type of the data to which 'value' points
+*/
+struct item
+{
+    char *key;
+    void *value;
+    uint64_t key_len;
+    unsigned char type;
+};
+
 typedef struct typed_value typed_value_st;
+typedef struct item item_st;
 
 #endif // !JSON_TYPES_H

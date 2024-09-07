@@ -1,34 +1,38 @@
-{
-  "first": "t",
-  "empty": {},
-  "next": "sadwda",
-  "test": -512,
-  "testing": 64220,
-  "array": [
-    1,
-    2,
-    [],
-    3,
-    ["testing", 5, ["dd", true, 5], {}],
-    {},
-    {
-      "first": "t"
-    },
-    {}
-  ],
-  "b1": false,
-  "a": [],
-  "te": {
-    "first": "t",
+[
+  {
+    "first": "y",
+    "empty": {},
     "next": "sadwda",
     "test": -512,
     "testing": 64220,
-    "array": [1, 2, 3, ["testing", 5, ["dd", true, 5]]],
-    "b1": false,
-    "b2": true,
-    "b3": true
+    "array": [
+      1,
+      2,
+      [],
+      3,
+      ["testing", 5, ["dd", true, 5], {}],
+      {},
+      {
+        "first": "w"
+      },
+      {}
+    ]
   },
-  "b2": true,
-  "b3": true,
-  "t": []
-}
+  {
+    "b1": false,
+    "a": [],
+    "te": {
+      "first": "z",
+      "next": "sadwda",
+      "test": -512,
+      "testing": 64220,
+      "array": [1, 2, 3, ["testing", 5, ["dd", true, 5]]],
+      "b1": false,
+      "b2": true,
+      "b3": true
+    },
+    "b2": true,
+    "b3": true,
+    "x": []
+  }
+]

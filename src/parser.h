@@ -4,33 +4,27 @@
 /*******************************************************************************
 **                                  INCLUDES                                  **
 *******************************************************************************/
-#include "json.h"
+#include <stdio.h>
 
-/*******************************************************************************
-**                                 STRUCTURES                                 **
-*******************************************************************************/
-struct states
-{
-    char is_in_json;
-    char is_in_array;
-    char is_in_str;
-    char is_in_key;
-    char is_in_value;
-    char is_waiting_key;
-};
-
-struct json
-{
-    char is_array;
-    json_dict_st *jd;
-    json_array_st *ja;
-};
-
-typedef struct json json_st;
+#include "values_storage.h"
 
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
-json_st parse(char *file);
+/**
+** \param f The file stream
+** \param pos The pos of the character just after the '[' that begins the
+**            current array
+** \returns The json array parsed at the pos
+*/
+json_array_st *parse_array(storage_st *s, FILE *f, uint64_t *pos);
+
+/**
+** \param f The file stream
+** \param pos The pos of the character just after the '[' that begins the
+**            current array
+** \returns The json dict parsed at the pos
+*/
+json_dict_st *parse_json_dict(storage_st *s, FILE *f, uint64_t *pos);
 
 #endif // !JSON_PARSER_H
