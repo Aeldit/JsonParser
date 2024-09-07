@@ -1,31 +1,21 @@
 -include Makefile.rules
 
+CC=gcc
 CFILES=src/lists/json_array.c \
 	src/lists/linked_lists.c \
-	src/api.c \
+	src/json_api.c \
 	src/json.c \
 	src/main.c \
 	src/parser.c \
 	src/printing.c
 
-OBJS=${CFILES:.c=.o}
-
-JSONFILES=*.json
-
-all: json-parser
-	./json-parser $(JSONFILES)
+all: clean json-parser
+	./json-parser ../JsonParserCPP/big.json
 
 .PHONY:
-json-parser: $(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) -o json-parser
-
-lib:
-	$(CC) $(CFLAGS) -c $(CFILES) -fpic
-	$(CC) $(CFLAGS) *.o -shared -o libjson-parser.so
-	rm *.o
+json-parser:
+	$(CC) $(CFLAGS) $(CFILES) -o json-parser \
+		-lm # math library for pow function
 
 clean:
-	rm src/*.o
-	rm -r src/lists/*.o
-	rm json-parser
-	rm *.so
+	if [ -f "json-parser" ]; then rm json-parser; fi
