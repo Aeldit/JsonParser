@@ -1,6 +1,6 @@
 # Json Parser
 
-![logo](https://raw.githubusercontent.com/Aeldit/Aeldit/55eac547aa6b50a11fb0bb6dc6e3eacc6b9b35ca/github_profile/JSONParser.svg)
+![logo](https://raw.githubusercontent.com/Aeldit/Aeldit/2c162a9bf611658c32247bd5bba500a30d1b6ad9/github_profile/json-parser.svg)
 
 ![nvim](https://raw.githubusercontent.com/Aeldit/Aeldit/267a0998a55b0462b042d3e471c02f137dbad551/images/nvim.svg)
 ![c](https://raw.githubusercontent.com/Aeldit/Aeldit/267a0998a55b0462b042d3e471c02f137dbad551/images/made_with_c.svg)
