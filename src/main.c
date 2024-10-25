@@ -10,11 +10,16 @@ int main(int argc, char *argv[])
     }
 
     Array a = init_array(5);
+
+    String s1 = { .str = "Test", .length = 4 };
+    String s2 = { .str = "Hello", .length = 5 };
+
     arr_add_int(&a, 1);
     arr_add_int(&a, 2);
-    arr_add_int(&a, 3);
-    arr_add_int(&a, 4);
+    arr_add_str(&a, s1);
+    arr_add_str(&a, s2);
     arr_add_int(&a, 5);
+
     for (int i = 0; i < a.size; ++i)
     {
         ArrayLink al = array_get(&a, i);
@@ -28,6 +33,7 @@ int main(int argc, char *argv[])
             break;
         }
     }
+
     destroy_array(&a);
     return 0;
 }

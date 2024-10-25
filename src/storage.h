@@ -35,12 +35,15 @@ struct array_linked_list
 {
     int size;
     int insert_idx;
+
     // Stores for each index the type of the value, allowing us to not have to
     // search inside all linked lists
     char indexes_types[10];
+
     // Pointers to the head of each linked list
     StrArrLink *strings_head;
     IntArrLink *integers_head;
+
     // Stores the tail of each linked list, to allow faster access
     StrArrLink *strings_tail;
     IntArrLink *integers_tail;
@@ -49,7 +52,10 @@ struct array_linked_list
 typedef struct array_linked_list Array;
 
 Array init_array(int size);
+
+void arr_add_str(Array *a, String value);
 void arr_add_int(Array *ial, int value);
+
 ArrayLink array_get(Array *a, int index);
 void destroy_array(Array *ial);
 
