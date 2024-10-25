@@ -81,7 +81,7 @@ struct array_linked_list
 
     // Stores for each index the type of the value, allowing us to not have to
     // search inside all linked lists
-    char indexes_types[10];
+    char *indexes_types;
 
     // Pointers to the head of each linked list
     StrArrLink *strings_head;
@@ -100,16 +100,20 @@ struct array_linked_list
     ArrArrLink *arrays_tail;
 };
 
+/**
+** \brief The size of the returned array is 0, it means that an error occured
+**        when allocating the indexes_types array
+*/
 Array init_array(int size);
 
 void arr_add_str(Array *a, String value);
-void arr_add_int(Array *ial, int value);
-void arr_add_double(Array *ial, double value);
-void arr_add_bool(Array *ial, char value);
-void arr_add_null(Array *ial);
-void arr_add_arr(Array *ial, Array *value);
+void arr_add_int(Array *a, int value);
+void arr_add_double(Array *a, double value);
+void arr_add_bool(Array *a, char value);
+void arr_add_null(Array *a);
+void arr_add_arr(Array *a, Array *value);
 
 ArrayLink array_get(Array *a, int index);
-void destroy_array(Array *ial);
+void destroy_array(Array *a);
 
 #endif // !STORAGE_H

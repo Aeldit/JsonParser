@@ -1,5 +1,4 @@
-#include <stdio.h>
-
+#include "printing.h"
 #include "storage.h"
 
 int main(int argc, char *argv[])
@@ -26,30 +25,13 @@ int main(int argc, char *argv[])
     arr_add_double(&a, 0.5);
     arr_add_double(&a, 55.789);
 
-    for (int i = 0; i < a.size; ++i)
-    {
-        ArrayLink al = array_get(&a, i);
-        switch (al.type)
-        {
-        case T_STR:
-            printf("%s\n", al.strv.str ? al.strv.str : "");
-            break;
-        case T_INT:
-            printf("%d\n", al.integerv);
-            break;
-        case T_DOUBLE:
-            printf("%f\n", al.doublev);
-            break;
-        case T_BOOL:
-            printf("%s\n", al.boolv ? "true" : "false");
-            break;
-        case T_NULL:
-            printf("null\n");
-            break;
-        case T_ARR:
-            break;
-        }
-    }
+    Array b = init_array(2);
+    arr_add_int(&b, 9);
+    arr_add_int(&b, 8);
+
+    arr_add_arr(&a, &b);
+
+    arr_print(&a);
 
     destroy_array(&a);
     return 0;

@@ -4,9 +4,18 @@
 
 Array init_array(int size)
 {
-    return (Array){ .size = size, .insert_idx = 0 };
+    char *indexes_types = calloc(size, sizeof(char));
+    if (!indexes_types)
+    {
+        size = 0;
+    }
+    return (
+        Array){ .size = size, .insert_idx = 0, .indexes_types = indexes_types };
 }
 
+/*******************************************************************************
+**                                    ADDS                                    **
+*******************************************************************************/
 void arr_add_str(Array *a, String value)
 {
     if (!a)
@@ -181,7 +190,7 @@ void arr_add_null(Array *a)
     a->indexes_types[a->insert_idx++] = T_NULL;
 }
 
-void arr_add_array(Array *a, Array *value)
+void arr_add_arr(Array *a, Array *value)
 {
     if (!a || !value)
     {
@@ -327,7 +336,7 @@ ArrayLink array_get(Array *a, int index)
 
 void destroy_array(Array *a)
 {
-    // free(a->indexes_types);
+    free(a->indexes_types);
 
     StrArrLink *sl = a->strings_head;
     while (sl)
@@ -374,6 +383,7 @@ void destroy_array(Array *a)
     {
         ArrArrLink *tmp = al;
         al = al->next;
+        destroy_array(tmp->value);
         free(tmp);
     }
 }
