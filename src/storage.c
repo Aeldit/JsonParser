@@ -13,8 +13,18 @@ Array init_array(int size)
         Array){ .size = size, .insert_idx = 0, .indexes_types = indexes_types };
 }
 
+Dict init_dict(int size)
+{
+    KeyType *keys_types = calloc(size, sizeof(KeyType));
+    if (!keys_types)
+    {
+        size = 0;
+    }
+    return (Dict){ .size = size, .insert_idx = 0, .keys_types = keys_types };
+}
+
 /*******************************************************************************
-**                                    ADDS                                    **
+**                                 ARRAYS ADDS                                **
 *******************************************************************************/
 void arr_add_str(Array *a, String value)
 {
@@ -225,6 +235,291 @@ void arr_add_arr(Array *a, Array *value)
     a->indexes_types[a->insert_idx++] = T_ARR;
 }
 
+void arr_add_dict(Array *a, Dict *value)
+{
+    if (!a || !value)
+    {
+        return;
+    }
+
+    if (!a->dicts_head)
+    {
+        DictArrLink *l = calloc(1, sizeof(DictArrLink));
+        if (!l)
+        {
+            return;
+        }
+        l->value = value;
+        l->index = a->insert_idx;
+        a->dicts_head = l;
+        a->dicts_tail = l;
+    }
+    else
+    {
+        // Goes to the last element of the linked list and adds the new element
+        DictArrLink *nl = calloc(1, sizeof(DictArrLink));
+        if (!nl)
+        {
+            return;
+        }
+        nl->value = value;
+        nl->index = a->insert_idx;
+        a->dicts_tail->next = nl;
+        a->dicts_tail = nl;
+    }
+    a->indexes_types[a->insert_idx++] = T_DICT;
+}
+
+/*******************************************************************************
+**                                 DICTS ADDS                                 **
+*******************************************************************************/
+void dict_add_str(Dict *d, String key, String value)
+{
+    if (!d)
+    {
+        return;
+    }
+
+    if (!d->strings_head)
+    {
+        StrDictLink *l = calloc(1, sizeof(StrDictLink));
+        if (!l)
+        {
+            return;
+        }
+        l->value = value;
+        l->key = key;
+        d->strings_head = l;
+        d->strings_tail = l;
+    }
+    else
+    {
+        // Goes to the last element of the linked list and adds the new element
+        StrDictLink *nl = calloc(1, sizeof(StrDictLink));
+        if (!nl)
+        {
+            return;
+        }
+
+        nl->value = value;
+        nl->key = key;
+        d->strings_tail->next = nl;
+        d->strings_tail = nl;
+    }
+    d->keys_types[d->insert_idx++] = (KeyType){ .key = key, .type = T_STR };
+}
+
+void dict_add_int(Dict *d, String key, int value)
+{
+    if (!d)
+    {
+        return;
+    }
+
+    if (!d->integers_head)
+    {
+        IntDictLink *l = calloc(1, sizeof(IntDictLink));
+        if (!l)
+        {
+            return;
+        }
+        l->value = value;
+        l->key = key;
+        d->integers_head = l;
+        d->integers_tail = l;
+    }
+    else
+    {
+        // Goes to the last element of the linked list and adds the new element
+        IntDictLink *nl = calloc(1, sizeof(IntDictLink));
+        if (!nl)
+        {
+            return;
+        }
+        nl->value = value;
+        nl->key = key;
+        d->integers_tail->next = nl;
+        d->integers_tail = nl;
+    }
+    d->keys_types[d->insert_idx++] = (KeyType){ .key = key, .type = T_INT };
+}
+
+void dict_add_double(Dict *d, String key, double value)
+{
+    if (!d)
+    {
+        return;
+    }
+
+    if (!d->doubles_head)
+    {
+        DoubleDictLink *l = calloc(1, sizeof(DoubleDictLink));
+        if (!l)
+        {
+            return;
+        }
+        l->value = value;
+        l->key = key;
+        d->doubles_head = l;
+        d->doubles_tail = l;
+    }
+    else
+    {
+        // Goes to the last element of the linked list and adds the new element
+        DoubleDictLink *nl = calloc(1, sizeof(DoubleDictLink));
+        if (!nl)
+        {
+            return;
+        }
+        nl->value = value;
+        nl->key = key;
+        d->doubles_tail->next = nl;
+        d->doubles_tail = nl;
+    }
+    d->keys_types[d->insert_idx++] = (KeyType){ .key = key, .type = T_DOUBLE };
+}
+
+void dict_add_bool(Dict *d, String key, char value)
+{
+    if (!d)
+    {
+        return;
+    }
+
+    if (!d->booleans_head)
+    {
+        BoolDictLink *l = calloc(1, sizeof(BoolDictLink));
+        if (!l)
+        {
+            return;
+        }
+        l->value = value;
+        l->key = key;
+        d->booleans_head = l;
+        d->booleans_tail = l;
+    }
+    else
+    {
+        // Goes to the last element of the linked list and adds the new element
+        BoolDictLink *nl = calloc(1, sizeof(BoolDictLink));
+        if (!nl)
+        {
+            return;
+        }
+        nl->value = value;
+        nl->key = key;
+        d->booleans_tail->next = nl;
+        d->booleans_tail = nl;
+    }
+    d->keys_types[d->insert_idx++] = (KeyType){ .key = key, .type = T_BOOL };
+}
+
+void dict_add_null(Dict *d, String key)
+{
+    if (!d)
+    {
+        return;
+    }
+
+    if (!d->nulls_head)
+    {
+        NullDictLink *l = calloc(1, sizeof(NullDictLink));
+        if (!l)
+        {
+            return;
+        }
+        l->key = key;
+        d->nulls_head = l;
+        d->nulls_tail = l;
+    }
+    else
+    {
+        // Goes to the last element of the linked list and adds the new element
+        NullDictLink *nl = calloc(1, sizeof(NullDictLink));
+        if (!nl)
+        {
+            return;
+        }
+        nl->key = key;
+        d->nulls_tail->next = nl;
+        d->nulls_tail = nl;
+    }
+    d->keys_types[d->insert_idx++] = (KeyType){ .key = key, .type = T_NULL };
+}
+
+void dict_add_arr(Dict *d, String key, Array *value)
+{
+    if (!d || !value)
+    {
+        return;
+    }
+
+    if (!d->arrays_head)
+    {
+        ArrDictLink *l = calloc(1, sizeof(ArrDictLink));
+        if (!l)
+        {
+            return;
+        }
+        l->value = value;
+        l->key = key;
+        d->arrays_head = l;
+        d->arrays_tail = l;
+    }
+    else
+    {
+        // Goes to the last element of the linked list and adds the new element
+        ArrDictLink *nl = calloc(1, sizeof(ArrDictLink));
+        if (!nl)
+        {
+            return;
+        }
+        nl->value = value;
+        nl->key = key;
+        d->arrays_tail->next = nl;
+        d->arrays_tail = nl;
+    }
+    d->keys_types[d->insert_idx++] = (KeyType){ .key = key, .type = T_ARR };
+}
+
+void dict_add_dict(Dict *d, String key, Dict *value)
+{
+    if (!d || !value)
+    {
+        return;
+    }
+
+    if (!d->dicts_head)
+    {
+        DictDictLink *l = calloc(1, sizeof(DictDictLink));
+        if (!l)
+        {
+            return;
+        }
+        l->value = value;
+        l->key = key;
+        d->dicts_head = l;
+        d->dicts_tail = l;
+    }
+    else
+    {
+        // Goes to the last element of the linked list and adds the new element
+        DictDictLink *nl = calloc(1, sizeof(DictDictLink));
+        if (!nl)
+        {
+            return;
+        }
+        nl->value = value;
+        nl->key = key;
+        d->dicts_tail->next = nl;
+        d->dicts_tail = nl;
+    }
+    d->keys_types[d->insert_idx++] = (KeyType){ .key = key, .type = T_DICT };
+}
+
+/*******************************************************************************
+**                                    GETS                                    **
+*******************************************************************************/
 ArrayLink array_get(Array *a, int index)
 {
     if (!a)
@@ -238,6 +533,7 @@ ArrayLink array_get(Array *a, int index)
     BoolArrLink *bl = 0;
     NullArrLink *nl = 0;
     ArrArrLink *al = 0;
+    DictArrLink *l = 0;
     switch (a->indexes_types[index])
     {
     case T_STR:
@@ -330,10 +626,172 @@ ArrayLink array_get(Array *a, int index)
             al = al->next;
         }
         return (ArrayLink){ .type = T_ARR, .arrayv = al->value };
+    case T_DICT:
+        l = a->dicts_head;
+        if (!l)
+        {
+            return (ArrayLink){ .type = T_ERROR };
+        }
+        while (l->next)
+        {
+            if (l->index == index)
+            {
+                break;
+            }
+            l = l->next;
+        }
+        return (ArrayLink){ .type = T_DICT, .dictv = l->value };
     }
     return (ArrayLink){ .type = T_ERROR };
 }
 
+int get_key_index(KeyType *kt, String key, int nb_keys)
+{
+    if (!kt)
+    {
+        return -1;
+    }
+
+    for (int i = 0; i < nb_keys; ++i)
+    {
+        if (strings_equals(key, kt[i].key))
+        {
+            return i;
+        }
+    }
+    return -1;
+}
+
+DictLink dict_get(Dict *d, String key)
+{
+    if (!d)
+    {
+        return (DictLink){ .type = T_ERROR };
+    }
+
+    int index = get_key_index(d->keys_types, key, d->size);
+
+    StrDictLink *sl = 0;
+    IntDictLink *il = 0;
+    DoubleDictLink *dl = 0;
+    BoolDictLink *bl = 0;
+    NullDictLink *nl = 0;
+    ArrDictLink *al = 0;
+    DictDictLink *l = 0;
+    switch (d->keys_types[index].type)
+    {
+    case T_STR:
+        sl = d->strings_head;
+        if (!sl)
+        {
+            return (DictLink){ .type = T_ERROR };
+        }
+        while (sl->next)
+        {
+            if (strings_equals(key, sl->key))
+            {
+                break;
+            }
+            sl = sl->next;
+        }
+        return (DictLink){ .type = T_STR, .key = key, .strv = sl->value };
+    case T_INT:
+        il = d->integers_head;
+        if (!il)
+        {
+            return (DictLink){ .type = T_ERROR };
+        }
+        while (il->next)
+        {
+            if (strings_equals(key, il->key))
+            {
+                break;
+            }
+            il = il->next;
+        }
+        return (DictLink){ .type = T_INT, .key = key, .integerv = il->value };
+    case T_DOUBLE:
+        dl = d->doubles_head;
+        if (!dl)
+        {
+            return (DictLink){ .type = T_ERROR };
+        }
+        while (dl->next)
+        {
+            if (strings_equals(key, dl->key))
+            {
+                break;
+            }
+            dl = dl->next;
+        }
+        return (DictLink){ .type = T_DOUBLE, .key = key, .doublev = dl->value };
+    case T_BOOL:
+        bl = d->booleans_head;
+        if (!bl)
+        {
+            return (DictLink){ .type = T_ERROR };
+        }
+        while (bl->next)
+        {
+            if (strings_equals(key, bl->key))
+            {
+                break;
+            }
+            bl = bl->next;
+        }
+        return (DictLink){ .type = T_BOOL, .key = key, .boolv = bl->value };
+    case T_NULL:
+        nl = d->nulls_head;
+        if (!nl)
+        {
+            return (DictLink){ .type = T_ERROR };
+        }
+        while (nl->next)
+        {
+            if (strings_equals(key, nl->key))
+            {
+                break;
+            }
+            nl = nl->next;
+        }
+        return (DictLink){ .type = T_NULL, .key = key };
+    case T_ARR:
+        al = d->arrays_head;
+        if (!al)
+        {
+            return (DictLink){ .type = T_ERROR };
+        }
+        while (al->next)
+        {
+            if (strings_equals(key, al->key))
+            {
+                break;
+            }
+            al = al->next;
+        }
+        return (DictLink){ .type = T_ARR, .key = key, .arrayv = al->value };
+    case T_DICT:
+        l = d->dicts_head;
+        if (!l)
+        {
+            return (DictLink){ .type = T_ERROR };
+        }
+        while (l->next)
+        {
+            if (strings_equals(key, l->key))
+            {
+                break;
+            }
+            l = l->next;
+        }
+        return (DictLink){ .type = T_DICT, .key = key, .dictv = l->value };
+    }
+    return (DictLink){ .type = T_ERROR };
+}
+
+/*******************************************************************************
+**                                   DESTROYS                                 **
+*******************************************************************************/
 void destroy_array(Array *a)
 {
     free(a->indexes_types);
@@ -341,6 +799,7 @@ void destroy_array(Array *a)
     StrArrLink *sl = a->strings_head;
     while (sl)
     {
+        // TODO: Free strings, as they normally are dynamically allocated
         StrArrLink *tmp = sl;
         sl = sl->next;
         free(tmp);
@@ -384,6 +843,81 @@ void destroy_array(Array *a)
         ArrArrLink *tmp = al;
         al = al->next;
         destroy_array(tmp->value);
+        free(tmp);
+    }
+
+    DictArrLink *l = a->dicts_head;
+    while (l)
+    {
+        DictArrLink *tmp = l;
+        l = l->next;
+        destroy_dict(tmp->value);
+        free(tmp);
+    }
+}
+
+void destroy_dict(Dict *d)
+{
+    // The keys that are pointed to by the elements of this array will be freed
+    // when freeing the element, so we don't do it here
+    free(d->keys_types);
+
+    StrDictLink *sl = d->strings_head;
+    while (sl)
+    {
+        // TODO: Free strings, as they normally are dynamically allocated
+        StrDictLink *tmp = sl;
+        sl = sl->next;
+        free(tmp);
+    }
+
+    IntDictLink *il = d->integers_head;
+    while (il)
+    {
+        IntDictLink *tmp = il;
+        il = il->next;
+        free(tmp);
+    }
+
+    DoubleDictLink *dl = d->doubles_head;
+    while (dl)
+    {
+        DoubleDictLink *tmp = dl;
+        dl = dl->next;
+        free(tmp);
+    }
+
+    BoolDictLink *bl = d->booleans_head;
+    while (bl)
+    {
+        BoolDictLink *tmp = bl;
+        bl = bl->next;
+        free(tmp);
+    }
+
+    NullDictLink *nl = d->nulls_head;
+    while (nl)
+    {
+        NullDictLink *tmp = nl;
+        nl = nl->next;
+        free(tmp);
+    }
+
+    ArrDictLink *al = d->arrays_head;
+    while (al)
+    {
+        ArrDictLink *tmp = al;
+        al = al->next;
+        destroy_array(tmp->value);
+        free(tmp);
+    }
+
+    DictDictLink *l = d->dicts_head;
+    while (l)
+    {
+        DictDictLink *tmp = l;
+        l = l->next;
+        destroy_dict(tmp->value);
         free(tmp);
     }
 }

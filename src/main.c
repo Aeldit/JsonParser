@@ -25,11 +25,11 @@ int main(int argc, char *argv[])
     arr_add_double(&a, 0.5);
     arr_add_double(&a, 55.789);
 
-    Array b = init_array(2);
-    arr_add_int(&b, 9);
-    arr_add_int(&b, 8);
+    Dict b = init_dict(2);
+    dict_add_int(&b, s1, 9);
+    dict_add_int(&b, s2, 8);
 
-    arr_add_arr(&a, &b);
+    arr_add_dict(&a, &b);
 
     arr_print(&a);
 

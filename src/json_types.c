@@ -2,16 +2,16 @@
 
 #include <stdio.h>
 
-char strings_equals(struct string *s1, struct string *s2)
+char strings_equals(struct string s1, struct string s2)
 {
-    uint_strlen_t length = s1->length;
-    if (length != s2->length)
+    uint_strlen_t length = s1.length;
+    if (length != s2.length)
     {
         return 0;
     }
 
-    const char *a = s1->str;
-    const char *b = s2->str;
+    const char *a = s1.str;
+    const char *b = s2.str;
     if (!a || !b)
     {
         return 0;

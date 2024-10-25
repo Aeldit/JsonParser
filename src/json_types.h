@@ -55,6 +55,8 @@ typedef struct string String;
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
+char strings_equals(struct string s1, struct string s2);
+
 void print_err_bits(uint_fast16_t err);
 
 #endif // !JSON_TYPES_H
