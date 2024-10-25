@@ -221,6 +221,15 @@ struct dict_linked_list
     DictDictLink *dicts_tail;
 };
 
+struct json
+{
+    char is_array;
+    Array *array;
+    Dict *dict;
+};
+
+typedef struct json JSON;
+
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
@@ -228,8 +237,9 @@ struct dict_linked_list
 ** \brief The size of the returned array is 0, it means that an error occured
 **        when allocating the indexes_types array
 */
-Array init_array(int size);
-Dict init_dict(int size);
+Array *init_array(int size);
+Dict *init_dict(int size);
+JSON *init_json(char is_array, Array *a, Dict *d);
 
 void arr_add_str(Array *a, String value);
 void arr_add_int(Array *a, int value);
@@ -252,5 +262,6 @@ DictLink dict_get(Dict *d, String key);
 
 void destroy_array(Array *a);
 void destroy_dict(Dict *d);
+void destroy_json(JSON *j);
 
 #endif // !STORAGE_H

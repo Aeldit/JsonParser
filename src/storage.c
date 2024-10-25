@@ -2,25 +2,51 @@
 
 #include <stdlib.h>
 
-Array init_array(int size)
+Array *init_array(int size)
 {
     char *indexes_types = calloc(size, sizeof(char));
     if (!indexes_types)
     {
         size = 0;
     }
-    return (
-        Array){ .size = size, .insert_idx = 0, .indexes_types = indexes_types };
+    Array *a = calloc(1, sizeof(Array));
+    if (!a)
+    {
+        return 0;
+    }
+    a->size = size;
+    a->indexes_types = indexes_types;
+    return a;
 }
 
-Dict init_dict(int size)
+Dict *init_dict(int size)
 {
     KeyType *keys_types = calloc(size, sizeof(KeyType));
     if (!keys_types)
     {
         size = 0;
     }
-    return (Dict){ .size = size, .insert_idx = 0, .keys_types = keys_types };
+    Dict *d = calloc(1, sizeof(Dict));
+    if (!d)
+    {
+        return 0;
+    }
+    d->size = size;
+    d->keys_types = keys_types;
+    return d;
+}
+
+JSON *init_json(char is_array, Array *a, Dict *d)
+{
+    JSON *j = calloc(1, sizeof(JSON));
+    if (!j)
+    {
+        return 0;
+    }
+    j->is_array = is_array;
+    j->array = a;
+    j->dict = d;
+    return j;
 }
 
 /*******************************************************************************
@@ -802,6 +828,7 @@ void destroy_array(Array *a)
         // TODO: Free strings, as they normally are dynamically allocated
         StrArrLink *tmp = sl;
         sl = sl->next;
+        free(tmp->value.str);
         free(tmp);
     }
 
@@ -843,6 +870,7 @@ void destroy_array(Array *a)
         ArrArrLink *tmp = al;
         al = al->next;
         destroy_array(tmp->value);
+        free(tmp->value);
         free(tmp);
     }
 
@@ -852,6 +880,7 @@ void destroy_array(Array *a)
         DictArrLink *tmp = l;
         l = l->next;
         destroy_dict(tmp->value);
+        free(tmp->value);
         free(tmp);
     }
 }
@@ -868,6 +897,8 @@ void destroy_dict(Dict *d)
         // TODO: Free strings, as they normally are dynamically allocated
         StrDictLink *tmp = sl;
         sl = sl->next;
+        free(tmp->key.str);
+        free(tmp->value.str);
         free(tmp);
     }
 
@@ -876,6 +907,7 @@ void destroy_dict(Dict *d)
     {
         IntDictLink *tmp = il;
         il = il->next;
+        free(tmp->key.str);
         free(tmp);
     }
 
@@ -884,6 +916,7 @@ void destroy_dict(Dict *d)
     {
         DoubleDictLink *tmp = dl;
         dl = dl->next;
+        free(tmp->key.str);
         free(tmp);
     }
 
@@ -892,6 +925,7 @@ void destroy_dict(Dict *d)
     {
         BoolDictLink *tmp = bl;
         bl = bl->next;
+        free(tmp->key.str);
         free(tmp);
     }
 
@@ -900,6 +934,7 @@ void destroy_dict(Dict *d)
     {
         NullDictLink *tmp = nl;
         nl = nl->next;
+        free(tmp->key.str);
         free(tmp);
     }
 
@@ -908,7 +943,9 @@ void destroy_dict(Dict *d)
     {
         ArrDictLink *tmp = al;
         al = al->next;
+        free(tmp->key.str);
         destroy_array(tmp->value);
+        free(tmp->value);
         free(tmp);
     }
 
@@ -917,7 +954,27 @@ void destroy_dict(Dict *d)
     {
         DictDictLink *tmp = l;
         l = l->next;
+        free(tmp->key.str);
         destroy_dict(tmp->value);
+        free(tmp->value);
         free(tmp);
+    }
+}
+
+void destroy_json(JSON *j)
+{
+    if (!j)
+    {
+        return;
+    }
+
+    if (j->array)
+    {
+        destroy_array(j->array);
+    }
+
+    if (j->dict)
+    {
+        destroy_dict(j->dict);
     }
 }

@@ -46,7 +46,7 @@ typedef uint_fast64_t uint_strlen_t;
 *******************************************************************************/
 struct string
 {
-    const char *str;
+    char *str;
     uint_strlen_t length;
 };
 

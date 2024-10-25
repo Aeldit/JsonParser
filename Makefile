@@ -4,6 +4,7 @@ CC=gcc
 CFILES=src/main.c \
 	src/json_types.c \
 	src/printing.c \
+	src/parser.c \
 	src/storage.c
 
 all: clean json-parser
