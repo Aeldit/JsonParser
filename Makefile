@@ -18,6 +18,11 @@ json-parser:
 clean:
 	if [ -f "json-parser" ]; then rm json-parser; fi
 
+valgrind-compile: clean
+	$(CC) $(CFLAGS) \
+		-DVALGRING_DISABLE_PRINT \
+		$(CFILES) -o json-parser
+
 valgrind: clean json-parser
 	valgrind --tool=callgrind --dump-instr=yes --simulate-cache=yes \
 		--collect-jumps=yes ./json-parser ../JsonParserCPP/big.json

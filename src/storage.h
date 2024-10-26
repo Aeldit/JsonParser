@@ -80,7 +80,7 @@ struct array_link
     Dict *dictv;
 };
 
-typedef struct array_link ArrayLink;
+typedef struct array_link Value;
 
 // Linked list for arrays
 struct array_linked_list
@@ -180,7 +180,7 @@ struct dict_link
     Dict *dictv;
 };
 
-typedef struct dict_link DictLink;
+typedef struct dict_link Item;
 
 struct key_type
 {
@@ -257,8 +257,8 @@ void dict_add_null(Dict *d, String key);
 void dict_add_arr(Dict *d, String key, Array *value);
 void dict_add_dict(Dict *d, String key, Dict *value);
 
-ArrayLink array_get(Array *a, int index);
-DictLink dict_get(Dict *d, String key);
+Value array_get(Array *a, int index);
+Item dict_get(Dict *d, String key);
 
 void destroy_array(Array *a);
 void destroy_dict(Dict *d);

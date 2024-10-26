@@ -1,74 +1,193 @@
+#include "printing.h"
+
 #include <stdio.h>
 
+#include "stdlib.h"
 #include "storage.h"
 
+void dict_print_indent(Dict *d, int indent, char fromDict);
 void dict_print(Dict *d);
 
-void arr_print(Array *a)
+void arr_print_indent(Array *a, int indent, char fromDict)
 {
-    int size = a->size;
-    for (int i = 0; i < size; ++i)
+    if (!a)
     {
-        ArrayLink al = array_get(a, i);
+        return;
+    }
+
+    // Obtains the number of tab characters that will be printed
+    char *tabs = calloc(indent, sizeof(char));
+    if (!tabs)
+    {
+        return;
+    }
+    for (int i = 0; i < indent - 1; ++i)
+    {
+        tabs[i] = '\t';
+    }
+    tabs[indent - 1] = '\0';
+
+    uint_fast64_t size = a->size;
+    // Empty array
+    if (size == 0)
+    {
+        printf("%s[]", fromDict ? "" : tabs);
+        if (indent == 1)
+        {
+            // flush
+        }
+        free(tabs);
+        return;
+    }
+
+    printf("%s[\n", fromDict ? "" : tabs);
+
+    for (uint_fast64_t i = 0; i < size; ++i)
+    {
+        Value al = array_get(a, i);
+        if (al.type == T_ERROR)
+        {
+            continue;
+        }
+
         switch (al.type)
         {
         case T_STR:
-            printf("%s\n", al.strv.str ? al.strv.str : "");
+            printf("\t%s\"%s\"", tabs, al.strv.str ? al.strv.str : "");
             break;
         case T_INT:
-            printf("%d\n", al.integerv);
+            printf("\t%s%d", tabs, al.integerv);
             break;
         case T_DOUBLE:
-            printf("%f\n", al.doublev);
+            printf("\t%s%f", tabs, al.doublev);
             break;
         case T_BOOL:
-            printf("%s\n", al.boolv ? "true" : "false");
+            printf("\t%s%s", tabs, al.boolv ? "true" : "false");
             break;
         case T_NULL:
-            printf("null\n");
+            printf("\t%snull", tabs);
             break;
         case T_ARR:
-            arr_print(al.arrayv);
+            arr_print_indent(al.arrayv, indent + 1, 0);
             break;
         case T_DICT:
-            dict_print(al.dictv);
+            dict_print_indent(al.dictv, indent + 1, 0);
             break;
         }
+
+        if (i < size - 1)
+        {
+            printf(",\n");
+            // cout << ",\n";
+        }
     }
+
+    printf("\n%s]", tabs);
+    // cout << "\n" << tabs << "]";
+
+    if (indent == 1)
+    {
+        // flush
+        // cout << endl;
+    }
+    free(tabs);
+}
+
+void arr_print(Array *a)
+{
+#ifndef VALGRING_DISABLE_PRINT
+    arr_print_indent(a, 1, 0);
+#endif
+}
+
+void dict_print_indent(Dict *d, int indent, char fromDict)
+{
+    // Obtains the number of tab characters that will be printed
+    char *tabs = calloc(indent, sizeof(char));
+    if (!tabs)
+    {
+        return;
+    }
+    for (int i = 0; i < indent - 1; ++i)
+    {
+        tabs[i] = '\t';
+    }
+    tabs[indent - 1] = '\0';
+
+    uint_fast64_t size = d->size;
+    if (size == 0)
+    {
+        printf("%s{}", fromDict ? "" : tabs);
+        // cout << (fromDict ? "" : tabs) << "{}";
+        if (indent == 1)
+        {
+            // flush
+        }
+        free(tabs);
+        return;
+    }
+
+    printf("%s{\n", fromDict ? "" : tabs);
+    // cout << (fromDict ? "" : tabs) << "{\n";
+
+    for (uint_fast64_t i = 0; i < size; ++i)
+    {
+        String key = d->keys_types[i].key;
+        Item it = dict_get(d, key);
+        if (it.type == T_ERROR)
+        {
+            continue;
+        }
+
+        switch (it.type)
+        {
+        case T_STR:
+            printf("\t%s\"%s\" : \"%s\"", tabs, key.str,
+                   it.strv.str ? it.strv.str : "");
+            break;
+        case T_INT:
+            printf("\t%s\"%s\" : %d", tabs, key.str, it.integerv);
+            break;
+        case T_DOUBLE:
+            printf("\t%s\"%s\" : %f", tabs, key.str, it.doublev);
+            break;
+        case T_BOOL:
+            printf("\t%s\"%s\" : %s", tabs, key.str,
+                   it.boolv ? "true" : "false");
+            break;
+        case T_NULL:
+            printf("\t%s\"%s\" : null", tabs, key.str);
+            break;
+        case T_ARR:
+            printf("\t%s\"%s\" : ", tabs, key.str);
+            arr_print_indent(it.arrayv, indent + 1, 1);
+            break;
+        case T_DICT:
+            printf("\t%s\"%s\" : ", tabs, key.str);
+            dict_print_indent(it.dictv, indent + 1, 1);
+            break;
+        }
+
+        if (i < size - 1)
+        {
+            printf(",\n");
+            // cout << ",\n";
+        }
+    }
+
+    printf("\n%s}", tabs);
+    // cout << "\n" << tabs << "}";
+
+    if (indent == 1)
+    {
+        // flush
+    }
+    free(tabs);
 }
 
 void dict_print(Dict *d)
 {
-    int size = d->size;
-    for (int i = 0; i < size; ++i)
-    {
-        String key = d->keys_types[i].key;
-        DictLink dl = dict_get(d, key);
-        switch (dl.type)
-        {
-        case T_STR:
-            printf("%s : %s\n", key.str, dl.strv.str ? dl.strv.str : "");
-            break;
-        case T_INT:
-            printf("%s : %d\n", key.str, dl.integerv);
-            break;
-        case T_DOUBLE:
-            printf("%s : %f\n", key.str, dl.doublev);
-            break;
-        case T_BOOL:
-            printf("%s : %s\n", key.str, dl.boolv ? "true" : "false");
-            break;
-        case T_NULL:
-            printf("%s : null\n", key.str);
-            break;
-        case T_ARR:
-            printf("%s : ", key.str);
-            arr_print(dl.arrayv);
-            break;
-        case T_DICT:
-            printf("%s : ", key.str);
-            dict_print(dl.dictv);
-            break;
-        }
-    }
+#ifndef VALGRING_DISABLE_PRINT
+    dict_print_indent(d, 1, 0);
+#endif
 }
