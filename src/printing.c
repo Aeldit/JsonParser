@@ -95,9 +95,12 @@ void arr_print_indent(Array *a, int indent, char fromDict)
 
 void arr_print(Array *a)
 {
+    if (a)
+    {
 #ifndef VALGRING_DISABLE_PRINT
-    arr_print_indent(a, 1, 0);
+        arr_print_indent(a, 1, 0);
 #endif
+    }
 }
 
 void dict_print_indent(Dict *d, int indent, char fromDict)
@@ -187,7 +190,10 @@ void dict_print_indent(Dict *d, int indent, char fromDict)
 
 void dict_print(Dict *d)
 {
+    if (d)
+    {
 #ifndef VALGRING_DISABLE_PRINT
-    dict_print_indent(d, 1, 0);
+        dict_print_indent(d, 1, 0);
 #endif
+    }
 }

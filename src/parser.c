@@ -1343,6 +1343,7 @@ Array *parse_array(FILE *f, uint_fast64_t *pos, uint_fast16_t *err)
                 arr_add_int(a, str_to_long(&sl));
                 //*err |= ja->addValue(new IntValue(str_to_long(&sl)));
             }
+            free(sl.str);
             ++nb_elts_parsed;
         }
         else if (IS_BOOL_START(c))
@@ -1514,6 +1515,7 @@ Dict *parse_dict(FILE *f, uint_fast64_t *pos, uint_fast16_t *err)
                 dict_add_int(d, key, str_to_long(&sl));
                 //*err |= jd->addItem(new IntItem(key, str_to_long(&sl)));
             }
+            free(sl.str);
             ++nb_elts_parsed;
         }
         else if (IS_BOOL_START(c))

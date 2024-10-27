@@ -19,7 +19,7 @@ clean:
 	if [ -f "json-parser" ]; then rm json-parser; fi
 
 valgrind-compile: clean
-	$(CC) $(CFLAGS) \
+	$(CC) $(CFLAGS) -lm \
 		-DVALGRING_DISABLE_PRINT \
 		$(CFILES) -o json-parser
 
