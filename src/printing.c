@@ -1,13 +1,23 @@
 #include "printing.h"
 
 #include <stdio.h>
-#include <stdlib.h>
 
-void print_array_indent(json_array_st *ja, char indent, char from_list)
+#include "stdlib.h"
+#include "storage.h"
+
+void dict_print_indent(Dict *d, int indent, char fromDict);
+void dict_print(Dict *d);
+
+void arr_print_indent(Array *a, int indent, char fromDict)
 {
+    if (!a)
+    {
+        return;
+    }
+
     // Obtains the number of tab characters that will be printed
     char *tabs = calloc(indent, sizeof(char));
-    if (tabs == NULL)
+    if (!tabs)
     {
         return;
     }
@@ -17,77 +27,87 @@ void print_array_indent(json_array_st *ja, char indent, char from_list)
     }
     tabs[indent - 1] = '\0';
 
-    if (ja == NULL || ja->head == NULL || ja->size == 0)
+    uint_fast64_t size = a->size;
+    // Empty array
+    if (size == 0)
     {
-        printf("%s[]", from_list ? tabs : "");
+        printf("%s[]", fromDict ? "" : tabs);
+        if (indent == 1)
+        {
+            // flush
+        }
         free(tabs);
         return;
     }
 
-    printf("%s[\n", from_list ? tabs : "");
+    printf("%s[\n", fromDict ? "" : tabs);
 
-    struct link_value *link = ja->head;
-    uint64_t ctr = 0;
-    while (link != NULL)
+    for (uint_fast64_t i = 0; i < size; ++i)
     {
-        for (uint64_t i = 0; i < BASE_ARRAY_LEN; ++i, ++ctr)
+        Value al = array_get(a, i);
+        if (al.type == T_ERROR)
         {
-            void *value = link->elts[i].value;
-            unsigned char type = link->elts[i].type;
-
-            // FIX: '(null)'s appearing out of nowhere
-            // printf("\n\nis null ? %d\n\n", link->elts[i].value == NULL);
-
-            if (type == TYPE_STR)
-            {
-                printf("%s\t\"%s\"", tabs, (char *)value);
-            }
-            else if (type == TYPE_INT)
-            {
-                printf("%s\t%ld", tabs, *(long *)value);
-            }
-            else if (type == TYPE_DOUBLE)
-            {
-                printf("%s\t%f", tabs, *(double *)value);
-            }
-            else if (type == TYPE_NULL)
-            {
-                printf("%s\tnull", tabs);
-            }
-            else if (type == TYPE_BOOL)
-            {
-                printf("%s\t%s", tabs, *(char *)value ? "true" : "false");
-            }
-            else if (type == TYPE_ARR)
-            {
-                print_array_indent(value, indent + 1, 1);
-            }
-            else if (type == TYPE_DICT)
-            {
-                print_json_indent(value, indent + 1, 0);
-            }
+            continue;
         }
 
-        if (ctr != ja->size - 1)
+        switch (al.type)
+        {
+        case T_STR:
+            printf("\t%s\"%s\"", tabs, al.strv.str ? al.strv.str : "");
+            break;
+        case T_INT:
+            printf("\t%s%d", tabs, al.intv);
+            break;
+        case T_DOUBLE:
+            printf("\t%s%f", tabs, al.doublev);
+            break;
+        case T_BOOL:
+            printf("\t%s%s", tabs, al.boolv ? "true" : "false");
+            break;
+        case T_NULL:
+            printf("\t%snull", tabs);
+            break;
+        case T_ARR:
+            arr_print_indent(al.arrayv, indent + 1, 0);
+            break;
+        case T_DICT:
+            dict_print_indent(al.dictv, indent + 1, 0);
+            break;
+        }
+
+        if (i < size - 1)
         {
             printf(",\n");
+            // cout << ",\n";
         }
-        link = link->next;
     }
+
     printf("\n%s]", tabs);
+    // cout << "\n" << tabs << "]";
+
+    if (indent == 1)
+    {
+        // flush
+        // cout << endl;
+    }
     free(tabs);
 }
 
-void print_array(json_array_st *ja)
+void arr_print(Array *a)
 {
-    print_array_indent(ja, 1, 0);
-    printf("\n");
+    if (a)
+    {
+#ifndef VALGRING_DISABLE_PRINT
+        arr_print_indent(a, 1, 0);
+#endif
+    }
 }
 
-void print_json_indent(json_dict_st *jd, char indent, char from_dict)
+void dict_print_indent(Dict *d, int indent, char fromDict)
 {
-    char *tabs = calloc(indent + 1, sizeof(char));
-    if (tabs == NULL)
+    // Obtains the number of tab characters that will be printed
+    char *tabs = calloc(indent, sizeof(char));
+    if (!tabs)
     {
         return;
     }
@@ -95,74 +115,85 @@ void print_json_indent(json_dict_st *jd, char indent, char from_dict)
     {
         tabs[i] = '\t';
     }
+    tabs[indent - 1] = '\0';
 
-    if (jd == NULL || jd->head == NULL || jd->size == 0)
+    uint_fast64_t size = d->size;
+    if (size == 0)
     {
-        printf("%s{}", from_dict ? "" : tabs);
+        printf("%s{}", fromDict ? "" : tabs);
+        // cout << (fromDict ? "" : tabs) << "{}";
+        if (indent == 1)
+        {
+            // flush
+        }
         free(tabs);
         return;
     }
 
-    printf("%s{\n", from_dict ? "" : tabs);
+    printf("%s{\n", fromDict ? "" : tabs);
+    // cout << (fromDict ? "" : tabs) << "{\n";
 
-    struct link_item *link = jd->head;
-    uint64_t ctr = 0;
-    while (link != NULL)
+    for (uint_fast64_t i = 0; i < size; ++i)
     {
-        for (uint64_t i = 0; i < BASE_ARRAY_LEN; ++i, ++ctr)
+        String key = d->keys_types[i].key;
+        Item it = dict_get(d, key);
+        if (it.type == T_ERROR)
         {
-            char *key = link->elts[i].key;
-            void *value = link->elts[i].value;
-            unsigned char type = link->elts[i].type;
-
-            if (type == TYPE_STR)
-            {
-                printf("%s\t\"%s\": \"%s\"", tabs, key, (const char *)value);
-            }
-            else if (type == TYPE_INT)
-            {
-                printf("%s\t\"%s\": %ld", tabs, key, *(long *)value);
-            }
-            else if (type == TYPE_DOUBLE)
-            {
-                printf("%s\t\"%s\": %f", tabs, key, *(double *)value);
-            }
-            else if (type == TYPE_NULL)
-            {
-                printf("%s\t\"%s\": null", tabs, key);
-            }
-            else if (type == TYPE_BOOL)
-            {
-                printf("%s\t\"%s\": %s", tabs, key,
-                       *(char *)value ? "true" : "false");
-            }
-            else if (type == TYPE_ARR)
-            {
-                printf("%s\t\"%s\": ", tabs, key);
-                print_array_indent(link->elts[i].value, indent + 1, 0);
-            }
-            else if (type == TYPE_DICT)
-            {
-                printf("%s\t\"%s\": ", tabs, key);
-                print_json_indent(value, indent + 1, 1);
-            }
+            continue;
         }
 
-        if (ctr != jd->size - 1)
+        switch (it.type)
+        {
+        case T_STR:
+            printf("\t%s\"%s\" : \"%s\"", tabs, key.str,
+                   it.strv.str ? it.strv.str : "");
+            break;
+        case T_INT:
+            printf("\t%s\"%s\" : %d", tabs, key.str, it.intv);
+            break;
+        case T_DOUBLE:
+            printf("\t%s\"%s\" : %f", tabs, key.str, it.doublev);
+            break;
+        case T_BOOL:
+            printf("\t%s\"%s\" : %s", tabs, key.str,
+                   it.boolv ? "true" : "false");
+            break;
+        case T_NULL:
+            printf("\t%s\"%s\" : null", tabs, key.str);
+            break;
+        case T_ARR:
+            printf("\t%s\"%s\" : ", tabs, key.str);
+            arr_print_indent(it.arrayv, indent + 1, 1);
+            break;
+        case T_DICT:
+            printf("\t%s\"%s\" : ", tabs, key.str);
+            dict_print_indent(it.dictv, indent + 1, 1);
+            break;
+        }
+
+        if (i < size - 1)
         {
             printf(",\n");
+            // cout << ",\n";
         }
-        link = link->next;
     }
+
     printf("\n%s}", tabs);
+    // cout << "\n" << tabs << "}";
+
     if (indent == 1)
     {
-        printf("\n");
+        // flush
     }
     free(tabs);
 }
 
-void print_json(json_dict_st *jd)
+void dict_print(Dict *d)
 {
-    print_json_indent(jd, 1, 0);
+    if (d)
+    {
+#ifndef VALGRING_DISABLE_PRINT
+        dict_print_indent(d, 1, 0);
+#endif
+    }
 }

@@ -1,5 +1,6 @@
-#include "json_api.h"
+#include "parser.h"
 #include "printing.h"
+#include "storage.h"
 
 int main(int argc, char *argv[])
 {
@@ -8,22 +9,22 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    json_st j = parse(argv[1]);
-    if (j.is_array)
+    JSON *j = parse(argv[1]);
+    if (!j)
     {
-        print_array(j.ja);
+        return 1;
+    }
+
+    if (j->is_array)
+    {
+        Array *a = j->array;
+        arr_print(a);
     }
     else
     {
-        print_json(j.jd);
-
-        /*typed_value_st tv = get_value(jd, "array", 5);
-        if (tv.type == TYPE_ARR)
-        {
-            print_array((json_array_st *)tv.value);
-        }
-        destroy_dict(jd);*/
+        Dict *d = j->dict;
+        dict_print(d);
     }
-    destroy_json(&j);
+    destroy_json(j);
     return 0;
 }
