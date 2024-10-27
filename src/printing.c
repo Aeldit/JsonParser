@@ -56,7 +56,7 @@ void arr_print_indent(Array *a, int indent, char fromDict)
             printf("\t%s\"%s\"", tabs, al.strv.str ? al.strv.str : "");
             break;
         case T_INT:
-            printf("\t%s%d", tabs, al.integerv);
+            printf("\t%s%d", tabs, al.intv);
             break;
         case T_DOUBLE:
             printf("\t%s%f", tabs, al.doublev);
@@ -149,7 +149,7 @@ void dict_print_indent(Dict *d, int indent, char fromDict)
                    it.strv.str ? it.strv.str : "");
             break;
         case T_INT:
-            printf("\t%s\"%s\" : %d", tabs, key.str, it.integerv);
+            printf("\t%s\"%s\" : %d", tabs, key.str, it.intv);
             break;
         case T_DOUBLE:
             printf("\t%s\"%s\" : %f", tabs, key.str, it.doublev);

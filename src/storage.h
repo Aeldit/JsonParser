@@ -73,7 +73,7 @@ typedef struct
 {
     char type;
     String strv;
-    int integerv;
+    int intv;
     double doublev;
     char boolv;
     Array *arrayv;
@@ -171,7 +171,7 @@ typedef struct
     char type;
     String key;
     String strv;
-    int integerv;
+    int intv;
     double doublev;
     char boolv;
     Array *arrayv;

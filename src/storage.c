@@ -2,6 +2,9 @@
 
 #include <stdlib.h>
 
+#define ERROR_VALUE ((Value){ .type = T_ERROR })
+#define ERROR_ITEM ((Item){ .type = T_ERROR })
+
 Array *init_array(int size)
 {
     char *indexes_types = calloc(size, sizeof(char));
@@ -550,7 +553,7 @@ Value array_get(Array *a, int index)
 {
     if (!a)
     {
-        return (Value){ .type = T_ERROR };
+        return ERROR_VALUE;
     }
 
     StrArrLink *sl = 0;
@@ -564,111 +567,83 @@ Value array_get(Array *a, int index)
     {
     case T_STR:
         sl = a->strings_head;
-        if (!sl)
-        {
-            return (Value){ .type = T_ERROR };
-        }
-        while (sl->next)
+        while (sl)
         {
             if (sl->index == index)
             {
-                break;
+                return (Value){ .type = T_STR, .strv = sl->value };
             }
             sl = sl->next;
         }
-        return (Value){ .type = T_STR, .strv = sl->value };
+        break;
     case T_INT:
         il = a->integers_head;
-        if (!il)
-        {
-            return (Value){ .type = T_ERROR };
-        }
-        while (il->next)
+        while (il)
         {
             if (il->index == index)
             {
-                break;
+                return (Value){ .type = T_INT, .intv = il->value };
             }
             il = il->next;
         }
-        return (Value){ .type = T_INT, .integerv = il->value };
+        break;
     case T_DOUBLE:
         dl = a->doubles_head;
-        if (!dl)
-        {
-            return (Value){ .type = T_ERROR };
-        }
-        while (dl->next)
+        while (dl)
         {
             if (dl->index == index)
             {
-                break;
+                return (Value){ .type = T_DOUBLE, .doublev = dl->value };
             }
             dl = dl->next;
         }
-        return (Value){ .type = T_DOUBLE, .doublev = dl->value };
+        break;
     case T_BOOL:
         bl = a->booleans_head;
-        if (!bl)
-        {
-            return (Value){ .type = T_ERROR };
-        }
-        while (bl->next)
+        while (bl)
         {
             if (bl->index == index)
             {
-                break;
+                return (Value){ .type = T_BOOL, .boolv = bl->value };
             }
             bl = bl->next;
         }
-        return (Value){ .type = T_BOOL, .boolv = bl->value };
+        break;
     case T_NULL:
         nl = a->nulls_head;
-        if (!nl)
-        {
-            return (Value){ .type = T_ERROR };
-        }
-        while (nl->next)
+        while (nl)
         {
             if (nl->index == index)
             {
-                break;
+                return (Value){ .type = T_NULL };
             }
             nl = nl->next;
         }
-        return (Value){ .type = T_NULL };
+        break;
     case T_ARR:
         al = a->arrays_head;
-        if (!al)
-        {
-            return (Value){ .type = T_ERROR };
-        }
-        while (al->next)
+        while (al)
         {
             if (al->index == index)
             {
-                break;
+                return (Value){ .type = T_ARR, .arrayv = al->value };
             }
             al = al->next;
         }
-        return (Value){ .type = T_ARR, .arrayv = al->value };
+        break;
     case T_DICT:
         l = a->dicts_head;
-        if (!l)
-        {
-            return (Value){ .type = T_ERROR };
-        }
-        while (l->next)
+        while (l)
         {
             if (l->index == index)
             {
-                break;
+                return (Value){ .type = T_DICT, .dictv = l->value };
             }
             l = l->next;
         }
-        return (Value){ .type = T_DICT, .dictv = l->value };
+        break;
     }
-    return (Value){ .type = T_ERROR };
+    return ERROR_VALUE;
 }
 
 int get_key_index(KeyType *kt, String key, int nb_keys)
@@ -692,10 +667,14 @@ Item dict_get(Dict *d, String key)
 {
     if (!d)
     {
-        return (Item){ .type = T_ERROR };
+        return ERROR_ITEM;
     }
 
     int index = get_key_index(d->keys_types, key, d->size);
+    if (index < 0)
+    {
+        return ERROR_ITEM;
+    }
 
     StrDictLink *sl = 0;
     IntDictLink *il = 0;
@@ -708,111 +687,84 @@ Item dict_get(Dict *d, String key)
     {
     case T_STR:
         sl = d->strings_head;
-        if (!sl)
-        {
-            return (Item){ .type = T_ERROR };
-        }
-        while (sl->next)
+        while (sl)
         {
             if (strings_equals(key, sl->key))
             {
-                break;
+                return (Item){ .type = T_STR, .key = key, .strv = sl->value };
             }
             sl = sl->next;
         }
-        return (Item){ .type = T_STR, .key = key, .strv = sl->value };
+        break;
     case T_INT:
         il = d->integers_head;
-        if (!il)
-        {
-            return (Item){ .type = T_ERROR };
-        }
-        while (il->next)
+        while (il)
         {
             if (strings_equals(key, il->key))
             {
-                break;
+                return (Item){ .type = T_INT, .key = key, .intv = il->value };
             }
             il = il->next;
         }
-        return (Item){ .type = T_INT, .key = key, .integerv = il->value };
+        break;
     case T_DOUBLE:
         dl = d->doubles_head;
-        if (!dl)
-        {
-            return (Item){ .type = T_ERROR };
-        }
-        while (dl->next)
+        while (dl)
         {
             if (strings_equals(key, dl->key))
             {
-                break;
+                return (
+                    Item){ .type = T_DOUBLE, .key = key, .doublev = dl->value };
             }
             dl = dl->next;
         }
-        return (Item){ .type = T_DOUBLE, .key = key, .doublev = dl->value };
+        break;
     case T_BOOL:
         bl = d->booleans_head;
-        if (!bl)
-        {
-            return (Item){ .type = T_ERROR };
-        }
-        while (bl->next)
+        while (bl)
         {
             if (strings_equals(key, bl->key))
             {
-                break;
+                return (Item){ .type = T_BOOL, .key = key, .boolv = bl->value };
             }
             bl = bl->next;
         }
-        return (Item){ .type = T_BOOL, .key = key, .boolv = bl->value };
+        break;
     case T_NULL:
         nl = d->nulls_head;
-        if (!nl)
-        {
-            return (Item){ .type = T_ERROR };
-        }
-        while (nl->next)
+        while (nl)
         {
             if (strings_equals(key, nl->key))
             {
-                break;
+                return (Item){ .type = T_NULL, .key = key };
             }
             nl = nl->next;
         }
-        return (Item){ .type = T_NULL, .key = key };
+        break;
     case T_ARR:
         al = d->arrays_head;
-        if (!al)
-        {
-            return (Item){ .type = T_ERROR };
-        }
-        while (al->next)
+        while (al)
         {
             if (strings_equals(key, al->key))
             {
-                break;
+                return (Item){ .type = T_ARR, .key = key, .arrayv = al->value };
             }
             al = al->next;
         }
-        return (Item){ .type = T_ARR, .key = key, .arrayv = al->value };
+        break;
     case T_DICT:
         l = d->dicts_head;
-        if (!l)
-        {
-            return (Item){ .type = T_ERROR };
-        }
-        while (l->next)
+        while (l)
         {
             if (strings_equals(key, l->key))
             {
-                break;
+                return (Item){ .type = T_DICT, .key = key, .dictv = l->value };
             }
             l = l->next;
         }
-        return (Item){ .type = T_DICT, .key = key, .dictv = l->value };
+        break;
     }
-    return (Item){ .type = T_ERROR };
+    return ERROR_ITEM;
 }
 
 /*******************************************************************************
