@@ -825,7 +825,6 @@ void destroy_array(Array *a)
     StrArrLink *sl = a->strings_head;
     while (sl)
     {
-        // TODO: Free strings, as they normally are dynamically allocated
         StrArrLink *tmp = sl;
         sl = sl->next;
         free(tmp->value.str);
@@ -870,7 +869,6 @@ void destroy_array(Array *a)
         ArrArrLink *tmp = al;
         al = al->next;
         destroy_array(tmp->value);
-        free(tmp->value);
         free(tmp);
     }
 
@@ -880,9 +878,10 @@ void destroy_array(Array *a)
         DictArrLink *tmp = l;
         l = l->next;
         destroy_dict(tmp->value);
-        free(tmp->value);
         free(tmp);
     }
+
+    free(a);
 }
 
 void destroy_dict(Dict *d)
@@ -894,7 +893,6 @@ void destroy_dict(Dict *d)
     StrDictLink *sl = d->strings_head;
     while (sl)
     {
-        // TODO: Free strings, as they normally are dynamically allocated
         StrDictLink *tmp = sl;
         sl = sl->next;
         free(tmp->key.str);
@@ -945,7 +943,6 @@ void destroy_dict(Dict *d)
         al = al->next;
         free(tmp->key.str);
         destroy_array(tmp->value);
-        free(tmp->value);
         free(tmp);
     }
 
@@ -956,9 +953,10 @@ void destroy_dict(Dict *d)
         l = l->next;
         free(tmp->key.str);
         destroy_dict(tmp->value);
-        free(tmp->value);
         free(tmp);
     }
+
+    free(d);
 }
 
 void destroy_json(JSON *j)
@@ -977,4 +975,6 @@ void destroy_json(JSON *j)
     {
         destroy_dict(j->dict);
     }
+
+    free(j);
 }
