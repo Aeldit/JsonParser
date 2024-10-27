@@ -23,10 +23,10 @@ valgrind-compile: clean
 		-DVALGRING_DISABLE_PRINT \
 		$(CFILES) -o json-parser
 
-valgrind: clean json-parser
+valgrind:  valgrind-compile
 	valgrind --tool=callgrind --dump-instr=yes --simulate-cache=yes \
-		--collect-jumps=yes ./json-parser ../JsonParserCPP/big.json
+		--collect-jumps=yes ./json-parser big.json
 
-leaks: clean json-parser
+leaks: valgrind-compile
 	valgrind --leak-check=full --show-leak-kinds=all \
          --track-origins=yes ./json-parser t.json
