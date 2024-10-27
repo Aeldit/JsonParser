@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 
-char strings_equals(struct string s1, struct string s2)
+char strings_equals(String s1, String s2)
 {
     uint_strlen_t length = s1.length;
     if (length != s2.length)

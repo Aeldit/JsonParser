@@ -69,7 +69,7 @@ typedef struct arr_array_link ArrArrLink;
 typedef struct dict_array_link DictArrLink;
 
 // Used for functions that return an element of the array
-struct array_link
+typedef struct
 {
     char type;
     String strv;
@@ -78,9 +78,7 @@ struct array_link
     char boolv;
     Array *arrayv;
     Dict *dictv;
-};
-
-typedef struct array_link Value;
+} Value;
 
 // Linked list for arrays
 struct array_linked_list
@@ -168,7 +166,7 @@ typedef struct arr_dict_link ArrDictLink;
 typedef struct dict_dict_link DictDictLink;
 
 // Used for functions that return an element of the dict
-struct dict_link
+typedef struct
 {
     char type;
     String key;
@@ -178,17 +176,13 @@ struct dict_link
     char boolv;
     Array *arrayv;
     Dict *dictv;
-};
+} Item;
 
-typedef struct dict_link Item;
-
-struct key_type
+typedef struct
 {
     String key;
     char type;
-};
-
-typedef struct key_type KeyType;
+} KeyType;
 
 // Linked list for dicts
 struct dict_linked_list
@@ -221,14 +215,12 @@ struct dict_linked_list
     DictDictLink *dicts_tail;
 };
 
-struct json
+typedef struct
 {
     char is_array;
     Array *array;
     Dict *dict;
-};
-
-typedef struct json JSON;
+} JSON;
 
 /*******************************************************************************
 **                                 FUNCTIONS                                  **

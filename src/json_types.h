@@ -44,18 +44,16 @@ typedef uint_fast64_t uint_strlen_t;
 /*******************************************************************************
 **                                 STRUCTURES                                 **
 *******************************************************************************/
-struct string
+typedef struct
 {
     char *str;
     uint_strlen_t length;
-};
-
-typedef struct string String;
+} String;
 
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
-char strings_equals(struct string s1, struct string s2);
+char strings_equals(String s1, String s2);
 
 void print_err_bits(uint_fast16_t err);
 

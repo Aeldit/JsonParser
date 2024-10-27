@@ -73,18 +73,16 @@ typedef uint_fast64_t uint_nested_dicts_t;
 **                                 STRUCTURES                                 **
 *******************************************************************************/
 /**
-** \class StrAndLenTuple
+** \struct str_and_len_tuple
 ** \brief Used by the parse_number() function to return multiple informations
 */
-struct str_and_len_tuple
+typedef struct
 {
     char *str;
     uint_strlen_t len;
     char is_float;
     char has_exponent;
-};
-
-typedef struct str_and_len_tuple StrAndLenTuple;
+} StrAndLenTuple;
 
 /*******************************************************************************
 **                           FUNCTIONS DECLARATIONS                           **
