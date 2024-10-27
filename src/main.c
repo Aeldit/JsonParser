@@ -10,17 +10,12 @@ int main(int argc, char *argv[])
     }
 
     JSON *j = parse(argv[1]);
-    if (!j)
-    {
-        return 1;
-    }
-
-    if (j->is_array)
+    if (IS_ARRAY(j))
     {
         Array *a = j->array;
         arr_print(a);
     }
-    else
+    else if (IS_DICT(j))
     {
         Dict *d = j->dict;
         dict_print(d);

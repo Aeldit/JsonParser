@@ -44,34 +44,34 @@ void arr_print_indent(Array *a, int indent, char fromDict)
 
     for (uint_fast64_t i = 0; i < size; ++i)
     {
-        Value al = array_get(a, i);
-        if (al.type == T_ERROR)
+        Value v = array_get(a, i);
+        if (v.type == T_ERROR)
         {
             continue;
         }
 
-        switch (al.type)
+        switch (v.type)
         {
         case T_STR:
-            printf("\t%s\"%s\"", tabs, al.strv.str ? al.strv.str : "");
+            printf("\t%s\"%s\"", tabs, v.strv.str ? v.strv.str : "");
             break;
         case T_INT:
-            printf("\t%s%d", tabs, al.intv);
+            printf("\t%s%d", tabs, v.intv);
             break;
         case T_DOUBLE:
-            printf("\t%s%f", tabs, al.doublev);
+            printf("\t%s%f", tabs, v.doublev);
             break;
         case T_BOOL:
-            printf("\t%s%s", tabs, al.boolv ? "true" : "false");
+            printf("\t%s%s", tabs, v.boolv ? "true" : "false");
             break;
         case T_NULL:
             printf("\t%snull", tabs);
             break;
         case T_ARR:
-            arr_print_indent(al.arrayv, indent + 1, 0);
+            arr_print_indent(v.arrayv, indent + 1, 0);
             break;
         case T_DICT:
-            dict_print_indent(al.dictv, indent + 1, 0);
+            dict_print_indent(v.dictv, indent + 1, 0);
             break;
         }
 

@@ -27,9 +27,8 @@ cd JsonParser
 
 Then run the following commands :
 
-> Make sure the `configure` file has execution permission (`chmod +x configure`)
->
-> If you want to compile using `gdb` or `fsanitize`, use `./configure DEBUG` instead of `./configure`
+> If you want to compile using `fsanitize`, use `./configure S`,
+> and if you want to compile using `gdb`, use `./configure D`
 
 ```shell
 ./configure
@@ -51,48 +50,121 @@ mv src/ json-parser/
 
 To read a json file in your code, call the `parse()` function :
 ```c
-json_dict_st *jd = parse(file_path);
-if (jd == NULL)
+JSON *j = parse(file_path);
+// Once you have this JSON instance, you first have to check whether it is an array or a dict :
+
+// The macros 'IS_ARRAY' and 'IS_DICT' check if 'j' is NULL, if 'j' is an array
+// and if j->array is not null
+if (IS_ARRAY(j))
 {
-    return 1;
+    Array *a = j->array;
+    // Do stuff with the array
+}
+else if (IS_DICT(j))
+{
+    Dict *d = j->dict;
+    // Do stuff with the dict
 }
 ```
 
-If you want to access a value of the parsed Json object, you can do this :
+The arrays contains `Value` elements, while the dicts contain `Item` elements :
+
+> Also note the usage of `String`, it is a simple typedef struct
+
+<center>
+<table>
+<tr>
+<th>Value</th>
+<th>Item</th>
+<th>String</th>
+</tr>
+<tr>
+<td>
+
 ```c
-// Replace 'key' by the name of the element you want to access
-typed_value_st tv = get_value(jd, "key", 5);
+typedef struct
+{
+    char type;
+    String strv;
+    int intv;
+    double doublev;
+    char boolv;
+    Array *arrayv;
+    Dict *dictv;
+} Value;
 ```
 
-A basic main file reading the file, accessing its content and printing it would look like this :
+</td>
+<td>
 
 ```c
-#include "json_api.h"
-#include "parser.h"
-#include "printing.h"
-
-int main(int argc, char *argv[])
+typedef struct
 {
-    if (argc < 2)
-    {
-        return 1;
-    }
+    char type;
+    String key;
+    String strv;
+    int intv;
+    double doublev;
+    char boolv;
+    Array *arrayv;
+    Dict *dictv;
+} Item;
+```
 
-    json_dict_st *jd = parse(argv[1]);
-    if (jd == NULL)
-    {
-        return 1;
-    }
+</td>
+<td>
 
-    typed_value_st tv = get_value(jd, "array", 5);
-    // Check if the value is of the expected type
-    if (tv.type == TYPE_ARR)
-    {
-        print_array((json_array_st *)tv.value);
-    }
+```c
+typedef struct
+{
+    char *str;
+    uint_strlen_t length;
+} String;
+```
 
-    destroy_dict(jd);
-    return 0;
+</td>
+</tr>
+</table>
+</center>
+
+To access the elements of the array or dict :
+
+```c
+// For arrays
+Value v = array_get(a, index);
+
+// For dicts
+Item it = dict_get(d, key);
+
+// The rest is the same for both, except that the arrays don't have keys
+if (v.type == T_ERROR)
+{
+    // Handle error
+}
+// Next we have to check what the type of the value is :
+switch (v.type)
+{
+case T_STR:
+    // Do stuff with string
+    break;
+case T_INT:
+    // Do stuff with integer
+    break;
+case T_DOUBLE:
+    // Do stuff with double
+    break;
+case T_BOOL:
+    // Do stuff with boolean
+    break;
+case T_NULL:
+    // Do stuff with null
+    break;
+case T_ARR:
+    // Do stuff with array
+    break;
+case T_DICT:
+    // Do stuff with dict
+    break;
 }
 ```
 

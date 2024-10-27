@@ -7,6 +7,21 @@
 #include "json_types.h"
 
 /*******************************************************************************
+**                                   MACROS                                   **
+*******************************************************************************/
+/*
+** \def Checks if the JSON instance is not null, if the JSON instance is an
+**      array and if the array is not null
+*/
+#define IS_ARRAY(j) ((j) && (j->is_array) && (j->array))
+
+/*
+** \def Checks if the JSON instance is not null, if the JSON instance is a dict
+**      and if the dict is not null
+*/
+#define IS_DICT(j) ((j) && !(j->is_array) && (j->dict))
+
+/*******************************************************************************
 **                                 STRUCTURES                                 **
 *******************************************************************************/
 typedef struct array_linked_list Array;
