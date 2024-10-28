@@ -66,8 +66,8 @@ typedef uint_fast32_t uint_nested_dicts_t;
 typedef uint_fast64_t uint_nested_dicts_t;
 #endif
 
-#define NULL_STRING ((String){ .str = 0 })
-#define NULL_STR_AND_LEN_TUPLE ((StrAndLenTuple){ .str = 0 })
+#define NULL_STRING ((String){ .str = 0, .length = 0 })
+#define NULL_STR_AND_LEN_TUPLE ((StrAndLenTuple){ .str = 0, .len = 0 })
 
 /*******************************************************************************
 **                                 STRUCTURES                                 **
@@ -294,7 +294,7 @@ String parse_string_buff(char *buff, uint_fast64_t *idx)
 {
     if (!buff || !idx)
     {
-        return (String){ .str = 0, .length = 0 };
+        return NULL_STRING;
     }
 
     uint_fast64_t start_idx = *idx + 1;
@@ -587,7 +587,7 @@ uint_fast64_t get_nb_elts_dict_buff(char *buff, uint_fast64_t idx,
 */
 Array *parse_array_buff(char *b, uint_fast64_t *idx, uint_fast16_t *err)
 {
-    if (!b || !err)
+    if (!b || !idx || !err)
     {
         return 0;
     }
@@ -602,7 +602,7 @@ Array *parse_array_buff(char *b, uint_fast64_t *idx, uint_fast16_t *err)
     }
 
     Array *a = init_array(nb_elts);
-    if (nb_elts == 0)
+    if (!a || nb_elts == 0)
     {
         return a;
     }
@@ -707,7 +707,7 @@ Array *parse_array_buff(char *b, uint_fast64_t *idx, uint_fast16_t *err)
 */
 Dict *parse_dict_buff(char *b, uint_fast64_t *idx, uint_fast16_t *err)
 {
-    if (!b || !err)
+    if (!b || !idx || !err)
     {
         return 0;
     }
@@ -722,7 +722,7 @@ Dict *parse_dict_buff(char *b, uint_fast64_t *idx, uint_fast16_t *err)
     }
 
     Dict *d = init_dict(nb_elts);
-    if (nb_elts == 0)
+    if (!d || nb_elts == 0)
     {
         return d;
     }
@@ -1137,8 +1137,7 @@ uint_fast64_t get_nb_elts_array(FILE *f, uint_fast64_t pos, uint_fast16_t *err)
 ** \param pos The position in the file of the character after the '{' that
 **            begins the current dict
 ** \returns The total number of characters in the current dict - 1 (the
-*first
-**          '{' is not counted)
+**          first '{' is not counted)
 */
 uint_fast64_t get_nb_chars_in_dict(FILE *f, uint_fast64_t pos,
                                    uint_fast16_t *err)
@@ -1208,8 +1207,7 @@ uint_fast64_t get_nb_chars_in_dict(FILE *f, uint_fast64_t pos,
 /**
 ** \param f The file stream
 ** \param pos The position in the file of the character just after the '{'
-*that
-**            begins the current dict
+**            that begins the current dict
 ** \returns The number of elements of the current dict
 */
 uint_fast64_t get_nb_elts_dict(FILE *f, uint_fast64_t pos, uint_fast16_t *err)
@@ -1286,8 +1284,7 @@ uint_fast64_t get_nb_elts_dict(FILE *f, uint_fast64_t pos, uint_fast16_t *err)
 /**
 ** \param f The file stream
 ** \param pos The postion in the file of the character after the '[' that
-*begins
-**            the current array
+**            begins the current array
 ** \returns The json array parsed from the position
 */
 Array *parse_array(FILE *f, uint_fast64_t *pos, uint_fast16_t *err)
@@ -1307,7 +1304,7 @@ Array *parse_array(FILE *f, uint_fast64_t *pos, uint_fast16_t *err)
     }
 
     Array *a = init_array(nb_elts);
-    if (nb_elts == 0)
+    if (!a || nb_elts == 0)
     {
         ++(*pos);
         return a;
@@ -1468,7 +1465,7 @@ Dict *parse_dict(FILE *f, uint_fast64_t *pos, uint_fast16_t *err)
     }
 
     Dict *d = init_dict(nb_elts);
-    if (nb_elts == 0)
+    if (!d || nb_elts == 0)
     {
         ++(*pos);
         return d;
