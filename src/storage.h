@@ -264,9 +264,15 @@ void dict_add_null(Dict *d, String key);
 void dict_add_arr(Dict *d, String key, Array *value);
 void dict_add_dict(Dict *d, String key, Dict *value);
 
+/**
+** \returns A Value struct containing the type and the value of the correct type
+*/
 Value array_get(Array *a, int index);
 Item dict_get(Dict *d, String key);
 
+/**
+** \brief Frees the allocated memory
+*/
 void destroy_array(Array *a);
 void destroy_dict(Dict *d);
 void destroy_json(JSON *j);
