@@ -12,7 +12,7 @@
 #define ERROR_ITEM ((Item){ .type = T_ERROR })
 
 /**
-** \def Common code to all the arr_arr_<type>() functions
+** \def Common code to all the arr_add_<type>() functions
 **      The null type cannot use this macro as there is no value to set
 ** \param type_head Can be one of the following :
 **                  strings_head, integers_head, doubles_head, booleans_head,
@@ -63,6 +63,53 @@
     /* Adds to the 'indexes_types' list the type of the element of index       \
      * a->insert_idx */                                                        \
     a->indexes_types[a->insert_idx++] = T_TYPE
+
+/**
+** \def Common code to all the dict_add_<type>() functions
+**      The null type cannot use this macro as there is no value to set
+** \param type_head Can be one of the following :
+**                  strings_head, integers_head, doubles_head, booleans_head,
+**                  arrays_head, dicts_head
+** \param type_tail Can be one of the following :
+**                  strings_tail, integers_tail, doubles_tail, booleans_tail,
+**                  arrays_tail, dicts_tail
+** \param TypeDictLink Can be one of the following :
+**                    StrDictLink, IntDictLink, DoubleDictLink, BoolDictLink,
+**                    ArrDictLink, DictDictLink
+** \param T_TYPE Can be one of the following :
+**               T_STR, T_INT, T_DOUBLE, T_BOOL, T_ARR, T_DICT
+*/
+#define DICT_ADD(type_head, type_tail, TypeDictLink, T_TYPE)                   \
+    if (!d->type_head)                                                         \
+    {                                                                          \
+        TypeDictLink *l = calloc(1, sizeof(TypeDictLink));                     \
+        if (!l)                                                                \
+        {                                                                      \
+            return;                                                            \
+        }                                                                      \
+        l->value = value;                                                      \
+        l->key = key;                                                          \
+        d->type_head = l;                                                      \
+        d->type_tail = l;                                                      \
+    }                                                                          \
+    else                                                                       \
+    {                                                                          \
+        /* Goes to the last element of the linked list and adds the new        \
+         * element*/                                                           \
+        TypeDictLink *nl = calloc(1, sizeof(TypeDictLink));                    \
+        if (!nl)                                                               \
+        {                                                                      \
+            return;                                                            \
+        }                                                                      \
+        nl->value = value;                                                     \
+        nl->key = key;                                                         \
+        d->type_tail->next = nl;                                               \
+        d->type_tail = nl;                                                     \
+    }                                                                          \
+    d->keys_types[d->insert_idx++] = (KeyType)                                 \
+    {                                                                          \
+        .key = key, .type = T_TYPE                                             \
+    }
 
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
@@ -213,34 +260,7 @@ void dict_add_str(Dict *d, String key, String value)
     {
         return;
     }
-
-    if (!d->strings_head)
-    {
-        StrDictLink *l = calloc(1, sizeof(StrDictLink));
-        if (!l)
-        {
-            return;
-        }
-        l->value = value;
-        l->key = key;
-        d->strings_head = l;
-        d->strings_tail = l;
-    }
-    else
-    {
-        // Goes to the last element of the linked list and adds the new element
-        StrDictLink *nl = calloc(1, sizeof(StrDictLink));
-        if (!nl)
-        {
-            return;
-        }
-
-        nl->value = value;
-        nl->key = key;
-        d->strings_tail->next = nl;
-        d->strings_tail = nl;
-    }
-    d->keys_types[d->insert_idx++] = (KeyType){ .key = key, .type = T_STR };
+    DICT_ADD(strings_head, strings_tail, StrDictLink, T_STR);
 }
 
 void dict_add_int(Dict *d, String key, int value)
@@ -249,33 +269,7 @@ void dict_add_int(Dict *d, String key, int value)
     {
         return;
     }
-
-    if (!d->integers_head)
-    {
-        IntDictLink *l = calloc(1, sizeof(IntDictLink));
-        if (!l)
-        {
-            return;
-        }
-        l->value = value;
-        l->key = key;
-        d->integers_head = l;
-        d->integers_tail = l;
-    }
-    else
-    {
-        // Goes to the last element of the linked list and adds the new element
-        IntDictLink *nl = calloc(1, sizeof(IntDictLink));
-        if (!nl)
-        {
-            return;
-        }
-        nl->value = value;
-        nl->key = key;
-        d->integers_tail->next = nl;
-        d->integers_tail = nl;
-    }
-    d->keys_types[d->insert_idx++] = (KeyType){ .key = key, .type = T_INT };
+    DICT_ADD(integers_head, integers_tail, IntDictLink, T_INT);
 }
 
 void dict_add_double(Dict *d, String key, double value)
@@ -284,33 +278,7 @@ void dict_add_double(Dict *d, String key, double value)
     {
         return;
     }
-
-    if (!d->doubles_head)
-    {
-        DoubleDictLink *l = calloc(1, sizeof(DoubleDictLink));
-        if (!l)
-        {
-            return;
-        }
-        l->value = value;
-        l->key = key;
-        d->doubles_head = l;
-        d->doubles_tail = l;
-    }
-    else
-    {
-        // Goes to the last element of the linked list and adds the new element
-        DoubleDictLink *nl = calloc(1, sizeof(DoubleDictLink));
-        if (!nl)
-        {
-            return;
-        }
-        nl->value = value;
-        nl->key = key;
-        d->doubles_tail->next = nl;
-        d->doubles_tail = nl;
-    }
-    d->keys_types[d->insert_idx++] = (KeyType){ .key = key, .type = T_DOUBLE };
+    DICT_ADD(doubles_head, doubles_tail, DoubleDictLink, T_DOUBLE);
 }
 
 void dict_add_bool(Dict *d, String key, char value)
@@ -319,33 +287,7 @@ void dict_add_bool(Dict *d, String key, char value)
     {
         return;
     }
-
-    if (!d->booleans_head)
-    {
-        BoolDictLink *l = calloc(1, sizeof(BoolDictLink));
-        if (!l)
-        {
-            return;
-        }
-        l->value = value;
-        l->key = key;
-        d->booleans_head = l;
-        d->booleans_tail = l;
-    }
-    else
-    {
-        // Goes to the last element of the linked list and adds the new element
-        BoolDictLink *nl = calloc(1, sizeof(BoolDictLink));
-        if (!nl)
-        {
-            return;
-        }
-        nl->value = value;
-        nl->key = key;
-        d->booleans_tail->next = nl;
-        d->booleans_tail = nl;
-    }
-    d->keys_types[d->insert_idx++] = (KeyType){ .key = key, .type = T_BOOL };
+    DICT_ADD(booleans_head, booleans_tail, BoolDictLink, T_BOOL);
 }
 
 void dict_add_null(Dict *d, String key)
@@ -387,33 +329,7 @@ void dict_add_arr(Dict *d, String key, Array *value)
     {
         return;
     }
-
-    if (!d->arrays_head)
-    {
-        ArrDictLink *l = calloc(1, sizeof(ArrDictLink));
-        if (!l)
-        {
-            return;
-        }
-        l->value = value;
-        l->key = key;
-        d->arrays_head = l;
-        d->arrays_tail = l;
-    }
-    else
-    {
-        // Goes to the last element of the linked list and adds the new element
-        ArrDictLink *nl = calloc(1, sizeof(ArrDictLink));
-        if (!nl)
-        {
-            return;
-        }
-        nl->value = value;
-        nl->key = key;
-        d->arrays_tail->next = nl;
-        d->arrays_tail = nl;
-    }
-    d->keys_types[d->insert_idx++] = (KeyType){ .key = key, .type = T_ARR };
+    DICT_ADD(arrays_head, arrays_tail, ArrDictLink, T_ARR);
 }
 
 void dict_add_dict(Dict *d, String key, Dict *value)
@@ -422,33 +338,7 @@ void dict_add_dict(Dict *d, String key, Dict *value)
     {
         return;
     }
-
-    if (!d->dicts_head)
-    {
-        DictDictLink *l = calloc(1, sizeof(DictDictLink));
-        if (!l)
-        {
-            return;
-        }
-        l->value = value;
-        l->key = key;
-        d->dicts_head = l;
-        d->dicts_tail = l;
-    }
-    else
-    {
-        // Goes to the last element of the linked list and adds the new element
-        DictDictLink *nl = calloc(1, sizeof(DictDictLink));
-        if (!nl)
-        {
-            return;
-        }
-        nl->value = value;
-        nl->key = key;
-        d->dicts_tail->next = nl;
-        d->dicts_tail = nl;
-    }
-    d->keys_types[d->insert_idx++] = (KeyType){ .key = key, .type = T_DICT };
+    DICT_ADD(dicts_head, dicts_tail, DictDictLink, T_DICT);
 }
 
 /*******************************************************************************
