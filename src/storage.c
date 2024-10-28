@@ -1,10 +1,72 @@
 #include "storage.h"
 
+/*******************************************************************************
+**                                  INCLUDES                                  **
+*******************************************************************************/
 #include <stdlib.h>
 
+/*******************************************************************************
+**                                   MACROS                                   **
+*******************************************************************************/
 #define ERROR_VALUE ((Value){ .type = T_ERROR })
 #define ERROR_ITEM ((Item){ .type = T_ERROR })
 
+/**
+** \def Common code to all the arr_arr_<type>() functions
+**      The null type cannot use this macro as there is no value to set
+** \param type_head Can be one of the following :
+**                  strings_head, integers_head, doubles_head, booleans_head,
+**                  arrays_head, dicts_head
+** \param type_tail Can be one of the following :
+**                  strings_tail, integers_tail, doubles_tail, booleans_tail,
+**                  arrays_tail, dicts_tail
+** \param TypeArrLink Can be one of the following :
+**                    StrArrLink, IntArrLink, DoubleArrLink, BoolArrLink,
+**                    ArrArrLink, DictArrLink
+** \param T_TYPE Can be one of the following :
+**               T_STR, T_INT, T_DOUBLE, T_BOOL, T_ARR, T_DICT
+*/
+#define ARRAY_ADD(type_head, type_tail, TypeArrLink, T_TYPE)                   \
+    if (!a->type_head)                                                         \
+    {                                                                          \
+        TypeArrLink *l = calloc(1, sizeof(TypeArrLink));                       \
+        if (!l)                                                                \
+        {                                                                      \
+            return;                                                            \
+        }                                                                      \
+        l->value = value;                                                      \
+        /* Sets the index of the element we are adding to the index of the     \
+         * element to be added in the linked list */                           \
+        l->index = a->insert_idx;                                              \
+        /* As there was no element, the tail is the head */                    \
+        a->type_head = l;                                                      \
+        a->type_tail = l;                                                      \
+    }                                                                          \
+    else                                                                       \
+    {                                                                          \
+        /* Goes to the last element of the linked list and adds the new        \
+         * element */                                                          \
+        TypeArrLink *nl = calloc(1, sizeof(TypeArrLink));                      \
+        if (!nl)                                                               \
+        {                                                                      \
+            return;                                                            \
+        }                                                                      \
+        nl->value = value;                                                     \
+        /* Sets the index of the element we are adding to the index of the     \
+         * element to be added in the linked list */                           \
+        nl->index = a->insert_idx;                                             \
+        /* Sets the new tail to the element we are adding and make the         \
+         * previous tail point to it */                                        \
+        a->type_tail->next = nl;                                               \
+        a->type_tail = nl;                                                     \
+    }                                                                          \
+    /* Adds to the 'indexes_types' list the type of the element of index       \
+     * a->insert_idx */                                                        \
+    a->indexes_types[a->insert_idx++] = T_TYPE
+
+/*******************************************************************************
+**                                 FUNCTIONS                                  **
+*******************************************************************************/
 Array *init_array(int size)
 {
     char *indexes_types = calloc(size, sizeof(char));
@@ -61,34 +123,7 @@ void arr_add_str(Array *a, String value)
     {
         return;
     }
-
-    if (!a->strings_head)
-    {
-        StrArrLink *l = calloc(1, sizeof(StrArrLink));
-        if (!l)
-        {
-            return;
-        }
-        l->value = value;
-        l->index = a->insert_idx;
-        a->strings_head = l;
-        a->strings_tail = l;
-    }
-    else
-    {
-        // Goes to the last element of the linked list and adds the new element
-        StrArrLink *nl = calloc(1, sizeof(StrArrLink));
-        if (!nl)
-        {
-            return;
-        }
-
-        nl->value = value;
-        nl->index = a->insert_idx;
-        a->strings_tail->next = nl;
-        a->strings_tail = nl;
-    }
-    a->indexes_types[a->insert_idx++] = T_STR;
+    ARRAY_ADD(strings_head, strings_tail, StrArrLink, T_STR);
 }
 
 void arr_add_int(Array *a, int value)
@@ -97,33 +132,7 @@ void arr_add_int(Array *a, int value)
     {
         return;
     }
-
-    if (!a->integers_head)
-    {
-        IntArrLink *l = calloc(1, sizeof(IntArrLink));
-        if (!l)
-        {
-            return;
-        }
-        l->value = value;
-        l->index = a->insert_idx;
-        a->integers_head = l;
-        a->integers_tail = l;
-    }
-    else
-    {
-        // Goes to the last element of the linked list and adds the new element
-        IntArrLink *nl = calloc(1, sizeof(IntArrLink));
-        if (!nl)
-        {
-            return;
-        }
-        nl->value = value;
-        nl->index = a->insert_idx;
-        a->integers_tail->next = nl;
-        a->integers_tail = nl;
-    }
-    a->indexes_types[a->insert_idx++] = T_INT;
+    ARRAY_ADD(integers_head, integers_tail, IntArrLink, T_INT);
 }
 
 void arr_add_double(Array *a, double value)
@@ -132,33 +141,7 @@ void arr_add_double(Array *a, double value)
     {
         return;
     }
-
-    if (!a->doubles_head)
-    {
-        DoubleArrLink *l = calloc(1, sizeof(DoubleArrLink));
-        if (!l)
-        {
-            return;
-        }
-        l->value = value;
-        l->index = a->insert_idx;
-        a->doubles_head = l;
-        a->doubles_tail = l;
-    }
-    else
-    {
-        // Goes to the last element of the linked list and adds the new element
-        DoubleArrLink *nl = calloc(1, sizeof(DoubleArrLink));
-        if (!nl)
-        {
-            return;
-        }
-        nl->value = value;
-        nl->index = a->insert_idx;
-        a->doubles_tail->next = nl;
-        a->doubles_tail = nl;
-    }
-    a->indexes_types[a->insert_idx++] = T_DOUBLE;
+    ARRAY_ADD(doubles_head, doubles_tail, DoubleArrLink, T_DOUBLE);
 }
 
 void arr_add_bool(Array *a, char value)
@@ -167,33 +150,7 @@ void arr_add_bool(Array *a, char value)
     {
         return;
     }
-
-    if (!a->booleans_head)
-    {
-        BoolArrLink *l = calloc(1, sizeof(BoolArrLink));
-        if (!l)
-        {
-            return;
-        }
-        l->value = value;
-        l->index = a->insert_idx;
-        a->booleans_head = l;
-        a->booleans_tail = l;
-    }
-    else
-    {
-        // Goes to the last element of the linked list and adds the new element
-        BoolArrLink *nl = calloc(1, sizeof(BoolArrLink));
-        if (!nl)
-        {
-            return;
-        }
-        nl->value = value;
-        nl->index = a->insert_idx;
-        a->booleans_tail->next = nl;
-        a->booleans_tail = nl;
-    }
-    a->indexes_types[a->insert_idx++] = T_BOOL;
+    ARRAY_ADD(booleans_head, booleans_tail, BoolArrLink, T_BOOL);
 }
 
 void arr_add_null(Array *a)
@@ -235,33 +192,7 @@ void arr_add_arr(Array *a, Array *value)
     {
         return;
     }
-
-    if (!a->arrays_head)
-    {
-        ArrArrLink *l = calloc(1, sizeof(ArrArrLink));
-        if (!l)
-        {
-            return;
-        }
-        l->value = value;
-        l->index = a->insert_idx;
-        a->arrays_head = l;
-        a->arrays_tail = l;
-    }
-    else
-    {
-        // Goes to the last element of the linked list and adds the new element
-        ArrArrLink *nl = calloc(1, sizeof(ArrArrLink));
-        if (!nl)
-        {
-            return;
-        }
-        nl->value = value;
-        nl->index = a->insert_idx;
-        a->arrays_tail->next = nl;
-        a->arrays_tail = nl;
-    }
-    a->indexes_types[a->insert_idx++] = T_ARR;
+    ARRAY_ADD(arrays_head, arrays_tail, ArrArrLink, T_ARR);
 }
 
 void arr_add_dict(Array *a, Dict *value)
@@ -270,33 +201,7 @@ void arr_add_dict(Array *a, Dict *value)
     {
         return;
     }
-
-    if (!a->dicts_head)
-    {
-        DictArrLink *l = calloc(1, sizeof(DictArrLink));
-        if (!l)
-        {
-            return;
-        }
-        l->value = value;
-        l->index = a->insert_idx;
-        a->dicts_head = l;
-        a->dicts_tail = l;
-    }
-    else
-    {
-        // Goes to the last element of the linked list and adds the new element
-        DictArrLink *nl = calloc(1, sizeof(DictArrLink));
-        if (!nl)
-        {
-            return;
-        }
-        nl->value = value;
-        nl->index = a->insert_idx;
-        a->dicts_tail->next = nl;
-        a->dicts_tail = nl;
-    }
-    a->indexes_types[a->insert_idx++] = T_DICT;
+    ARRAY_ADD(dicts_head, dicts_tail, DictArrLink, T_DICT);
 }
 
 /*******************************************************************************
