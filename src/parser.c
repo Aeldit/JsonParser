@@ -257,7 +257,7 @@ char max_nested_arrays_reached(uint_nested_arrays_t is_in_array,
         printf("Max number of nested arrays reached, aborting "
                "parsing\n");
 #endif
-        *err = ERR_MAX_NESTED_ARRAYS_REACHED;
+        *err |= ERR_MAX_NESTED_ARRAYS_REACHED;
         return 1;
     }
     return 0;
@@ -277,7 +277,7 @@ char max_nested_dicts_reached(uint_nested_dicts_t is_in_dict,
         printf("Max number of nested dicts reached, aborting "
                "parsing\n");
 #endif
-        *err = ERR_MAX_NESTED_DICTS_REACHED;
+        *err |= ERR_MAX_NESTED_DICTS_REACHED;
         return 1;
     }
     return 0;
@@ -587,7 +587,7 @@ uint_fast64_t get_nb_elts_dict_buff(char *buff, uint_fast64_t idx,
 */
 Array *parse_array_buff(char *b, uint_fast64_t *idx, uint_fast16_t *err)
 {
-    if (!b || !idx || !err)
+    if (!b || !err)
     {
         return 0;
     }
@@ -707,7 +707,7 @@ Array *parse_array_buff(char *b, uint_fast64_t *idx, uint_fast16_t *err)
 */
 Dict *parse_dict_buff(char *b, uint_fast64_t *idx, uint_fast16_t *err)
 {
-    if (!b || !idx || !err)
+    if (!b || !err)
     {
         return 0;
     }
@@ -1298,7 +1298,7 @@ Array *parse_array(FILE *f, uint_fast64_t *pos, uint_fast16_t *err)
 
     uint_fast64_t nb_elts_parsed = 0;
     uint_fast64_t nb_elts = get_nb_elts_array(f, i, err);
-    if (*err)
+    if (err && *err)
     {
         return 0;
     }
@@ -1317,7 +1317,6 @@ Array *parse_array(FILE *f, uint_fast64_t *pos, uint_fast16_t *err)
         if (c == '"')
         {
             arr_add_str(a, parse_string(f, &i));
-            //*err |= ja->addValue(new StringValue());
             ++nb_elts_parsed;
         }
         else if (IS_NUMBER_START(c))
@@ -1331,12 +1330,10 @@ Array *parse_array(FILE *f, uint_fast64_t *pos, uint_fast16_t *err)
             if (sl.is_float)
             {
                 arr_add_double(a, str_to_double(&sl));
-                //*err |= ja->addValue(new DoubleValue());
             }
             else
             {
                 arr_add_int(a, str_to_long(&sl));
-                //*err |= ja->addValue(new IntValue(str_to_long(&sl)));
             }
             free(sl.str);
             ++nb_elts_parsed;
@@ -1349,20 +1346,18 @@ Array *parse_array(FILE *f, uint_fast64_t *pos, uint_fast16_t *err)
                 continue;
             }
             arr_add_bool(a, len == 4 ? 1 : 0);
-            //*err |= ja->addValue(new BoolValue(len == 4 ? true : false));
             ++nb_elts_parsed;
         }
         else if (c == 'n')
         {
             arr_add_null(a);
-            //*err |= ja->addValue(new NullValue());
             i += 3;
             ++nb_elts_parsed;
         }
         else if (c == '[')
         {
             uint_fast64_t nb_chars = get_nb_chars_in_array(f, i, err);
-            if (*err)
+            if (err && *err)
             {
                 break;
             }
@@ -1389,13 +1384,12 @@ Array *parse_array(FILE *f, uint_fast64_t *pos, uint_fast16_t *err)
             }
 
             arr_add_arr(a, tmp_ja);
-            //*err |= ja->addValue(new ArrayValue(tmp_ja));
             ++nb_elts_parsed;
         }
         else if (c == '{')
         {
             uint_fast64_t nb_chars = get_nb_chars_in_dict(f, i, err);
-            if (*err)
+            if (err && *err)
             {
                 break;
             }
@@ -1422,16 +1416,15 @@ Array *parse_array(FILE *f, uint_fast64_t *pos, uint_fast16_t *err)
             }
 
             arr_add_dict(a, tmp_jd);
-            //*err |= ja->addValue(new DictValue(tmp_jd));
             ++nb_elts_parsed;
         }
 
-        if (*err)
+        if (err && *err)
         {
             break;
         }
     }
-    if (*err)
+    if (err && *err)
     {
         print_err_bits(*err);
         free(a);
@@ -1459,7 +1452,7 @@ Dict *parse_dict(FILE *f, uint_fast64_t *pos, uint_fast16_t *err)
 
     uint_fast64_t nb_elts_parsed = 0;
     uint_fast64_t nb_elts = get_nb_elts_dict(f, i, err);
-    if (*err)
+    if (err && *err)
     {
         return 0;
     }
@@ -1488,7 +1481,6 @@ Dict *parse_dict(FILE *f, uint_fast64_t *pos, uint_fast16_t *err)
             else
             {
                 dict_add_str(d, key, parse_string(f, &i));
-                //*err |= jd->addItem(new StringItem(key, ));
                 ++nb_elts_parsed;
             }
         }
@@ -1503,12 +1495,10 @@ Dict *parse_dict(FILE *f, uint_fast64_t *pos, uint_fast16_t *err)
             if (sl.is_float)
             {
                 dict_add_double(d, key, str_to_double(&sl));
-                //*err |= jd->addItem(new DoubleItem(key, ));
             }
             else
             {
                 dict_add_int(d, key, str_to_long(&sl));
-                //*err |= jd->addItem(new IntItem(key, str_to_long(&sl)));
             }
             free(sl.str);
             ++nb_elts_parsed;
@@ -1521,20 +1511,18 @@ Dict *parse_dict(FILE *f, uint_fast64_t *pos, uint_fast16_t *err)
                 continue;
             }
             dict_add_bool(d, key, len == 4 ? 1 : 0);
-            //*err |= jd->addItem(new BoolItem(key, ));
             ++nb_elts_parsed;
         }
         else if (c == 'n')
         {
             dict_add_null(d, key);
-            //*err |= jd->addItem(new NullItem(key));
             i += 3;
             ++nb_elts_parsed;
         }
         else if (c == '[')
         {
             uint_fast64_t nb_chars = get_nb_chars_in_array(f, i, err);
-            if (*err)
+            if (err && *err)
             {
                 break;
             }
@@ -1546,7 +1534,7 @@ Dict *parse_dict(FILE *f, uint_fast64_t *pos, uint_fast16_t *err)
                 char *b = calloc(nb_chars + 1, sizeof(char));
                 if (!b || fseek(f, i, SEEK_SET) != 0)
                 {
-                    *err = ERR_FSEEK;
+                    *err |= ERR_FSEEK;
                     free(b);
                     break;
                 }
@@ -1561,13 +1549,12 @@ Dict *parse_dict(FILE *f, uint_fast64_t *pos, uint_fast16_t *err)
             }
 
             dict_add_arr(d, key, tmp_ja);
-            //*err |= jd->addItem(new ArrayItem(key, tmp_ja));
             ++nb_elts_parsed;
         }
         else if (c == '{')
         {
             uint_fast64_t nb_chars = get_nb_chars_in_dict(f, i, err);
-            if (*err)
+            if (err && *err)
             {
                 break;
             }
@@ -1579,7 +1566,7 @@ Dict *parse_dict(FILE *f, uint_fast64_t *pos, uint_fast16_t *err)
                 char *b = calloc(nb_chars + 1, sizeof(char));
                 if (!b || fseek(f, i, SEEK_SET) != 0)
                 {
-                    *err = ERR_FSEEK;
+                    *err |= ERR_FSEEK;
                     free(b);
                     break;
                 }
@@ -1594,7 +1581,6 @@ Dict *parse_dict(FILE *f, uint_fast64_t *pos, uint_fast16_t *err)
             }
 
             dict_add_dict(d, key, tmp_jd);
-            //*err |= jd->addItem(new DictItem(key, tmp_jd));
             ++nb_elts_parsed;
         }
         else if (c == ',')
@@ -1602,12 +1588,12 @@ Dict *parse_dict(FILE *f, uint_fast64_t *pos, uint_fast16_t *err)
             is_waiting_key = 1;
         }
 
-        if (*err)
+        if (err && *err)
         {
             break;
         }
     }
-    if (*err)
+    if (err && *err)
     {
         print_err_bits(*err);
         if (*err != ERR_NULL_KEY)
