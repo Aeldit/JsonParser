@@ -601,7 +601,7 @@ Array *parse_array_buff(char *b, uint_fast64_t *idx, uint_fast16_t *err)
         return 0;
     }
 
-    Array *a = init_array(nb_elts);
+    Array *a = calloc(1, sizeof(Array));
     if (!a || nb_elts == 0)
     {
         return a;
@@ -721,7 +721,7 @@ Dict *parse_dict_buff(char *b, uint_fast64_t *idx, uint_fast16_t *err)
         return 0;
     }
 
-    Dict *d = init_dict(nb_elts);
+    Dict *d = calloc(1, sizeof(Dict));
     if (!d || nb_elts == 0)
     {
         return d;
@@ -1303,7 +1303,7 @@ Array *parse_array(FILE *f, uint_fast64_t *pos, uint_fast16_t *err)
         return 0;
     }
 
-    Array *a = init_array(nb_elts);
+    Array *a = calloc(1, sizeof(Array));
     if (!a || nb_elts == 0)
     {
         ++(*pos);
@@ -1457,7 +1457,7 @@ Dict *parse_dict(FILE *f, uint_fast64_t *pos, uint_fast16_t *err)
         return 0;
     }
 
-    Dict *d = init_dict(nb_elts);
+    Dict *d = calloc(1, sizeof(Dict));
     if (!d || nb_elts == 0)
     {
         ++(*pos);

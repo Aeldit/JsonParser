@@ -32,10 +32,6 @@ void arr_print_indent(Array *a, int indent, char fromDict)
     if (size == 0)
     {
         printf("%s[]", fromDict ? "" : tabs);
-        if (indent == 1)
-        {
-            // flush
-        }
         free(tabs);
         return;
     }
@@ -78,18 +74,10 @@ void arr_print_indent(Array *a, int indent, char fromDict)
         if (i < size - 1)
         {
             printf(",\n");
-            // cout << ",\n";
         }
     }
 
     printf("\n%s]", tabs);
-    // cout << "\n" << tabs << "]";
-
-    if (indent == 1)
-    {
-        // flush
-        // cout << endl;
-    }
     free(tabs);
 }
 
@@ -117,25 +105,21 @@ void dict_print_indent(Dict *d, int indent, char fromDict)
     }
     tabs[indent - 1] = '\0';
 
-    uint_fast64_t size = d->size;
+    int size = d->size;
     if (size == 0)
     {
         printf("%s{}", fromDict ? "" : tabs);
-        // cout << (fromDict ? "" : tabs) << "{}";
-        if (indent == 1)
-        {
-            // flush
-        }
         free(tabs);
         return;
     }
 
     printf("%s{\n", fromDict ? "" : tabs);
-    // cout << (fromDict ? "" : tabs) << "{\n";
 
-    for (uint_fast64_t i = 0; i < size; ++i)
+    int i = 0;
+    ItemLink *link = d->head;
+    while (link)
     {
-        String key = d->keys_types[i].key;
+        String key = link->key;
         Item it = dict_get(d, key);
         if (it.type == T_ERROR)
         {
@@ -174,17 +158,12 @@ void dict_print_indent(Dict *d, int indent, char fromDict)
         if (i < size - 1)
         {
             printf(",\n");
-            // cout << ",\n";
         }
+        ++i;
+        link = link->next;
     }
 
     printf("\n%s}", tabs);
-    // cout << "\n" << tabs << "}";
-
-    if (indent == 1)
-    {
-        // flush
-    }
     free(tabs);
 }
 
