@@ -156,8 +156,14 @@ JSON *init_json(char is_array, Array *a, Dict *d)
         return 0;
     }
     j->is_array = is_array;
-    j->array = a;
-    j->dict = d;
+    if (is_array)
+    {
+        j->array = a;
+    }
+    else
+    {
+        j->dict = d;
+    }
     return j;
 }
 
@@ -567,6 +573,11 @@ Item dict_get(Dict *d, String key)
 *******************************************************************************/
 void destroy_array(Array *a)
 {
+    if (!a)
+    {
+        return;
+    }
+
     free(a->indexes_types);
 
     StrArrLink *sl = a->strings_head;
@@ -633,8 +644,13 @@ void destroy_array(Array *a)
 
 void destroy_dict(Dict *d)
 {
+    if (!d)
+    {
+        return;
+    }
+
     // The keys that are pointed to by the elements of this array will be freed
-    // when freeing the element, so we don't do it here
+    // when freeing the elements, so we don't do it here
     free(d->keys_types);
 
     StrDictLink *sl = d->strings_head;
@@ -713,12 +729,11 @@ void destroy_json(JSON *j)
         return;
     }
 
-    if (j->array)
+    if (j->is_array)
     {
         destroy_array(j->array);
     }
-
-    if (j->dict)
+    else
     {
         destroy_dict(j->dict);
     }
