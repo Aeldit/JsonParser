@@ -175,6 +175,13 @@ struct dict_dict_link
     struct dict_dict_link *next;
 };
 
+struct generic_dict_link
+{
+    String key;
+    Dict *value;
+    struct dict_dict_link *next;
+};
+
 typedef struct str_dict_link StrDictLink;
 typedef struct int_dict_link IntDictLink;
 typedef struct double_dict_link DoubleDictLink;
@@ -239,8 +246,11 @@ struct dict_linked_list
 typedef struct
 {
     char is_array;
-    Array *array;
-    Dict *dict;
+    union
+    {
+        Array *array;
+        Dict *dict;
+    };
 } JSON;
 
 /*******************************************************************************
