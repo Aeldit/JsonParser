@@ -2,7 +2,7 @@
 
 DEBUG=0
 
-CFLAGS="-W -Wall -Werror -std=c99 -pedantic"
+CFLAGS="-W -Wall -Werror -std=c11 -pedantic"
 
 if [ $# -eq 1 ]; then
 	if [ -z "${1##*"S"*}" ]; then
