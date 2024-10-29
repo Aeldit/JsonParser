@@ -87,12 +87,15 @@ typedef struct dict_array_link DictArrLink;
 typedef struct
 {
     char type;
-    String strv;
-    int intv;
-    double doublev;
-    char boolv;
-    Array *arrayv;
-    Dict *dictv;
+    union
+    {
+        String strv;
+        int intv;
+        double doublev;
+        char boolv;
+        Array *arrayv;
+        Dict *dictv;
+    };
 } Value;
 
 // Linked list for arrays
@@ -185,12 +188,15 @@ typedef struct
 {
     char type;
     String key;
-    String strv;
-    int intv;
-    double doublev;
-    char boolv;
-    Array *arrayv;
-    Dict *dictv;
+    union
+    {
+        String strv;
+        int intv;
+        double doublev;
+        char boolv;
+        Array *arrayv;
+        Dict *dictv;
+    };
 } Item;
 
 typedef struct
