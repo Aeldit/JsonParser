@@ -3,7 +3,7 @@
 ![logo](https://raw.githubusercontent.com/Aeldit/Aeldit/2c162a9bf611658c32247bd5bba500a30d1b6ad9/github_profile/json-parser.svg)
 
 ![nvim](https://raw.githubusercontent.com/Aeldit/Aeldit/267a0998a55b0462b042d3e471c02f137dbad551/images/nvim.svg)
-![c](https://raw.githubusercontent.com/Aeldit/Aeldit/267a0998a55b0462b042d3e471c02f137dbad551/images/made_with_c.svg)
+![c](https://raw.githubusercontent.com/Aeldit/Aeldit/7abcf209fcfe3cbc0f29ffdc22668087fc9cea67/images/made-with-c11.svg)
 
 The goal of this project is to allow its user to give the script a `json` file and be able to store it and access its elements in C.
 
@@ -85,12 +85,15 @@ The arrays contains `Value` elements, while the dicts contain `Item` elements :
 typedef struct
 {
     char type;
-    String strv;
-    int intv;
-    double doublev;
-    char boolv;
-    Array *arrayv;
-    Dict *dictv;
+    union
+    {
+        String strv;
+        int intv;
+        double doublev;
+        char boolv;
+        Array *arrayv;
+        Dict *dictv;
+    };
 } Value;
 ```
 
@@ -102,12 +105,15 @@ typedef struct
 {
     char type;
     String key;
-    String strv;
-    int intv;
-    double doublev;
-    char boolv;
-    Array *arrayv;
-    Dict *dictv;
+    union
+    {
+        String strv;
+        int intv;
+        double doublev;
+        char boolv;
+        Array *arrayv;
+        Dict *dictv;
+    };
 } Item;
 ```
 
