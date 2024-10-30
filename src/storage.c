@@ -393,6 +393,14 @@ Value array_get(Array *a, int index)
     {
         link = link->next;
     }
+
+    // If index is 0, it means that we encountered a null link, and it
+    // is an error
+    if (!index)
+    {
+        return ERROR_VALUE;
+    }
+
     if (link)
     {
         switch (link->type)
