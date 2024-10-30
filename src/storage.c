@@ -231,6 +231,89 @@ void dict_add_dict(Dict *d, String key, Dict *value)
 }
 
 /*******************************************************************************
+**                                   REMOVES                                  **
+*******************************************************************************/
+void arr_remove(Array *a, unsigned index)
+{
+    if (a && index < a->size && a->head)
+    {
+        ValueLink *link = a->head;
+        while (link && --index)
+        {
+            link = link->next;
+        }
+
+        // If index is not 0, it means that we encountered a null link, and it
+        // is an error
+        if (index)
+        {
+            return;
+        }
+
+        // Takes the link that is before the one we want to remove and make its
+        // next point to the next of the link we want to remove
+        if (link->next)
+        {
+            ValueLink *tmp = link->next;
+            link->next = link->next->next;
+
+            switch (tmp->type)
+            {
+            case T_STR:
+                free(tmp->strv.str);
+                break;
+            case T_ARR:
+                destroy_array(tmp->arrayv);
+                break;
+            case T_DICT:
+                destroy_dict(tmp->dictv);
+                break;
+            }
+            free(tmp);
+            --a->size;
+        }
+    }
+}
+
+void dict_remove(Dict *d, String key)
+{
+    if (d && d->head)
+    {
+        ItemLink *link = d->head;
+        while (link)
+        {
+            if (strings_equals(key, link->key))
+            {
+                // Takes the link that is before the one we want to remove and
+                // make its next point to the next of the link we want to remove
+                if (link->next)
+                {
+                    ItemLink *tmp = link->next;
+                    link->next = link->next->next;
+
+                    switch (tmp->type)
+                    {
+                    case T_STR:
+                        free(tmp->strv.str);
+                        break;
+                    case T_ARR:
+                        destroy_array(tmp->arrayv);
+                        break;
+                    case T_DICT:
+                        destroy_dict(tmp->dictv);
+                        break;
+                    }
+                    free(tmp);
+                }
+                --d->size;
+                break;
+            }
+            link = link->next;
+        }
+    }
+}
+
+/*******************************************************************************
 **                                   INSERTS                                  **
 *******************************************************************************/
 void arr_insert_str(Array *a, unsigned index, String value)
@@ -279,7 +362,7 @@ void arr_insert_null(Array *a, unsigned index)
 
 void arr_insert_arr(Array *a, unsigned index, Array *value)
 {
-    if (a)
+    if (a && value)
     {
         ARRAY_INSERT(T_ARR);
         vl->arrayv = value;
@@ -288,7 +371,7 @@ void arr_insert_arr(Array *a, unsigned index, Array *value)
 
 void arr_insert_dict(Array *a, unsigned index, Dict *value)
 {
-    if (a)
+    if (a && value)
     {
         ARRAY_INSERT(T_DICT);
         vl->dictv = value;
@@ -367,6 +450,7 @@ Item dict_get(Dict *d, String key)
                 return (
                     Item){ .type = T_DICT, .key = key, .dictv = link->dictv };
             }
+            break;
         }
         link = link->next;
     }

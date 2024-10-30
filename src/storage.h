@@ -136,6 +136,9 @@ void dict_add_null(Dict *d, String key);
 void dict_add_arr(Dict *d, String key, Array *value);
 void dict_add_dict(Dict *d, String key, Dict *value);
 
+void arr_remove(Array *a, unsigned index);
+void dict_remove(Dict *d, String key);
+
 void arr_insert_str(Array *a, unsigned index, String value);
 void arr_insert_int(Array *a, unsigned index, int value);
 void arr_insert_double(Array *a, unsigned index, double value);

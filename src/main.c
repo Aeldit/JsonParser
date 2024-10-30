@@ -15,6 +15,8 @@ int main(int argc, char *argv[])
         Array *a = j->array;
         arr_insert_int(a, 2, 1);
         arr_print(j->array);
+        arr_remove(a, 2);
+        arr_print(j->array);
     }
     else if (IS_DICT(j))
     {
