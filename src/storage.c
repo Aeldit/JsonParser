@@ -40,6 +40,47 @@
     d->tail = il;                                                              \
     ++d->size
 
+#define ARRAY_INSERT(T_TYPE)                                                   \
+    /* If index is equal to the size, it is the same as adding an element      \
+     * or if the size is 0 but the head is not null (which may have been       \
+     * caused by an error)*/                                                   \
+    if (index > a->size || (a->size == 0 && a->head))                          \
+    {                                                                          \
+        return;                                                                \
+    }                                                                          \
+    ValueLink *vl = calloc(1, sizeof(ValueLink));                              \
+    vl->type = T_TYPE;                                                         \
+    /* If the linked list is empty */                                          \
+    if (!a->head)                                                              \
+    {                                                                          \
+        a->head = vl;                                                          \
+        a->tail = vl;                                                          \
+    }                                                                          \
+    else if (index == 0)                                                       \
+    {                                                                          \
+        vl->next = a->head;                                                    \
+        a->head = vl;                                                          \
+    }                                                                          \
+    else if (index == a->size)                                                 \
+    {                                                                          \
+        a->tail->next = vl;                                                    \
+        a->tail = vl;                                                          \
+    }                                                                          \
+    else                                                                       \
+    {                                                                          \
+        /* Navigates the the element at position 'index - 1', make its next    \
+        element the next of the new element, and make its next point to        \
+        the new element */                                                     \
+        ValueLink *link = a->head;                                             \
+        while (link && --index)                                                \
+        {                                                                      \
+            link = link->next;                                                 \
+        }                                                                      \
+        vl->next = link->next;                                                 \
+        link->next = vl;                                                       \
+    }                                                                          \
+    ++a->size
+
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
@@ -63,7 +104,7 @@ JSON *init_json(char is_array, Array *a, Dict *d)
 }
 
 /*******************************************************************************
-**                                 ARRAYS ADDS                                **
+**                                     ADDS                                   **
 *******************************************************************************/
 void arr_add_str(Array *a, String value)
 {
@@ -127,9 +168,6 @@ void arr_add_dict(Array *a, Dict *value)
     }
 }
 
-/*******************************************************************************
-**                                 DICTS ADDS                                 **
-*******************************************************************************/
 void dict_add_str(Dict *d, String key, String value)
 {
     if (d)
@@ -189,6 +227,71 @@ void dict_add_dict(Dict *d, String key, Dict *value)
     {
         DICT_ADD(T_DICT);
         il->dictv = value;
+    }
+}
+
+/*******************************************************************************
+**                                   INSERTS                                  **
+*******************************************************************************/
+void arr_insert_str(Array *a, unsigned index, String value)
+{
+    if (a)
+    {
+        ARRAY_INSERT(T_STR);
+        vl->strv = value;
+    }
+}
+
+void arr_insert_int(Array *a, unsigned index, int value)
+{
+    if (a)
+    {
+        ARRAY_INSERT(T_INT);
+        vl->intv = value;
+    }
+}
+
+void arr_insert_double(Array *a, unsigned index, double value)
+{
+    if (a)
+    {
+        ARRAY_INSERT(T_DOUBLE);
+        vl->doublev = value;
+    }
+}
+
+void arr_insert_bool(Array *a, unsigned index, char value)
+{
+    if (a)
+    {
+        ARRAY_INSERT(T_BOOL);
+        vl->boolv = value;
+    }
+}
+
+void arr_insert_null(Array *a, unsigned index)
+{
+    if (a)
+    {
+        ARRAY_INSERT(T_NULL);
+    }
+}
+
+void arr_insert_arr(Array *a, unsigned index, Array *value)
+{
+    if (a)
+    {
+        ARRAY_INSERT(T_ARR);
+        vl->arrayv = value;
+    }
+}
+
+void arr_insert_dict(Array *a, unsigned index, Dict *value)
+{
+    if (a)
+    {
+        ARRAY_INSERT(T_DICT);
+        vl->dictv = value;
     }
 }
 

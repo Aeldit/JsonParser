@@ -12,6 +12,8 @@ int main(int argc, char *argv[])
     JSON *j = parse(argv[1]);
     if (IS_ARRAY(j))
     {
+        Array *a = j->array;
+        arr_insert_int(a, 2, 1);
         arr_print(j->array);
     }
     else if (IS_DICT(j))

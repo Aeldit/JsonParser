@@ -92,7 +92,7 @@ typedef struct
 // Linked list for arrays
 struct array_linked_list
 {
-    int size;
+    unsigned size;
     ValueLink *head;
     ValueLink *tail;
 };
@@ -100,7 +100,7 @@ struct array_linked_list
 // Linked list for dicts
 struct dict_linked_list
 {
-    int size;
+    unsigned size;
     ItemLink *head;
     ItemLink *tail;
 };
@@ -135,6 +135,14 @@ void dict_add_bool(Dict *d, String key, char value);
 void dict_add_null(Dict *d, String key);
 void dict_add_arr(Dict *d, String key, Array *value);
 void dict_add_dict(Dict *d, String key, Dict *value);
+
+void arr_insert_str(Array *a, unsigned index, String value);
+void arr_insert_int(Array *a, unsigned index, int value);
+void arr_insert_double(Array *a, unsigned index, double value);
+void arr_insert_bool(Array *a, unsigned index, char value);
+void arr_insert_null(Array *a, unsigned index);
+void arr_insert_arr(Array *a, unsigned index, Array *value);
+void arr_insert_dict(Array *a, unsigned index, Dict *value);
 
 /**
 ** \returns A Value struct containing the type and the value of the correct type
