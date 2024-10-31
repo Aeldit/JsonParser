@@ -89,7 +89,6 @@
 Array *init_array(unsigned size)
 {
     Array *a = calloc(1, sizeof(Array));
-#ifndef EDITING_MODE
     if (!a)
     {
         return 0;
@@ -100,6 +99,7 @@ Array *init_array(unsigned size)
         return a;
     }
 
+#ifndef EDITING_MODE
     a->values = calloc(size, sizeof(Value));
     if (!a->values)
     {
@@ -114,7 +114,6 @@ Array *init_array(unsigned size)
 Dict *init_dict(unsigned size)
 {
     Dict *d = calloc(1, sizeof(Dict));
-#ifndef EDITING_MODE
     if (!d)
     {
         return 0;
@@ -125,6 +124,7 @@ Dict *init_dict(unsigned size)
         return d;
     }
 
+#ifndef EDITING_MODE
     d->items = calloc(size, sizeof(Item));
     if (!d->items)
     {
