@@ -601,7 +601,11 @@ Array *parse_array_buff(char *b, uint_fast64_t *idx, uint_fast16_t *err)
         return 0;
     }
 
+#ifndef EDITING_MODE
+    Array *a = init_array(nb_elts);
+#else
     Array *a = calloc(1, sizeof(Array));
+#endif // !EDITING_MODE
     if (!a || nb_elts == 0)
     {
         return a;
@@ -721,7 +725,11 @@ Dict *parse_dict_buff(char *b, uint_fast64_t *idx, uint_fast16_t *err)
         return 0;
     }
 
+#ifndef EDITING_MODE
+    Dict *d = init_dict(nb_elts);
+#else
     Dict *d = calloc(1, sizeof(Dict));
+#endif // !EDITING_MODE
     if (!d || nb_elts == 0)
     {
         return d;
@@ -1303,7 +1311,11 @@ Array *parse_array(FILE *f, uint_fast64_t *pos, uint_fast16_t *err)
         return 0;
     }
 
+#ifndef EDITING_MODE
+    Array *a = init_array(nb_elts);
+#else
     Array *a = calloc(1, sizeof(Array));
+#endif // !EDITING_MODE
     if (!a || nb_elts == 0)
     {
         ++(*pos);
@@ -1457,7 +1469,11 @@ Dict *parse_dict(FILE *f, uint_fast64_t *pos, uint_fast16_t *err)
         return 0;
     }
 
+#ifndef EDITING_MODE
+    Dict *d = init_dict(nb_elts);
+#else
     Dict *d = calloc(1, sizeof(Dict));
+#endif // !EDITING_MODE
     if (!d || nb_elts == 0)
     {
         ++(*pos);

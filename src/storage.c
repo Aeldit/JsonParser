@@ -11,79 +11,131 @@
 #define ERROR_VALUE ((Value){ .type = T_ERROR })
 #define ERROR_ITEM ((Item){ .type = T_ERROR })
 
-#define ARRAY_ADD(T_TYPE)                                                      \
-    ValueLink *vl = calloc(1, sizeof(ValueLink));                              \
-    vl->type = T_TYPE;                                                         \
-    if (!a->head)                                                              \
-    {                                                                          \
-        a->head = vl;                                                          \
-    }                                                                          \
-    else                                                                       \
-    {                                                                          \
-        a->tail->next = vl;                                                    \
-    }                                                                          \
-    a->tail = vl;                                                              \
-    ++a->size
-
-#define DICT_ADD(T_TYPE)                                                       \
-    ItemLink *il = calloc(1, sizeof(ItemLink));                                \
-    il->type = T_TYPE;                                                         \
-    il->key = key;                                                             \
-    if (!d->head)                                                              \
-    {                                                                          \
-        d->head = il;                                                          \
-    }                                                                          \
-    else                                                                       \
-    {                                                                          \
-        d->tail->next = il;                                                    \
-    }                                                                          \
-    d->tail = il;                                                              \
-    ++d->size
-
-#define ARRAY_INSERT(T_TYPE)                                                   \
-    /* If index is equal to the size, it is the same as adding an element      \
-     * or if the size is 0 but the head is not null (which may have been       \
-     * caused by an error)*/                                                   \
-    if (index > a->size || (a->size == 0 && a->head))                          \
-    {                                                                          \
-        return;                                                                \
-    }                                                                          \
-    ValueLink *vl = calloc(1, sizeof(ValueLink));                              \
-    vl->type = T_TYPE;                                                         \
-    /* If the linked list is empty */                                          \
-    if (!a->head)                                                              \
-    {                                                                          \
-        a->head = vl;                                                          \
-        a->tail = vl;                                                          \
-    }                                                                          \
-    else if (index == 0)                                                       \
-    {                                                                          \
-        vl->next = a->head;                                                    \
-        a->head = vl;                                                          \
-    }                                                                          \
-    else if (index == a->size)                                                 \
-    {                                                                          \
-        a->tail->next = vl;                                                    \
-        a->tail = vl;                                                          \
-    }                                                                          \
-    else                                                                       \
-    {                                                                          \
-        /* Navigates the the element at position 'index - 1', make its next    \
-        element the next of the new element, and make its next point to        \
-        the new element */                                                     \
-        ValueLink *link = a->head;                                             \
-        while (link && --index)                                                \
+#ifdef EDITING_MODE
+#    define ARRAY_ADD(T_TYPE)                                                  \
+        ValueLink *vl = calloc(1, sizeof(ValueLink));                          \
+        vl->type = T_TYPE;                                                     \
+        if (!a->head)                                                          \
         {                                                                      \
-            link = link->next;                                                 \
+            a->head = vl;                                                      \
         }                                                                      \
-        vl->next = link->next;                                                 \
-        link->next = vl;                                                       \
-    }                                                                          \
-    ++a->size
+        else                                                                   \
+        {                                                                      \
+            a->tail->next = vl;                                                \
+        }                                                                      \
+        a->tail = vl;                                                          \
+        ++a->size
+
+#    define DICT_ADD(T_TYPE)                                                   \
+        ItemLink *il = calloc(1, sizeof(ItemLink));                            \
+        il->type = T_TYPE;                                                     \
+        il->key = key;                                                         \
+        if (!d->head)                                                          \
+        {                                                                      \
+            d->head = il;                                                      \
+        }                                                                      \
+        else                                                                   \
+        {                                                                      \
+            d->tail->next = il;                                                \
+        }                                                                      \
+        d->tail = il;                                                          \
+        ++d->size
+
+#    define ARRAY_INSERT(T_TYPE)                                               \
+        /* If index is equal to the size, it is the same as adding an element  \
+         * or if the size is 0 but the head is not null (which may have been   \
+         * caused by an error)*/                                               \
+        if (index > a->size || (a->size == 0 && a->head))                      \
+        {                                                                      \
+            return;                                                            \
+        }                                                                      \
+        ValueLink *vl = calloc(1, sizeof(ValueLink));                          \
+        vl->type = T_TYPE;                                                     \
+        /* If the linked list is empty */                                      \
+        if (!a->head)                                                          \
+        {                                                                      \
+            a->head = vl;                                                      \
+            a->tail = vl;                                                      \
+        }                                                                      \
+        else if (index == 0)                                                   \
+        {                                                                      \
+            vl->next = a->head;                                                \
+            a->head = vl;                                                      \
+        }                                                                      \
+        else if (index == a->size)                                             \
+        {                                                                      \
+            a->tail->next = vl;                                                \
+            a->tail = vl;                                                      \
+        }                                                                      \
+        else                                                                   \
+        {                                                                      \
+            /* Navigates the the element at position 'index - 1', make its     \
+            next element the next of the new element, and make its next point  \
+            to the new element */                                              \
+            ValueLink *link = a->head;                                         \
+            while (link && --index)                                            \
+            {                                                                  \
+                link = link->next;                                             \
+            }                                                                  \
+            vl->next = link->next;                                             \
+            link->next = vl;                                                   \
+        }                                                                      \
+        ++a->size
+#endif // !EDITING_MODE
 
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
+Array *init_array(unsigned size)
+{
+    Array *a = calloc(1, sizeof(Array));
+#ifndef EDITING_MODE
+    if (!a)
+    {
+        return 0;
+    }
+
+    if (!size)
+    {
+        return a;
+    }
+
+    a->values = calloc(size, sizeof(Value));
+    if (!a->values)
+    {
+        free(a);
+        return 0;
+    }
+    a->size = size;
+#endif // !EDITING_MODE
+    return a;
+}
+
+Dict *init_dict(unsigned size)
+{
+    Dict *d = calloc(1, sizeof(Dict));
+#ifndef EDITING_MODE
+    if (!d)
+    {
+        return 0;
+    }
+
+    if (!size)
+    {
+        return d;
+    }
+
+    d->items = calloc(size, sizeof(Item));
+    if (!d->items)
+    {
+        free(d);
+        return 0;
+    }
+    d->size = size;
+#endif // !EDITING_MODE
+    return d;
+}
+
 JSON *init_json(char is_array, Array *a, Dict *d)
 {
     JSON *j = calloc(1, sizeof(JSON));
@@ -106,6 +158,129 @@ JSON *init_json(char is_array, Array *a, Dict *d)
 /*******************************************************************************
 **                                     ADDS                                   **
 *******************************************************************************/
+#ifndef EDITING_MODE
+void arr_add_str(Array *a, String value)
+{
+    if (a && a->values && a->insert_index < a->size)
+    {
+        a->values[a->insert_index++] = (Value){ .type = T_STR, .strv = value };
+    }
+}
+
+void arr_add_int(Array *a, int value)
+{
+    if (a && a->values && a->insert_index < a->size)
+    {
+        a->values[a->insert_index++] = (Value){ .type = T_INT, .intv = value };
+    }
+}
+
+void arr_add_double(Array *a, double value)
+{
+    if (a && a->values && a->insert_index < a->size)
+    {
+        a->values[a->insert_index++] =
+            (Value){ .type = T_DOUBLE, .doublev = value };
+    }
+}
+
+void arr_add_bool(Array *a, char value)
+{
+    if (a && a->values && a->insert_index < a->size)
+    {
+        a->values[a->insert_index++] =
+            (Value){ .type = T_BOOL, .boolv = value };
+    }
+}
+
+void arr_add_null(Array *a)
+{
+    if (a && a->values && a->insert_index < a->size)
+    {
+        a->values[a->insert_index++] = (Value){ .type = T_NULL };
+    }
+}
+
+void arr_add_arr(Array *a, Array *value)
+{
+    if (a && a->values && value && a->insert_index < a->size)
+    {
+        a->values[a->insert_index++] =
+            (Value){ .type = T_ARR, .arrayv = value };
+    }
+}
+
+void arr_add_dict(Array *a, Dict *value)
+{
+    if (a && a->values && value && a->insert_index < a->size)
+    {
+        a->values[a->insert_index++] =
+            (Value){ .type = T_DICT, .dictv = value };
+    }
+}
+
+void dict_add_str(Dict *d, String key, String value)
+{
+    if (d && d->items && d->insert_index < d->size)
+    {
+        d->items[d->insert_index++] =
+            (Item){ .type = T_STR, .key = key, .strv = value };
+    }
+}
+
+void dict_add_int(Dict *d, String key, int value)
+{
+    if (d && d->items && d->insert_index < d->size)
+    {
+        d->items[d->insert_index++] =
+            (Item){ .type = T_INT, .key = key, .intv = value };
+    }
+}
+
+void dict_add_double(Dict *d, String key, double value)
+{
+    if (d && d->items && d->insert_index < d->size)
+    {
+        d->items[d->insert_index++] =
+            (Item){ .type = T_DOUBLE, .key = key, .doublev = value };
+    }
+}
+
+void dict_add_bool(Dict *d, String key, char value)
+{
+    if (d && d->items && d->insert_index < d->size)
+    {
+        d->items[d->insert_index++] =
+            (Item){ .type = T_BOOL, .key = key, .boolv = value };
+    }
+}
+
+void dict_add_null(Dict *d, String key)
+{
+    if (d && d->items && d->insert_index < d->size)
+    {
+        d->items[d->insert_index++] = (Item){ .type = T_NULL, .key = key };
+    }
+}
+
+void dict_add_arr(Dict *d, String key, Array *value)
+{
+    if (d && d->items && value && d->insert_index < d->size)
+    {
+        d->items[d->insert_index++] =
+            (Item){ .type = T_ARR, .key = key, .arrayv = value };
+    }
+}
+
+void dict_add_dict(Dict *d, String key, Dict *value)
+{
+    if (d && d->items && value && d->insert_index < d->size)
+    {
+        d->items[d->insert_index++] =
+            (Item){ .type = T_DICT, .key = key, .dictv = value };
+    }
+}
+#else
 void arr_add_str(Array *a, String value)
 {
     if (a)
@@ -377,17 +552,21 @@ void arr_insert_dict(Array *a, unsigned index, Dict *value)
         vl->dictv = value;
     }
 }
+#endif // !EDITING_MODE
 
 /*******************************************************************************
 **                                    GETS                                    **
 *******************************************************************************/
-Value array_get(Array *a, int index)
+Value array_get(Array *a, unsigned index)
 {
     if (!a)
     {
         return ERROR_VALUE;
     }
 
+#ifndef EDITING_MODE
+    return index < a->size ? a->values[index] : ERROR_VALUE;
+#else
     ValueLink *link = a->head;
     while (link && index--)
     {
@@ -422,6 +601,7 @@ Value array_get(Array *a, int index)
         }
     }
     return ERROR_VALUE;
+#endif // !EDITING_MODE
 }
 
 Item dict_get(Dict *d, String key)
@@ -431,6 +611,18 @@ Item dict_get(Dict *d, String key)
         return ERROR_ITEM;
     }
 
+#ifndef EDITING_MODE
+    Item *items = d->items;
+    unsigned size = d->size;
+    for (unsigned i = 0; i < size; ++i)
+    {
+        Item it = items[i];
+        if (strings_equals(key, it.key))
+        {
+            return it;
+        }
+    }
+#else
     ItemLink *link = d->head;
     while (link)
     {
@@ -462,6 +654,7 @@ Item dict_get(Dict *d, String key)
         }
         link = link->next;
     }
+#endif // !EDITING_MODE
     return ERROR_ITEM;
 }
 
@@ -475,6 +668,27 @@ void destroy_array(Array *a)
         return;
     }
 
+#ifndef EDITING_MODE
+    Value *values = a->values;
+    unsigned size = a->size;
+    for (unsigned i = 0; i < size; ++i)
+    {
+        Value val = values[i];
+        switch (val.type)
+        {
+        case T_STR:
+            free(val.strv.str);
+            break;
+        case T_ARR:
+            destroy_array(val.arrayv);
+            break;
+        case T_DICT:
+            destroy_dict(val.dictv);
+            break;
+        }
+    }
+    free(values);
+#else
     ValueLink *link = a->head;
     while (link)
     {
@@ -495,6 +709,7 @@ void destroy_array(Array *a)
         }
         free(tmp);
     }
+#endif // !EDITING_MODE
     free(a);
 }
 
@@ -505,6 +720,28 @@ void destroy_dict(Dict *d)
         return;
     }
 
+#ifndef EDITING_MODE
+    Item *items = d->items;
+    unsigned size = d->size;
+    for (unsigned i = 0; i < size; ++i)
+    {
+        Item it = items[i];
+        free(it.key.str);
+        switch (it.type)
+        {
+        case T_STR:
+            free(it.strv.str);
+            break;
+        case T_ARR:
+            destroy_array(it.arrayv);
+            break;
+        case T_DICT:
+            destroy_dict(it.dictv);
+            break;
+        }
+    }
+    free(items);
+#else
     ItemLink *link = d->head;
     while (link)
     {
@@ -526,6 +763,7 @@ void destroy_dict(Dict *d)
         free(tmp->key.str);
         free(tmp);
     }
+#endif // !EDITING_MODE
     free(d);
 }
 
