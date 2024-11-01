@@ -24,12 +24,12 @@
 /*******************************************************************************
 **                                 STRUCTURES                                 **
 *******************************************************************************/
-typedef struct array_linked_list Array;
-typedef struct dict_linked_list Dict;
+typedef struct array Array;
+typedef struct dict Dict;
 
-// #define EDITING_MODE
+#define EDITING_MODE
 #ifdef EDITING_MODE
-typedef struct value_link
+/*typedef struct value_link
 {
     char type;
     union
@@ -58,7 +58,7 @@ typedef struct item_link
         Dict *dictv;
     };
     struct item_link *next;
-} ItemLink;
+} ItemLink;*/
 #endif // !EDITING_MODE
 
 // Used for functions that return an element of the array
@@ -92,8 +92,25 @@ typedef struct
     };
 } Item;
 
-// Linked list for arrays
-struct array_linked_list
+#ifdef EDITING_MODE
+#    define ARRAY_LEN 32
+
+typedef struct value_link
+{
+    Value values[ARRAY_LEN];
+    unsigned insert_index;
+    struct value_link *next;
+} ValueLink;
+
+typedef struct item_link
+{
+    Item items[ARRAY_LEN];
+    unsigned insert_index;
+    struct item_link *next;
+} ItemLink;
+#endif // !EDITING_MODE
+
+struct array
 {
     unsigned size;
 
@@ -106,8 +123,7 @@ struct array_linked_list
 #endif
 };
 
-// Linked list for dicts
-struct dict_linked_list
+struct dict
 {
     unsigned size;
 

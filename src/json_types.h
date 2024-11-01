@@ -9,14 +9,14 @@
 /*******************************************************************************
 **                              DEFINES / MACROS                              **
 *******************************************************************************/
-#define T_STR 0
-#define T_INT 1
-#define T_DOUBLE 2
-#define T_BOOL 3
-#define T_NULL 4
-#define T_ARR 5
-#define T_DICT 6
-#define T_ERROR 7
+#define T_ERROR 0
+#define T_STR 1
+#define T_INT 2
+#define T_DOUBLE 3
+#define T_BOOL 4
+#define T_NULL 5
+#define T_ARR 6
+#define T_DICT 7
 
 #define ERR_FSEEK (1 << 0)
 #define ERR_NULL_KEY (1 << 1)

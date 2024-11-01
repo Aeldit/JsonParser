@@ -12,35 +12,6 @@
 #define ERROR_ITEM ((Item){ .type = T_ERROR })
 
 #ifdef EDITING_MODE
-#    define ARRAY_ADD(T_TYPE)                                                  \
-        ValueLink *vl = calloc(1, sizeof(ValueLink));                          \
-        vl->type = T_TYPE;                                                     \
-        if (!a->head)                                                          \
-        {                                                                      \
-            a->head = vl;                                                      \
-        }                                                                      \
-        else                                                                   \
-        {                                                                      \
-            a->tail->next = vl;                                                \
-        }                                                                      \
-        a->tail = vl;                                                          \
-        ++a->size
-
-#    define DICT_ADD(T_TYPE)                                                   \
-        ItemLink *il = calloc(1, sizeof(ItemLink));                            \
-        il->type = T_TYPE;                                                     \
-        il->key = key;                                                         \
-        if (!d->head)                                                          \
-        {                                                                      \
-            d->head = il;                                                      \
-        }                                                                      \
-        else                                                                   \
-        {                                                                      \
-            d->tail->next = il;                                                \
-        }                                                                      \
-        d->tail = il;                                                          \
-        ++d->size
-
 #    define ARRAY_INSERT(T_TYPE)                                               \
         /* If index is equal to the size, it is the same as adding an element  \
          * or if the size is 0 but the head is not null (which may have been   \
@@ -81,6 +52,42 @@
             link->next = vl;                                                   \
         }                                                                      \
         ++a->size
+
+/**
+** \def Adds an element to the given array or dict
+** \param TypeLink Can be either 'ValueLink' or 'ItemLink'
+** \param x The name of the array or dict variable (a for array, d for dict)
+*/
+#    define ADD(TypeLink, x)                                                   \
+        if (!x->head)                                                          \
+        {                                                                      \
+            TypeLink *l = calloc(1, sizeof(TypeLink));                         \
+            if (!l)                                                            \
+            {                                                                  \
+                return;                                                        \
+            }                                                                  \
+            x->head = l;                                                       \
+            x->tail = l;                                                       \
+        }                                                                      \
+        else                                                                   \
+        {                                                                      \
+            if (!x->tail)                                                      \
+            {                                                                  \
+                return;                                                        \
+            }                                                                  \
+            /* If the current link's array is full */                          \
+            if (x->tail->insert_index == ARRAY_LEN)                            \
+            {                                                                  \
+                TypeLink *l = calloc(1, sizeof(TypeLink));                     \
+                if (!l)                                                        \
+                {                                                              \
+                    return;                                                    \
+                }                                                              \
+                x->tail->next = l;                                             \
+                x->tail = l;                                                   \
+            }                                                                  \
+        }                                                                      \
+        ++x->size
 #endif // !EDITING_MODE
 
 /*******************************************************************************
@@ -285,8 +292,9 @@ void arr_add_str(Array *a, String value)
 {
     if (a)
     {
-        ARRAY_ADD(T_STR);
-        vl->strv = value;
+        ADD(ValueLink, a);
+        a->tail->values[a->tail->insert_index++] =
+            (Value){ .type = T_STR, .strv = value };
     }
 }
 
@@ -294,8 +302,9 @@ void arr_add_int(Array *a, int value)
 {
     if (a)
     {
-        ARRAY_ADD(T_INT);
-        vl->intv = value;
+        ADD(ValueLink, a);
+        a->tail->values[a->tail->insert_index++] =
+            (Value){ .type = T_INT, .intv = value };
     }
 }
 
@@ -303,8 +312,9 @@ void arr_add_double(Array *a, double value)
 {
     if (a)
     {
-        ARRAY_ADD(T_DOUBLE);
-        vl->doublev = value;
+        ADD(ValueLink, a);
+        a->tail->values[a->tail->insert_index++] =
+            (Value){ .type = T_DOUBLE, .doublev = value };
     }
 }
 
@@ -312,8 +322,9 @@ void arr_add_bool(Array *a, char value)
 {
     if (a)
     {
-        ARRAY_ADD(T_BOOL);
-        vl->boolv = value;
+        ADD(ValueLink, a);
+        a->tail->values[a->tail->insert_index++] =
+            (Value){ .type = T_BOOL, .boolv = value };
     }
 }
 
@@ -321,7 +332,8 @@ void arr_add_null(Array *a)
 {
     if (a)
     {
-        ARRAY_ADD(T_NULL);
+        ADD(ValueLink, a);
+        a->tail->values[a->tail->insert_index++] = (Value){ .type = T_NULL };
     }
 }
 
@@ -329,8 +341,9 @@ void arr_add_arr(Array *a, Array *value)
 {
     if (a && value)
     {
-        ARRAY_ADD(T_ARR);
-        vl->arrayv = value;
+        ADD(ValueLink, a);
+        a->tail->values[a->tail->insert_index++] =
+            (Value){ .type = T_ARR, .arrayv = value };
     }
 }
 
@@ -338,8 +351,9 @@ void arr_add_dict(Array *a, Dict *value)
 {
     if (a && value)
     {
-        ARRAY_ADD(T_DICT);
-        vl->dictv = value;
+        ADD(ValueLink, a);
+        a->tail->values[a->tail->insert_index++] =
+            (Value){ .type = T_DICT, .dictv = value };
     }
 }
 
@@ -347,8 +361,9 @@ void dict_add_str(Dict *d, String key, String value)
 {
     if (d)
     {
-        DICT_ADD(T_STR);
-        il->strv = value;
+        ADD(ItemLink, d);
+        d->tail->items[d->tail->insert_index++] =
+            (Item){ .type = T_STR, .key = key, .strv = value };
     }
 }
 
@@ -356,8 +371,9 @@ void dict_add_int(Dict *d, String key, int value)
 {
     if (d)
     {
-        DICT_ADD(T_INT);
-        il->intv = value;
+        ADD(ItemLink, d);
+        d->tail->items[d->tail->insert_index++] =
+            (Item){ .type = T_INT, .key = key, .intv = value };
     }
 }
 
@@ -365,8 +381,9 @@ void dict_add_double(Dict *d, String key, double value)
 {
     if (d)
     {
-        DICT_ADD(T_DOUBLE);
-        il->doublev = value;
+        ADD(ItemLink, d);
+        d->tail->items[d->tail->insert_index++] =
+            (Item){ .type = T_DOUBLE, .key = key, .doublev = value };
     }
 }
 
@@ -374,8 +391,9 @@ void dict_add_bool(Dict *d, String key, char value)
 {
     if (d)
     {
-        DICT_ADD(T_BOOL);
-        il->boolv = value;
+        ADD(ItemLink, d);
+        d->tail->items[d->tail->insert_index++] =
+            (Item){ .type = T_BOOL, .key = key, .boolv = value };
     }
 }
 
@@ -383,7 +401,9 @@ void dict_add_null(Dict *d, String key)
 {
     if (d)
     {
-        DICT_ADD(T_NULL);
+        ADD(ItemLink, d);
+        d->tail->items[d->tail->insert_index++] =
+            (Item){ .type = T_NULL, .key = key };
     }
 }
 
@@ -391,8 +411,9 @@ void dict_add_arr(Dict *d, String key, Array *value)
 {
     if (d && value)
     {
-        DICT_ADD(T_ARR);
-        il->arrayv = value;
+        ADD(ItemLink, d);
+        d->tail->items[d->tail->insert_index++] =
+            (Item){ .type = T_ARR, .key = key, .arrayv = value };
     }
 }
 
@@ -400,8 +421,9 @@ void dict_add_dict(Dict *d, String key, Dict *value)
 {
     if (d && value)
     {
-        DICT_ADD(T_DICT);
-        il->dictv = value;
+        ADD(ItemLink, d);
+        d->tail->items[d->tail->insert_index++] =
+            (Item){ .type = T_DICT, .key = key, .dictv = value };
     }
 }
 
@@ -427,6 +449,7 @@ void arr_remove(Array *a, unsigned index)
 
         // Takes the link that is before the one we want to remove and make its
         // next point to the next of the link we want to remove
+        /*
         if (link->next)
         {
             ValueLink *tmp = link->next;
@@ -446,7 +469,7 @@ void arr_remove(Array *a, unsigned index)
             }
             free(tmp);
             --a->size;
-        }
+        }*/
     }
 }
 
@@ -454,6 +477,10 @@ void dict_remove(Dict *d, String key)
 {
     if (d && d->head)
     {
+        if (!key.str)
+        {
+        }
+        /*
         ItemLink *link = d->head;
         while (link)
         {
@@ -484,14 +511,14 @@ void dict_remove(Dict *d, String key)
                 break;
             }
             link = link->next;
-        }
+        }*/
     }
 }
 
 /*******************************************************************************
 **                                   INSERTS                                  **
 *******************************************************************************/
-void arr_insert_str(Array *a, unsigned index, String value)
+/*void arr_insert_str(Array *a, unsigned index, String value)
 {
     if (a)
     {
@@ -551,7 +578,7 @@ void arr_insert_dict(Array *a, unsigned index, Dict *value)
         ARRAY_INSERT(T_DICT);
         vl->dictv = value;
     }
-}
+}*/
 #endif // !EDITING_MODE
 
 /*******************************************************************************
@@ -568,39 +595,19 @@ Value array_get(Array *a, unsigned index)
     return index < a->size ? a->values[index] : ERROR_VALUE;
 #else
     ValueLink *link = a->head;
-    while (link && index--)
+    unsigned link_nb = index / ARRAY_LEN;
+    while (link && link_nb--)
     {
         link = link->next;
     }
 
-    // If index is 0, it means that we encountered a null link, and it
+    // If index is not 0, it means that we encountered a null link, and it
     // is an error
-    if (!index)
+    if (link_nb)
     {
         return ERROR_VALUE;
     }
-
-    if (link)
-    {
-        switch (link->type)
-        {
-        case T_STR:
-            return (Value){ .type = T_STR, .strv = link->strv };
-        case T_INT:
-            return (Value){ .type = T_INT, .intv = link->intv };
-        case T_DOUBLE:
-            return (Value){ .type = T_DOUBLE, .doublev = link->doublev };
-        case T_BOOL:
-            return (Value){ .type = T_BOOL, .boolv = link->boolv };
-        case T_NULL:
-            return (Value){ .type = T_NULL };
-        case T_ARR:
-            return (Value){ .type = T_ARR, .arrayv = link->arrayv };
-        case T_DICT:
-            return (Value){ .type = T_DICT, .dictv = link->dictv };
-        }
-    }
-    return ERROR_VALUE;
+    return link ? link->values[index % ARRAY_LEN] : ERROR_VALUE;
 #endif // !EDITING_MODE
 }
 
@@ -626,31 +633,13 @@ Item dict_get(Dict *d, String key)
     ItemLink *link = d->head;
     while (link)
     {
-        if (strings_equals(key, link->key))
+        for (unsigned i = 0; i < ARRAY_LEN; ++i)
         {
-            switch (link->type)
+            Item it = link->items[i];
+            if (strings_equals(key, it.key))
             {
-            case T_STR:
-                return (Item){ .type = T_STR, .key = key, .strv = link->strv };
-            case T_INT:
-                return (Item){ .type = T_INT, .key = key, .intv = link->intv };
-            case T_DOUBLE:
-                return (Item){ .type = T_DOUBLE,
-                               .key = key,
-                               .doublev = link->doublev };
-            case T_BOOL:
-                return (
-                    Item){ .type = T_BOOL, .key = key, .boolv = link->boolv };
-            case T_NULL:
-                return (Item){ .type = T_NULL, .key = key };
-            case T_ARR:
-                return (
-                    Item){ .type = T_ARR, .key = key, .arrayv = link->arrayv };
-            case T_DICT:
-                return (
-                    Item){ .type = T_DICT, .key = key, .dictv = link->dictv };
+                return it;
             }
-            break;
         }
         link = link->next;
     }
@@ -693,19 +682,22 @@ void destroy_array(Array *a)
     while (link)
     {
         ValueLink *tmp = link;
+        Value *values = link->values;
         link = link->next;
-
-        switch (tmp->type)
+        for (unsigned i = 0; i < ARRAY_LEN; ++i)
         {
-        case T_STR:
-            free(tmp->strv.str);
-            break;
-        case T_ARR:
-            destroy_array(tmp->arrayv);
-            break;
-        case T_DICT:
-            destroy_dict(tmp->dictv);
-            break;
+            switch (values[i].type)
+            {
+            case T_STR:
+                free(values[i].strv.str);
+                break;
+            case T_ARR:
+                destroy_array(values[i].arrayv);
+                break;
+            case T_DICT:
+                destroy_dict(values[i].dictv);
+                break;
+            }
         }
         free(tmp);
     }
@@ -746,21 +738,24 @@ void destroy_dict(Dict *d)
     while (link)
     {
         ItemLink *tmp = link;
+        Item *items = link->items;
         link = link->next;
-
-        switch (tmp->type)
+        for (unsigned i = 0; i < ARRAY_LEN; ++i)
         {
-        case T_STR:
-            free(tmp->strv.str);
-            break;
-        case T_ARR:
-            destroy_array(tmp->arrayv);
-            break;
-        case T_DICT:
-            destroy_dict(tmp->dictv);
-            break;
+            switch (items[i].type)
+            {
+            case T_STR:
+                free(items[i].strv.str);
+                break;
+            case T_ARR:
+                destroy_array(items[i].arrayv);
+                break;
+            case T_DICT:
+                destroy_dict(items[i].dictv);
+                break;
+            }
+            free(items[i].key.str);
         }
-        free(tmp->key.str);
         free(tmp);
     }
 #endif // !EDITING_MODE
