@@ -165,6 +165,7 @@ void copy_array(Int *src, Int *dest)
     }
 }
 
+// TODO: Define at which interval we defragment
 void defragment(Array *a)
 {
     if (!a)
