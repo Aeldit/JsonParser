@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 #define ARRAY_LEN 8
 #define ERROR_INT ((Int){ .type = 0, .value = 0 })
@@ -212,11 +211,13 @@ void defragment(Array *a)
         link = link->next;
     }
 
+    // When the last link's array didn't reach the max number of contained
+    // elements, we add the remaining elements and free all the remaining unused
+    // links
     if (tmps_insert_idx)
     {
         copy_array(tmps, link_to_fill->values);
         a->tail = link_to_fill;
-        link_to_fill->next = 0;
         link_to_fill = link_to_fill->next;
         while (link_to_fill)
         {
@@ -224,33 +225,34 @@ void defragment(Array *a)
             link_to_fill = link_to_fill->next;
             free(tmp);
         }
+        a->tail->next = 0;
     }
 }
 
 int main(void)
 {
     Array *a = calloc(1, sizeof(Array));
-    add(a, 1);
-    add(a, 2);
-    add(a, 3);
-    add(a, 4);
-    add(a, 5);
-    add(a, 6);
-    add(a, 7);
-    add(a, 8);
-    add(a, 9);
-    add(a, 10);
+    for (unsigned i = 0; i < 100; ++i)
+    {
+        add(a, i);
+    }
     print_array(a);
-    array_remove(a, 6);
+    printf("\n\n");
+    for (unsigned i = 0; i < 100; i += 2)
+    {
+        array_remove(a, i);
+    }
     print_array(a);
-    array_remove(a, 2);
-    print_array(a);
-    array_remove(a, 4);
-    print_array(a);
-    array_remove(a, 9);
-    print_array(a);
+    printf("\n\n");
     defragment(a);
     print_array(a);
+    ValueLink *link = a->head;
+    while (link)
+    {
+        ValueLink *tmp = link;
+        link = link->next;
+        free(tmp);
+    }
     free(a);
     return 0;
 }
