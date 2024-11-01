@@ -151,7 +151,6 @@ int_fast64_t str_to_long(StrAndLenTuple *sl)
 ** \returns The 0 in case of error (or if the number was 0), the number
 **          otherwise
 */
-// FIX: Precision error
 double str_to_double(StrAndLenTuple *sl)
 {
     if (!sl)
