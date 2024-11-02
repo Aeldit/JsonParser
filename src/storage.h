@@ -94,6 +94,7 @@ typedef struct
 
 #ifdef EDITING_MODE
 #    define ARRAY_LEN 32
+#    define NB_DELETIONS_TO_DEFRAG 8
 
 typedef struct value_link
 {
@@ -115,6 +116,7 @@ struct array
     unsigned size;
 
 #ifdef EDITING_MODE
+    unsigned nb_deletions;
     ValueLink *head;
     ValueLink *tail;
 #else
@@ -128,6 +130,7 @@ struct dict
     unsigned size;
 
 #ifdef EDITING_MODE
+    unsigned nb_deletions;
     ItemLink *head;
     ItemLink *tail;
 #else

@@ -73,7 +73,6 @@ void arr_print_indent(Array *a, int indent, char fromDict)
             case T_DICT:
                 dict_print_indent(v.dictv, indent + 1, 0);
                 break;
-                link = link->next;
             }
 
             if (b < size - 1)

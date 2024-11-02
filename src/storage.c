@@ -76,7 +76,7 @@
                 return;                                                        \
             }                                                                  \
             /* If the current link's array is full */                          \
-            if (x->tail->insert_index == ARRAY_LEN)                            \
+            if (x->tail->insert_index >= ARRAY_LEN)                            \
             {                                                                  \
                 TypeLink *l = calloc(1, sizeof(TypeLink));                     \
                 if (!l)                                                        \
@@ -89,6 +89,267 @@
         }                                                                      \
         ++x->size
 #endif // !EDITING_MODE
+
+/*******************************************************************************
+**                               LOCAL FUNCTIONS                              **
+*******************************************************************************/
+#include <stdio.h>
+void arr_print_array(Array *a)
+{
+    if (!a)
+    {
+        return;
+    }
+
+    ValueLink *link = a->head;
+    while (link)
+    {
+        printf("[");
+        Value *values = link->values;
+        for (unsigned i = 0; i < ARRAY_LEN; ++i)
+        {
+            if (values[i].type != 0)
+            {
+                Value v = values[i];
+                switch (v.type)
+                {
+                case T_STR:
+                    printf("\"%s\", ", v.strv.str ? v.strv.str : "");
+                    break;
+                case T_INT:
+                    printf("%d, ", v.intv);
+                    break;
+                case T_DOUBLE:
+                    printf("%f, ", v.doublev);
+                    break;
+                case T_BOOL:
+                    printf("%s, ", v.boolv ? "true" : "false");
+                    break;
+                case T_NULL:
+                    printf("null, ");
+                    break;
+                case T_ARR:
+                    printf("array, ");
+                    break;
+                case T_DICT:
+                    printf("dict, ");
+                    break;
+                }
+            }
+            else
+            {
+                printf(" , ");
+            }
+        }
+        printf("]\n");
+        link = link->next;
+    }
+    printf("%u\n", a->size);
+}
+
+void arr_copy_array(Value *src, Value *dest)
+{
+    if (!src || !dest)
+    {
+        return;
+    }
+
+    for (unsigned i = 0; i < ARRAY_LEN; ++i)
+    {
+        dest[i] = src[i];
+    }
+}
+
+void dict_copy_array(Item *src, Item *dest)
+{
+    if (!src || !dest)
+    {
+        return;
+    }
+
+    for (unsigned i = 0; i < ARRAY_LEN; ++i)
+    {
+        dest[i] = src[i];
+    }
+}
+
+void arr_empty_array(Value *array)
+{
+    if (!array)
+    {
+        return;
+    }
+
+    for (unsigned i = 0; i < ARRAY_LEN; ++i)
+    {
+        array[i].type = 0;
+    }
+}
+
+void dict_empty_array(Item *array)
+{
+    if (!array)
+    {
+        return;
+    }
+
+    for (unsigned i = 0; i < ARRAY_LEN; ++i)
+    {
+        array[i].type = 0;
+    }
+}
+
+void defragment_array(Array *a)
+{
+    if (!a)
+    {
+        return;
+    }
+
+    // We fill this array with each non-empty element (where the type is not
+    // T_ERROR), and then we copy its contents to the previously fragmented
+    // array
+    Value tmps[ARRAY_LEN] = { 0 };
+    unsigned tmps_insert_idx = 0;
+
+    ValueLink *link_to_fill = a->head;
+    ValueLink *prev_link_to_fill = a->head;
+
+    ValueLink *link = a->head;
+    while (link)
+    {
+        for (unsigned i = 0; i < ARRAY_LEN; ++i)
+        {
+            // The temp array is filled, so we can put the defragmented array
+            // back inside it
+            if (tmps_insert_idx == ARRAY_LEN)
+            {
+                if (!link_to_fill)
+                {
+                    link_to_fill = calloc(1, sizeof(ValueLink));
+                    if (!link_to_fill)
+                    {
+                        return;
+                    }
+                    prev_link_to_fill->next = link_to_fill;
+                }
+
+                // Copies the temp array to the base Array
+                arr_copy_array(tmps, link_to_fill->values);
+                link_to_fill->insert_index = ARRAY_LEN;
+                arr_empty_array(tmps);
+                tmps_insert_idx = 0;
+                prev_link_to_fill = link_to_fill;
+                link_to_fill = link_to_fill->next;
+            }
+
+            if (link->values[i].type != 0)
+            {
+                tmps[tmps_insert_idx++] = link->values[i];
+            }
+        }
+        link = link->next;
+    }
+
+    // When the last link's array didn't reach the max number of contained
+    // elements, we add the remaining elements and free all the remaining unused
+    // links
+    if (tmps_insert_idx)
+    {
+        arr_copy_array(tmps, link_to_fill->values);
+        a->tail = link_to_fill;
+        link_to_fill = link_to_fill->next;
+        while (link_to_fill)
+        {
+            ValueLink *tmp = link_to_fill;
+            link_to_fill = link_to_fill->next;
+            free(tmp);
+        }
+        a->tail->next = 0;
+    }
+
+    // FIX: Values not being properly removed in the last link
+
+    // Sets the insert index to the correct position
+    Value *values = a->tail->values;
+    for (unsigned i = 0; i < ARRAY_LEN; ++i)
+    {
+        if (values[i].type == T_ERROR)
+        {
+            a->tail->insert_index = i;
+            break;
+        }
+    }
+}
+
+void defragment_dict(Dict *d)
+{
+    if (!d)
+    {
+        return;
+    }
+
+    // We fill this array with each non-empty element (where the type is not
+    // T_ERROR), and then we copy its contents to the previously fragmented
+    // array
+    Item tmps[ARRAY_LEN] = { 0 };
+    unsigned tmps_insert_idx = 0;
+
+    ItemLink *link_to_fill = d->head;
+    ItemLink *prev_link_to_fill = d->head;
+
+    ItemLink *link = d->head;
+    while (link)
+    {
+        for (unsigned i = 0; i < ARRAY_LEN; ++i)
+        {
+            // The temp array is filled, so we can put the defragmented array
+            // back inside it
+            if (tmps_insert_idx == ARRAY_LEN)
+            {
+                if (!link_to_fill)
+                {
+                    link_to_fill = calloc(1, sizeof(ItemLink));
+                    if (!link_to_fill)
+                    {
+                        return;
+                    }
+                    prev_link_to_fill->next = link_to_fill;
+                }
+
+                // Copies the temp array to the base Array
+                dict_copy_array(tmps, link_to_fill->items);
+                dict_empty_array(tmps);
+                tmps_insert_idx = 0;
+                prev_link_to_fill = link_to_fill;
+                link_to_fill = link_to_fill->next;
+            }
+
+            if (link->items[i].type != 0)
+            {
+                tmps[tmps_insert_idx++] = link->items[i];
+            }
+        }
+        link = link->next;
+    }
+
+    // When the last link's array didn't reach the max number of contained
+    // elements, we add the remaining elements and free all the remaining unused
+    // links
+    if (tmps_insert_idx)
+    {
+        dict_copy_array(tmps, link_to_fill->items);
+        d->tail = link_to_fill;
+        link_to_fill = link_to_fill->next;
+        while (link_to_fill)
+        {
+            ItemLink *tmp = link_to_fill;
+            link_to_fill = link_to_fill->next;
+            free(tmp);
+        }
+        d->tail->next = 0;
+    }
+}
 
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
@@ -426,167 +687,119 @@ void dict_add_dict(Dict *d, String key, Dict *value)
             (Item){ .type = T_DICT, .key = key, .dictv = value };
     }
 }
+#endif // !EDITING_MODE
 
 /*******************************************************************************
 **                                   REMOVES                                  **
 *******************************************************************************/
 void arr_remove(Array *a, unsigned index)
 {
-    if (a && index < a->size && a->head)
+    if (!a || index >= a->size)
     {
-        ValueLink *link = a->head;
-        while (link && --index)
-        {
-            link = link->next;
-        }
+        return;
+    }
 
-        // If index is not 0, it means that we encountered a null link, and it
-        // is an error
-        if (index)
+    ValueLink *link = a->head;
+    unsigned non_null_values = 0;
+    while (link)
+    {
+        for (unsigned i = 0; i < ARRAY_LEN; ++i)
         {
-            return;
-        }
-
-        // Takes the link that is before the one we want to remove and make its
-        // next point to the next of the link we want to remove
-        /*
-        if (link->next)
-        {
-            ValueLink *tmp = link->next;
-            link->next = link->next->next;
-
-            switch (tmp->type)
+            Value v = link->values[i];
+            if (v.type != T_ERROR)
             {
-            case T_STR:
-                free(tmp->strv.str);
-                break;
-            case T_ARR:
-                destroy_array(tmp->arrayv);
-                break;
-            case T_DICT:
-                destroy_dict(tmp->dictv);
-                break;
+                ++non_null_values;
             }
-            free(tmp);
-            --a->size;
-        }*/
+
+            if (non_null_values && non_null_values - 1 == index)
+            {
+                switch (v.type)
+                {
+                case T_STR:
+                    free(v.strv.str);
+                    v.strv.str = 0;
+                    break;
+                case T_ARR:
+                    destroy_array(v.arrayv);
+                    v.arrayv = 0;
+                    break;
+                case T_DICT:
+                    destroy_dict(v.dictv);
+                    v.dictv = 0;
+                    break;
+                };
+                link->values[i].type = T_ERROR;
+
+                --a->size;
+                ++a->nb_deletions;
+                if (a->nb_deletions == NB_DELETIONS_TO_DEFRAG)
+                {
+                    arr_print_array(a);
+                    defragment_array(a);
+                    a->nb_deletions = 0;
+                }
+                return;
+            }
+        }
+        link = link->next;
     }
 }
 
 void dict_remove(Dict *d, String key)
 {
-    if (d && d->head)
+    if (!d || !key.str)
     {
-        if (!key.str)
+        return;
+    }
+
+    ItemLink *link = d->head;
+    while (link)
+    {
+        for (unsigned i = 0; i < ARRAY_LEN; ++i)
         {
-        }
-        /*
-        ItemLink *link = d->head;
-        while (link)
-        {
-            if (strings_equals(key, link->key))
+            Item it = link->items[i];
+            if (it.type != T_ERROR && strings_equals(key, it.key))
             {
-                // Takes the link that is before the one we want to remove and
-                // make its next point to the next of the link we want to remove
-                if (link->next)
+                switch (it.type)
                 {
-                    ItemLink *tmp = link->next;
-                    link->next = link->next->next;
+                case T_STR:
+                    free(it.strv.str);
+                    it.strv.str = 0;
+                    break;
+                case T_ARR:
+                    destroy_array(it.arrayv);
+                    it.arrayv = 0;
+                    break;
+                case T_DICT:
+                    destroy_dict(it.dictv);
+                    it.dictv = 0;
+                    break;
+                };
+                free(it.key.str);
+                it.key.str = 0;
+                link->items[i].type = T_ERROR;
 
-                    switch (tmp->type)
-                    {
-                    case T_STR:
-                        free(tmp->strv.str);
-                        break;
-                    case T_ARR:
-                        destroy_array(tmp->arrayv);
-                        break;
-                    case T_DICT:
-                        destroy_dict(tmp->dictv);
-                        break;
-                    }
-                    free(tmp);
-                }
                 --d->size;
-                break;
+                ++d->nb_deletions;
+                if (d->nb_deletions == NB_DELETIONS_TO_DEFRAG)
+                {
+                    // print_array(a);
+                    defragment_dict(d);
+                    d->nb_deletions = 0;
+                }
+                return;
             }
-            link = link->next;
-        }*/
+        }
+        link = link->next;
     }
 }
-
-/*******************************************************************************
-**                                   INSERTS                                  **
-*******************************************************************************/
-/*void arr_insert_str(Array *a, unsigned index, String value)
-{
-    if (a)
-    {
-        ARRAY_INSERT(T_STR);
-        vl->strv = value;
-    }
-}
-
-void arr_insert_int(Array *a, unsigned index, int value)
-{
-    if (a)
-    {
-        ARRAY_INSERT(T_INT);
-        vl->intv = value;
-    }
-}
-
-void arr_insert_double(Array *a, unsigned index, double value)
-{
-    if (a)
-    {
-        ARRAY_INSERT(T_DOUBLE);
-        vl->doublev = value;
-    }
-}
-
-void arr_insert_bool(Array *a, unsigned index, char value)
-{
-    if (a)
-    {
-        ARRAY_INSERT(T_BOOL);
-        vl->boolv = value;
-    }
-}
-
-void arr_insert_null(Array *a, unsigned index)
-{
-    if (a)
-    {
-        ARRAY_INSERT(T_NULL);
-    }
-}
-
-void arr_insert_arr(Array *a, unsigned index, Array *value)
-{
-    if (a && value)
-    {
-        ARRAY_INSERT(T_ARR);
-        vl->arrayv = value;
-    }
-}
-
-void arr_insert_dict(Array *a, unsigned index, Dict *value)
-{
-    if (a && value)
-    {
-        ARRAY_INSERT(T_DICT);
-        vl->dictv = value;
-    }
-}*/
-#endif // !EDITING_MODE
 
 /*******************************************************************************
 **                                    GETS                                    **
 *******************************************************************************/
 Value array_get(Array *a, unsigned index)
 {
-    if (!a)
+    if (!a || index >= a->size)
     {
         return ERROR_VALUE;
     }
@@ -595,19 +808,23 @@ Value array_get(Array *a, unsigned index)
     return index < a->size ? a->values[index] : ERROR_VALUE;
 #else
     ValueLink *link = a->head;
-    unsigned link_nb = index / ARRAY_LEN;
-    while (link && link_nb--)
+    unsigned non_null_values = 0;
+    while (link)
     {
+        for (unsigned i = 0; i < ARRAY_LEN; ++i)
+        {
+            if (non_null_values == index)
+            {
+                return link->values[i];
+            }
+            if (link->values[i].type != 0)
+            {
+                ++non_null_values;
+            }
+        }
         link = link->next;
     }
-
-    // If index is not 0, it means that we encountered a null link, and it
-    // is an error
-    if (link_nb)
-    {
-        return ERROR_VALUE;
-    }
-    return link ? link->values[index % ARRAY_LEN] : ERROR_VALUE;
+    return ERROR_VALUE;
 #endif // !EDITING_MODE
 }
 
@@ -631,6 +848,7 @@ Item dict_get(Dict *d, String key)
     }
 #else
     ItemLink *link = d->head;
+    unsigned non_null_values = 0;
     while (link)
     {
         for (unsigned i = 0; i < ARRAY_LEN; ++i)
@@ -639,6 +857,10 @@ Item dict_get(Dict *d, String key)
             if (strings_equals(key, it.key))
             {
                 return it;
+            }
+            if (it.type != 0)
+            {
+                ++non_null_values;
             }
         }
         link = link->next;
