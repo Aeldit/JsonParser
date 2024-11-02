@@ -145,22 +145,22 @@ void print_array(Array *a)
     }
 
     ValueLink *link = a->head;
-    unsigned ctr = 0;
     while (link)
     {
         printf("[");
-        for (unsigned i = 0; i < ARRAY_LEN; ++i, ++ctr)
+        Int *values = link->values;
+        for (unsigned i = 0; i < ARRAY_LEN; ++i)
         {
-            if (link->values[i].type != 0)
+            if (values[i].type != 0)
             {
-                printf("%d, ", link->values[i].value);
+                printf("%d, ", values[i].value);
             }
             else
             {
                 printf(" , ");
             }
         }
-        printf("]%s-> ", (ctr % 2) == 0 ? "\n" : " ");
+        printf("]\n");
         link = link->next;
     }
     printf("%u\n", a->size);
@@ -266,10 +266,15 @@ int main(void)
     }
     print_array(a);
     printf("\n\n");
-    for (unsigned i = 0; i < 100; i += 2)
+    /*for (unsigned i = 0; i < 100; i += 2)
     {
         array_remove(a, i);
-    }
+    }*/
+    array_remove(a, 0);
+    array_remove(a, 2);
+    array_remove(a, 4);
+    array_remove(a, 6);
+    array_remove(a, 8);
     print_array(a);
     printf("\n\n");
     defragment(a);
