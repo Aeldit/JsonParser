@@ -114,7 +114,11 @@ void array_remove(Array *a, unsigned index)
     {
         for (unsigned i = 0; i < ARRAY_LEN; ++i)
         {
-            if (non_null_values == index)
+            if (link->values[i].type != 0)
+            {
+                ++non_null_values;
+            }
+            if (non_null_values && non_null_values - 1 == index)
             {
                 link->values[i].type = 0;
                 --a->size;
@@ -127,10 +131,6 @@ void array_remove(Array *a, unsigned index)
                     a->nb_deletions = 0;
                 }
                 return;
-            }
-            if (link->values[i].type != 0)
-            {
-                ++non_null_values;
             }
         }
         link = link->next;
@@ -266,15 +266,10 @@ int main(void)
     }
     print_array(a);
     printf("\n\n");
-    /*for (unsigned i = 0; i < 100; i += 2)
+    for (unsigned i = 0; i < 100; i += 2)
     {
         array_remove(a, i);
-    }*/
-    array_remove(a, 0);
-    array_remove(a, 2);
-    array_remove(a, 4);
-    array_remove(a, 6);
-    array_remove(a, 8);
+    }
     print_array(a);
     printf("\n\n");
     defragment(a);
