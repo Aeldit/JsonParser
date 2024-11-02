@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #define ARRAY_LEN 8
+#define NB_DELETIONS_TO_DEFRAG 8
 #define ERROR_INT ((Int){ .type = 0, .value = 0 })
 
 typedef struct
@@ -20,9 +21,13 @@ typedef struct value_link
 typedef struct
 {
     unsigned size;
+    unsigned nb_deletions;
     ValueLink *head;
     ValueLink *tail;
 } Array;
+
+void defragment(Array *a);
+void print_array(Array *a);
 
 void add(Array *a, int value)
 {
@@ -113,6 +118,14 @@ void array_remove(Array *a, unsigned index)
             {
                 link->values[i].type = 0;
                 --a->size;
+                ++a->nb_deletions;
+                if (a->nb_deletions == NB_DELETIONS_TO_DEFRAG)
+                {
+                    print_array(a);
+                    defragment(a);
+                    printf("\n");
+                    a->nb_deletions = 0;
+                }
                 return;
             }
             if (link->values[i].type != 0)
@@ -132,10 +145,11 @@ void print_array(Array *a)
     }
 
     ValueLink *link = a->head;
+    unsigned ctr = 0;
     while (link)
     {
         printf("[");
-        for (unsigned i = 0; i < ARRAY_LEN; ++i)
+        for (unsigned i = 0; i < ARRAY_LEN; ++i, ++ctr)
         {
             if (link->values[i].type != 0)
             {
@@ -146,7 +160,7 @@ void print_array(Array *a)
                 printf(" , ");
             }
         }
-        printf("] -> ");
+        printf("]%s-> ", (ctr % 2) == 0 ? "\n" : " ");
         link = link->next;
     }
     printf("%u\n", a->size);
@@ -165,7 +179,19 @@ void copy_array(Int *src, Int *dest)
     }
 }
 
-// TODO: Define at which interval we defragment
+void empty_array(Int *array)
+{
+    if (!array)
+    {
+        return;
+    }
+
+    for (unsigned i = 0; i < ARRAY_LEN; ++i)
+    {
+        array[i].type = 0;
+    }
+}
+
 void defragment(Array *a)
 {
     if (!a)
@@ -199,6 +225,7 @@ void defragment(Array *a)
 
                 // Copies the temp array to the base Array
                 copy_array(tmps, link_to_fill->values);
+                empty_array(tmps);
                 tmps_insert_idx = 0;
                 prev_link_to_fill = link_to_fill;
                 link_to_fill = link_to_fill->next;
