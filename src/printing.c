@@ -5,10 +5,10 @@
 #include "stdlib.h"
 #include "storage.h"
 
-void dict_print_indent(Dict *d, int indent, char fromDict);
+void dict_print_indent(Dict *d, unsigned indent, char fromDict);
 void dict_print(Dict *d);
 
-void arr_print_indent(Array *a, int indent, char fromDict)
+void arr_print_indent(Array *a, unsigned indent, char fromDict)
 {
     if (!a)
     {
@@ -21,7 +21,7 @@ void arr_print_indent(Array *a, int indent, char fromDict)
     {
         return;
     }
-    for (int i = 0; i < indent - 1; ++i)
+    for (unsigned i = 0; i < indent - 1; ++i)
     {
         tabs[i] = '\t';
     }
@@ -38,13 +38,55 @@ void arr_print_indent(Array *a, int indent, char fromDict)
 
     printf("%s[\n", fromDict ? "" : tabs);
 
-    ValueLink *link = a->head;
+#ifndef EDITING_MODE
+    Value *values = a->values;
+    for (unsigned i = 0; i < size; ++i)
+    {
+        Value v = values[i];
+        if (v.type == T_ERROR)
+        {
+            continue;
+        }
+
+        switch (v.type)
+        {
+        case T_STR:
+            printf("\t%s\"%s\"", tabs, v.strv.str ? v.strv.str : "");
+            break;
+        case T_INT:
+            printf("\t%s%d", tabs, v.intv);
+            break;
+        case T_DOUBLE:
+            printf("\t%s%f", tabs, v.doublev);
+            break;
+        case T_BOOL:
+            printf("\t%s%s", tabs, v.boolv ? "true" : "false");
+            break;
+        case T_NULL:
+            printf("\t%snull", tabs);
+            break;
+        case T_ARR:
+            arr_print_indent(v.arrayv, indent + 1, 0);
+            break;
+        case T_DICT:
+            dict_print_indent(v.dictv, indent + 1, 0);
+            break;
+        }
+
+        if (i < size - 1)
+        {
+            printf(",\n");
+        }
+    }
+#else
     unsigned b = 0;
+    ValueLink *link = a->head;
     while (link)
     {
-        for (unsigned i = 0; i < ARRAY_LEN; ++i, ++b)
+        Value *values = link->values;
+        for (unsigned i = 0; i < ARRAY_LEN; ++i)
         {
-            Value v = link->values[i];
+            Value v = values[i];
             if (v.type == T_ERROR)
             {
                 continue;
@@ -75,13 +117,14 @@ void arr_print_indent(Array *a, int indent, char fromDict)
                 break;
             }
 
-            if (b < size - 1)
+            if (b++ < size - 1)
             {
                 printf(",\n");
             }
         }
         link = link->next;
     }
+#endif // !EDITING_MODE
 
     printf("\n%s]", tabs);
     free(tabs);
@@ -97,7 +140,7 @@ void arr_print(Array *a)
     }
 }
 
-void dict_print_indent(Dict *d, int indent, char fromDict)
+void dict_print_indent(Dict *d, unsigned indent, char fromDict)
 {
     // Obtains the number of tab characters that will be printed
     char *tabs = calloc(indent, sizeof(char));
@@ -105,7 +148,7 @@ void dict_print_indent(Dict *d, int indent, char fromDict)
     {
         return;
     }
-    for (int i = 0; i < indent - 1; ++i)
+    for (unsigned i = 0; i < indent - 1; ++i)
     {
         tabs[i] = '\t';
     }

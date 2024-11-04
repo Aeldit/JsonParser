@@ -12,24 +12,7 @@ int main(int argc, char *argv[])
     JSON *j = parse(argv[1]);
     if (IS_ARRAY(j))
     {
-        Array *a = j->array;
-        for (unsigned i = 0; i < 40; ++i)
-        {
-            arr_add_int(a, i);
-        }
-        for (unsigned i = 0; i < 19; ++i)
-        {
-            arr_remove(a, i + 2);
-        }
-        for (unsigned i = 40; i < 70; ++i)
-        {
-            arr_add_int(a, i);
-        }
-        for (unsigned i = 0; i < 5; ++i)
-        {
-            arr_remove(a, i + 2);
-        }
-        arr_print_array(a);
+        arr_print(j->array);
     }
     else if (IS_DICT(j))
     {

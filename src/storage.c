@@ -47,12 +47,12 @@
             }                                                                  \
         }                                                                      \
         ++x->size
-#endif // !EDITING_MODE
 
 /*******************************************************************************
 **                               LOCAL FUNCTIONS                              **
 *******************************************************************************/
-#include <stdio.h>
+#    ifdef DEBUG
+#        include <stdio.h>
 void arr_print_array(Array *a)
 {
     if (!a)
@@ -105,6 +105,7 @@ void arr_print_array(Array *a)
     }
     printf("\n");
 }
+#    endif // !DEBUG
 
 void arr_copy_array(Value *src, Value *dest)
 {
@@ -284,8 +285,12 @@ void defragment_dict(Dict *d)
     unsigned tmps_insert_idx = 0;
 
     ItemLink *link_to_fill = d->head;
+    ItemLink *prev_link_to_fill = d->head;
+    char last_started_fill = 0;
 
     ItemLink *link = d->head;
+    // We gather all the non empty items inside 'tmps', and then we copy the
+    // contents of 'tmps' in the 'link_to_fill' (which starts at the head)
     while (link)
     {
         for (unsigned i = 0; i < ARRAY_LEN; ++i)
@@ -294,16 +299,20 @@ void defragment_dict(Dict *d)
             // back inside it
             if (tmps_insert_idx == ARRAY_LEN)
             {
-                // Copies the temp array to the base Array
+                // Copies the temp array to the base Dict
                 dict_copy_array(tmps, link_to_fill->items);
+                link_to_fill->insert_index = ARRAY_LEN;
                 dict_empty_array(tmps);
                 tmps_insert_idx = 0;
+                prev_link_to_fill = link_to_fill;
                 link_to_fill = link_to_fill->next;
+                last_started_fill = 0;
             }
 
-            if (link->items[i].type != 0)
+            if (link->items[i].type != T_ERROR)
             {
                 tmps[tmps_insert_idx++] = link->items[i];
+                last_started_fill = 1;
             }
         }
         link = link->next;
@@ -325,7 +334,36 @@ void defragment_dict(Dict *d)
         }
         d->tail->next = 0;
     }
+    // If we filled the array in the linked list but there is no value left
+    // after, it means that the 'link_to_fill' now points to a link that we have
+    // to remove, because the defragmentation is done so it is no longer the
+    // link to fill.
+    // This is why we make the tail point to the previous one, and free all the
+    // remaining links starting at 'link_to_fill'
+    else if (!last_started_fill)
+    {
+        d->tail = prev_link_to_fill;
+        d->tail->next = 0;
+        while (link_to_fill)
+        {
+            ItemLink *tmp = link_to_fill;
+            link_to_fill = link_to_fill->next;
+            free(tmp);
+        }
+    }
+
+    // Sets the insert index of the last link to the correct position
+    Item *items = d->tail->items;
+    for (unsigned i = 0; i < ARRAY_LEN; ++i)
+    {
+        if (items[i].type == T_ERROR)
+        {
+            d->tail->insert_index = i;
+            break;
+        }
+    }
 }
+#endif // !EDITING_MODE
 
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
@@ -663,7 +701,6 @@ void dict_add_dict(Dict *d, String key, Dict *value)
             (Item){ .type = T_DICT, .key = key, .dictv = value };
     }
 }
-#endif // !EDITING_MODE
 
 /*******************************************************************************
 **                                   REMOVES                                  **
@@ -767,6 +804,7 @@ void dict_remove(Dict *d, String key)
         link = link->next;
     }
 }
+#endif // !EDITING_MODE
 
 /*******************************************************************************
 **                                    GETS                                    **

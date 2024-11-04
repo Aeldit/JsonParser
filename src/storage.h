@@ -27,40 +27,6 @@
 typedef struct array Array;
 typedef struct dict Dict;
 
-#define EDITING_MODE
-#ifdef EDITING_MODE
-/*typedef struct value_link
-{
-    char type;
-    union
-    {
-        String strv;
-        int intv;
-        double doublev;
-        char boolv;
-        Array *arrayv;
-        Dict *dictv;
-    };
-    struct value_link *next;
-} ValueLink;
-
-typedef struct item_link
-{
-    char type;
-    String key;
-    union
-    {
-        String strv;
-        int intv;
-        double doublev;
-        char boolv;
-        Array *arrayv;
-        Dict *dictv;
-    };
-    struct item_link *next;
-} ItemLink;*/
-#endif // !EDITING_MODE
-
 // Used for functions that return an element of the array
 typedef struct
 {
@@ -92,6 +58,7 @@ typedef struct
     };
 } Item;
 
+// #define EDITING_MODE
 #ifdef EDITING_MODE
 #    define ARRAY_LEN 16 // 32
 #    define NB_DELETIONS_TO_DEFRAG 8 // 16
