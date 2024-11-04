@@ -158,6 +158,25 @@ void dict_empty_array(Item *array)
     }
 }
 
+void fast_print(Value *v)
+{
+    if (!v)
+    {
+        return;
+    }
+
+    printf("-> [");
+    for (int i = 0; i < ARRAY_LEN; ++i)
+    {
+        printf("%d", v[i].type == T_INT ? v[i].intv : -1);
+        if (i < ARRAY_LEN - 1)
+        {
+            printf(", ");
+        }
+    }
+    printf("]\n");
+}
+
 void defragment_array(Array *a)
 {
     if (!a)
@@ -172,6 +191,8 @@ void defragment_array(Array *a)
     unsigned tmps_insert_idx = 0;
 
     ValueLink *link_to_fill = a->head;
+    ValueLink *prev_link_to_fill = a->head;
+    char last_started_fill = 0;
 
     ValueLink *link = a->head;
     // We gather all the non empty values inside 'tmps', and then we copy the
@@ -189,12 +210,15 @@ void defragment_array(Array *a)
                 link_to_fill->insert_index = ARRAY_LEN;
                 arr_empty_array(tmps);
                 tmps_insert_idx = 0;
+                prev_link_to_fill = link_to_fill;
                 link_to_fill = link_to_fill->next;
+                last_started_fill = 0;
             }
 
             if (link->values[i].type != T_ERROR)
             {
                 tmps[tmps_insert_idx++] = link->values[i];
+                last_started_fill = 1;
             }
         }
         link = link->next;
@@ -216,11 +240,25 @@ void defragment_array(Array *a)
         }
         a->tail->next = 0;
     }
+    // If we filled the array in the linked list but there is no value left
+    // after, it means that the 'link_to_fill' now points to a link that we have
+    // to remove, because the defragmentation is done so it is no longer the
+    // link to fill.
+    // This is why we make the tail point to the previous one, and free all the
+    // remaining links starting at 'link_to_fill'
+    else if (!last_started_fill)
+    {
+        a->tail = prev_link_to_fill;
+        a->tail->next = 0;
+        while (link_to_fill)
+        {
+            ValueLink *tmp = link_to_fill;
+            link_to_fill = link_to_fill->next;
+            free(tmp);
+        }
+    }
 
-    // FIX: Values not being properly removed in the last link
-    // by storing through how many arrays we went
-
-    // Sets the insert index to the correct position
+    // Sets the insert index of the last link to the correct position
     Value *values = a->tail->values;
     for (unsigned i = 0; i < ARRAY_LEN; ++i)
     {
@@ -246,7 +284,6 @@ void defragment_dict(Dict *d)
     unsigned tmps_insert_idx = 0;
 
     ItemLink *link_to_fill = d->head;
-    ItemLink *prev_link_to_fill = d->head;
 
     ItemLink *link = d->head;
     while (link)
@@ -257,21 +294,10 @@ void defragment_dict(Dict *d)
             // back inside it
             if (tmps_insert_idx == ARRAY_LEN)
             {
-                if (!link_to_fill)
-                {
-                    link_to_fill = calloc(1, sizeof(ItemLink));
-                    if (!link_to_fill)
-                    {
-                        return;
-                    }
-                    prev_link_to_fill->next = link_to_fill;
-                }
-
                 // Copies the temp array to the base Array
                 dict_copy_array(tmps, link_to_fill->items);
                 dict_empty_array(tmps);
                 tmps_insert_idx = 0;
-                prev_link_to_fill = link_to_fill;
                 link_to_fill = link_to_fill->next;
             }
 

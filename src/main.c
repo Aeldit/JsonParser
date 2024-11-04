@@ -17,18 +17,15 @@ int main(int argc, char *argv[])
         {
             arr_add_int(a, i);
         }
-        arr_print_array(a);
-        for (unsigned i = 0; i < 18; ++i)
+        for (unsigned i = 0; i < 19; ++i)
         {
             arr_remove(a, i + 2);
         }
-        arr_print_array(a);
         for (unsigned i = 40; i < 70; ++i)
         {
             arr_add_int(a, i);
         }
-        arr_print_array(a);
-        for (unsigned i = 0; i < 6; ++i)
+        for (unsigned i = 0; i < 5; ++i)
         {
             arr_remove(a, i + 2);
         }
