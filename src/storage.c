@@ -53,6 +53,9 @@
 *******************************************************************************/
 #    ifdef DEBUG
 #        include <stdio.h>
+/**
+** \brief Debug function that allows printing the linked lists arrays
+*/
 void arr_print_array(Array *a)
 {
     if (!a)
@@ -157,25 +160,6 @@ void dict_empty_array(Item *array)
     {
         array[i].type = 0;
     }
-}
-
-void fast_print(Value *v)
-{
-    if (!v)
-    {
-        return;
-    }
-
-    printf("-> [");
-    for (int i = 0; i < ARRAY_LEN; ++i)
-    {
-        printf("%d", v[i].type == T_INT ? v[i].intv : -1);
-        if (i < ARRAY_LEN - 1)
-        {
-            printf(", ");
-        }
-    }
-    printf("]\n");
 }
 
 void defragment_array(Array *a)
@@ -363,8 +347,7 @@ void defragment_dict(Dict *d)
         }
     }
 }
-#endif // !EDITING_MODE
-
+#else
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
@@ -381,7 +364,6 @@ Array *init_array(unsigned size)
         return a;
     }
 
-#ifndef EDITING_MODE
     a->values = calloc(size, sizeof(Value));
     if (!a->values)
     {
@@ -389,7 +371,6 @@ Array *init_array(unsigned size)
         return 0;
     }
     a->size = size;
-#endif // !EDITING_MODE
     return a;
 }
 
@@ -406,7 +387,6 @@ Dict *init_dict(unsigned size)
         return d;
     }
 
-#ifndef EDITING_MODE
     d->items = calloc(size, sizeof(Item));
     if (!d->items)
     {
@@ -414,9 +394,9 @@ Dict *init_dict(unsigned size)
         return 0;
     }
     d->size = size;
-#endif // !EDITING_MODE
     return d;
 }
+#endif // !EDITING_MODE
 
 JSON *init_json(char is_array, Array *a, Dict *d)
 {
