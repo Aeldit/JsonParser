@@ -76,35 +76,37 @@ typedef struct item_link
     unsigned insert_index;
     struct item_link *next;
 } ItemLink;
-#endif // !EDITING_MODE
 
 struct array
 {
     unsigned size;
-
-#ifdef EDITING_MODE
     unsigned nb_deletions;
     ValueLink *head;
     ValueLink *tail;
+}
+
+struct dict
+{
+    unsigned size;
+    unsigned nb_deletions;
+    ItemLink *head;
+    ItemLink *tail;
+};
 #else
+struct array
+{
+    unsigned size;
     unsigned insert_index;
     Value *values;
-#endif
 };
 
 struct dict
 {
     unsigned size;
-
-#ifdef EDITING_MODE
-    unsigned nb_deletions;
-    ItemLink *head;
-    ItemLink *tail;
-#else
     unsigned insert_index;
     Item *items;
-#endif // !EDITING_MODE
 };
+#endif // !EDITING_MODE
 
 typedef struct
 {
@@ -117,7 +119,7 @@ typedef struct
 } JSON;
 
 /*******************************************************************************
-**                                 FUNCTIONS                                  **
+**                                 FUNCTIONS **
 *******************************************************************************/
 JSON *init_json(char is_array, Array *a, Dict *d);
 
@@ -146,7 +148,8 @@ Dict *init_dict(unsigned size);
 #endif // !EDITING_MODE
 
 /**
-** \returns A Value struct containing the type and the value of the correct type
+** \returns A Value struct containing the type and the value of the correct
+*type
 */
 Value array_get(Array *a, unsigned index);
 Item dict_get(Dict *d, String key);
