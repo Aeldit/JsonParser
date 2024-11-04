@@ -12,47 +12,6 @@
 #define ERROR_ITEM ((Item){ .type = T_ERROR })
 
 #ifdef EDITING_MODE
-#    define ARRAY_INSERT(T_TYPE)                                               \
-        /* If index is equal to the size, it is the same as adding an element  \
-         * or if the size is 0 but the head is not null (which may have been   \
-         * caused by an error)*/                                               \
-        if (index > a->size || (a->size == 0 && a->head))                      \
-        {                                                                      \
-            return;                                                            \
-        }                                                                      \
-        ValueLink *vl = calloc(1, sizeof(ValueLink));                          \
-        vl->type = T_TYPE;                                                     \
-        /* If the linked list is empty */                                      \
-        if (!a->head)                                                          \
-        {                                                                      \
-            a->head = vl;                                                      \
-            a->tail = vl;                                                      \
-        }                                                                      \
-        else if (index == 0)                                                   \
-        {                                                                      \
-            vl->next = a->head;                                                \
-            a->head = vl;                                                      \
-        }                                                                      \
-        else if (index == a->size)                                             \
-        {                                                                      \
-            a->tail->next = vl;                                                \
-            a->tail = vl;                                                      \
-        }                                                                      \
-        else                                                                   \
-        {                                                                      \
-            /* Navigates the the element at position 'index - 1', make its     \
-            next element the next of the new element, and make its next point  \
-            to the new element */                                              \
-            ValueLink *link = a->head;                                         \
-            while (link && --index)                                            \
-            {                                                                  \
-                link = link->next;                                             \
-            }                                                                  \
-            vl->next = link->next;                                             \
-            link->next = vl;                                                   \
-        }                                                                      \
-        ++a->size
-
 /**
 ** \def Adds an element to the given array or dict
 ** \param TypeLink Can be either 'ValueLink' or 'ItemLink'
@@ -144,7 +103,7 @@ void arr_print_array(Array *a)
         printf("]\n");
         link = link->next;
     }
-    printf("%u\n", a->size);
+    printf("\n");
 }
 
 void arr_copy_array(Value *src, Value *dest)
@@ -213,9 +172,10 @@ void defragment_array(Array *a)
     unsigned tmps_insert_idx = 0;
 
     ValueLink *link_to_fill = a->head;
-    ValueLink *prev_link_to_fill = a->head;
 
     ValueLink *link = a->head;
+    // We gather all the non empty values inside 'tmps', and then we copy the
+    // contents of 'tmps' in the 'link_to_fill' (which starts at the head)
     while (link)
     {
         for (unsigned i = 0; i < ARRAY_LEN; ++i)
@@ -224,26 +184,15 @@ void defragment_array(Array *a)
             // back inside it
             if (tmps_insert_idx == ARRAY_LEN)
             {
-                if (!link_to_fill)
-                {
-                    link_to_fill = calloc(1, sizeof(ValueLink));
-                    if (!link_to_fill)
-                    {
-                        return;
-                    }
-                    prev_link_to_fill->next = link_to_fill;
-                }
-
                 // Copies the temp array to the base Array
                 arr_copy_array(tmps, link_to_fill->values);
                 link_to_fill->insert_index = ARRAY_LEN;
                 arr_empty_array(tmps);
                 tmps_insert_idx = 0;
-                prev_link_to_fill = link_to_fill;
                 link_to_fill = link_to_fill->next;
             }
 
-            if (link->values[i].type != 0)
+            if (link->values[i].type != T_ERROR)
             {
                 tmps[tmps_insert_idx++] = link->values[i];
             }
@@ -269,6 +218,7 @@ void defragment_array(Array *a)
     }
 
     // FIX: Values not being properly removed in the last link
+    // by storing through how many arrays we went
 
     // Sets the insert index to the correct position
     Value *values = a->tail->values;
@@ -734,7 +684,6 @@ void arr_remove(Array *a, unsigned index)
                 ++a->nb_deletions;
                 if (a->nb_deletions == NB_DELETIONS_TO_DEFRAG)
                 {
-                    arr_print_array(a);
                     defragment_array(a);
                     a->nb_deletions = 0;
                 }
@@ -783,7 +732,6 @@ void dict_remove(Dict *d, String key)
                 ++d->nb_deletions;
                 if (d->nb_deletions == NB_DELETIONS_TO_DEFRAG)
                 {
-                    // print_array(a);
                     defragment_dict(d);
                     d->nb_deletions = 0;
                 }
@@ -817,7 +765,7 @@ Value array_get(Array *a, unsigned index)
             {
                 return link->values[i];
             }
-            if (link->values[i].type != 0)
+            if (link->values[i].type != T_ERROR)
             {
                 ++non_null_values;
             }
@@ -858,7 +806,7 @@ Item dict_get(Dict *d, String key)
             {
                 return it;
             }
-            if (it.type != 0)
+            if (it.type != T_ERROR)
             {
                 ++non_null_values;
             }

@@ -93,9 +93,10 @@ typedef struct
 } Item;
 
 #ifdef EDITING_MODE
-#    define ARRAY_LEN 32
-#    define NB_DELETIONS_TO_DEFRAG 8
+#    define ARRAY_LEN 16 // 32
+#    define NB_DELETIONS_TO_DEFRAG 8 // 16
 
+// TODO: Store whether each link is full or not
 typedef struct value_link
 {
     Value values[ARRAY_LEN];
@@ -175,14 +176,6 @@ void dict_add_dict(Dict *d, String key, Dict *value);
 #ifdef EDITING_MODE
 void arr_remove(Array *a, unsigned index);
 void dict_remove(Dict *d, String key);
-
-void arr_insert_str(Array *a, unsigned index, String value);
-void arr_insert_int(Array *a, unsigned index, int value);
-void arr_insert_double(Array *a, unsigned index, double value);
-void arr_insert_bool(Array *a, unsigned index, char value);
-void arr_insert_null(Array *a, unsigned index);
-void arr_insert_arr(Array *a, unsigned index, Array *value);
-void arr_insert_dict(Array *a, unsigned index, Dict *value);
 #endif // !EDITING_MODE
 
 /**
@@ -197,5 +190,7 @@ Item dict_get(Dict *d, String key);
 void destroy_array(Array *a);
 void destroy_dict(Dict *d);
 void destroy_json(JSON *j);
+
+void arr_print_array(Array *a);
 
 #endif // !STORAGE_H
