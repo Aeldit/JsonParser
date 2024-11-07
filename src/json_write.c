@@ -4,6 +4,54 @@
 #include <stdlib.h>
 #include <string.h>
 
+void add_link(StringLinkedList *ll, String str)
+{
+    if (!ll)
+    {
+        return;
+    }
+
+    StringLink *sl = calloc(1, sizeof(StringLink));
+    if (!sl)
+    {
+        return;
+    }
+    sl->s = str;
+
+    if (!ll->head)
+    {
+        ll->head = sl;
+        ll->tail = sl;
+    }
+    else if (!ll->tail)
+    {
+        free(sl);
+    }
+    else
+    {
+        ll->tail->next = sl;
+        ll->tail = sl;
+    }
+}
+
+void destroy_linked_list(StringLinkedList *ll)
+{
+    if (!ll)
+    {
+        return;
+    }
+
+    StringLink *link = ll->head;
+    while (link)
+    {
+        StringLink *tmp = link;
+        link = link->next;
+        free(tmp->s.str);
+        free(tmp);
+    }
+    free(ll);
+}
+
 String get_int_as_str(int value)
 {
     int nb_chars = 1;
@@ -66,42 +114,17 @@ String get_double_as_str(double value)
     return s;
 }
 
-int get_nb_chars_array(Array *a)
+String get_bool_as_str(char value)
 {
-    if (!a)
-    {
-        return 0;
-    }
-
-    int size = a->size;
-    Value *values = a->values;
-
-    uint_fast64_t nb_chars = 3; // 3 : '[' + ']' + '\0'
-    for (int i = 0; i < size; ++i)
-    {
-        Value v = values[i];
-        switch (v.type)
-        {
-        case T_STR:
-            nb_chars += v.strv.length;
-            break;
-        case T_INT:
-            nb_chars += get_int_as_str(v.intv);
-            break;
-        case T_DOUBLE:
-            nb_chars += get_double_as_str(v.doublev);
-            break;
-        case T_BOOL:
-            nb_chars += v.boolv ? 4 : 5;
-            break;
-        }
-    }
-    return nb_chars;
+    char nb_chars = (value ? 4 : 5);
+    char *str = calloc(nb_chars + 1, sizeof(char));
+    memcpy(str, value ? "true" : "false", nb_chars);
+    return (String){ .str = str ? str : 0, .length = str ? nb_chars : 0 };
 }
 
 void write_json_to_file(JSON *j, char *file_name)
 {
-    if (!j)
+    if (!j || !file_name)
     {
         return;
     }
@@ -109,7 +132,45 @@ void write_json_to_file(JSON *j, char *file_name)
     Array *a = j->array;
     if (j->is_array && a)
     {
-        int nb_chars = get_nb_chars_array(a);
+        StringLinkedList *ll = calloc(1, sizeof(StringLinkedList));
+        if (!ll)
+        {
+            return;
+        }
+
+        // Iterates over each element of the array and converts them to
+        // 'String's + counts the number of chars required for each value
+        Value *values = a->values;
+        unsigned size = a->size;
+        unsigned nb_chars = 4; // [\n]\n
+        for (unsigned i = 0; i < size; ++i)
+        {
+            Value v = values[i];
+            String tmp_str;
+            switch (v.type)
+            {
+            case T_STR:
+                tmp_str = v.strv;
+                nb_chars += 2; // Strings are encased by 2 double-quotes (\"\")
+                break;
+            case T_INT:
+                tmp_str = get_int_as_str(v.intv);
+                break;
+            case T_DOUBLE:
+                tmp_str = get_double_as_str(v.doublev);
+                break;
+            case T_BOOL:
+                tmp_str = get_bool_as_str(v.boolv);
+                break;
+            }
+            add_link(ll, tmp_str);
+            // We add 1 for the comma if we are not at the last value
+            // We add 1 for the line return
+            // We add 'indent' for the tabs
+            // TODO: Store the number of indents required
+            nb_chars += tmp_str.length + (i == size - 1 ? 0 : 1) + 1;
+        }
+
         char *writtable_json = calloc(nb_chars, sizeof(char));
         if (!writtable_json)
         {
@@ -117,33 +178,24 @@ void write_json_to_file(JSON *j, char *file_name)
         }
 
         writtable_json[0] = '[';
-        unsigned insert_idx = 0;
-
-        unsigned size = a->size;
-        Value *values = a->values;
-        unsigned tmp_nb = 0;
-        for (unsigned i = 0; i < size; ++i)
+        writtable_json[1] = '\n';
+        unsigned insert_idx = 2;
+        StringLink *link = ll->head;
+        while (link)
         {
-            Value v = values[i];
-            switch (v.type)
+            memcpy(writtable_json + insert_idx, link->s.str, link->s.length);
+            insert_idx += link->s.length;
+            if (link->next)
             {
-            case T_STR:
-                insert_idx += add_str_to_buff(writtable_json, v.strv.str,
-                                              insert_idx, v.strv.length);
-                break;
-            case T_INT:
-                insert_idx += tmp_nb;
-                break;
-            case T_DOUBLE:
-                insert_idx += (v.doublev);
-                break;
-            case T_BOOL:
-                insert_idx += v.boolv ? 4 : 5;
-                break;
+                writtable_json[insert_idx++] = ',';
             }
+            writtable_json[insert_idx++] = '\n';
+            link = link->next;
         }
         writtable_json[nb_chars - 2] = ']';
-        printf("%s\n", writtable_json);
+        printf("%s", writtable_json);
+        free(writtable_json);
+        destroy_linked_list(ll);
         return;
     }
 
@@ -166,12 +218,7 @@ int main(void)
     // printf("%d\n", get_nb_chars_int(123456789));
     // printf("%d\n", get_nb_chars_double(1234567891.123456));
 
-    String s = get_int_as_str(5468);
-    printf("%s\n", s.str);
-    free(s.str);
-    String d = get_double_as_str(5468.235);
-    printf("%s\n", d.str);
-    free(d.str);
+    write_json_to_file(j, "test.json");
     destroy_json(j);
     return 0;
 }
