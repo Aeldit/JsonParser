@@ -6,6 +6,7 @@
 typedef struct str_link
 {
     String s;
+    char s_needs_free;
     struct str_link *next;
 } StringLink;
 
