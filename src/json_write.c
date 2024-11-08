@@ -128,6 +128,83 @@ String get_bool_as_str(char value)
     return (String){ .str = str ? str : 0, .length = str ? nb_chars : 0 };
 }
 
+String get_array_as_str(Array *a, unsigned indent)
+{
+    if (!a)
+    {
+        return (String){ .str = 0, .length = 0 };
+    }
+
+    StringLinkedList *ll = calloc(1, sizeof(StringLinkedList));
+    if (!ll)
+    {
+        return (String){ .str = 0, .length = 0 };
+    }
+
+    // Iterates over each element of the array and converts them to
+    // 'String's + counts the number of chars required for each value
+    Value *values = a->values;
+    unsigned size = a->size;
+    unsigned nb_chars = 4; // [\n]\n
+    for (unsigned i = 0; i < size; ++i)
+    {
+        Value v = values[i];
+        String tmp_str;
+        switch (v.type)
+        {
+        case T_STR:
+            tmp_str = v.strv;
+            nb_chars += 2; // Strings are encased by 2 double-quotes (\"\")
+            break;
+        case T_INT:
+            tmp_str = get_int_as_str(v.intv);
+            break;
+        case T_DOUBLE:
+            tmp_str = get_double_as_str(v.doublev);
+            break;
+        case T_BOOL:
+            tmp_str = get_bool_as_str(v.boolv);
+            break;
+        }
+        add_link(ll, tmp_str);
+        // We add 1 for the comma if we are not at the last value
+        // We add 1 for the line return
+        // We add 'indent' for the tabs
+        // TODO: Store the number of indents required
+        nb_chars += tmp_str.length + (i == size - 1 ? 0 : 1) + 1 + indent;
+    }
+    printf("nb_chars = %d\n", nb_chars);
+
+    char *str = calloc(nb_chars, sizeof(char));
+    if (!str)
+    {
+        destroy_linked_list(ll);
+        return (String){ .str = 0, .length = 0 };
+    }
+
+    str[0] = '[';
+    str[1] = '\n';
+    unsigned insert_idx = 2;
+    StringLink *link = ll->head;
+    while (link)
+    {
+        memset(str + insert_idx, '\t', indent);
+        insert_idx += indent;
+        memcpy(str + insert_idx, link->s.str, link->s.length);
+        insert_idx += link->s.length;
+        if (link->next)
+        {
+            str[insert_idx++] = ',';
+        }
+        str[insert_idx++] = '\n';
+        link = link->next;
+    }
+    str[nb_chars - 2] = ']';
+    printf("%s\n", str);
+    destroy_linked_list(ll);
+    return (String){ .str = str, .length = nb_chars };
+}
+
 void write_json_to_file(JSON *j, char *file_name)
 {
     if (!j || !file_name)
@@ -138,70 +215,8 @@ void write_json_to_file(JSON *j, char *file_name)
     Array *a = j->array;
     if (j->is_array && a)
     {
-        StringLinkedList *ll = calloc(1, sizeof(StringLinkedList));
-        if (!ll)
-        {
-            return;
-        }
-
-        // Iterates over each element of the array and converts them to
-        // 'String's + counts the number of chars required for each value
-        Value *values = a->values;
-        unsigned size = a->size;
-        unsigned nb_chars = 4; // [\n]\n
-        for (unsigned i = 0; i < size; ++i)
-        {
-            Value v = values[i];
-            String tmp_str;
-            switch (v.type)
-            {
-            case T_STR:
-                tmp_str = v.strv;
-                nb_chars += 2; // Strings are encased by 2 double-quotes (\"\")
-                break;
-            case T_INT:
-                tmp_str = get_int_as_str(v.intv);
-                break;
-            case T_DOUBLE:
-                tmp_str = get_double_as_str(v.doublev);
-                break;
-            case T_BOOL:
-                tmp_str = get_bool_as_str(v.boolv);
-                break;
-            }
-            add_link(ll, tmp_str);
-            // We add 1 for the comma if we are not at the last value
-            // We add 1 for the line return
-            // We add 'indent' for the tabs
-            // TODO: Store the number of indents required
-            nb_chars += tmp_str.length + (i == size - 1 ? 0 : 1) + 1;
-        }
-
-        char *writtable_json = calloc(nb_chars, sizeof(char));
-        if (!writtable_json)
-        {
-            return;
-        }
-
-        writtable_json[0] = '[';
-        writtable_json[1] = '\n';
-        unsigned insert_idx = 2;
-        StringLink *link = ll->head;
-        while (link)
-        {
-            memcpy(writtable_json + insert_idx, link->s.str, link->s.length);
-            insert_idx += link->s.length;
-            if (link->next)
-            {
-                writtable_json[insert_idx++] = ',';
-            }
-            writtable_json[insert_idx++] = '\n';
-            link = link->next;
-        }
-        writtable_json[nb_chars - 2] = ']';
-        printf("%s", writtable_json);
-        free(writtable_json);
-        destroy_linked_list(ll);
+        String s = get_array_as_str(j->array, 1);
+        free(s.str);
         return;
     }
 
