@@ -170,10 +170,8 @@ String get_array_as_str(Array *a, unsigned indent)
         // We add 1 for the comma if we are not at the last value
         // We add 1 for the line return
         // We add 'indent' for the tabs
-        // TODO: Store the number of indents required
         nb_chars += tmp_str.length + (i == size - 1 ? 0 : 1) + 1 + indent;
     }
-    printf("nb_chars = %d\n", nb_chars);
 
     char *str = calloc(nb_chars, sizeof(char));
     if (!str)

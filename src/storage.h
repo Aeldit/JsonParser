@@ -128,6 +128,8 @@ void arr_add_int(Array *a, int value);
 void arr_add_double(Array *a, double value);
 void arr_add_bool(Array *a, char value);
 void arr_add_null(Array *a);
+// WARN: Check if the array is added to itself, and deep-copy it if so to
+// prevent infinite recursion
 void arr_add_arr(Array *a, Array *value);
 void arr_add_dict(Array *a, Dict *value);
 
@@ -137,6 +139,8 @@ void dict_add_double(Dict *d, String key, double value);
 void dict_add_bool(Dict *d, String key, char value);
 void dict_add_null(Dict *d, String key);
 void dict_add_arr(Dict *d, String key, Array *value);
+// WARN: Check if the dict is added to itself, and deep-copy it if so to
+// prevent infinite recursion
 void dict_add_dict(Dict *d, String key, Dict *value);
 
 #ifdef EDITING_MODE
