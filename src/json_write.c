@@ -4,6 +4,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+String get_int_as_str(int value);
+String get_double_as_str(double value);
+String get_bool_as_str(char value);
+String get_array_as_str(Array *a, unsigned indent, char from_dict);
+
 void add_link(StringLinkedList *ll, String str)
 {
     if (!ll)
@@ -50,6 +55,54 @@ void destroy_linked_list(StringLinkedList *ll)
         free(tmp);
     }
     free(ll);
+}
+
+/**
+** \returns The number of additional characters
+*/
+unsigned fill_string_ll_with_values(StringLinkedList *ll, Array *a,
+                                    unsigned indent)
+{
+    if (!ll || !a)
+    {
+        return 0;
+    }
+
+    unsigned nb_chars = 0;
+    // Iterates over each value of the array and converts them to
+    // 'String's + counts the number of chars required for each value
+    Value *values = a->values;
+    unsigned size = a->size;
+    for (unsigned i = 0; i < size; ++i)
+    {
+        Value v = values[i];
+        String tmp_str;
+        switch (v.type)
+        {
+        case T_STR:
+            tmp_str = v.strv;
+            nb_chars += 2; // Strings are encased by 2 double-quotes (\"\")
+            break;
+        case T_INT:
+            tmp_str = get_int_as_str(v.intv);
+            break;
+        case T_DOUBLE:
+            tmp_str = get_double_as_str(v.doublev);
+            break;
+        case T_BOOL:
+            tmp_str = get_bool_as_str(v.boolv);
+            break;
+        case T_ARR:
+            tmp_str = get_array_as_str(v.arrayv, indent + 1, 0);
+            break;
+        }
+        add_link(ll, tmp_str);
+        // We add 1 for the comma if we are not at the last value
+        // We add 1 for the line return
+        // We add 'indent' for the tabs
+        nb_chars += tmp_str.length + (i == size - 1 ? 0 : 1) + 1 + indent;
+    }
+    return nb_chars;
 }
 
 /*******************************************************************************
@@ -143,42 +196,9 @@ String get_array_as_str(Array *a, unsigned indent, char from_dict)
         return EMPTY_STRING;
     }
 
-    // '[' + '\n' + ']' + '\n' + indents before ']'
-    unsigned nb_chars = indent - 1 + 4;
-
-    // Iterates over each value of the array and converts them to
-    // 'String's + counts the number of chars required for each value
-    Value *values = a->values;
-    unsigned size = a->size;
-    for (unsigned i = 0; i < size; ++i)
-    {
-        Value v = values[i];
-        String tmp_str;
-        switch (v.type)
-        {
-        case T_STR:
-            tmp_str = v.strv;
-            nb_chars += 2; // Strings are encased by 2 double-quotes (\"\")
-            break;
-        case T_INT:
-            tmp_str = get_int_as_str(v.intv);
-            break;
-        case T_DOUBLE:
-            tmp_str = get_double_as_str(v.doublev);
-            break;
-        case T_BOOL:
-            tmp_str = get_bool_as_str(v.boolv);
-            break;
-        case T_ARR:
-            tmp_str = get_array_as_str(v.arrayv, indent + 1, 0);
-            break;
-        }
-        add_link(ll, tmp_str);
-        // We add 1 for the comma if we are not at the last value
-        // We add 1 for the line return
-        // We add 'indent' for the tabs
-        nb_chars += tmp_str.length + (i == size - 1 ? 0 : 1) + 1 + indent;
-    }
+    // '[' + '\n' + (indent - 1) * '\t' + ']' + '\n'
+    unsigned nb_chars =
+        indent - 1 + 4 + fill_string_ll_with_values(ll, a, indent);
 
     unsigned char *str = calloc(nb_chars + 1, sizeof(char));
     if (!str)
@@ -187,6 +207,7 @@ String get_array_as_str(Array *a, unsigned indent, char from_dict)
         return EMPTY_STRING;
     }
 
+    // |-> Start building the string
     str[0] = '[';
     str[1] = '\n';
     unsigned insert_idx = 2;
@@ -218,11 +239,15 @@ String get_array_as_str(Array *a, unsigned indent, char from_dict)
 
     str[nb_chars - 2] = ']';
     str[nb_chars - 1] = '\n';
+    // |-> End of string building
 
     destroy_linked_list(ll);
     return STRING_OF(str, nb_chars);
 }
 
+/*******************************************************************************
+**                                   WRITING                                  **
+*******************************************************************************/
 void write_json_to_file(JSON *j, char *file_name)
 {
     if (!j || !file_name)
@@ -238,12 +263,9 @@ void write_json_to_file(JSON *j, char *file_name)
         fwrite(s.str, sizeof(char), s.length, f);
         fclose(f);
         free(s.str);
-        return;
     }
-
-    if (!j->dict)
+    if (j->dict)
     {
-        return;
     }
 }
 
