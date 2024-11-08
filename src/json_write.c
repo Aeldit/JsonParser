@@ -7,6 +7,7 @@
 String get_int_as_str(int value);
 String get_double_as_str(double value);
 String get_bool_as_str(char value);
+String get_null_as_str();
 String get_array_as_str(Array *a, unsigned indent, char from_dict);
 
 void add_link(StringLinkedList *ll, String str)
@@ -91,6 +92,9 @@ unsigned fill_string_ll_with_values(StringLinkedList *ll, Array *a,
             break;
         case T_BOOL:
             tmp_str = get_bool_as_str(v.boolv);
+            break;
+        case T_NULL:
+            tmp_str = get_null_as_str();
             break;
         case T_ARR:
             tmp_str = get_array_as_str(v.arrayv, indent + 1, 0);
@@ -183,6 +187,17 @@ String get_bool_as_str(char value)
     return STRING_OF(str ? str : 0, str ? nb_chars : 0);
 }
 
+String get_null_as_str()
+{
+    unsigned char *str = calloc(5, sizeof(char));
+    if (!str)
+    {
+        return EMPTY_STRING;
+    }
+    memcpy(str, "null", 4);
+    return STRING_OF(str, 4);
+}
+
 String get_array_as_str(Array *a, unsigned indent, char from_dict)
 {
     if (!a)
@@ -197,8 +212,9 @@ String get_array_as_str(Array *a, unsigned indent, char from_dict)
     }
 
     // '[' + '\n' + (indent - 1) * '\t' + ']' + '\n'
-    unsigned nb_chars =
-        indent - 1 + 4 + fill_string_ll_with_values(ll, a, indent);
+    // indent == 1 -> if we are in the 'root' array, the add a '\n' at the end
+    unsigned nb_chars = indent - 1 + 3 + (indent == 1)
+        + fill_string_ll_with_values(ll, a, indent);
 
     unsigned char *str = calloc(nb_chars + 1, sizeof(char));
     if (!str)
@@ -237,8 +253,11 @@ String get_array_as_str(Array *a, unsigned indent, char from_dict)
     memset(str + insert_idx, '\t', indent - 1);
     insert_idx += indent - 1;
 
-    str[nb_chars - 2] = ']';
-    str[nb_chars - 1] = '\n';
+    str[nb_chars - (indent == 1 ? 2 : 1)] = ']';
+    if (indent == 1)
+    {
+        str[nb_chars - 1] = '\n';
+    }
     // |-> End of string building
 
     destroy_linked_list(ll);
@@ -246,7 +265,7 @@ String get_array_as_str(Array *a, unsigned indent, char from_dict)
 }
 
 /*******************************************************************************
-**                                   WRITING                                  **
+**                                   WRITING **
 *******************************************************************************/
 void write_json_to_file(JSON *j, char *file_name)
 {
@@ -257,12 +276,23 @@ void write_json_to_file(JSON *j, char *file_name)
 
     if (j->is_array && j->array)
     {
-        String s = get_array_as_str(j->array, 1, 1);
         FILE *f = fopen(file_name, "w");
+        if (!f)
+        {
+            return;
+        }
+
+        String s = get_array_as_str(j->array, 1, 1);
+        if (!s.str)
+        {
+            fclose(f);
+            return;
+        }
+
         printf("%s\n", s.str);
         fwrite(s.str, sizeof(char), s.length, f);
-        fclose(f);
         free(s.str);
+        fclose(f);
     }
     if (j->dict)
     {
@@ -277,8 +307,9 @@ int main(void)
     arr_add_bool(a, 1);
     arr_add_bool(a, 0);
 
-    Array *b = init_array(2);
+    Array *b = init_array(3);
     arr_add_bool(b, 1);
+    arr_add_null(b);
     arr_add_bool(b, 1);
 
     arr_add_arr(a, b);
