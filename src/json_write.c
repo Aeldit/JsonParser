@@ -61,13 +61,13 @@ String get_int_as_str(int value)
         ++nb_chars;
     }
 
-    char *str = calloc(nb_chars + 1, sizeof(char));
+    unsigned char *str = calloc(nb_chars + 1, sizeof(char));
     if (!str)
     {
-        return (String){ .str = 0, .length = 0 };
+        return EMPTY_STRING;
     }
 
-    String s = { .str = str, .length = nb_chars };
+    String s = STRING_OF(str, nb_chars);
 
     while (nb_chars)
     {
@@ -108,14 +108,13 @@ String get_double_as_str(double value)
         }
     }
 
-    char *str = calloc(18, sizeof(char));
+    unsigned char *str = calloc(18, sizeof(char));
     if (!str)
     {
-        return (String){ .str = 0, .length = 0 };
+        return EMPTY_STRING;
     }
 
-    String s = { .str = str,
-                 .length = nb_chars + nb_decimals - (nb_decimals ? 0 : 1) };
+    String s = STRING_OF(str, nb_chars + nb_decimals - (nb_decimals ? 0 : 1));
     memcpy(str, double_str, s.length);
     return s;
 }
@@ -123,22 +122,22 @@ String get_double_as_str(double value)
 String get_bool_as_str(char value)
 {
     char nb_chars = (value ? 4 : 5);
-    char *str = calloc(nb_chars + 1, sizeof(char));
+    unsigned char *str = calloc(nb_chars + 1, sizeof(char));
     memcpy(str, value ? "true" : "false", nb_chars);
-    return (String){ .str = str ? str : 0, .length = str ? nb_chars : 0 };
+    return STRING_OF(str ? str : 0, str ? nb_chars : 0);
 }
 
 String get_array_as_str(Array *a, unsigned indent)
 {
     if (!a)
     {
-        return (String){ .str = 0, .length = 0 };
+        return EMPTY_STRING;
     }
 
     StringLinkedList *ll = calloc(1, sizeof(StringLinkedList));
     if (!ll)
     {
-        return (String){ .str = 0, .length = 0 };
+        return EMPTY_STRING;
     }
 
     // Iterates over each element of the array and converts them to
@@ -173,11 +172,11 @@ String get_array_as_str(Array *a, unsigned indent)
         nb_chars += tmp_str.length + (i == size - 1 ? 0 : 1) + 1 + indent;
     }
 
-    char *str = calloc(nb_chars, sizeof(char));
+    unsigned char *str = calloc(nb_chars, sizeof(char));
     if (!str)
     {
         destroy_linked_list(ll);
-        return (String){ .str = 0, .length = 0 };
+        return EMPTY_STRING;
     }
 
     str[0] = '[';
@@ -186,21 +185,27 @@ String get_array_as_str(Array *a, unsigned indent)
     StringLink *link = ll->head;
     while (link)
     {
+        // Tabs
         memset(str + insert_idx, '\t', indent);
         insert_idx += indent;
+
+        // Value as string
         memcpy(str + insert_idx, link->s.str, link->s.length);
         insert_idx += link->s.length;
+
+        // Comma and line return
         if (link->next)
         {
             str[insert_idx++] = ',';
         }
         str[insert_idx++] = '\n';
+
         link = link->next;
     }
     str[nb_chars - 2] = ']';
     printf("%s\n", str);
     destroy_linked_list(ll);
-    return (String){ .str = str, .length = nb_chars };
+    return STRING_OF(str, nb_chars);
 }
 
 void write_json_to_file(JSON *j, char *file_name)
@@ -210,10 +215,12 @@ void write_json_to_file(JSON *j, char *file_name)
         return;
     }
 
-    Array *a = j->array;
-    if (j->is_array && a)
+    if (j->is_array && j->array)
     {
         String s = get_array_as_str(j->array, 1);
+        FILE *f = fopen(file_name, "w");
+        fwrite(s.str, sizeof(char), s.length, f);
+        fclose(f);
         free(s.str);
         return;
     }
@@ -232,12 +239,8 @@ int main(void)
     arr_add_bool(a, 1);
     arr_add_bool(a, 0);
     JSON *j = init_json(1, a, 0);
-    // printf("nb chars = %d\n", get_nb_chars_array(a));
 
-    // printf("%d\n", get_nb_chars_int(123456789));
-    // printf("%d\n", get_nb_chars_double(1234567891.123456));
-
-    write_json_to_file(j, "test.json");
+    write_json_to_file(j, "out.json");
     destroy_json(j);
     return 0;
 }

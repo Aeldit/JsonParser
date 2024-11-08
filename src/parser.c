@@ -66,7 +66,6 @@ typedef uint_fast32_t uint_nested_dicts_t;
 typedef uint_fast64_t uint_nested_dicts_t;
 #endif
 
-#define NULL_STRING ((String){ .str = 0, .length = 0 })
 #define NULL_STR_AND_LEN_TUPLE ((StrAndLenTuple){ .str = 0, .len = 0 })
 
 /*******************************************************************************
@@ -293,7 +292,7 @@ String parse_string_buff(char *buff, uint_fast64_t *idx)
 {
     if (!buff || !idx)
     {
-        return NULL_STRING;
+        return EMPTY_STRING;
     }
 
     uint_fast64_t start_idx = *idx + 1;
@@ -314,13 +313,13 @@ String parse_string_buff(char *buff, uint_fast64_t *idx)
 
     if (len == 0)
     {
-        return NULL_STRING;
+        return EMPTY_STRING;
     }
 
-    char *str = calloc(len + 1, sizeof(char));
+    unsigned char *str = calloc(len + 1, sizeof(char));
     if (!str)
     {
-        return NULL_STRING;
+        return EMPTY_STRING;
     }
     memcpy(str, buff + start_idx, len);
 
@@ -734,7 +733,7 @@ Dict *parse_dict_buff(char *b, uint_fast64_t *idx, uint_fast16_t *err)
         return d;
     }
 
-    String key = NULL_STRING;
+    String key = EMPTY_STRING;
     char c = 0;
     char is_waiting_key = 1;
     // We start at 1 because if we entered this function, it means that we
@@ -848,7 +847,7 @@ String parse_string(FILE *f, uint_fast64_t *pos)
 {
     if (!f || !pos)
     {
-        return NULL_STRING;
+        return EMPTY_STRING;
     }
 
     uint_fast64_t i = *pos;
@@ -862,19 +861,19 @@ String parse_string(FILE *f, uint_fast64_t *pos)
     uint_strlen_t len = i - *pos - 1 > MAX_STR_LEN ? 0 : i - *pos - 1;
     if (len == 0)
     {
-        return NULL_STRING;
+        return EMPTY_STRING;
     }
 
-    char *str = calloc(len + 1, sizeof(char));
+    unsigned char *str = calloc(len + 1, sizeof(char));
     if (!str)
     {
-        return NULL_STRING;
+        return EMPTY_STRING;
     }
 
     if (fseek(f, *pos, SEEK_SET) != 0)
     {
         free(str);
-        return NULL_STRING;
+        return EMPTY_STRING;
     }
     fread(str, sizeof(char), len, f);
 
@@ -1479,7 +1478,7 @@ Dict *parse_dict(FILE *f, uint_fast64_t *pos, uint_fast16_t *err)
         return d;
     }
 
-    String key = NULL_STRING;
+    String key = EMPTY_STRING;
     char c = 0;
     char is_waiting_key = 1;
     // We start at 1 because if we entered this function, it means that we

@@ -41,12 +41,15 @@ typedef uint_fast32_t uint_strlen_t;
 typedef uint_fast64_t uint_strlen_t;
 #endif
 
+#define STRING_OF(string, len) ((String){ .str = (string), .length = (len) })
+#define EMPTY_STRING ((String){ .str = 0, .length = 0 })
+
 /*******************************************************************************
 **                                 STRUCTURES                                 **
 *******************************************************************************/
 typedef struct
 {
-    char *str;
+    unsigned char *str;
     uint_strlen_t length;
 } String;
 
