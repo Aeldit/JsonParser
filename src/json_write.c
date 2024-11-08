@@ -86,13 +86,19 @@ String get_double_as_str(double value)
     int nb_chars = 0;
     int nb_decimals = 6;
     char is_in_decimals = 1;
+    char non_zero_decimal_found = 0;
     for (int i = 17; i >= 0; --i)
     {
-        if (double_str[i] == '.')
+        char s = double_str[i];
+        if (s == '.')
         {
             is_in_decimals = 0;
         }
-        if (double_str[i] == '0' && is_in_decimals)
+        if (is_in_decimals && '1' <= s && s <= '9')
+        {
+            non_zero_decimal_found = 1;
+        }
+        if (s == '0' && is_in_decimals && !non_zero_decimal_found)
         {
             --nb_decimals;
         }
@@ -209,7 +215,7 @@ int main(void)
 {
     Array *a = init_array(4);
     arr_add_int(a, 666);
-    arr_add_double(a, 1234567891.123456);
+    arr_add_double(a, 1234567891.100456);
     arr_add_bool(a, 1);
     arr_add_bool(a, 0);
     JSON *j = init_json(1, a, 0);
