@@ -52,9 +52,12 @@ void destroy_linked_list(StringLinkedList *ll)
     free(ll);
 }
 
+/*******************************************************************************
+**                                GETS AS STR                                 **
+*******************************************************************************/
 String get_int_as_str(int value)
 {
-    int nb_chars = 1;
+    unsigned nb_chars = 1;
     int tmp_value = value;
     while (tmp_value /= 10)
     {
@@ -127,7 +130,7 @@ String get_bool_as_str(char value)
     return STRING_OF(str ? str : 0, str ? nb_chars : 0);
 }
 
-String get_array_as_str(Array *a, unsigned indent)
+String get_array_as_str(Array *a, unsigned indent, char from_dict)
 {
     if (!a)
     {
@@ -140,11 +143,13 @@ String get_array_as_str(Array *a, unsigned indent)
         return EMPTY_STRING;
     }
 
-    // Iterates over each element of the array and converts them to
+    // '[' + '\n' + ']' + '\n' + indents before ']'
+    unsigned nb_chars = indent - 1 + 4;
+
+    // Iterates over each value of the array and converts them to
     // 'String's + counts the number of chars required for each value
     Value *values = a->values;
     unsigned size = a->size;
-    unsigned nb_chars = 4; // [\n]\n
     for (unsigned i = 0; i < size; ++i)
     {
         Value v = values[i];
@@ -164,6 +169,9 @@ String get_array_as_str(Array *a, unsigned indent)
         case T_BOOL:
             tmp_str = get_bool_as_str(v.boolv);
             break;
+        case T_ARR:
+            tmp_str = get_array_as_str(v.arrayv, indent + 1, 0);
+            break;
         }
         add_link(ll, tmp_str);
         // We add 1 for the comma if we are not at the last value
@@ -172,7 +180,7 @@ String get_array_as_str(Array *a, unsigned indent)
         nb_chars += tmp_str.length + (i == size - 1 ? 0 : 1) + 1 + indent;
     }
 
-    unsigned char *str = calloc(nb_chars, sizeof(char));
+    unsigned char *str = calloc(nb_chars + 1, sizeof(char));
     if (!str)
     {
         destroy_linked_list(ll);
@@ -182,6 +190,7 @@ String get_array_as_str(Array *a, unsigned indent)
     str[0] = '[';
     str[1] = '\n';
     unsigned insert_idx = 2;
+
     StringLink *link = ll->head;
     while (link)
     {
@@ -202,8 +211,14 @@ String get_array_as_str(Array *a, unsigned indent)
 
         link = link->next;
     }
+
+    // Tabs before the last ']'
+    memset(str + insert_idx, '\t', indent - 1);
+    insert_idx += indent - 1;
+
     str[nb_chars - 2] = ']';
-    printf("%s\n", str);
+    str[nb_chars - 1] = '\n';
+
     destroy_linked_list(ll);
     return STRING_OF(str, nb_chars);
 }
@@ -217,8 +232,9 @@ void write_json_to_file(JSON *j, char *file_name)
 
     if (j->is_array && j->array)
     {
-        String s = get_array_as_str(j->array, 1);
+        String s = get_array_as_str(j->array, 1, 1);
         FILE *f = fopen(file_name, "w");
+        printf("%s\n", s.str);
         fwrite(s.str, sizeof(char), s.length, f);
         fclose(f);
         free(s.str);
@@ -233,11 +249,17 @@ void write_json_to_file(JSON *j, char *file_name)
 
 int main(void)
 {
-    Array *a = init_array(4);
+    Array *a = init_array(5);
     arr_add_int(a, 666);
     arr_add_double(a, 1234567891.100456);
     arr_add_bool(a, 1);
     arr_add_bool(a, 0);
+
+    Array *b = init_array(2);
+    arr_add_bool(b, 1);
+    arr_add_bool(b, 1);
+
+    arr_add_arr(a, b);
     JSON *j = init_json(1, a, 0);
 
     write_json_to_file(j, "out.json");
