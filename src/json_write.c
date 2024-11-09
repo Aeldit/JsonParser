@@ -162,8 +162,8 @@ unsigned fill_string_ll_with_items(StringLinkedList *ll, Dict *d,
             break;
         }
         add_link(ll, it.key, 0);
-        // + 3 because we add "\": " after the key
-        nb_chars += it.key.length + 3;
+        // + 2 because we add ": " after the key
+        nb_chars += it.key.length + 4;
 
         add_link(ll, tmp_str, 1);
         // We add 1 for the comma if we are not at the last value
@@ -278,7 +278,7 @@ String get_array_as_str(Array *a, unsigned indent, char from_dict)
     }
 
     // '[' + '\n' + (indent - 1) * '\t' + ']' + '\n'
-    // indent == 1 -> if we are in the 'root' array, the add a '\n' at the end
+    // indent == 1 -> if we are in the 'root' array, we add a '\n' at the end
     unsigned nb_chars = indent - 1 + 3 + (indent == 1)
         + fill_string_ll_with_values(ll, a, indent);
 
@@ -315,14 +315,18 @@ String get_array_as_str(Array *a, unsigned indent, char from_dict)
         link = link->next;
     }
 
-    // Tabs before the last ']'
-    memset(str + insert_idx, '\t', indent - 1);
-    insert_idx += indent - 1;
-
-    str[nb_chars - (indent == 1 ? 2 : 1)] = ']';
     if (indent == 1)
     {
+        str[nb_chars - 2] = ']';
         str[nb_chars - 1] = '\n';
+    }
+    else
+    {
+        // Tabs before the last ']'
+        memset(str + insert_idx, '\t', indent - 1);
+        insert_idx += indent - 1;
+
+        str[nb_chars - 1] = ']';
     }
     // |-> End of string building
 
@@ -344,7 +348,7 @@ String get_dict_as_str(Dict *d, unsigned indent, char from_dict)
     }
 
     // '{' + '\n' + (indent - 1) * '\t' + '}' + '\n'
-    // indent == 1 -> if we are in the 'root' array, the add a '\n' at the end
+    // indent == 1 -> if we are in the 'root' dict, we add a '\n' at the end
     unsigned nb_chars = indent - 1 + 3 + (indent == 1)
         + fill_string_ll_with_items(ll, d, indent);
 
@@ -370,8 +374,9 @@ String get_dict_as_str(Dict *d, unsigned indent, char from_dict)
             memset(str + insert_idx, '\t', indent);
             insert_idx += indent;
 
-            memset(str + insert_idx++, '"', 1);
+            str[insert_idx++] = '"';
 
+            // String's contents
             memcpy(str + insert_idx, link->s.str, link->s.length);
             insert_idx += link->s.length;
 
@@ -395,14 +400,18 @@ String get_dict_as_str(Dict *d, unsigned indent, char from_dict)
         link = link->next;
     }
 
-    // Tabs before the last ']'
-    memset(str + insert_idx, '\t', indent - 1);
-    insert_idx += indent - 1;
-
-    str[nb_chars - (indent == 1 ? 2 : 1)] = '}';
     if (indent == 1)
     {
+        str[nb_chars - 2] = '}';
         str[nb_chars - 1] = '\n';
+    }
+    else
+    {
+        // Tabs before the last '}'
+        memset(str + insert_idx, '\t', indent - 1);
+        insert_idx += indent - 1;
+
+        str[nb_chars - 1] = '}';
     }
     // |-> End of string building
 
@@ -411,7 +420,7 @@ String get_dict_as_str(Dict *d, unsigned indent, char from_dict)
 }
 
 /*******************************************************************************
-**                                   WRITING **
+**                                   WRITING                                  **
 *******************************************************************************/
 void write_json_to_file(JSON *j, char *file_name)
 {
@@ -435,7 +444,7 @@ void write_json_to_file(JSON *j, char *file_name)
             return;
         }
 
-        printf("%s\n", s.str);
+        printf("%s", s.str);
         fwrite(s.str, sizeof(char), s.length, f);
         free(s.str);
         fclose(f);
@@ -455,7 +464,7 @@ void write_json_to_file(JSON *j, char *file_name)
             return;
         }
 
-        printf("%s\n", s.str);
+        printf("%s", s.str);
         fwrite(s.str, sizeof(char), s.length, f);
         free(s.str);
         fclose(f);
