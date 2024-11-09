@@ -8,8 +8,8 @@ String get_int_as_str(int value);
 String get_double_as_str(double value);
 String get_bool_as_str(char value);
 String get_null_as_str();
-String get_array_as_str(Array *a, unsigned indent, char from_dict);
-String get_dict_as_str(Dict *d, unsigned indent, char from_dict);
+String get_array_as_str(Array *a, unsigned indent);
+String get_dict_as_str(Dict *d, unsigned indent);
 
 void add_link(StringLinkedList *ll, String str, char str_needs_free)
 {
@@ -102,10 +102,10 @@ unsigned fill_string_ll_with_values(StringLinkedList *ll, Array *a,
             tmp_str = get_null_as_str();
             break;
         case T_ARR:
-            tmp_str = get_array_as_str(v.arrayv, indent + 1, 0);
+            tmp_str = get_array_as_str(v.arrayv, indent + 1);
             break;
         case T_DICT:
-            tmp_str = get_dict_as_str(v.dictv, indent + 1, 0);
+            tmp_str = get_dict_as_str(v.dictv, indent + 1);
             break;
         }
         add_link(ll, tmp_str, 1);
@@ -162,10 +162,10 @@ unsigned fill_string_ll_with_items(StringLinkedList *ll, Dict *d,
             tmp_str = get_null_as_str();
             break;
         case T_ARR:
-            tmp_str = get_array_as_str(it.arrayv, indent + 1, 1);
+            tmp_str = get_array_as_str(it.arrayv, indent + 1);
             break;
         case T_DICT:
-            tmp_str = get_dict_as_str(it.dictv, indent + 1, 1);
+            tmp_str = get_dict_as_str(it.dictv, indent + 1);
             break;
         }
         add_link(ll, it.key, 0);
@@ -194,7 +194,7 @@ String get_int_as_str(int value)
         ++nb_chars;
     }
 
-    unsigned char *str = calloc(nb_chars + 1, sizeof(char));
+    char *str = calloc(nb_chars + 1, sizeof(char));
     if (!str)
     {
         return EMPTY_STRING;
@@ -241,7 +241,7 @@ String get_double_as_str(double value)
         }
     }
 
-    unsigned char *str = calloc(18, sizeof(char));
+    char *str = calloc(18, sizeof(char));
     if (!str)
     {
         return EMPTY_STRING;
@@ -255,14 +255,14 @@ String get_double_as_str(double value)
 String get_bool_as_str(char value)
 {
     char nb_chars = (value ? 4 : 5);
-    unsigned char *str = calloc(nb_chars + 1, sizeof(char));
+    char *str = calloc(nb_chars + 1, sizeof(char));
     memcpy(str, value ? "true" : "false", nb_chars);
     return STRING_OF(str ? str : 0, str ? nb_chars : 0);
 }
 
 String get_null_as_str()
 {
-    unsigned char *str = calloc(5, sizeof(char));
+    char *str = calloc(5, sizeof(char));
     if (!str)
     {
         return EMPTY_STRING;
@@ -271,7 +271,7 @@ String get_null_as_str()
     return STRING_OF(str, 4);
 }
 
-String get_array_as_str(Array *a, unsigned indent, char from_dict)
+String get_array_as_str(Array *a, unsigned indent)
 {
     if (!a)
     {
@@ -289,7 +289,7 @@ String get_array_as_str(Array *a, unsigned indent, char from_dict)
     unsigned nb_chars = indent - 1 + 3 + (indent == 1)
         + fill_string_ll_with_values(ll, a, indent);
 
-    unsigned char *str = calloc(nb_chars + 1, sizeof(char));
+    char *str = calloc(nb_chars + 1, sizeof(char));
     if (!str)
     {
         destroy_linked_list(ll);
@@ -341,7 +341,7 @@ String get_array_as_str(Array *a, unsigned indent, char from_dict)
     return STRING_OF(str, nb_chars);
 }
 
-String get_dict_as_str(Dict *d, unsigned indent, char from_dict)
+String get_dict_as_str(Dict *d, unsigned indent)
 {
     if (!d)
     {
@@ -359,7 +359,7 @@ String get_dict_as_str(Dict *d, unsigned indent, char from_dict)
     unsigned nb_chars = indent - 1 + 3 + (indent == 1)
         + fill_string_ll_with_items(ll, d, indent);
 
-    unsigned char *str = calloc(nb_chars + 1, sizeof(char));
+    char *str = calloc(nb_chars + 1, sizeof(char));
     if (!str)
     {
         destroy_linked_list(ll);
@@ -444,7 +444,7 @@ void write_json_to_file(JSON *j, char *file_name)
             return;
         }
 
-        String s = get_array_as_str(j->array, 1, 1);
+        String s = get_array_as_str(j->array, 1);
         if (!s.str)
         {
             fclose(f);
@@ -464,7 +464,7 @@ void write_json_to_file(JSON *j, char *file_name)
             return;
         }
 
-        String s = get_dict_as_str(j->dict, 1, 1);
+        String s = get_dict_as_str(j->dict, 1);
         if (!s.str)
         {
             fclose(f);
@@ -478,7 +478,7 @@ void write_json_to_file(JSON *j, char *file_name)
     }
 }
 
-int main(void)
+/*int main(void)
 {
     Array *a = init_array(6);
     arr_add_int(a, 666);
@@ -538,4 +538,4 @@ int main(void)
     write_json_to_file(j, "out.json");
     destroy_json(j);
     return 0;
-}
+}*/

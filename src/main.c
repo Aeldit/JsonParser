@@ -1,6 +1,6 @@
-#include "parser.h"
-#include "printing.h"
-#include "storage.h"
+#include "json_parser.h"
+#include "json_printing.h"
+#include "json_storage.h"
 
 int main(int argc, char *argv[])
 {

@@ -1,9 +1,7 @@
-#include "printing.h"
+#include "json_printing.h"
 
 #include <stdio.h>
-
-#include "stdlib.h"
-#include "storage.h"
+#include <stdlib.h>
 
 void dict_print_indent(Dict *d, unsigned indent, char fromDict);
 void dict_print(Dict *d);

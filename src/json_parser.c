@@ -1,17 +1,15 @@
-#include "parser.h"
+#include "json_parser.h"
 
 /*******************************************************************************
 **                                  INCLUDES                                  **
 *******************************************************************************/
 #include <math.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 
-#include "json_types.h"
-#include "storage.h"
+#include "json_storage.h"
 
 /*******************************************************************************
 **                                   MACROS                                   **
@@ -39,31 +37,11 @@
 #endif
 
 #ifndef MAX_NESTED_ARRAYS
-#    define MAX_NESTED_ARRAYS UINT_FAST8_MAX // 255
+#    define MAX_NESTED_ARRAYS 255
 #endif
 
 #ifndef MAX_NESTED_DICTS
-#    define MAX_NESTED_DICTS UINT_FAST8_MAX // 255
-#endif
-
-#if MAX_NESTED_ARRAYS <= UINT_FAST8_MAX
-typedef uint_fast8_t uint_nested_arrays_t;
-#elif MAX_NESTED_ARRAYS <= UINT_FAST16_MAX
-typedef uint_fast16_t uint_nested_arrays_t;
-#elif MAX_NESTED_ARRAYS <= UINT_FAST32_MAX
-typedef uint_fast32_t uint_nested_arrays_t;
-#else
-typedef uint_fast64_t uint_nested_arrays_t;
-#endif
-
-#if MAX_NESTED_DICTS <= UINT_FAST8_MAX
-typedef uint_fast8_t uint_nested_dicts_t;
-#elif MAX_NESTED_DICTS <= UINT_FAST16_MAX
-typedef uint_fast16_t uint_nested_dicts_t;
-#elif MAX_NESTED_DICTS <= UINT_FAST32_MAX
-typedef uint_fast32_t uint_nested_dicts_t;
-#else
-typedef uint_fast64_t uint_nested_dicts_t;
+#    define MAX_NESTED_DICTS 255
 #endif
 
 #define NULL_STR_AND_LEN_TUPLE ((StrAndLenTuple){ .str = 0, .len = 0 })
@@ -78,7 +56,7 @@ typedef uint_fast64_t uint_nested_dicts_t;
 typedef struct
 {
     char *str;
-    uint_strlen_t len;
+    unsigned len;
     char is_float;
     char has_exponent;
 } StrAndLenTuple;
@@ -86,8 +64,8 @@ typedef struct
 /*******************************************************************************
 **                           FUNCTIONS DECLARATIONS                           **
 *******************************************************************************/
-Dict *parse_dict_buff(char *b, uint_fast64_t *pos, uint_fast16_t *err);
-Dict *parse_dict(FILE *f, uint_fast64_t *pos, uint_fast16_t *err);
+Dict *parse_dict_buff(char *b, unsigned long *pos);
+Dict *parse_dict(FILE *f, unsigned long *pos);
 
 /*******************************************************************************
 **                              LOCAL FUNCTIONS                               **
@@ -100,7 +78,7 @@ Dict *parse_dict(FILE *f, uint_fast64_t *pos, uint_fast16_t *err);
 ** \returns The 0 in case of error (or if the number was 0), the number
 **          otherwise
 */
-int_fast64_t str_to_long(StrAndLenTuple *sl)
+long str_to_long(StrAndLenTuple *sl)
 {
     if (!sl)
     {
@@ -108,18 +86,18 @@ int_fast64_t str_to_long(StrAndLenTuple *sl)
     }
 
     char *str = sl->str;
-    uint_fast64_t len = sl->len;
+    unsigned long len = sl->len;
     if (!str || len == 0)
     {
         return 0;
     }
 
-    int_fast64_t res = 0;
-    uint_fast64_t exponent = 0;
+    long res = 0;
+    unsigned long exponent = 0;
     char is_negative = str[0] == '-' ? -1 : 1;
     char is_in_exponent = 0;
     char c = 0;
-    for (uint_fast64_t i = 0; i < len; ++i)
+    for (unsigned long i = 0; i < len; ++i)
     {
         c = str[i];
         if (sl->has_exponent && (c == 'e' || c == 'E'))
@@ -158,7 +136,7 @@ double str_to_double(StrAndLenTuple *sl)
     }
 
     char *str = sl->str;
-    uint_fast64_t len = sl->len;
+    unsigned long len = sl->len;
     if (!str || len == 0)
     {
         return 0;
@@ -166,15 +144,15 @@ double str_to_double(StrAndLenTuple *sl)
 
     double res = 0; // Integer part
     double dot_res = 0; // Decimal part
-    uint_fast64_t exponent = 0; // Only used if sl->has_exponent() is true
-    uint_fast64_t nb_digits_dot = 1;
+    unsigned long exponent = 0; // Only used if sl->has_exponent() is true
+    unsigned long nb_digits_dot = 1;
     // If the number is negative, this is set to -1 and the final res is
     // multiplied by it
     char is_negative = str[0] == '-' ? -1 : 1;
     char dot_reached = 0;
     char is_in_exponent = 0;
     char c = 0;
-    for (uint_fast64_t i = 0; i < len; ++i)
+    for (unsigned long i = 0; i < len; ++i)
     {
         c = str[i];
         if (c == '.')
@@ -207,14 +185,14 @@ double str_to_double(StrAndLenTuple *sl)
         : is_negative * (res + (dot_res / nb_digits_dot));
 }
 
-char is_float(char *str, uint_fast64_t len)
+char is_float(char *str, unsigned long len)
 {
     if (!str)
     {
         return 0;
     }
 
-    for (uint_fast64_t i = 0; i < len; ++i)
+    for (unsigned long i = 0; i < len; ++i)
     {
         if (str[i] == '.')
         {
@@ -224,14 +202,14 @@ char is_float(char *str, uint_fast64_t len)
     return 0;
 }
 
-char has_exponent(char *str, uint_fast64_t len)
+char has_exponent(char *str, unsigned long len)
 {
     if (!str)
     {
         return 0;
     }
 
-    for (uint_fast64_t i = 0; i < len; ++i)
+    for (unsigned long i = 0; i < len; ++i)
     {
         if (str[i] == 'e' || str[i] == 'E')
         {
@@ -241,41 +219,27 @@ char has_exponent(char *str, uint_fast64_t len)
     return 0;
 }
 
-char max_nested_arrays_reached(uint_nested_arrays_t is_in_array,
-                               uint_fast16_t *err)
+char max_nested_arrays_reached(long is_in_array)
 {
-    if (!err)
-    {
-        return 1;
-    }
-
     if (is_in_array == MAX_NESTED_ARRAYS)
     {
 #ifdef DEBUG
         printf("Max number of nested arrays reached, aborting "
                "parsing\n");
 #endif
-        *err |= ERR_MAX_NESTED_ARRAYS_REACHED;
         return 1;
     }
     return 0;
 }
 
-char max_nested_dicts_reached(uint_nested_dicts_t is_in_dict,
-                              uint_fast16_t *err)
+char max_nested_dicts_reached(long is_in_dict)
 {
-    if (!err)
-    {
-        return 1;
-    }
-
     if (is_in_dict == MAX_NESTED_DICTS)
     {
 #ifdef DEBUG
         printf("Max number of nested dicts reached, aborting "
                "parsing\n");
 #endif
-        *err |= ERR_MAX_NESTED_DICTS_REACHED;
         return 1;
     }
     return 0;
@@ -284,19 +248,19 @@ char max_nested_dicts_reached(uint_nested_dicts_t is_in_dict,
 /**
 ** \brief Parses the string starting at 'pos + 1' (first char after the '"')
 ** \param buff The buffer containing the current json file or object
-** \param idx A pointer to the uint_fast64_t containing the index of the '"'
+** \param idx A pointer to the unsigned long containing the index of the '"'
 **            that started the string we want to parse
 ** \returns An empty string in case of error, the parsed string otherwise
 */
-String parse_string_buff(char *buff, uint_fast64_t *idx)
+String parse_string_buff(char *buff, unsigned long *idx)
 {
     if (!buff || !idx)
     {
         return EMPTY_STRING;
     }
 
-    uint_fast64_t start_idx = *idx + 1;
-    uint_fast64_t len = 0;
+    unsigned long start_idx = *idx + 1;
+    unsigned long len = 0;
     char c = 0;
     char prev_c = 0;
     // Counts the number of characters until the first one that is an 'end char'
@@ -316,7 +280,7 @@ String parse_string_buff(char *buff, uint_fast64_t *idx)
         return EMPTY_STRING;
     }
 
-    unsigned char *str = calloc(len + 1, sizeof(char));
+    char *str = calloc(len + 1, sizeof(char));
     if (!str)
     {
         return EMPTY_STRING;
@@ -337,7 +301,7 @@ String parse_string_buff(char *buff, uint_fast64_t *idx)
 **          char array, the length of the char array and whether the number is a
 **          float and has an exponent
 */
-StrAndLenTuple parse_number_buff(char *buff, uint_fast64_t *idx)
+StrAndLenTuple parse_number_buff(char *buff, unsigned long *idx)
 {
     if (!buff || !idx)
     {
@@ -345,8 +309,8 @@ StrAndLenTuple parse_number_buff(char *buff, uint_fast64_t *idx)
     }
 
     // Counts the number of characters until the first one that is an 'end char'
-    uint_fast64_t end_idx = *idx;
-    uint_fast64_t initial_i = end_idx;
+    unsigned long end_idx = *idx;
+    unsigned long initial_i = end_idx;
     char c = 0;
     while (1)
     {
@@ -359,7 +323,7 @@ StrAndLenTuple parse_number_buff(char *buff, uint_fast64_t *idx)
     }
 
     // Number of chars
-    uint_fast64_t len = end_idx - initial_i;
+    unsigned long len = end_idx - initial_i;
     if (len == 0)
     {
         return NULL_STR_AND_LEN_TUPLE;
@@ -383,14 +347,14 @@ StrAndLenTuple parse_number_buff(char *buff, uint_fast64_t *idx)
 /**
 ** \returns 5 if false, 4 if true, 0 otherwise
 **/
-uint_fast64_t parse_boolean_buff(char *buff, uint_fast64_t *idx)
+unsigned long parse_boolean_buff(char *buff, unsigned long *idx)
 {
     if (!buff || !idx)
     {
         return 0;
     }
 
-    uint_fast64_t end_idx = *idx;
+    unsigned long end_idx = *idx;
     char c = 0;
     while (1)
     {
@@ -401,7 +365,7 @@ uint_fast64_t parse_boolean_buff(char *buff, uint_fast64_t *idx)
         }
         ++end_idx;
     }
-    uint_fast64_t len = end_idx - *idx;
+    unsigned long len = end_idx - *idx;
     *idx += len - 1;
     return len;
 }
@@ -412,17 +376,16 @@ uint_fast64_t parse_boolean_buff(char *buff, uint_fast64_t *idx)
 **            current array
 ** \returns The number of elements of the current array
 */
-uint_fast64_t get_nb_elts_array_buff(char *buff, uint_fast64_t idx,
-                                     uint_fast16_t *err)
+unsigned long get_nb_elts_array_buff(char *buff, unsigned long idx)
 {
-    if (!buff || !err || buff[idx] == ']')
+    if (!buff || buff[idx] == ']')
     {
         return 0;
     }
 
-    uint_fast64_t nb_elts = 0;
-    uint_nested_arrays_t is_in_array = 1;
-    uint_nested_dicts_t is_in_dict = 0;
+    unsigned long nb_elts = 0;
+    long is_in_array = 1;
+    long is_in_dict = 0;
     char c = 0;
     char prev_c = 0;
     char is_in_string = 0;
@@ -454,7 +417,7 @@ uint_fast64_t get_nb_elts_array_buff(char *buff, uint_fast64_t idx,
             }
             else if (c == '[')
             {
-                if (max_nested_arrays_reached(is_in_array, err))
+                if (max_nested_arrays_reached(is_in_array))
                 {
                     return 0;
                 }
@@ -466,7 +429,7 @@ uint_fast64_t get_nb_elts_array_buff(char *buff, uint_fast64_t idx,
             }
             else if (c == '{')
             {
-                if (max_nested_dicts_reached(is_in_dict, err))
+                if (max_nested_dicts_reached(is_in_dict))
                 {
                     return 0;
                 }
@@ -505,21 +468,20 @@ uint_fast64_t get_nb_elts_array_buff(char *buff, uint_fast64_t idx,
 **            current dict
 ** \returns The number of elements of the current dict
 */
-uint_fast64_t get_nb_elts_dict_buff(char *buff, uint_fast64_t idx,
-                                    uint_fast16_t *err)
+unsigned long get_nb_elts_dict_buff(char *buff, unsigned long idx)
 {
-    if (!buff || !err || idx >= MAX_READ_BUFF_SIZE || buff[idx] == '}')
+    if (!buff || idx >= MAX_READ_BUFF_SIZE || buff[idx] == '}')
     {
         return 0;
     }
 
-    uint_fast64_t nb_elts = 0;
+    unsigned long nb_elts = 0;
     // Used for the case where the dict contains only one element, and so
     // does not contain a ','
-    uint_fast64_t single_elt_found = 0;
+    unsigned long single_elt_found = 0;
 
-    uint_nested_dicts_t is_in_dict = 1;
-    uint_nested_arrays_t is_in_array = 0;
+    long is_in_dict = 1;
+    long is_in_array = 0;
     char is_in_string = 0;
     char is_backslashing = 0;
     char c = 0;
@@ -546,7 +508,7 @@ uint_fast64_t get_nb_elts_dict_buff(char *buff, uint_fast64_t idx,
             }
             else if (c == '[')
             {
-                if (max_nested_arrays_reached(is_in_array, err))
+                if (max_nested_arrays_reached(is_in_array))
                 {
                     return 0;
                 }
@@ -558,7 +520,7 @@ uint_fast64_t get_nb_elts_dict_buff(char *buff, uint_fast64_t idx,
             }
             else if (c == '{')
             {
-                if (max_nested_dicts_reached(is_in_dict, err))
+                if (max_nested_dicts_reached(is_in_dict))
                 {
                     return 0;
                 }
@@ -583,21 +545,17 @@ uint_fast64_t get_nb_elts_dict_buff(char *buff, uint_fast64_t idx,
 ** \param idx The index of the character '[' that begins the current array
 ** \returns The json array parsed from the position
 */
-Array *parse_array_buff(char *b, uint_fast64_t *idx, uint_fast16_t *err)
+Array *parse_array_buff(char *b, unsigned long *idx)
 {
-    if (!b || !err)
+    if (!b)
     {
         return 0;
     }
 
-    uint_fast64_t i = idx == 0 ? 0 : *idx + 1;
+    unsigned long i = idx == 0 ? 0 : *idx + 1;
 
-    uint_fast64_t nb_elts_parsed = 0;
-    uint_fast64_t nb_elts = get_nb_elts_array_buff(b, i, err);
-    if (*err)
-    {
-        return 0;
-    }
+    unsigned long nb_elts_parsed = 0;
+    unsigned long nb_elts = get_nb_elts_array_buff(b, i);
 
 #ifndef EDITING_MODE
     Array *a = init_array(nb_elts);
@@ -612,7 +570,7 @@ Array *parse_array_buff(char *b, uint_fast64_t *idx, uint_fast16_t *err)
     char c = 0;
     // We start at 1 because if we entered this function, it means that we
     // already read a '['
-    uint_fast64_t initial_i = i;
+    unsigned long initial_i = i;
     while (1)
     {
         c = b[i];
@@ -647,7 +605,7 @@ Array *parse_array_buff(char *b, uint_fast64_t *idx, uint_fast16_t *err)
         }
         else if (IS_BOOL_START(c))
         {
-            uint_fast64_t len = parse_boolean_buff(b, &i);
+            unsigned long len = parse_boolean_buff(b, &i);
             if (IS_NOT_BOOLEAN(c, len))
             {
                 continue;
@@ -663,10 +621,9 @@ Array *parse_array_buff(char *b, uint_fast64_t *idx, uint_fast16_t *err)
         }
         else if (c == '[')
         {
-            Array *tmp_a = parse_array_buff(b, &i, err);
+            Array *tmp_a = parse_array_buff(b, &i);
             if (!tmp_a)
             {
-                *err = 1;
                 break;
             }
             arr_add_arr(a, tmp_a);
@@ -674,21 +631,15 @@ Array *parse_array_buff(char *b, uint_fast64_t *idx, uint_fast16_t *err)
         }
         else if (c == '{')
         {
-            Dict *tmp_jd = parse_dict_buff(b, &i, err);
+            Dict *tmp_jd = parse_dict_buff(b, &i);
             if (!tmp_jd)
             {
-                *err = 1;
                 break;
             }
             arr_add_dict(a, tmp_jd);
             ++nb_elts_parsed;
         }
         ++i;
-    }
-    if (*err)
-    {
-        destroy_array(a);
-        return 0;
     }
     if (idx)
     {
@@ -707,21 +658,17 @@ Array *parse_array_buff(char *b, uint_fast64_t *idx, uint_fast16_t *err)
 **            index starts at 0
 ** \returns The json dict parsed from the index
 */
-Dict *parse_dict_buff(char *b, uint_fast64_t *idx, uint_fast16_t *err)
+Dict *parse_dict_buff(char *b, unsigned long *idx)
 {
-    if (!b || !err)
+    if (!b)
     {
         return 0;
     }
 
-    uint_fast64_t i = idx == 0 ? 0 : *idx + 1;
+    unsigned long i = idx == 0 ? 0 : *idx + 1;
 
-    uint_fast64_t nb_elts_parsed = 0;
-    uint_fast64_t nb_elts = get_nb_elts_dict_buff(b, i, err);
-    if (*err)
-    {
-        return 0;
-    }
+    unsigned long nb_elts_parsed = 0;
+    unsigned long nb_elts = get_nb_elts_dict_buff(b, i);
 
 #ifndef EDITING_MODE
     Dict *d = init_dict(nb_elts);
@@ -738,7 +685,7 @@ Dict *parse_dict_buff(char *b, uint_fast64_t *idx, uint_fast16_t *err)
     char is_waiting_key = 1;
     // We start at 1 because if we entered this function, it means that we
     // already read a '{'
-    uint_fast64_t initial_i = i;
+    unsigned long initial_i = i;
     while (1)
     {
         c = b[i];
@@ -781,7 +728,7 @@ Dict *parse_dict_buff(char *b, uint_fast64_t *idx, uint_fast16_t *err)
         }
         else if (IS_BOOL_START(c))
         {
-            uint_fast64_t len = parse_boolean_buff(b, &i);
+            unsigned long len = parse_boolean_buff(b, &i);
             if (IS_NOT_BOOLEAN(c, len))
             {
                 continue;
@@ -797,10 +744,9 @@ Dict *parse_dict_buff(char *b, uint_fast64_t *idx, uint_fast16_t *err)
         }
         else if (c == '[')
         {
-            Array *tmp_ja = parse_array_buff(b, &i, err);
+            Array *tmp_ja = parse_array_buff(b, &i);
             if (!tmp_ja)
             {
-                *err = 1;
                 break;
             }
             dict_add_arr(d, key, tmp_ja);
@@ -808,10 +754,9 @@ Dict *parse_dict_buff(char *b, uint_fast64_t *idx, uint_fast16_t *err)
         }
         else if (c == '{')
         {
-            Dict *tmp_jd = parse_dict_buff(b, &i, err);
+            Dict *tmp_jd = parse_dict_buff(b, &i);
             if (!tmp_jd)
             {
-                *err = 1;
                 break;
             }
             dict_add_dict(d, key, tmp_jd);
@@ -823,11 +768,6 @@ Dict *parse_dict_buff(char *b, uint_fast64_t *idx, uint_fast16_t *err)
         }
         ++i;
     }
-    if (*err)
-    {
-        destroy_dict(d);
-        return 0;
-    }
     if (idx)
     {
         *idx += i - initial_i;
@@ -838,19 +778,19 @@ Dict *parse_dict_buff(char *b, uint_fast64_t *idx, uint_fast16_t *err)
 /**
 ** \brief Parses the string starting at 'pos + 1' (first char after the '"')
 ** \param f The file stream
-** \param pos A pointer to the uint_fast64_t containing the position of the
+** \param pos A pointer to the unsigned long containing the position of the
 *'"'
 **            that started the string we want to parse
 ** \returns An empty string in case of error, the parsed string otherwise
 */
-String parse_string(FILE *f, uint_fast64_t *pos)
+String parse_string(FILE *f, unsigned long *pos)
 {
     if (!f || !pos)
     {
         return EMPTY_STRING;
     }
 
-    uint_fast64_t i = *pos;
+    unsigned long i = *pos;
     char c = 0;
     char prev_c = 0;
     while (SEEK_AND_GET_CHAR(i) && !IS_STRING_END(c))
@@ -858,13 +798,13 @@ String parse_string(FILE *f, uint_fast64_t *pos)
         prev_c = c;
     }
 
-    uint_strlen_t len = i - *pos - 1 > MAX_STR_LEN ? 0 : i - *pos - 1;
+    unsigned len = i - i - *pos - 1;
     if (len == 0)
     {
         return EMPTY_STRING;
     }
 
-    unsigned char *str = calloc(len + 1, sizeof(char));
+    char *str = calloc(len + 1, sizeof(char));
     if (!str)
     {
         return EMPTY_STRING;
@@ -892,7 +832,7 @@ String parse_string(FILE *f, uint_fast64_t *pos)
 ** \param pos The pos of the start of the number of which we are currently
 **            acquiring the length
 */
-StrAndLenTuple parse_number(FILE *f, uint_fast64_t *pos)
+StrAndLenTuple parse_number(FILE *f, unsigned long *pos)
 {
     if (!f || !pos)
     {
@@ -901,7 +841,7 @@ StrAndLenTuple parse_number(FILE *f, uint_fast64_t *pos)
 
     // Obtains the length of the value
     // -1 because we already read the first digit (or sign)
-    uint_fast64_t end_pos = *pos - 1;
+    unsigned long end_pos = *pos - 1;
 
     char c = 0;
     // end_pos is incremented for each character found to be part of a
@@ -910,7 +850,7 @@ StrAndLenTuple parse_number(FILE *f, uint_fast64_t *pos)
     {
     }
 
-    uint_fast64_t len = end_pos - *pos;
+    unsigned long len = end_pos - *pos;
     if (len == 0)
     {
         return NULL_STR_AND_LEN_TUPLE;
@@ -941,7 +881,7 @@ StrAndLenTuple parse_number(FILE *f, uint_fast64_t *pos)
 /**
 ** \returns 5 if false, 4 if true, 0 otherwise
 **/
-uint_fast64_t parse_boolean(FILE *f, uint_fast64_t *pos)
+unsigned long parse_boolean(FILE *f, unsigned long *pos)
 {
     if (!f || !pos)
     {
@@ -949,7 +889,7 @@ uint_fast64_t parse_boolean(FILE *f, uint_fast64_t *pos)
     }
 
     // -1 because we already read the first character
-    uint_fast64_t end_pos = *pos - 1;
+    unsigned long end_pos = *pos - 1;
 
     char c = 0;
     // end_pos is incremented for each character found to be part of a
@@ -957,7 +897,7 @@ uint_fast64_t parse_boolean(FILE *f, uint_fast64_t *pos)
     while (SEEK_AND_GET_CHAR(end_pos) && !IS_END_CHAR(c))
     {
     }
-    uint_fast64_t len = end_pos - *pos;
+    unsigned long len = end_pos - *pos;
     *pos += len - 1;
     return len;
 }
@@ -973,18 +913,17 @@ uint_fast64_t parse_boolean(FILE *f, uint_fast64_t *pos)
 *first
 **          '[' is not counted)
 */
-uint_fast64_t get_nb_chars_in_array(FILE *f, uint_fast64_t pos,
-                                    uint_fast16_t *err)
+unsigned long get_nb_chars_in_array(FILE *f, unsigned long pos)
 {
-    if (!f || !err)
+    if (!f)
     {
         return 0;
     }
 
-    uint_fast64_t nb_chars = 0;
+    unsigned long nb_chars = 0;
 
-    uint_nested_arrays_t is_in_array = 1;
-    uint_nested_dicts_t is_in_dict = 0;
+    long is_in_array = 1;
+    long is_in_dict = 0;
     char is_in_string = 0;
     char is_backslashing = 0;
 
@@ -1005,7 +944,7 @@ uint_fast64_t get_nb_chars_in_array(FILE *f, uint_fast64_t pos,
             }
             else if (c == '[')
             {
-                if (max_nested_arrays_reached(is_in_array, err))
+                if (max_nested_arrays_reached(is_in_array))
                 {
                     return 0;
                 }
@@ -1017,7 +956,7 @@ uint_fast64_t get_nb_chars_in_array(FILE *f, uint_fast64_t pos,
             }
             else if (c == '{')
             {
-                if (max_nested_dicts_reached(is_in_dict, err))
+                if (max_nested_dicts_reached(is_in_dict))
                 {
                     return 0;
                 }
@@ -1045,17 +984,17 @@ uint_fast64_t get_nb_chars_in_array(FILE *f, uint_fast64_t pos,
 **            begins the current array
 ** \returns The number of elements of the current array
 */
-uint_fast64_t get_nb_elts_array(FILE *f, uint_fast64_t pos, uint_fast16_t *err)
+unsigned long get_nb_elts_array(FILE *f, unsigned long pos)
 {
-    if (!f || !err)
+    if (!f)
     {
         return 0;
     }
 
-    uint_fast64_t nb_elts = 0;
+    unsigned long nb_elts = 0;
 
-    uint_nested_arrays_t is_in_array = 1;
-    uint_nested_dicts_t is_in_dict = 0;
+    long is_in_array = 1;
+    long is_in_dict = 0;
     char is_in_string = 0;
     char is_backslashing = 0;
     char comma_encountered = 0;
@@ -1087,7 +1026,7 @@ uint_fast64_t get_nb_elts_array(FILE *f, uint_fast64_t pos, uint_fast16_t *err)
             }
             else if (c == '[')
             {
-                if (max_nested_arrays_reached(is_in_array, err))
+                if (max_nested_arrays_reached(is_in_array))
                 {
                     return 0;
                 }
@@ -1106,7 +1045,7 @@ uint_fast64_t get_nb_elts_array(FILE *f, uint_fast64_t pos, uint_fast16_t *err)
             }
             else if (c == '{')
             {
-                if (max_nested_dicts_reached(is_in_dict, err))
+                if (max_nested_dicts_reached(is_in_dict))
                 {
                     return 0;
                 }
@@ -1145,18 +1084,17 @@ uint_fast64_t get_nb_elts_array(FILE *f, uint_fast64_t pos, uint_fast16_t *err)
 ** \returns The total number of characters in the current dict - 1 (the
 **          first '{' is not counted)
 */
-uint_fast64_t get_nb_chars_in_dict(FILE *f, uint_fast64_t pos,
-                                   uint_fast16_t *err)
+unsigned long get_nb_chars_in_dict(FILE *f, unsigned long pos)
 {
-    if (!f || !err)
+    if (!f)
     {
         return 0;
     }
 
-    uint_fast64_t nb_chars = 0;
+    unsigned long nb_chars = 0;
 
-    uint_nested_dicts_t is_in_dict = 1;
-    uint_nested_arrays_t is_in_array = 0;
+    long is_in_dict = 1;
+    long is_in_array = 0;
     char is_in_string = 0;
     char is_backslashing = 0;
 
@@ -1177,7 +1115,7 @@ uint_fast64_t get_nb_chars_in_dict(FILE *f, uint_fast64_t pos,
             }
             else if (c == '[')
             {
-                if (max_nested_arrays_reached(is_in_array, err))
+                if (max_nested_arrays_reached(is_in_array))
                 {
                     return 0;
                 }
@@ -1189,7 +1127,7 @@ uint_fast64_t get_nb_chars_in_dict(FILE *f, uint_fast64_t pos,
             }
             else if (c == '{')
             {
-                if (max_nested_dicts_reached(is_in_dict, err))
+                if (max_nested_dicts_reached(is_in_dict))
                 {
                     return 0;
                 }
@@ -1216,22 +1154,22 @@ uint_fast64_t get_nb_chars_in_dict(FILE *f, uint_fast64_t pos,
 **            that begins the current dict
 ** \returns The number of elements of the current dict
 */
-uint_fast64_t get_nb_elts_dict(FILE *f, uint_fast64_t pos, uint_fast16_t *err)
+unsigned long get_nb_elts_dict(FILE *f, unsigned long pos)
 {
-    if (!f || !err)
+    if (!f)
     {
         return 0;
     }
 
-    uint_fast64_t nb_elts = 0;
+    unsigned long nb_elts = 0;
 
-    uint_nested_dicts_t is_in_dict = 1;
-    uint_nested_arrays_t is_in_array = 0;
+    long is_in_dict = 1;
+    long is_in_array = 0;
     char is_in_string = 0;
     char is_backslashing = 0;
     // Used for the case where the dict contains only one element, and so
     // does not contain a ','
-    uint_fast64_t single_elt_found = 0;
+    unsigned long single_elt_found = 0;
 
     char c = 0;
     while (SEEK_AND_GET_CHAR(pos))
@@ -1251,7 +1189,7 @@ uint_fast64_t get_nb_elts_dict(FILE *f, uint_fast64_t pos, uint_fast16_t *err)
             }
             else if (c == '[')
             {
-                if (max_nested_arrays_reached(is_in_array, err))
+                if (max_nested_arrays_reached(is_in_array))
                 {
                     return 0;
                 }
@@ -1263,7 +1201,7 @@ uint_fast64_t get_nb_elts_dict(FILE *f, uint_fast64_t pos, uint_fast16_t *err)
             }
             else if (c == '{')
             {
-                if (max_nested_dicts_reached(is_in_dict, err))
+                if (max_nested_dicts_reached(is_in_dict))
                 {
                     return 0;
                 }
@@ -1293,21 +1231,17 @@ uint_fast64_t get_nb_elts_dict(FILE *f, uint_fast64_t pos, uint_fast16_t *err)
 **            begins the current array
 ** \returns The json array parsed from the position
 */
-Array *parse_array(FILE *f, uint_fast64_t *pos, uint_fast16_t *err)
+Array *parse_array(FILE *f, unsigned long *pos)
 {
-    if (!f || !pos || !err)
+    if (!f || !pos)
     {
         return 0;
     }
 
-    uint_fast64_t i = *pos;
+    unsigned long i = *pos;
 
-    uint_fast64_t nb_elts_parsed = 0;
-    uint_fast64_t nb_elts = get_nb_elts_array(f, i, err);
-    if (err && *err)
-    {
-        return 0;
-    }
+    unsigned long nb_elts_parsed = 0;
+    unsigned long nb_elts = get_nb_elts_array(f, i);
 
 #ifndef EDITING_MODE
     Array *a = init_array(nb_elts);
@@ -1350,7 +1284,7 @@ Array *parse_array(FILE *f, uint_fast64_t *pos, uint_fast16_t *err)
         }
         else if (IS_BOOL_START(c))
         {
-            uint_fast64_t len = parse_boolean(f, &i);
+            unsigned long len = parse_boolean(f, &i);
             if (IS_NOT_BOOLEAN(c, len))
             {
                 continue;
@@ -1366,11 +1300,7 @@ Array *parse_array(FILE *f, uint_fast64_t *pos, uint_fast16_t *err)
         }
         else if (c == '[')
         {
-            uint_fast64_t nb_chars = get_nb_chars_in_array(f, i, err);
-            if (err && *err)
-            {
-                break;
-            }
+            unsigned long nb_chars = get_nb_chars_in_array(f, i);
 
             Array *tmp_ja = 0;
             // If there is enough space, we fill a buffer to read from it
@@ -1379,18 +1309,17 @@ Array *parse_array(FILE *f, uint_fast64_t *pos, uint_fast16_t *err)
                 char *b = calloc(nb_chars + 1, sizeof(char));
                 if (!b || fseek(f, i, SEEK_SET) != 0)
                 {
-                    *err = 1;
                     free(b);
                     break;
                 }
                 fread(b, sizeof(char), nb_chars, f);
-                tmp_ja = parse_array_buff(b, 0, err);
+                tmp_ja = parse_array_buff(b, 0);
                 free(b);
                 i += nb_chars;
             }
             else
             {
-                tmp_ja = parse_array(f, &i, err);
+                tmp_ja = parse_array(f, &i);
             }
 
             arr_add_arr(a, tmp_ja);
@@ -1398,11 +1327,7 @@ Array *parse_array(FILE *f, uint_fast64_t *pos, uint_fast16_t *err)
         }
         else if (c == '{')
         {
-            uint_fast64_t nb_chars = get_nb_chars_in_dict(f, i, err);
-            if (err && *err)
-            {
-                break;
-            }
+            unsigned long nb_chars = get_nb_chars_in_dict(f, i);
 
             Dict *tmp_jd = 0;
             // If there is enough space, we fill a buffer to read from it
@@ -1411,34 +1336,22 @@ Array *parse_array(FILE *f, uint_fast64_t *pos, uint_fast16_t *err)
                 char *b = calloc(nb_chars + 1, sizeof(char));
                 if (!b || fseek(f, i, SEEK_SET) != 0)
                 {
-                    *err = 1;
                     free(b);
                     break;
                 }
                 fread(b, sizeof(char), nb_chars, f);
-                tmp_jd = parse_dict_buff(b, 0, err);
+                tmp_jd = parse_dict_buff(b, 0);
                 free(b);
                 i += nb_chars;
             }
             else
             {
-                tmp_jd = parse_dict(f, &i, err);
+                tmp_jd = parse_dict(f, &i);
             }
 
             arr_add_dict(a, tmp_jd);
             ++nb_elts_parsed;
         }
-
-        if (err && *err)
-        {
-            break;
-        }
-    }
-    if (err && *err)
-    {
-        print_err_bits(*err);
-        free(a);
-        return 0;
     }
     *pos = i - 1;
     return a;
@@ -1451,21 +1364,17 @@ Array *parse_array(FILE *f, uint_fast64_t *pos, uint_fast16_t *err)
 **            '{' that begins the current dict
 ** \returns The json dict parsed from the position
 */
-Dict *parse_dict(FILE *f, uint_fast64_t *pos, uint_fast16_t *err)
+Dict *parse_dict(FILE *f, unsigned long *pos)
 {
-    if (!f || !pos || !err)
+    if (!f || !pos)
     {
         return 0;
     }
 
-    uint_fast64_t i = *pos;
+    unsigned long i = *pos;
 
-    uint_fast64_t nb_elts_parsed = 0;
-    uint_fast64_t nb_elts = get_nb_elts_dict(f, i, err);
-    if (err && *err)
-    {
-        return 0;
-    }
+    unsigned long nb_elts_parsed = 0;
+    unsigned long nb_elts = get_nb_elts_dict(f, i);
 
 #ifndef EDITING_MODE
     Dict *d = init_dict(nb_elts);
@@ -1519,7 +1428,7 @@ Dict *parse_dict(FILE *f, uint_fast64_t *pos, uint_fast16_t *err)
         }
         else if (IS_BOOL_START(c))
         {
-            uint_fast64_t len = parse_boolean(f, &i);
+            unsigned long len = parse_boolean(f, &i);
             if (IS_NOT_BOOLEAN(c, len))
             {
                 continue;
@@ -1535,11 +1444,7 @@ Dict *parse_dict(FILE *f, uint_fast64_t *pos, uint_fast16_t *err)
         }
         else if (c == '[')
         {
-            uint_fast64_t nb_chars = get_nb_chars_in_array(f, i, err);
-            if (err && *err)
-            {
-                break;
-            }
+            unsigned long nb_chars = get_nb_chars_in_array(f, i);
 
             Array *tmp_ja = 0;
             // If there is enough space, we fill a buffer to read from it
@@ -1548,18 +1453,17 @@ Dict *parse_dict(FILE *f, uint_fast64_t *pos, uint_fast16_t *err)
                 char *b = calloc(nb_chars + 1, sizeof(char));
                 if (!b || fseek(f, i, SEEK_SET) != 0)
                 {
-                    *err |= ERR_FSEEK;
                     free(b);
                     break;
                 }
                 fread(b, sizeof(char), nb_chars, f);
-                tmp_ja = parse_array_buff(b, 0, err);
+                tmp_ja = parse_array_buff(b, 0);
                 free(b);
                 i += nb_chars;
             }
             else
             {
-                tmp_ja = parse_array(f, &i, err);
+                tmp_ja = parse_array(f, &i);
             }
 
             dict_add_arr(d, key, tmp_ja);
@@ -1567,11 +1471,7 @@ Dict *parse_dict(FILE *f, uint_fast64_t *pos, uint_fast16_t *err)
         }
         else if (c == '{')
         {
-            uint_fast64_t nb_chars = get_nb_chars_in_dict(f, i, err);
-            if (err && *err)
-            {
-                break;
-            }
+            unsigned long nb_chars = get_nb_chars_in_dict(f, i);
 
             Dict *tmp_jd = 0;
             // If there is enough space, we fill a buffer to read from it
@@ -1580,18 +1480,17 @@ Dict *parse_dict(FILE *f, uint_fast64_t *pos, uint_fast16_t *err)
                 char *b = calloc(nb_chars + 1, sizeof(char));
                 if (!b || fseek(f, i, SEEK_SET) != 0)
                 {
-                    *err |= ERR_FSEEK;
                     free(b);
                     break;
                 }
                 fread(b, sizeof(char), nb_chars, f);
-                tmp_jd = parse_dict_buff(b, 0, err);
+                tmp_jd = parse_dict_buff(b, 0);
                 free(b);
                 i += nb_chars;
             }
             else
             {
-                tmp_jd = parse_dict(f, &i, err);
+                tmp_jd = parse_dict(f, &i);
             }
 
             dict_add_dict(d, key, tmp_jd);
@@ -1601,21 +1500,6 @@ Dict *parse_dict(FILE *f, uint_fast64_t *pos, uint_fast16_t *err)
         {
             is_waiting_key = 1;
         }
-
-        if (err && *err)
-        {
-            break;
-        }
-    }
-    if (err && *err)
-    {
-        print_err_bits(*err);
-        if (*err != ERR_NULL_KEY)
-        {
-            free(key.str);
-        }
-        free(d);
-        return 0;
     }
     *pos = i - 1;
     return d;
@@ -1632,7 +1516,7 @@ JSON *parse(char *file)
         return 0;
     }
 
-    uint_fast64_t offset = 0;
+    unsigned long offset = 0;
     if (fseek(f, offset++, SEEK_SET) != 0)
     {
         fclose(f);
@@ -1642,9 +1526,8 @@ JSON *parse(char *file)
     // Obtains the number of characters in the file
     struct stat st;
     stat(file, &st);
-    uint_fast64_t nb_chars = st.st_size;
+    unsigned long nb_chars = st.st_size;
 
-    uint_fast16_t err = 0;
     char c = fgetc(f);
     if (c == '{')
     {
@@ -1659,12 +1542,12 @@ JSON *parse(char *file)
                 return 0;
             }
             fread(b, sizeof(char), nb_chars, f);
-            d = parse_dict_buff(b, 0, &err);
+            d = parse_dict_buff(b, 0);
             free(b);
         }
         else
         {
-            d = parse_dict(f, &offset, &err);
+            d = parse_dict(f, &offset);
         }
         fclose(f);
         return init_json(0, 0, d);
@@ -1682,12 +1565,12 @@ JSON *parse(char *file)
                 return 0;
             }
             fread(b, sizeof(char), nb_chars, f);
-            a = parse_array_buff(b, 0, &err);
+            a = parse_array_buff(b, 0);
             free(b);
         }
         else
         {
-            a = parse_array(f, &offset, &err);
+            a = parse_array(f, &offset);
         }
         fclose(f);
         return init_json(1, a, 0);

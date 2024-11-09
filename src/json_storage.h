@@ -1,14 +1,21 @@
-#ifndef STORAGE_H
-#define STORAGE_H
+#ifndef JSON_STORAGE_H
+#define JSON_STORAGE_H
 
 /*******************************************************************************
-**                                  INCLUDES                                  **
+**                              DEFINES / MACROS                              **
 *******************************************************************************/
-#include "json_types.h"
+#define T_ERROR 0
+#define T_STR 1
+#define T_INT 2
+#define T_DOUBLE 3
+#define T_BOOL 4
+#define T_NULL 5
+#define T_ARR 6
+#define T_DICT 7
 
-/*******************************************************************************
-**                                   MACROS                                   **
-*******************************************************************************/
+#define STRING_OF(string, len) ((String){ .str = (string), .length = (len) })
+#define EMPTY_STRING ((String){ .str = 0, .length = 0 })
+
 /*
 ** \def Checks if the JSON instance is not null, if the JSON instance is an
 **      array and if the array is not null
@@ -24,6 +31,12 @@
 /*******************************************************************************
 **                                 STRUCTURES                                 **
 *******************************************************************************/
+typedef struct
+{
+    char *str;
+    unsigned length;
+} String;
+
 typedef struct array Array;
 typedef struct dict Dict;
 
@@ -121,6 +134,8 @@ typedef struct
 /*******************************************************************************
 **                                 FUNCTIONS **
 *******************************************************************************/
+char strings_equals(String s1, String s2);
+
 JSON *init_json(char is_array, Array *a, Dict *d);
 
 void arr_add_str(Array *a, String value);
@@ -165,4 +180,4 @@ void destroy_array(Array *a);
 void destroy_dict(Dict *d);
 void destroy_json(JSON *j);
 
-#endif // !STORAGE_H
+#endif // !JSON_STORAGE_H

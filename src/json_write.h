@@ -1,7 +1,7 @@
 #ifndef JSON_WRITE_H
 #define JSON_WRITE_H
 
-#include "storage.h"
+#include "json_storage.h"
 
 typedef struct str_link
 {
