@@ -9,6 +9,7 @@ String get_double_as_str(double value);
 String get_bool_as_str(char value);
 String get_null_as_str();
 String get_array_as_str(Array *a, unsigned indent, char from_dict);
+String get_dict_as_str(Dict *d, unsigned indent, char from_dict);
 
 void add_link(StringLinkedList *ll, String str, char str_needs_free)
 {
@@ -103,6 +104,9 @@ unsigned fill_string_ll_with_values(StringLinkedList *ll, Array *a,
         case T_ARR:
             tmp_str = get_array_as_str(v.arrayv, indent + 1, 0);
             break;
+        case T_DICT:
+            tmp_str = get_dict_as_str(v.dictv, indent + 1, 0);
+            break;
         }
         add_link(ll, tmp_str, 1);
         // We add 1 for the comma if we are not at the last value
@@ -159,6 +163,9 @@ unsigned fill_string_ll_with_items(StringLinkedList *ll, Dict *d,
             break;
         case T_ARR:
             tmp_str = get_array_as_str(it.arrayv, indent + 1, 1);
+            break;
+        case T_DICT:
+            tmp_str = get_dict_as_str(it.dictv, indent + 1, 1);
             break;
         }
         add_link(ll, it.key, 0);
@@ -473,7 +480,7 @@ void write_json_to_file(JSON *j, char *file_name)
 
 int main(void)
 {
-    Array *a = init_array(5);
+    Array *a = init_array(6);
     arr_add_int(a, 666);
     arr_add_double(a, 1234567891.100456);
     arr_add_bool(a, 1);
@@ -494,6 +501,38 @@ int main(void)
     }
     memcpy(key, "array", 5);
     dict_add_arr(d, STRING_OF(key, 5), a);
+
+    Dict *d2 = init_dict(4);
+    unsigned char *k1 = calloc(1, sizeof(char));
+    if (!key)
+    {
+        return 1;
+    }
+    memcpy(k1, "a", 1);
+    unsigned char *k2 = calloc(1, sizeof(char));
+    if (!key)
+    {
+        return 1;
+    }
+    memcpy(k2, "b", 1);
+    unsigned char *k3 = calloc(1, sizeof(char));
+    if (!key)
+    {
+        return 1;
+    }
+    memcpy(k3, "c", 1);
+    unsigned char *k4 = calloc(1, sizeof(char));
+    if (!key)
+    {
+        return 1;
+    }
+    memcpy(k4, "d", 1);
+    dict_add_int(d2, STRING_OF(k1, 1), 55);
+    dict_add_int(d2, STRING_OF(k2, 1), 65);
+    dict_add_int(d2, STRING_OF(k3, 1), 75);
+    dict_add_int(d2, STRING_OF(k4, 1), 85);
+    arr_add_dict(a, d2);
+
     JSON *j = init_json(0, 0, d);
 
     write_json_to_file(j, "out.json");
