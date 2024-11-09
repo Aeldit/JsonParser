@@ -7,6 +7,7 @@ typedef struct str_link
 {
     String s;
     char s_needs_free;
+    char is_from_str;
     struct str_link *next;
 } StringLink;
 

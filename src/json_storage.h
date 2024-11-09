@@ -71,7 +71,7 @@ typedef struct
     };
 } Item;
 
-// #define EDITING_MODE
+#define EDITING_MODE
 #ifdef EDITING_MODE
 #    define ARRAY_LEN 32
 #    define NB_DELETIONS_TO_DEFRAG 16
@@ -96,7 +96,7 @@ struct array
     unsigned nb_deletions;
     ValueLink *head;
     ValueLink *tail;
-}
+};
 
 struct dict
 {

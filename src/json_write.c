@@ -11,7 +11,8 @@ String get_null_as_str();
 String get_array_as_str(Array *a, unsigned indent);
 String get_dict_as_str(Dict *d, unsigned indent);
 
-void add_link(StringLinkedList *ll, String str, char str_needs_free)
+void add_link(StringLinkedList *ll, String str, char str_needs_free,
+              char is_from_str)
 {
     if (!ll)
     {
@@ -25,6 +26,7 @@ void add_link(StringLinkedList *ll, String str, char str_needs_free)
     }
     sl->s = str;
     sl->s_needs_free = str_needs_free;
+    sl->is_from_str = is_from_str;
 
     if (!ll->head)
     {
@@ -63,25 +65,19 @@ void destroy_linked_list(StringLinkedList *ll)
     free(ll);
 }
 
-/**
-** \returns The number of additional characters
-*/
-unsigned fill_string_ll_with_values(StringLinkedList *ll, Array *a,
-                                    unsigned indent)
+// FIX: Handle arrays that end with empty dicts
+unsigned handle_values(StringLinkedList *ll, Value *values, unsigned size,
+                       unsigned total_size, unsigned indent)
 {
-    if (!ll || !a)
-    {
-        return 0;
-    }
-
     unsigned nb_chars = 0;
-    // Iterates over each value of the array and converts them to
-    // 'String's + counts the number of chars required for each value
-    Value *values = a->values;
-    unsigned size = a->size;
     for (unsigned i = 0; i < size; ++i)
     {
         Value v = values[i];
+        if (v.type == T_ERROR)
+        {
+            continue;
+        }
+
         String tmp_str;
         switch (v.type)
         {
@@ -108,32 +104,22 @@ unsigned fill_string_ll_with_values(StringLinkedList *ll, Array *a,
             tmp_str = get_dict_as_str(v.dictv, indent + 1);
             break;
         }
-        add_link(ll, tmp_str, 1);
+        add_link(ll, tmp_str, v.type != T_STR, v.type == T_STR);
         // We add 1 for the comma if we are not at the last value
         // We add 1 for the line return
         // We add 'indent' for the tabs
-        nb_chars += tmp_str.length + (i == size - 1 ? 0 : 1) + 1 + indent;
+        // We add 2 if the item's value is a string (for the double quotes)
+        nb_chars += tmp_str.length + (i == total_size - 1 ? 0 : 1) + 1 + indent
+            + (v.type == T_STR ? 2 : 0);
     }
     return nb_chars;
 }
 
-/**
-** \returns The number of additional characters
-*/
-unsigned fill_string_ll_with_items(StringLinkedList *ll, Dict *d,
-                                   unsigned indent)
+unsigned handle_items(StringLinkedList *ll, Item *items, unsigned size,
+                      unsigned total_size, unsigned indent)
 {
-    if (!ll || !d)
-    {
-        return 0;
-    }
-
     unsigned nb_chars = 0;
     char is_key = 1;
-    // Iterates over each value of the array and converts them to
-    // 'String's + counts the number of chars required for each value
-    Item *items = d->items;
-    unsigned size = d->size;
     for (unsigned i = 0; i < size; ++i)
     {
         Item it = items[i];
@@ -168,26 +154,88 @@ unsigned fill_string_ll_with_items(StringLinkedList *ll, Dict *d,
             tmp_str = get_dict_as_str(it.dictv, indent + 1);
             break;
         }
-        add_link(ll, it.key, 0);
+        add_link(ll, it.key, 0, 1);
         // + 2 because we add ": " after the key
         nb_chars += it.key.length + 4;
 
-        add_link(ll, tmp_str, 1);
+        add_link(ll, tmp_str, it.type != T_STR, it.type == T_STR);
         // We add 1 for the comma if we are not at the last value
         // We add 1 for the line return
         // We add 'indent' for the tabs
-        nb_chars += tmp_str.length + (i == size - 1 ? 0 : 1) + 1 + indent;
+        // We add 2 if the item's value is a string (for the double quotes)
+        nb_chars += tmp_str.length + (i == total_size - 1 ? 0 : 1) + 1 + indent
+            + (it.type == T_STR ? 2 : 0);
         is_key = !is_key;
     }
     return nb_chars;
 }
 
+/**
+** \returns The number of additional characters
+*/
+unsigned fill_string_ll_with_values(StringLinkedList *ll, Array *a,
+                                    unsigned indent)
+{
+    if (!ll || !a)
+    {
+        return 0;
+    }
+
+    // Iterates over each value of the array and converts them to
+    // 'String's + counts the number of chars required for each value
+#ifndef EDITING_MODE
+    return handle_value(ll, a->values, a->size, a->size, indent);
+#else
+    unsigned nb_chars = 0;
+    ValueLink *link = a->head;
+    while (link)
+    {
+        nb_chars += handle_values(ll, link->values, ARRAY_LEN, a->size, indent);
+        link = link->next;
+    }
+#endif // !EDITING_MODE
+    return nb_chars;
+}
+
+/**
+** \returns The number of additional characters
+*/
+unsigned fill_string_ll_with_items(StringLinkedList *ll, Dict *d,
+                                   unsigned indent)
+{
+    if (!ll || !d)
+    {
+        return 0;
+    }
+
+// Iterates over each value of the array and converts them to
+// 'String's + counts the number of chars required for each value
+#ifndef EDITING_MODE
+    return handle_items(ll, link->items, d->size, d->size, indent);
+#else
+    unsigned nb_chars = 0;
+    ItemLink *link = d->head;
+    while (link)
+    {
+        nb_chars += handle_items(ll, link->items, ARRAY_LEN, d->size, indent);
+        link = link->next;
+    }
+#endif // !EDITING_MODE
+    return nb_chars;
+}
+
 /*******************************************************************************
-**                                GETS AS STR                                 **
+**                                GETS AS STR **
 *******************************************************************************/
 String get_int_as_str(int value)
 {
-    unsigned nb_chars = 1;
+    char is_neg = value < 0;
+    unsigned nb_chars = is_neg ? 2 : 1;
+    if (is_neg)
+    {
+        value *= -1;
+    }
+
     int tmp_value = value;
     while (tmp_value /= 10)
     {
@@ -206,6 +254,11 @@ String get_int_as_str(int value)
     {
         str[--nb_chars] = value % 10 + '0';
         value /= 10;
+    }
+
+    if (is_neg)
+    {
+        str[0] = '-';
     }
     return s;
 }
@@ -285,7 +338,8 @@ String get_array_as_str(Array *a, unsigned indent)
     }
 
     // '[' + '\n' + (indent - 1) * '\t' + ']' + '\n'
-    // indent == 1 -> if we are in the 'root' array, we add a '\n' at the end
+    // indent == 1 -> if we are in the 'root' array, we add a '\n' at the
+    // end
     unsigned nb_chars = indent - 1 + 3 + (indent == 1)
         + fill_string_ll_with_values(ll, a, indent);
 
@@ -308,9 +362,19 @@ String get_array_as_str(Array *a, unsigned indent)
         memset(str + insert_idx, '\t', indent);
         insert_idx += indent;
 
+        if (link->is_from_str)
+        {
+            str[insert_idx++] = '"';
+        }
+
         // Value as string
         memcpy(str + insert_idx, link->s.str, link->s.length);
         insert_idx += link->s.length;
+
+        if (link->is_from_str)
+        {
+            str[insert_idx++] = '"';
+        }
 
         // Comma and line return
         if (link->next)
@@ -392,8 +456,18 @@ String get_dict_as_str(Dict *d, unsigned indent)
         }
         else
         {
+            if (link->is_from_str)
+            {
+                str[insert_idx++] = '"';
+            }
+
             memcpy(str + insert_idx, link->s.str, link->s.length);
             insert_idx += link->s.length;
+
+            if (link->is_from_str)
+            {
+                str[insert_idx++] = '"';
+            }
 
             // Comma and line return
             if (link->next)
@@ -427,7 +501,7 @@ String get_dict_as_str(Dict *d, unsigned indent)
 }
 
 /*******************************************************************************
-**                                   WRITING                                  **
+**                                   WRITING **
 *******************************************************************************/
 void write_json_to_file(JSON *j, char *file_name)
 {
@@ -456,7 +530,7 @@ void write_json_to_file(JSON *j, char *file_name)
         free(s.str);
         fclose(f);
     }
-    if (j->dict)
+    else if (j->dict)
     {
         FILE *f = fopen(file_name, "w");
         if (!f)
@@ -477,3 +551,19 @@ void write_json_to_file(JSON *j, char *file_name)
         fclose(f);
     }
 }
+
+// FIX: Empty dicts or arrays
+/*int main(void)
+{
+    Array *a = init_array(6);
+    arr_add_int(a, 666);
+    arr_add_double(a, 1234567891.100456);
+    arr_add_bool(a, 1);
+    arr_add_bool(a, 0);
+
+    JSON *j = init_json(1, a, 0);
+
+    write_json_to_file(j, "out.json");
+    destroy_json(j);
+    return 0;
+}*/
