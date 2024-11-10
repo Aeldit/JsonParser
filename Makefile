@@ -7,26 +7,29 @@ CFILES=src/json_parser.c \
 	src/json_write.c \
 	src/main.c
 
-all: clean json-parser
-	./json-parser t.json
+TARGET=json-parser
+
+all: clean $(TARGET)
+	./$(TARGET) t.json
 
 .PHONY:
-json-parser:
-	$(CC) $(CFLAGS) $(CFILES) -o json-parser \
+$(TARGET):
+	$(CC) $(CFLAGS) $(CFILES) -o $(TARGET) \
 		-lm # math library for pow function
 
 clean:
-	if [ -f "json-parser" ]; then rm json-parser; fi
+	if [ -f "$(TARGET)" ]; then rm $(TARGET); fi
 
 valgrind-compile: clean
 	$(CC) $(CFLAGS) -lm \
 		-DVALGRING_DISABLE_PRINT \
-		$(CFILES) -o json-parser
+		$(CFILES) -o $(TARGET)
 
 valgrind:  valgrind-compile
 	valgrind --tool=callgrind --dump-instr=yes --simulate-cache=yes \
-		--collect-jumps=yes ./json-parser big.json
+		--collect-jumps=yes ./$(TARGET) big.json
 
 leaks: valgrind-compile
 	valgrind --leak-check=full --show-leak-kinds=all \
-         --track-origins=yes ./json-parser t.json
+         --track-origins=yes ./$(TARGET) t.json
+
