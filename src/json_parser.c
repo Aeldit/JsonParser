@@ -64,14 +64,14 @@ typedef struct
 /*******************************************************************************
 **                           FUNCTIONS DECLARATIONS                           **
 *******************************************************************************/
-Dict *parse_dict_buff(char *b, unsigned long *pos);
-Dict *parse_dict(FILE *f, unsigned long *pos);
+dict_t *parse_dict_buff(char *b, unsigned long *pos);
+dict_t *parse_dict(FILE *f, unsigned long *pos);
 
 /*******************************************************************************
 **                              LOCAL FUNCTIONS                               **
 *******************************************************************************/
 /**
-** \brief Takes sl's char array and transforms it into an int64_t.
+** \brief Takes sl's char array_t and transforms it into an int64_t.
 **        If the number has an exponent, the exponent is parsed as well and the
 **        number is elevated to that exponent
 ** \param sl A pointer to an StrAndLenTuple object
@@ -121,7 +121,7 @@ long str_to_long(StrAndLenTuple *sl)
 }
 
 /**
-** \brief Takes sl's char array and transforms it into a double.
+** \brief Takes sl's char array_t and transforms it into a double.
 **        If the number has an exponent, the exponent is parsed as well and the
 **        number is elevated to that exponent
 ** \param sl A pointer to an StrAndLenTuple object
@@ -252,7 +252,7 @@ char max_nested_dicts_reached(long is_in_dict)
 **            that started the string we want to parse
 ** \returns An empty string in case of error, the parsed string otherwise
 */
-String parse_string_buff(char *buff, unsigned long *idx)
+string_t parse_string_buff(char *buff, unsigned long *idx)
 {
     if (!buff || !idx)
     {
@@ -289,7 +289,7 @@ String parse_string_buff(char *buff, unsigned long *idx)
 
     // + 1 to not read the last '"' when returning in the calling function
     *idx += len + 1;
-    return (String){ .str = str, .length = len };
+    return (string_t){ .str = str, .length = len };
 }
 
 /**
@@ -298,7 +298,8 @@ String parse_string_buff(char *buff, unsigned long *idx)
 ** \param idx The index of the second character of the number (the first one
 **            was already read)
 ** \returns An instance of the StrAndLenTuple class containing the number as a
-**          char array, the length of the char array and whether the number is a
+**          char array_t, the length of the char array and whether the number is
+*a
 **          float and has an exponent
 */
 StrAndLenTuple parse_number_buff(char *buff, unsigned long *idx)
@@ -329,7 +330,7 @@ StrAndLenTuple parse_number_buff(char *buff, unsigned long *idx)
         return NULL_STR_AND_LEN_TUPLE;
     }
 
-    // Puts the value in the form of a char array
+    // Puts the value in the form of a char array_t
     char *str = calloc(len + 1, sizeof(char));
     if (!str)
     {
@@ -373,8 +374,8 @@ unsigned long parse_boolean_buff(char *buff, unsigned long *idx)
 /**
 ** \param buff The buffer containing the object currently being parsed
 ** \param idx The index of the character just after the '[' that begins the
-**            current array
-** \returns The number of elements of the current array
+**            current array_t
+** \returns The number of elements of the current array_t
 */
 unsigned long get_nb_elts_array_buff(char *buff, unsigned long idx)
 {
@@ -542,10 +543,10 @@ unsigned long get_nb_elts_dict_buff(char *buff, unsigned long idx)
 
 /**
 ** \param buff The buffer containing the object currently being parsed
-** \param idx The index of the character '[' that begins the current array
-** \returns The json array parsed from the position
+** \param idx The index of the character '[' that begins the current array_t
+** \returns The json array_t parsed from the position
 */
-Array *parse_array_buff(char *b, unsigned long *idx)
+array_t *parse_array_buff(char *b, unsigned long *idx)
 {
     if (!b)
     {
@@ -558,9 +559,9 @@ Array *parse_array_buff(char *b, unsigned long *idx)
     unsigned long nb_elts = get_nb_elts_array_buff(b, i);
 
 #ifndef EDITING_MODE
-    Array *a = init_array(nb_elts);
+    array_t *a = init_array(nb_elts);
 #else
-    Array *a = calloc(1, sizeof(Array));
+    array_t *a = calloc(1, sizeof(array_t));
 #endif // !EDITING_MODE
     if (!a || nb_elts == 0)
     {
@@ -621,7 +622,7 @@ Array *parse_array_buff(char *b, unsigned long *idx)
         }
         else if (c == '[')
         {
-            Array *tmp_a = parse_array_buff(b, &i);
+            array_t *tmp_a = parse_array_buff(b, &i);
             if (!tmp_a)
             {
                 break;
@@ -631,7 +632,7 @@ Array *parse_array_buff(char *b, unsigned long *idx)
         }
         else if (c == '{')
         {
-            Dict *tmp_jd = parse_dict_buff(b, &i);
+            dict_t *tmp_jd = parse_dict_buff(b, &i);
             if (!tmp_jd)
             {
                 break;
@@ -658,7 +659,7 @@ Array *parse_array_buff(char *b, unsigned long *idx)
 **            index starts at 0
 ** \returns The json dict parsed from the index
 */
-Dict *parse_dict_buff(char *b, unsigned long *idx)
+dict_t *parse_dict_buff(char *b, unsigned long *idx)
 {
     if (!b)
     {
@@ -671,16 +672,16 @@ Dict *parse_dict_buff(char *b, unsigned long *idx)
     unsigned long nb_elts = get_nb_elts_dict_buff(b, i);
 
 #ifndef EDITING_MODE
-    Dict *d = init_dict(nb_elts);
+    dict_t *d = init_dict(nb_elts);
 #else
-    Dict *d = calloc(1, sizeof(Dict));
+    dict_t *d = calloc(1, sizeof(dict_t));
 #endif // !EDITING_MODE
     if (!d || nb_elts == 0)
     {
         return d;
     }
 
-    String key = EMPTY_STRING;
+    string_t key = EMPTY_STRING;
     char c = 0;
     char is_waiting_key = 1;
     // We start at 1 because if we entered this function, it means that we
@@ -744,7 +745,7 @@ Dict *parse_dict_buff(char *b, unsigned long *idx)
         }
         else if (c == '[')
         {
-            Array *tmp_ja = parse_array_buff(b, &i);
+            array_t *tmp_ja = parse_array_buff(b, &i);
             if (!tmp_ja)
             {
                 break;
@@ -754,7 +755,7 @@ Dict *parse_dict_buff(char *b, unsigned long *idx)
         }
         else if (c == '{')
         {
-            Dict *tmp_jd = parse_dict_buff(b, &i);
+            dict_t *tmp_jd = parse_dict_buff(b, &i);
             if (!tmp_jd)
             {
                 break;
@@ -783,7 +784,7 @@ Dict *parse_dict_buff(char *b, unsigned long *idx)
 **            that started the string we want to parse
 ** \returns An empty string in case of error, the parsed string otherwise
 */
-String parse_string(FILE *f, unsigned long *pos)
+string_t parse_string(FILE *f, unsigned long *pos)
 {
     if (!f || !pos)
     {
@@ -819,14 +820,14 @@ String parse_string(FILE *f, unsigned long *pos)
 
     // +1 to not read the last '"' when returning in the calling function
     *pos += len + 1;
-    return (String){ .str = str, .length = len };
+    return (string_t){ .str = str, .length = len };
 }
 
 /**
 ** \brief Reads the file from the given pos and returns an instance of the
-**        StrAndLenTuple class containing the number as a char array, the
+**        StrAndLenTuple class containing the number as a char array_t, the
 *length
-**        of the char array and whether the number is a float and has an
+**        of the char array_t and whether the number is a float and has an
 **        exponent
 ** \param f The file stream
 ** \param pos The pos of the start of the number of which we are currently
@@ -856,7 +857,7 @@ StrAndLenTuple parse_number(FILE *f, unsigned long *pos)
         return NULL_STR_AND_LEN_TUPLE;
     }
 
-    // Puts the value in the form of a char array
+    // Puts the value in the form of a char array_t
     char *str = calloc(len + 1, sizeof(char));
     if (!str)
     {
@@ -905,11 +906,11 @@ unsigned long parse_boolean(FILE *f, unsigned long *pos)
 /**
 ** \param f The file stream
 ** \param pos The position in the file of the character after the '[' that
-**            begins the current array
+**            begins the current array_t
 ** \param err A pointer to a char that will be updated if an error occurs
 **            (we return the number of chars, so we can't use a number to
 **            indicate an error)
-** \returns The total number of characters in the current array - 1 (the
+** \returns The total number of characters in the current array_t - 1 (the
 *first
 **          '[' is not counted)
 */
@@ -981,8 +982,8 @@ unsigned long get_nb_chars_in_array(FILE *f, unsigned long pos)
 ** \param f The file stream
 ** \param pos The position in the file of the character just after the '['
 *that
-**            begins the current array
-** \returns The number of elements of the current array
+**            begins the current array_t
+** \returns The number of elements of the current array_t
 */
 unsigned long get_nb_elts_array(FILE *f, unsigned long pos)
 {
@@ -1034,7 +1035,7 @@ unsigned long get_nb_elts_array(FILE *f, unsigned long pos)
             }
             else if (c == ']')
             {
-                // Empty array
+                // Empty array_t
                 // TODO: Remove this and put it at the top like in the
                 // buffered version
                 if (is_in_array == 1 && prev_c == 0)
@@ -1228,10 +1229,10 @@ unsigned long get_nb_elts_dict(FILE *f, unsigned long pos)
 /**
 ** \param f The file stream
 ** \param pos The postion in the file of the character after the '[' that
-**            begins the current array
-** \returns The json array parsed from the position
+**            begins the current array_t
+** \returns The json array_t parsed from the position
 */
-Array *parse_array(FILE *f, unsigned long *pos)
+array_t *parse_array(FILE *f, unsigned long *pos)
 {
     if (!f || !pos)
     {
@@ -1244,9 +1245,9 @@ Array *parse_array(FILE *f, unsigned long *pos)
     unsigned long nb_elts = get_nb_elts_array(f, i);
 
 #ifndef EDITING_MODE
-    Array *a = init_array(nb_elts);
+    array_t *a = init_array(nb_elts);
 #else
-    Array *a = calloc(1, sizeof(Array));
+    array_t *a = calloc(1, sizeof(array_t));
 #endif // !EDITING_MODE
     if (!a || nb_elts == 0)
     {
@@ -1302,7 +1303,7 @@ Array *parse_array(FILE *f, unsigned long *pos)
         {
             unsigned long nb_chars = get_nb_chars_in_array(f, i);
 
-            Array *tmp_ja = 0;
+            array_t *tmp_ja = 0;
             // If there is enough space, we fill a buffer to read from it
             if (nb_chars < MAX_READ_BUFF_SIZE)
             {
@@ -1329,7 +1330,7 @@ Array *parse_array(FILE *f, unsigned long *pos)
         {
             unsigned long nb_chars = get_nb_chars_in_dict(f, i);
 
-            Dict *tmp_jd = 0;
+            dict_t *tmp_jd = 0;
             // If there is enough space, we fill a buffer to read from it
             if (nb_chars < MAX_READ_BUFF_SIZE)
             {
@@ -1364,7 +1365,7 @@ Array *parse_array(FILE *f, unsigned long *pos)
 **            '{' that begins the current dict
 ** \returns The json dict parsed from the position
 */
-Dict *parse_dict(FILE *f, unsigned long *pos)
+dict_t *parse_dict(FILE *f, unsigned long *pos)
 {
     if (!f || !pos)
     {
@@ -1377,9 +1378,9 @@ Dict *parse_dict(FILE *f, unsigned long *pos)
     unsigned long nb_elts = get_nb_elts_dict(f, i);
 
 #ifndef EDITING_MODE
-    Dict *d = init_dict(nb_elts);
+    dict_t *d = init_dict(nb_elts);
 #else
-    Dict *d = calloc(1, sizeof(Dict));
+    dict_t *d = calloc(1, sizeof(dict_t));
 #endif // !EDITING_MODE
     if (!d || nb_elts == 0)
     {
@@ -1387,7 +1388,7 @@ Dict *parse_dict(FILE *f, unsigned long *pos)
         return d;
     }
 
-    String key = EMPTY_STRING;
+    string_t key = EMPTY_STRING;
     char c = 0;
     char is_waiting_key = 1;
     // We start at 1 because if we entered this function, it means that we
@@ -1446,7 +1447,7 @@ Dict *parse_dict(FILE *f, unsigned long *pos)
         {
             unsigned long nb_chars = get_nb_chars_in_array(f, i);
 
-            Array *tmp_ja = 0;
+            array_t *tmp_ja = 0;
             // If there is enough space, we fill a buffer to read from it
             if (nb_chars < MAX_READ_BUFF_SIZE)
             {
@@ -1473,7 +1474,7 @@ Dict *parse_dict(FILE *f, unsigned long *pos)
         {
             unsigned long nb_chars = get_nb_chars_in_dict(f, i);
 
-            Dict *tmp_jd = 0;
+            dict_t *tmp_jd = 0;
             // If there is enough space, we fill a buffer to read from it
             if (nb_chars < MAX_READ_BUFF_SIZE)
             {
@@ -1508,7 +1509,7 @@ Dict *parse_dict(FILE *f, unsigned long *pos)
 /*******************************************************************************
 **                                 FUNCTIONS **
 *******************************************************************************/
-JSON *parse(char *file)
+json_t *parse(char *file)
 {
     FILE *f = fopen(file, "r");
     if (!f)
@@ -1531,7 +1532,7 @@ JSON *parse(char *file)
     char c = fgetc(f);
     if (c == '{')
     {
-        Dict *d = 0;
+        dict_t *d = 0;
         if (nb_chars < MAX_READ_BUFF_SIZE)
         {
             char *b = calloc(nb_chars + 1, sizeof(char));
@@ -1554,7 +1555,7 @@ JSON *parse(char *file)
     }
     else if (c == '[')
     {
-        Array *a = 0;
+        array_t *a = 0;
         if (nb_chars < MAX_READ_BUFF_SIZE)
         {
             char *b = calloc(nb_chars + 1, sizeof(char));

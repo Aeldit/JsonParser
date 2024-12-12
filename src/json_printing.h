@@ -3,7 +3,7 @@
 
 #include "json_storage.h"
 
-void arr_print(Array *a);
-void dict_print(Dict *d);
+void arr_print(array_t *a);
+void dict_print(dict_t *d);
 
 #endif // !PRINTING_H

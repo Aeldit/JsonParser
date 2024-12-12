@@ -3,10 +3,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void dict_print_indent(Dict *d, unsigned indent, char fromDict);
-void dict_print(Dict *d);
+void dict_print_indent(dict_t *d, unsigned indent, char fromDict);
+void dict_print(dict_t *d);
 
-void arr_print_indent(Array *a, unsigned indent, char fromDict)
+void arr_print_indent(array_t *a, unsigned indent, char fromDict)
 {
     if (!a)
     {
@@ -37,10 +37,10 @@ void arr_print_indent(Array *a, unsigned indent, char fromDict)
     printf("%s[\n", fromDict ? "" : tabs);
 
 #ifndef EDITING_MODE
-    Value *values = a->values;
+    value_t *values = a->values;
     for (unsigned i = 0; i < size; ++i)
     {
-        Value v = values[i];
+        value_t v = values[i];
         if (v.type == T_ERROR)
         {
             continue;
@@ -78,13 +78,13 @@ void arr_print_indent(Array *a, unsigned indent, char fromDict)
     }
 #else
     unsigned b = 0;
-    ValueLink *link = a->head;
+    value_link_t *link = a->head;
     while (link)
     {
-        Value *values = link->values;
+        value_t *values = link->values;
         for (unsigned i = 0; i < ARRAY_LEN; ++i)
         {
-            Value v = values[i];
+            value_t v = values[i];
             if (v.type == T_ERROR)
             {
                 continue;
@@ -128,7 +128,7 @@ void arr_print_indent(Array *a, unsigned indent, char fromDict)
     free(tabs);
 }
 
-void arr_print(Array *a)
+void arr_print(array_t *a)
 {
     if (a)
     {
@@ -138,7 +138,7 @@ void arr_print(Array *a)
     }
 }
 
-void dict_print_indent(Dict *d, unsigned indent, char fromDict)
+void dict_print_indent(dict_t *d, unsigned indent, char fromDict)
 {
     // Obtains the number of tab characters that will be printed
     char *tabs = calloc(indent, sizeof(char));
@@ -164,16 +164,16 @@ void dict_print_indent(Dict *d, unsigned indent, char fromDict)
 
     unsigned i = 0;
 #ifndef EDITING_MODE
-    Item *items = d->items;
+    item_t *items = d->items;
     for (; i < size; ++i)
     {
-        Item it = items[i];
+        item_t it = items[i];
         if (it.type == T_ERROR)
         {
             continue;
         }
 
-        String key = it.key;
+        string_t key = it.key;
         switch (it.type)
         {
         case T_STR:
@@ -209,14 +209,14 @@ void dict_print_indent(Dict *d, unsigned indent, char fromDict)
         }
     }
 #else
-    ItemLink *link = d->head;
+    item_link_t *link = d->head;
     while (link)
     {
-        Item *items = link->items;
+        item_t *items = link->items;
         for (unsigned a = 0; a < ARRAY_LEN; ++a, ++i)
         {
-            Item it = items[a];
-            String key = it.key;
+            item_t it = items[a];
+            string_t key = it.key;
             if (it.type == T_ERROR)
             {
                 continue;
@@ -264,7 +264,7 @@ void dict_print_indent(Dict *d, unsigned indent, char fromDict)
     free(tabs);
 }
 
-void dict_print(Dict *d)
+void dict_print(dict_t *d)
 {
     if (d)
     {

@@ -4,14 +4,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-String get_int_as_str(int value);
-String get_double_as_str(double value);
-String get_bool_as_str(char value);
-String get_null_as_str();
-String get_array_as_str(Array *a, unsigned indent);
-String get_dict_as_str(Dict *d, unsigned indent);
+string_t get_int_as_str(int value);
+string_t get_double_as_str(double value);
+string_t get_bool_as_str(char value);
+string_t get_null_as_str();
+string_t get_array_as_str(array_t *a, unsigned indent);
+string_t get_dict_as_str(dict_t *d, unsigned indent);
 
-void add_link(StringLinkedList *ll, String str, char str_needs_free,
+void add_link(string_linked_list_t *ll, string_t str, char str_needs_free,
               char is_from_str)
 {
     if (!ll)
@@ -19,7 +19,7 @@ void add_link(StringLinkedList *ll, String str, char str_needs_free,
         return;
     }
 
-    StringLink *sl = calloc(1, sizeof(StringLink));
+    string_link_t *sl = calloc(1, sizeof(string_link_t));
     if (!sl)
     {
         return;
@@ -44,17 +44,17 @@ void add_link(StringLinkedList *ll, String str, char str_needs_free,
     }
 }
 
-void destroy_linked_list(StringLinkedList *ll)
+void destroy_linked_list(string_linked_list_t *ll)
 {
     if (!ll)
     {
         return;
     }
 
-    StringLink *link = ll->head;
+    string_link_t *link = ll->head;
     while (link)
     {
-        StringLink *tmp = link;
+        string_link_t *tmp = link;
         link = link->next;
         if (tmp->s_needs_free)
         {
@@ -66,19 +66,19 @@ void destroy_linked_list(StringLinkedList *ll)
 }
 
 // FIX: Handle arrays that end with empty dicts
-unsigned handle_values(StringLinkedList *ll, Value *values, unsigned size,
+unsigned handle_values(string_linked_list_t *ll, value_t *values, unsigned size,
                        unsigned total_size, unsigned indent)
 {
     unsigned nb_chars = 0;
     for (unsigned i = 0; i < size; ++i)
     {
-        Value v = values[i];
+        value_t v = values[i];
         if (v.type == T_ERROR)
         {
             continue;
         }
 
-        String tmp_str;
+        string_t tmp_str;
         switch (v.type)
         {
         case T_STR:
@@ -108,27 +108,27 @@ unsigned handle_values(StringLinkedList *ll, Value *values, unsigned size,
         // We add 1 for the comma if we are not at the last value
         // We add 1 for the line return
         // We add 'indent' for the tabs
-        // We add 2 if the item's value is a string (for the double quotes)
+        // We add 2 if the item_t's value is a string (for the double quotes)
         nb_chars += tmp_str.length + (i == total_size - 1 ? 0 : 1) + 1 + indent
             + (v.type == T_STR ? 2 : 0);
     }
     return nb_chars;
 }
 
-unsigned handle_items(StringLinkedList *ll, Item *items, unsigned size,
+unsigned handle_items(string_linked_list_t *ll, item_t *items, unsigned size,
                       unsigned total_size, unsigned indent)
 {
     unsigned nb_chars = 0;
     char is_key = 1;
     for (unsigned i = 0; i < size; ++i)
     {
-        Item it = items[i];
+        item_t it = items[i];
         if (it.type == T_ERROR)
         {
             continue;
         }
 
-        String tmp_str;
+        string_t tmp_str;
         switch (it.type)
         {
         case T_STR:
@@ -162,7 +162,7 @@ unsigned handle_items(StringLinkedList *ll, Item *items, unsigned size,
         // We add 1 for the comma if we are not at the last value
         // We add 1 for the line return
         // We add 'indent' for the tabs
-        // We add 2 if the item's value is a string (for the double quotes)
+        // We add 2 if the item_t's value is a string (for the double quotes)
         nb_chars += tmp_str.length + (i == total_size - 1 ? 0 : 1) + 1 + indent
             + (it.type == T_STR ? 2 : 0);
         is_key = !is_key;
@@ -173,7 +173,7 @@ unsigned handle_items(StringLinkedList *ll, Item *items, unsigned size,
 /**
 ** \returns The number of additional characters
 */
-unsigned fill_string_ll_with_values(StringLinkedList *ll, Array *a,
+unsigned fill_string_ll_with_values(string_linked_list_t *ll, array_t *a,
                                     unsigned indent)
 {
     if (!ll || !a)
@@ -184,23 +184,23 @@ unsigned fill_string_ll_with_values(StringLinkedList *ll, Array *a,
     // Iterates over each value of the array and converts them to
     // 'String's + counts the number of chars required for each value
 #ifndef EDITING_MODE
-    return handle_value(ll, a->values, a->size, a->size, indent);
+    return handle_values(ll, a->values, a->size, a->size, indent);
 #else
     unsigned nb_chars = 0;
-    ValueLink *link = a->head;
+    value_link_t *link = a->head;
     while (link)
     {
         nb_chars += handle_values(ll, link->values, ARRAY_LEN, a->size, indent);
         link = link->next;
     }
-#endif // !EDITING_MODE
     return nb_chars;
+#endif // !EDITING_MODE
 }
 
 /**
 ** \returns The number of additional characters
 */
-unsigned fill_string_ll_with_items(StringLinkedList *ll, Dict *d,
+unsigned fill_string_ll_with_items(string_linked_list_t *ll, dict_t *d,
                                    unsigned indent)
 {
     if (!ll || !d)
@@ -211,23 +211,23 @@ unsigned fill_string_ll_with_items(StringLinkedList *ll, Dict *d,
 // Iterates over each value of the array and converts them to
 // 'String's + counts the number of chars required for each value
 #ifndef EDITING_MODE
-    return handle_items(ll, link->items, d->size, d->size, indent);
+    return handle_items(ll, d->items, d->size, d->size, indent);
 #else
     unsigned nb_chars = 0;
-    ItemLink *link = d->head;
+    item_link_t *link = d->head;
     while (link)
     {
         nb_chars += handle_items(ll, link->items, ARRAY_LEN, d->size, indent);
         link = link->next;
     }
-#endif // !EDITING_MODE
     return nb_chars;
+#endif // !EDITING_MODE
 }
 
 /*******************************************************************************
 **                                GETS AS STR **
 *******************************************************************************/
-String get_int_as_str(int value)
+string_t get_int_as_str(int value)
 {
     char is_neg = value < 0;
     unsigned nb_chars = is_neg ? 2 : 1;
@@ -248,7 +248,7 @@ String get_int_as_str(int value)
         return EMPTY_STRING;
     }
 
-    String s = STRING_OF(str, nb_chars);
+    string_t s = STRING_OF(str, nb_chars);
 
     while (nb_chars)
     {
@@ -263,7 +263,7 @@ String get_int_as_str(int value)
     return s;
 }
 
-String get_double_as_str(double value)
+string_t get_double_as_str(double value)
 {
     // 18 : 10 int digits + '.' + 6 floating point digits + '\0'
     char double_str[18];
@@ -300,12 +300,12 @@ String get_double_as_str(double value)
         return EMPTY_STRING;
     }
 
-    String s = STRING_OF(str, nb_chars + nb_decimals - (nb_decimals ? 0 : 1));
+    string_t s = STRING_OF(str, nb_chars + nb_decimals - (nb_decimals ? 0 : 1));
     memcpy(str, double_str, s.length);
     return s;
 }
 
-String get_bool_as_str(char value)
+string_t get_bool_as_str(char value)
 {
     char nb_chars = (value ? 4 : 5);
     char *str = calloc(nb_chars + 1, sizeof(char));
@@ -313,7 +313,7 @@ String get_bool_as_str(char value)
     return STRING_OF(str ? str : 0, str ? nb_chars : 0);
 }
 
-String get_null_as_str()
+string_t get_null_as_str()
 {
     char *str = calloc(5, sizeof(char));
     if (!str)
@@ -324,14 +324,14 @@ String get_null_as_str()
     return STRING_OF(str, 4);
 }
 
-String get_array_as_str(Array *a, unsigned indent)
+string_t get_array_as_str(array_t *a, unsigned indent)
 {
     if (!a)
     {
         return EMPTY_STRING;
     }
 
-    StringLinkedList *ll = calloc(1, sizeof(StringLinkedList));
+    string_linked_list_t *ll = calloc(1, sizeof(string_linked_list_t));
     if (!ll)
     {
         return EMPTY_STRING;
@@ -355,7 +355,7 @@ String get_array_as_str(Array *a, unsigned indent)
     str[1] = '\n';
     unsigned insert_idx = 2;
 
-    StringLink *link = ll->head;
+    string_link_t *link = ll->head;
     while (link)
     {
         // Tabs
@@ -405,14 +405,14 @@ String get_array_as_str(Array *a, unsigned indent)
     return STRING_OF(str, nb_chars);
 }
 
-String get_dict_as_str(Dict *d, unsigned indent)
+string_t get_dict_as_str(dict_t *d, unsigned indent)
 {
     if (!d)
     {
         return EMPTY_STRING;
     }
 
-    StringLinkedList *ll = calloc(1, sizeof(StringLinkedList));
+    string_linked_list_t *ll = calloc(1, sizeof(string_linked_list_t));
     if (!ll)
     {
         return EMPTY_STRING;
@@ -436,7 +436,7 @@ String get_dict_as_str(Dict *d, unsigned indent)
     unsigned insert_idx = 2;
 
     char is_key = 1;
-    StringLink *link = ll->head;
+    string_link_t *link = ll->head;
     while (link)
     {
         if (is_key)
@@ -503,7 +503,7 @@ String get_dict_as_str(Dict *d, unsigned indent)
 /*******************************************************************************
 **                                   WRITING **
 *******************************************************************************/
-void write_json_to_file(JSON *j, char *file_name)
+void write_json_to_file(json_t *j, char *file_name)
 {
     if (!j || !file_name)
     {
@@ -518,7 +518,7 @@ void write_json_to_file(JSON *j, char *file_name)
             return;
         }
 
-        String s = get_array_as_str(j->array, 1);
+        string_t s = get_array_as_str(j->array, 1);
         if (!s.str)
         {
             fclose(f);
@@ -538,7 +538,7 @@ void write_json_to_file(JSON *j, char *file_name)
             return;
         }
 
-        String s = get_dict_as_str(j->dict, 1);
+        string_t s = get_dict_as_str(j->dict, 1);
         if (!s.str)
         {
             fclose(f);

@@ -5,18 +5,18 @@
 
 typedef struct str_link
 {
-    String s;
+    string_t s;
     char s_needs_free;
     char is_from_str;
     struct str_link *next;
-} StringLink;
+} string_link_t;
 
 typedef struct
 {
-    StringLink *head;
-    StringLink *tail;
-} StringLinkedList;
+    string_link_t *head;
+    string_link_t *tail;
+} string_linked_list_t;
 
-void write_json_to_file(JSON *j, char *file_name);
+void write_json_to_file(json_t *j, char *file_name);
 
 #endif // !JSON_WRITE_H

@@ -13,13 +13,13 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    JSON *j = parse(argv[1]);
+    json_t *j = parse(argv[1]);
     if (IS_ARRAY(j))
     {
         arr_print(j->array);
         printf("\n");
 
-        Array *a = calloc(1, sizeof(Array));
+        array_t *a = calloc(1, sizeof(array_t));
         if (a)
         {
             arr_add_int(a, 1);
