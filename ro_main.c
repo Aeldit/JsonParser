@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
     ro_json_t *j = ro_parse(argv[1]);
     if (IS_ARRAY(j))
     {
-        ro_array_print(j->array);
+        // ro_array_print(j->array);
         printf("\n");
         write_ro_json_to_file(j, "out.json");
     }

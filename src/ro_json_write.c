@@ -108,9 +108,7 @@ unsigned handle_values(string_linked_list_t *ll, ro_value_t *values,
         // We add 1 for the comma if we are not at the last value
         // We add 1 for the line return
         // We add 'indent' for the tabs
-        // We add 2 if the item_t's value is a string (for the double quotes)
-        nb_chars += tmp_str.length + (i == total_size - 1 ? 0 : 1) + 1 + indent
-            + (v.type == T_STR ? 2 : 0);
+        nb_chars += tmp_str.length + (i < total_size ? 1 : 0) + 1 + indent * 4;
     }
     return nb_chars;
 }
@@ -155,16 +153,14 @@ unsigned handle_items(string_linked_list_t *ll, ro_item_t *items, unsigned size,
             break;
         }
         add_link(ll, it.key, 0, 1);
-        // + 2 because we add ": " after the key
+        // + 4 because we add '": "' after the key
         nb_chars += it.key.length + 4;
 
         add_link(ll, tmp_str, it.type != T_STR, it.type == T_STR);
         // We add 1 for the comma if we are not at the last value
         // We add 1 for the line return
         // We add 'indent' for the tabs
-        // We add 2 if the item_t's value is a string (for the double quotes)
-        nb_chars += tmp_str.length + (i == total_size - 1 ? 0 : 1) + 1 + indent
-            + (it.type == T_STR ? 2 : 0);
+        nb_chars += tmp_str.length + (i < total_size ? 1 : 0) + 1 + indent * 4;
         is_key = !is_key;
     }
     return nb_chars;
@@ -309,17 +305,30 @@ string_t get_array_as_str(ro_array_t *a, unsigned indent)
         return EMPTY_STRING;
     }
 
+    if (!a->size)
+    {
+        char *str = calloc(3, sizeof(char));
+        if (!str)
+        {
+            return EMPTY_STRING;
+        }
+        memcpy(str, "[]", 2);
+        return STRING_OF(str, 2);
+    }
+
     string_linked_list_t *ll = calloc(1, sizeof(string_linked_list_t));
     if (!ll)
     {
         return EMPTY_STRING;
     }
 
-    // '[' + '\n' + (indent - 1) * '\t' + ']' + '\n'
+    // '[' + '\n' + (indent - 1) * 4 * ' ' + ']' + '\n'
+    // indents are 4 spaces
     // indent == 1 -> if we are in the 'root' array, we add a '\n' at the
     // end
-    unsigned nb_chars = indent - 1 + 3 + (indent == 1)
+    unsigned nb_chars = 2 + (indent - 1) * 4 + (indent == 1)
         + fill_string_ll_with_values(ll, a, indent);
+    unsigned nb_chars_indent = indent * 4;
 
     char *str = calloc(nb_chars + 1, sizeof(char));
     if (!str)
@@ -337,8 +346,8 @@ string_t get_array_as_str(ro_array_t *a, unsigned indent)
     while (link)
     {
         // Tabs
-        memset(str + insert_idx, '\t', indent);
-        insert_idx += indent;
+        memset(str + insert_idx, ' ', nb_chars_indent);
+        insert_idx += nb_chars_indent;
 
         if (link->is_from_str)
         {
@@ -372,8 +381,8 @@ string_t get_array_as_str(ro_array_t *a, unsigned indent)
     else
     {
         // Tabs before the last ']'
-        memset(str + insert_idx, '\t', indent - 1);
-        insert_idx += indent - 1;
+        memset(str + insert_idx, ' ', nb_chars_indent - 4);
+        insert_idx += nb_chars_indent - 4;
 
         str[nb_chars - 1] = ']';
     }
@@ -390,16 +399,28 @@ string_t get_dict_as_str(ro_dict_t *d, unsigned indent)
         return EMPTY_STRING;
     }
 
+    if (!d->size)
+    {
+        char *str = calloc(3, sizeof(char));
+        if (!str)
+        {
+            return EMPTY_STRING;
+        }
+        memcpy(str, "{}", 2);
+        return STRING_OF(str, 2);
+    }
+
     string_linked_list_t *ll = calloc(1, sizeof(string_linked_list_t));
     if (!ll)
     {
         return EMPTY_STRING;
     }
 
-    // '{' + '\n' + (indent - 1) * '\t' + '}' + '\n'
+    // '{' + '\n' + (indent - 1) * 4 * ' ' + '}' + '\n'
     // indent == 1 -> if we are in the 'root' dict, we add a '\n' at the end
-    unsigned nb_chars = indent - 1 + 3 + (indent == 1)
+    unsigned nb_chars = 2 + (indent - 1) * 4 + (indent == 1)
         + fill_string_ll_with_items(ll, d, indent);
+    unsigned nb_chars_indent = indent * 4;
 
     char *str = calloc(nb_chars + 1, sizeof(char));
     if (!str)
@@ -420,8 +441,8 @@ string_t get_dict_as_str(ro_dict_t *d, unsigned indent)
         if (is_key)
         {
             // Tabs
-            memset(str + insert_idx, '\t', indent);
-            insert_idx += indent;
+            memset(str + insert_idx, ' ', nb_chars_indent);
+            insert_idx += nb_chars_indent;
 
             str[insert_idx++] = '"';
 
@@ -466,10 +487,9 @@ string_t get_dict_as_str(ro_dict_t *d, unsigned indent)
     }
     else
     {
-        // TODO: Use spaces instead of tabs
         // Tabs before the last '}'
-        memset(str + insert_idx, '\t', indent - 1);
-        insert_idx += indent - 1;
+        memset(str + insert_idx, ' ', nb_chars_indent - 4);
+        insert_idx += nb_chars_indent - 4;
 
         str[nb_chars - 1] = '}';
     }
@@ -489,46 +509,30 @@ void write_ro_json_to_file(ro_json_t *j, char *file_name)
         return;
     }
 
-    if (j->is_array && j->array)
+    FILE *f = fopen(file_name, "w");
+    if (!f)
     {
-        FILE *f = fopen(file_name, "w");
-        if (!f)
-        {
-            return;
-        }
-
-        string_t s = get_array_as_str(j->array, 1);
-        if (!s.str)
-        {
-            fclose(f);
-            return;
-        }
-
-        printf("%s", s.str);
-        fwrite(s.str, sizeof(char), s.length, f);
-        free(s.str);
-        fclose(f);
+        return;
     }
-    else if (j->dict)
+
+    string_t s = IS_ARRAY(j) ? get_array_as_str(j->array, 1)
+                             : get_dict_as_str(j->dict, 1);
+    if (!s.str)
     {
-        FILE *f = fopen(file_name, "w");
-        if (!f)
-        {
-            return;
-        }
-
-        string_t s = get_dict_as_str(j->dict, 1);
-        if (!s.str)
-        {
-            fclose(f);
-            return;
-        }
-
-        printf("%s", s.str);
-        fwrite(s.str, sizeof(char), s.length, f);
-        free(s.str);
         fclose(f);
+        return;
     }
+
+    printf("%s", s.str);
+    /*printf("\n");
+    for (unsigned i = 0; i < s.length; ++i)
+    {
+        printf("%c", s.str[i] ? s.str[i] : '0');
+    }*/
+
+    fwrite(s.str, sizeof(char), s.length, f);
+    free(s.str);
+    fclose(f);
 }
 
 // FIX: Empty dicts or arrays

@@ -507,46 +507,24 @@ void write_rw_json_to_file(rw_json_t *j, char *file_name)
         return;
     }
 
-    if (j->is_array && j->array)
+    FILE *f = fopen(file_name, "w");
+    if (!f)
     {
-        FILE *f = fopen(file_name, "w");
-        if (!f)
-        {
-            return;
-        }
-
-        string_t s = get_rw_array_as_str(j->array, 1);
-        if (!s.str)
-        {
-            fclose(f);
-            return;
-        }
-
-        printf("%s", s.str);
-        fwrite(s.str, sizeof(char), s.length, f);
-        free(s.str);
-        fclose(f);
+        return;
     }
-    else if (j->dict)
+
+    string_t s = IS_ARRAY(j) ? get_rw_array_as_str(j->array, 1)
+                             : get_rw_dict_as_str(j->dict, 1);
+    if (!s.str)
     {
-        FILE *f = fopen(file_name, "w");
-        if (!f)
-        {
-            return;
-        }
-
-        string_t s = get_rw_dict_as_str(j->dict, 1);
-        if (!s.str)
-        {
-            fclose(f);
-            return;
-        }
-
-        printf("%s", s.str);
-        fwrite(s.str, sizeof(char), s.length, f);
-        free(s.str);
         fclose(f);
+        return;
     }
+
+    printf("%s", s.str);
+    fwrite(s.str, sizeof(char), s.length, f);
+    free(s.str);
+    fclose(f);
 }
 
 // FIX: Empty dicts or arrays

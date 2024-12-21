@@ -347,9 +347,8 @@ void ro_dict_print_indent(ro_dict_t *d, unsigned indent, char fromDict)
 
     printf("%s{\n", fromDict ? "" : tabs);
 
-    unsigned i = 0;
     ro_item_t *items = d->items;
-    for (; i < size; ++i)
+    for (unsigned i = 0; i < size; ++i)
     {
         ro_item_t it = items[i];
         if (it.type == T_ERROR)
