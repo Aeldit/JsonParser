@@ -65,7 +65,6 @@ void destroy_rw_linked_list(rw_string_linked_list_t *ll)
     free(ll);
 }
 
-// FIX: Handle arrays that end with empty dicts
 unsigned handle_rw_values(rw_string_linked_list_t *ll, rw_value_t *values,
                           unsigned size, unsigned total_size, unsigned indent)
 {
@@ -109,8 +108,7 @@ unsigned handle_rw_values(rw_string_linked_list_t *ll, rw_value_t *values,
         // We add 1 for the line return
         // We add 'indent' for the tabs
         // We add 2 if the item_t's value is a string (for the double quotes)
-        nb_chars += tmp_str.length + (i == total_size - 1 ? 0 : 1) + 1 + indent
-            + (v.type == T_STR ? 2 : 0);
+        nb_chars += tmp_str.length + (i < total_size ? 1 : 0) + 1 + indent * 4;
     }
     return nb_chars;
 }
@@ -155,7 +153,7 @@ unsigned handle_rw_items(rw_string_linked_list_t *ll, rw_item_t *items,
             break;
         }
         add_rw_link(ll, it.key, 0, 1);
-        // + 2 because we add ": " after the key
+        // + 4 because we add '": "' after the key
         nb_chars += it.key.length + 4;
 
         add_rw_link(ll, tmp_str, it.type != T_STR, it.type == T_STR);
@@ -163,8 +161,7 @@ unsigned handle_rw_items(rw_string_linked_list_t *ll, rw_item_t *items,
         // We add 1 for the line return
         // We add 'indent' for the tabs
         // We add 2 if the item_t's value is a string (for the double quotes)
-        nb_chars += tmp_str.length + (i == total_size - 1 ? 0 : 1) + 1 + indent
-            + (it.type == T_STR ? 2 : 0);
+        nb_chars += tmp_str.length + (i < total_size ? 1 : 0) + 1 + indent * 4;
         is_key = !is_key;
     }
     return nb_chars;
@@ -327,6 +324,17 @@ string_t get_rw_array_as_str(rw_array_t *a, unsigned indent)
         return EMPTY_STRING;
     }
 
+    if (!a->size)
+    {
+        char *str = calloc(3, sizeof(char));
+        if (!str)
+        {
+            return EMPTY_STRING;
+        }
+        memcpy(str, "[]", 2);
+        return STRING_OF(str, 2);
+    }
+
     rw_string_linked_list_t *ll = calloc(1, sizeof(rw_string_linked_list_t));
     if (!ll)
     {
@@ -336,8 +344,9 @@ string_t get_rw_array_as_str(rw_array_t *a, unsigned indent)
     // '[' + '\n' + (indent - 1) * '\t' + ']' + '\n'
     // indent == 1 -> if we are in the 'root' array, we add a '\n' at the
     // end
-    unsigned nb_chars = indent - 1 + 3 + (indent == 1)
+    unsigned nb_chars = 2 + (indent - 1) * 4 + (indent == 1)
         + fill_rw_string_ll_with_values(ll, a, indent);
+    unsigned nb_chars_indent = indent * 4;
 
     char *str = calloc(nb_chars + 1, sizeof(char));
     if (!str)
@@ -355,8 +364,8 @@ string_t get_rw_array_as_str(rw_array_t *a, unsigned indent)
     while (link)
     {
         // Tabs
-        memset(str + insert_idx, '\t', indent);
-        insert_idx += indent;
+        memset(str + insert_idx, ' ', nb_chars_indent);
+        insert_idx += nb_chars_indent;
 
         if (link->is_from_str)
         {
@@ -390,8 +399,8 @@ string_t get_rw_array_as_str(rw_array_t *a, unsigned indent)
     else
     {
         // Tabs before the last ']'
-        memset(str + insert_idx, '\t', indent - 1);
-        insert_idx += indent - 1;
+        memset(str + insert_idx, ' ', nb_chars_indent - 4);
+        insert_idx += nb_chars_indent - 4;
 
         str[nb_chars - 1] = ']';
     }
@@ -408,6 +417,17 @@ string_t get_rw_dict_as_str(rw_dict_t *d, unsigned indent)
         return EMPTY_STRING;
     }
 
+    if (!d->size)
+    {
+        char *str = calloc(3, sizeof(char));
+        if (!str)
+        {
+            return EMPTY_STRING;
+        }
+        memcpy(str, "{}", 2);
+        return STRING_OF(str, 2);
+    }
+
     rw_string_linked_list_t *ll = calloc(1, sizeof(rw_string_linked_list_t));
     if (!ll)
     {
@@ -416,8 +436,9 @@ string_t get_rw_dict_as_str(rw_dict_t *d, unsigned indent)
 
     // '{' + '\n' + (indent - 1) * '\t' + '}' + '\n'
     // indent == 1 -> if we are in the 'root' dict, we add a '\n' at the end
-    unsigned nb_chars = indent - 1 + 3 + (indent == 1)
+    unsigned nb_chars = 2 + (indent - 1) * 4 + (indent == 1)
         + fill_rw_string_ll_with_items(ll, d, indent);
+    unsigned nb_chars_indent = indent * 4;
 
     char *str = calloc(nb_chars + 1, sizeof(char));
     if (!str)
@@ -438,8 +459,8 @@ string_t get_rw_dict_as_str(rw_dict_t *d, unsigned indent)
         if (is_key)
         {
             // Tabs
-            memset(str + insert_idx, '\t', indent);
-            insert_idx += indent;
+            memset(str + insert_idx, ' ', nb_chars_indent);
+            insert_idx += nb_chars_indent;
 
             str[insert_idx++] = '"';
 
@@ -484,10 +505,9 @@ string_t get_rw_dict_as_str(rw_dict_t *d, unsigned indent)
     }
     else
     {
-        // TODO: Use spaces instead of tabs
         // Tabs before the last '}'
-        memset(str + insert_idx, '\t', indent - 1);
-        insert_idx += indent - 1;
+        memset(str + insert_idx, ' ', nb_chars_indent - 4);
+        insert_idx += nb_chars_indent - 4;
 
         str[nb_chars - 1] = '}';
     }

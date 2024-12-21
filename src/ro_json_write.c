@@ -65,7 +65,6 @@ void destroy_linked_list(string_linked_list_t *ll)
     free(ll);
 }
 
-// FIX: Handle arrays that end with empty dicts
 unsigned handle_values(string_linked_list_t *ll, ro_value_t *values,
                        unsigned size, unsigned total_size, unsigned indent)
 {
