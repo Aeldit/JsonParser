@@ -348,7 +348,7 @@ void defragment_dict(rw_dict_t *d)
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
-rw_json_t *init_ro_json(char is_array, rw_array_t *a, rw_dict_t *d)
+rw_json_t *init_rw_json(char is_array, rw_array_t *a, rw_dict_t *d)
 {
     rw_json_t *j = calloc(1, sizeof(rw_json_t));
     if (!j)
@@ -370,7 +370,7 @@ rw_json_t *init_ro_json(char is_array, rw_array_t *a, rw_dict_t *d)
 /*******************************************************************************
 **                                     ADDS                                   **
 *******************************************************************************/
-void arr_add_str(rw_array_t *a, string_t value)
+void rw_array_add_str(rw_array_t *a, string_t value)
 {
     if (a)
     {
@@ -380,7 +380,7 @@ void arr_add_str(rw_array_t *a, string_t value)
     }
 }
 
-void arr_add_int(rw_array_t *a, int value)
+void rw_array_add_int(rw_array_t *a, int value)
 {
     if (a)
     {
@@ -390,7 +390,7 @@ void arr_add_int(rw_array_t *a, int value)
     }
 }
 
-void arr_add_double(rw_array_t *a, double value)
+void rw_array_add_double(rw_array_t *a, double value)
 {
     if (a)
     {
@@ -400,7 +400,7 @@ void arr_add_double(rw_array_t *a, double value)
     }
 }
 
-void arr_add_bool(rw_array_t *a, char value)
+void rw_array_add_bool(rw_array_t *a, char value)
 {
     if (a)
     {
@@ -410,7 +410,7 @@ void arr_add_bool(rw_array_t *a, char value)
     }
 }
 
-void arr_add_null(rw_array_t *a)
+void rw_array_add_null(rw_array_t *a)
 {
     if (a)
     {
@@ -420,7 +420,7 @@ void arr_add_null(rw_array_t *a)
     }
 }
 
-void arr_add_arr(rw_array_t *a, rw_array_t *value)
+void rw_array_add_array(rw_array_t *a, rw_array_t *value)
 {
     if (a && value)
     {
@@ -430,7 +430,7 @@ void arr_add_arr(rw_array_t *a, rw_array_t *value)
     }
 }
 
-void arr_add_dict(rw_array_t *a, rw_dict_t *value)
+void rw_array_add_dict(rw_array_t *a, rw_dict_t *value)
 {
     if (a && value)
     {
@@ -440,7 +440,7 @@ void arr_add_dict(rw_array_t *a, rw_dict_t *value)
     }
 }
 
-void dict_add_str(rw_dict_t *d, string_t key, string_t rw_value_t)
+void rw_dict_add_str(rw_dict_t *d, string_t key, string_t rw_value_t)
 {
     if (d)
     {
@@ -450,7 +450,7 @@ void dict_add_str(rw_dict_t *d, string_t key, string_t rw_value_t)
     }
 }
 
-void dict_add_int(rw_dict_t *d, string_t key, int rw_value_t)
+void rw_dict_add_int(rw_dict_t *d, string_t key, int rw_value_t)
 {
     if (d)
     {
@@ -460,7 +460,7 @@ void dict_add_int(rw_dict_t *d, string_t key, int rw_value_t)
     }
 }
 
-void dict_add_double(rw_dict_t *d, string_t key, double rw_value_t)
+void rw_dict_add_double(rw_dict_t *d, string_t key, double rw_value_t)
 {
     if (d)
     {
@@ -470,7 +470,7 @@ void dict_add_double(rw_dict_t *d, string_t key, double rw_value_t)
     }
 }
 
-void dict_add_bool(rw_dict_t *d, string_t key, char rw_value_t)
+void rw_dict_add_bool(rw_dict_t *d, string_t key, char rw_value_t)
 {
     if (d)
     {
@@ -480,7 +480,7 @@ void dict_add_bool(rw_dict_t *d, string_t key, char rw_value_t)
     }
 }
 
-void dict_add_null(rw_dict_t *d, string_t key)
+void rw_dict_add_null(rw_dict_t *d, string_t key)
 {
     if (d)
     {
@@ -490,7 +490,7 @@ void dict_add_null(rw_dict_t *d, string_t key)
     }
 }
 
-void dict_add_arr(rw_dict_t *d, string_t key, rw_array_t *rw_value_t)
+void rw_dict_add_array(rw_dict_t *d, string_t key, rw_array_t *rw_value_t)
 {
     if (d && rw_value_t)
     {
@@ -500,7 +500,7 @@ void dict_add_arr(rw_dict_t *d, string_t key, rw_array_t *rw_value_t)
     }
 }
 
-void dict_add_dict(rw_dict_t *d, string_t key, rw_dict_t *rw_value_t)
+void rw_dict_add_dict(rw_dict_t *d, string_t key, rw_dict_t *rw_value_t)
 {
     if (d && rw_value_t)
     {
@@ -513,7 +513,7 @@ void dict_add_dict(rw_dict_t *d, string_t key, rw_dict_t *rw_value_t)
 /*******************************************************************************
 **                                   REMOVES                                  **
 *******************************************************************************/
-void arr_remove(rw_array_t *a, unsigned index)
+void rw_array_remove(rw_array_t *a, unsigned index)
 {
     if (!a || index >= a->size)
     {
@@ -565,7 +565,7 @@ void arr_remove(rw_array_t *a, unsigned index)
     }
 }
 
-void dict_remove(rw_dict_t *d, string_t key)
+void rw_dict_remove(rw_dict_t *d, string_t key)
 {
     if (!d || !key.str)
     {
@@ -616,7 +616,7 @@ void dict_remove(rw_dict_t *d, string_t key)
 /*******************************************************************************
 **                                    GETS                                    **
 *******************************************************************************/
-rw_value_t array_get(rw_array_t *a, unsigned index)
+rw_value_t rw_array_get(rw_array_t *a, unsigned index)
 {
     if (!a || index >= a->size)
     {
@@ -643,7 +643,7 @@ rw_value_t array_get(rw_array_t *a, unsigned index)
     return ERROR_RW_VALUE;
 }
 
-rw_item_t dict_get(rw_dict_t *d, string_t key)
+rw_item_t rw_dict_get(rw_dict_t *d, string_t key)
 {
     if (!d)
     {

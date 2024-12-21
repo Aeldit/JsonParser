@@ -1,25 +1,25 @@
-#include "json_write.h"
+#include "rw_json_write.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-string_t get_int_as_str(int value);
-string_t get_double_as_str(double value);
-string_t get_bool_as_str(char value);
-string_t get_null_as_str();
-string_t get_array_as_str(array_t *a, unsigned indent);
-string_t get_dict_as_str(dict_t *d, unsigned indent);
+string_t get_rw_int_as_str(int value);
+string_t get_rw_double_as_str(double value);
+string_t get_rw_bool_as_str(char value);
+string_t get_rw_null_as_str();
+string_t get_rw_array_as_str(rw_array_t *a, unsigned indent);
+string_t get_rw_dict_as_str(rw_dict_t *d, unsigned indent);
 
-void add_link(string_linked_list_t *ll, string_t str, char str_needs_free,
-              char is_from_str)
+void add_rw_link(rw_string_linked_list_t *ll, string_t str, char str_needs_free,
+                 char is_from_str)
 {
     if (!ll)
     {
         return;
     }
 
-    string_link_t *sl = calloc(1, sizeof(string_link_t));
+    rw_string_link_t *sl = calloc(1, sizeof(rw_string_link_t));
     if (!sl)
     {
         return;
@@ -44,17 +44,17 @@ void add_link(string_linked_list_t *ll, string_t str, char str_needs_free,
     }
 }
 
-void destroy_linked_list(string_linked_list_t *ll)
+void destroy_rw_linked_list(rw_string_linked_list_t *ll)
 {
     if (!ll)
     {
         return;
     }
 
-    string_link_t *link = ll->head;
+    rw_string_link_t *link = ll->head;
     while (link)
     {
-        string_link_t *tmp = link;
+        rw_string_link_t *tmp = link;
         link = link->next;
         if (tmp->s_needs_free)
         {
@@ -66,13 +66,13 @@ void destroy_linked_list(string_linked_list_t *ll)
 }
 
 // FIX: Handle arrays that end with empty dicts
-unsigned handle_values(string_linked_list_t *ll, value_t *values, unsigned size,
-                       unsigned total_size, unsigned indent)
+unsigned handle_rw_values(rw_string_linked_list_t *ll, rw_value_t *values,
+                          unsigned size, unsigned total_size, unsigned indent)
 {
     unsigned nb_chars = 0;
     for (unsigned i = 0; i < size; ++i)
     {
-        value_t v = values[i];
+        rw_value_t v = values[i];
         if (v.type == T_ERROR)
         {
             continue;
@@ -86,25 +86,25 @@ unsigned handle_values(string_linked_list_t *ll, value_t *values, unsigned size,
             nb_chars += 2; // Strings are encased by 2 double-quotes (\"\")
             break;
         case T_INT:
-            tmp_str = get_int_as_str(v.intv);
+            tmp_str = get_rw_int_as_str(v.intv);
             break;
         case T_DOUBLE:
-            tmp_str = get_double_as_str(v.doublev);
+            tmp_str = get_rw_double_as_str(v.doublev);
             break;
         case T_BOOL:
-            tmp_str = get_bool_as_str(v.boolv);
+            tmp_str = get_rw_bool_as_str(v.boolv);
             break;
         case T_NULL:
-            tmp_str = get_null_as_str();
+            tmp_str = get_rw_null_as_str();
             break;
         case T_ARR:
-            tmp_str = get_array_as_str(v.arrayv, indent + 1);
+            tmp_str = get_rw_array_as_str(v.arrayv, indent + 1);
             break;
         case T_DICT:
-            tmp_str = get_dict_as_str(v.dictv, indent + 1);
+            tmp_str = get_rw_dict_as_str(v.dictv, indent + 1);
             break;
         }
-        add_link(ll, tmp_str, v.type != T_STR, v.type == T_STR);
+        add_rw_link(ll, tmp_str, v.type != T_STR, v.type == T_STR);
         // We add 1 for the comma if we are not at the last value
         // We add 1 for the line return
         // We add 'indent' for the tabs
@@ -115,14 +115,14 @@ unsigned handle_values(string_linked_list_t *ll, value_t *values, unsigned size,
     return nb_chars;
 }
 
-unsigned handle_items(string_linked_list_t *ll, item_t *items, unsigned size,
-                      unsigned total_size, unsigned indent)
+unsigned handle_rw_items(rw_string_linked_list_t *ll, rw_item_t *items,
+                         unsigned size, unsigned total_size, unsigned indent)
 {
     unsigned nb_chars = 0;
     char is_key = 1;
     for (unsigned i = 0; i < size; ++i)
     {
-        item_t it = items[i];
+        rw_item_t it = items[i];
         if (it.type == T_ERROR)
         {
             continue;
@@ -136,29 +136,29 @@ unsigned handle_items(string_linked_list_t *ll, item_t *items, unsigned size,
             nb_chars += 2; // Strings are encased by 2 double-quotes (\"\")
             break;
         case T_INT:
-            tmp_str = get_int_as_str(it.intv);
+            tmp_str = get_rw_int_as_str(it.intv);
             break;
         case T_DOUBLE:
-            tmp_str = get_double_as_str(it.doublev);
+            tmp_str = get_rw_double_as_str(it.doublev);
             break;
         case T_BOOL:
-            tmp_str = get_bool_as_str(it.boolv);
+            tmp_str = get_rw_bool_as_str(it.boolv);
             break;
         case T_NULL:
-            tmp_str = get_null_as_str();
+            tmp_str = get_rw_null_as_str();
             break;
         case T_ARR:
-            tmp_str = get_array_as_str(it.arrayv, indent + 1);
+            tmp_str = get_rw_array_as_str(it.arrayv, indent + 1);
             break;
         case T_DICT:
-            tmp_str = get_dict_as_str(it.dictv, indent + 1);
+            tmp_str = get_rw_dict_as_str(it.dictv, indent + 1);
             break;
         }
-        add_link(ll, it.key, 0, 1);
+        add_rw_link(ll, it.key, 0, 1);
         // + 2 because we add ": " after the key
         nb_chars += it.key.length + 4;
 
-        add_link(ll, tmp_str, it.type != T_STR, it.type == T_STR);
+        add_rw_link(ll, tmp_str, it.type != T_STR, it.type == T_STR);
         // We add 1 for the comma if we are not at the last value
         // We add 1 for the line return
         // We add 'indent' for the tabs
@@ -173,8 +173,8 @@ unsigned handle_items(string_linked_list_t *ll, item_t *items, unsigned size,
 /**
 ** \returns The number of additional characters
 */
-unsigned fill_string_ll_with_values(string_linked_list_t *ll, array_t *a,
-                                    unsigned indent)
+unsigned fill_rw_string_ll_with_values(rw_string_linked_list_t *ll,
+                                       rw_array_t *a, unsigned indent)
 {
     if (!ll || !a)
     {
@@ -183,51 +183,47 @@ unsigned fill_string_ll_with_values(string_linked_list_t *ll, array_t *a,
 
     // Iterates over each value of the array and converts them to
     // 'String's + counts the number of chars required for each value
-#ifndef EDITING_MODE
-    return handle_values(ll, a->values, a->size, a->size, indent);
-#else
+
     unsigned nb_chars = 0;
     value_link_t *link = a->head;
     while (link)
     {
-        nb_chars += handle_values(ll, link->values, ARRAY_LEN, a->size, indent);
+        nb_chars +=
+            handle_rw_values(ll, link->values, ARRAY_LEN, a->size, indent);
         link = link->next;
     }
     return nb_chars;
-#endif // !EDITING_MODE
 }
 
 /**
 ** \returns The number of additional characters
 */
-unsigned fill_string_ll_with_items(string_linked_list_t *ll, dict_t *d,
-                                   unsigned indent)
+unsigned fill_rw_string_ll_with_items(rw_string_linked_list_t *ll, rw_dict_t *d,
+                                      unsigned indent)
 {
     if (!ll || !d)
     {
         return 0;
     }
 
-// Iterates over each value of the array and converts them to
-// 'String's + counts the number of chars required for each value
-#ifndef EDITING_MODE
-    return handle_items(ll, d->items, d->size, d->size, indent);
-#else
+    // Iterates over each value of the array and converts them to
+    // 'String's + counts the number of chars required for each value
+
     unsigned nb_chars = 0;
     item_link_t *link = d->head;
     while (link)
     {
-        nb_chars += handle_items(ll, link->items, ARRAY_LEN, d->size, indent);
+        nb_chars +=
+            handle_rw_items(ll, link->items, ARRAY_LEN, d->size, indent);
         link = link->next;
     }
     return nb_chars;
-#endif // !EDITING_MODE
 }
 
 /*******************************************************************************
 **                                GETS AS STR                                 **
 *******************************************************************************/
-string_t get_int_as_str(int value)
+string_t get_rw_int_as_str(int value)
 {
     char is_neg = value < 0;
     unsigned nb_chars = is_neg ? 2 : 1;
@@ -263,7 +259,7 @@ string_t get_int_as_str(int value)
     return s;
 }
 
-string_t get_double_as_str(double value)
+string_t get_rw_double_as_str(double value)
 {
     // 18 : 10 int digits + '.' + 6 floating point digits + '\0'
     char double_str[18];
@@ -305,7 +301,7 @@ string_t get_double_as_str(double value)
     return s;
 }
 
-string_t get_bool_as_str(char value)
+string_t get_rw_bool_as_str(char value)
 {
     char nb_chars = (value ? 4 : 5);
     char *str = calloc(nb_chars + 1, sizeof(char));
@@ -313,7 +309,7 @@ string_t get_bool_as_str(char value)
     return STRING_OF(str ? str : 0, str ? nb_chars : 0);
 }
 
-string_t get_null_as_str()
+string_t get_rw_null_as_str()
 {
     char *str = calloc(5, sizeof(char));
     if (!str)
@@ -324,14 +320,14 @@ string_t get_null_as_str()
     return STRING_OF(str, 4);
 }
 
-string_t get_array_as_str(array_t *a, unsigned indent)
+string_t get_rw_array_as_str(rw_array_t *a, unsigned indent)
 {
     if (!a)
     {
         return EMPTY_STRING;
     }
 
-    string_linked_list_t *ll = calloc(1, sizeof(string_linked_list_t));
+    rw_string_linked_list_t *ll = calloc(1, sizeof(rw_string_linked_list_t));
     if (!ll)
     {
         return EMPTY_STRING;
@@ -341,12 +337,12 @@ string_t get_array_as_str(array_t *a, unsigned indent)
     // indent == 1 -> if we are in the 'root' array, we add a '\n' at the
     // end
     unsigned nb_chars = indent - 1 + 3 + (indent == 1)
-        + fill_string_ll_with_values(ll, a, indent);
+        + fill_rw_string_ll_with_values(ll, a, indent);
 
     char *str = calloc(nb_chars + 1, sizeof(char));
     if (!str)
     {
-        destroy_linked_list(ll);
+        destroy_rw_linked_list(ll);
         return EMPTY_STRING;
     }
 
@@ -355,7 +351,7 @@ string_t get_array_as_str(array_t *a, unsigned indent)
     str[1] = '\n';
     unsigned insert_idx = 2;
 
-    string_link_t *link = ll->head;
+    rw_string_link_t *link = ll->head;
     while (link)
     {
         // Tabs
@@ -401,18 +397,18 @@ string_t get_array_as_str(array_t *a, unsigned indent)
     }
     // |-> End of string building
 
-    destroy_linked_list(ll);
+    destroy_rw_linked_list(ll);
     return STRING_OF(str, nb_chars);
 }
 
-string_t get_dict_as_str(dict_t *d, unsigned indent)
+string_t get_rw_dict_as_str(rw_dict_t *d, unsigned indent)
 {
     if (!d)
     {
         return EMPTY_STRING;
     }
 
-    string_linked_list_t *ll = calloc(1, sizeof(string_linked_list_t));
+    rw_string_linked_list_t *ll = calloc(1, sizeof(rw_string_linked_list_t));
     if (!ll)
     {
         return EMPTY_STRING;
@@ -421,12 +417,12 @@ string_t get_dict_as_str(dict_t *d, unsigned indent)
     // '{' + '\n' + (indent - 1) * '\t' + '}' + '\n'
     // indent == 1 -> if we are in the 'root' dict, we add a '\n' at the end
     unsigned nb_chars = indent - 1 + 3 + (indent == 1)
-        + fill_string_ll_with_items(ll, d, indent);
+        + fill_rw_string_ll_with_items(ll, d, indent);
 
     char *str = calloc(nb_chars + 1, sizeof(char));
     if (!str)
     {
-        destroy_linked_list(ll);
+        destroy_rw_linked_list(ll);
         return EMPTY_STRING;
     }
 
@@ -436,7 +432,7 @@ string_t get_dict_as_str(dict_t *d, unsigned indent)
     unsigned insert_idx = 2;
 
     char is_key = 1;
-    string_link_t *link = ll->head;
+    rw_string_link_t *link = ll->head;
     while (link)
     {
         if (is_key)
@@ -497,14 +493,14 @@ string_t get_dict_as_str(dict_t *d, unsigned indent)
     }
     // |-> End of string building
 
-    destroy_linked_list(ll);
+    destroy_rw_linked_list(ll);
     return STRING_OF(str, nb_chars);
 }
 
 /*******************************************************************************
 **                                   WRITING **
 *******************************************************************************/
-void write_json_to_file(json_t *j, char *file_name)
+void write_rw_json_to_file(rw_json_t *j, char *file_name)
 {
     if (!j || !file_name)
     {
@@ -519,7 +515,7 @@ void write_json_to_file(json_t *j, char *file_name)
             return;
         }
 
-        string_t s = get_array_as_str(j->array, 1);
+        string_t s = get_rw_array_as_str(j->array, 1);
         if (!s.str)
         {
             fclose(f);
@@ -539,7 +535,7 @@ void write_json_to_file(json_t *j, char *file_name)
             return;
         }
 
-        string_t s = get_dict_as_str(j->dict, 1);
+        string_t s = get_rw_dict_as_str(j->dict, 1);
         if (!s.str)
         {
             fclose(f);

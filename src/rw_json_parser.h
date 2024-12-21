@@ -1,5 +1,5 @@
-#ifndef PARSER_H
-#define PARSER_H
+#ifndef RW_JSON_PARSER_H
+#define RW_JSON_PARSER_H
 
 /*******************************************************************************
 **                                  INCLUDES                                  **
@@ -14,4 +14,4 @@
 */
 rw_json_t *rw_parse(char *file);
 
-#endif // !PARSER_H
+#endif // !RW_JSON_PARSER_H

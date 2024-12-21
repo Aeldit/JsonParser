@@ -49,7 +49,6 @@ typedef struct
     };
 } ro_item_t;
 
-// FIX: Memory leak when EDITING_MODE is not defined
 struct ro_array
 {
     unsigned size;
@@ -86,8 +85,6 @@ void ro_array_add_int(ro_array_t *a, int value);
 void ro_array_add_double(ro_array_t *a, double value);
 void ro_array_add_bool(ro_array_t *a, char value);
 void ro_array_add_null(ro_array_t *a);
-// WARN: Check if the array is added to itself, and deep-copy it if so to
-// prevent infinite recursion
 void ro_array_add_array(ro_array_t *a, ro_array_t *value);
 void ro_array_add_dict(ro_array_t *a, ro_dict_t *value);
 
@@ -97,26 +94,14 @@ void ro_dict_add_double(ro_dict_t *d, string_t key, double value);
 void ro_dict_add_bool(ro_dict_t *d, string_t key, char value);
 void ro_dict_add_null(ro_dict_t *d, string_t key);
 void ro_dict_add_array(ro_dict_t *d, string_t key, ro_array_t *value);
-// WARN: Check if the dict is added to itself, and deep-copy it if so to
-// prevent infinite recursion
 void ro_dict_add_dict(ro_dict_t *d, string_t key, ro_dict_t *value);
 
-/**
-** \returns A Value struct containing the type and the value of the correct
-*type
-*/
 ro_value_t ro_array_get(ro_array_t *a, unsigned index);
 ro_item_t ro_dict_get(ro_dict_t *d, string_t key);
 
-/**
-** \brief Prints the contents of the given object to stdout
-*/
 void ro_array_print(ro_array_t *a);
 void ro_dict_print(ro_dict_t *d);
 
-/**
-** \brief Frees the allocated memory
-*/
 void destroy_ro_array(ro_array_t *a);
 void destroy_ro_dict(ro_dict_t *d);
 void destroy_ro_json(ro_json_t *j);

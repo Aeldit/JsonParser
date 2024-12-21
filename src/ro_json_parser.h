@@ -1,5 +1,5 @@
-#ifndef PARSER_H
-#define PARSER_H
+#ifndef RO_JSON_PARSER_H
+#define RO_JSON_PARSER_H
 
 /*******************************************************************************
 **                                  INCLUDES                                  **
@@ -14,4 +14,4 @@
 */
 ro_json_t *ro_parse(char *file);
 
-#endif // !PARSER_H
+#endif // !RO_JSON_PARSER_H

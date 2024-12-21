@@ -1,20 +1,27 @@
 -include Makefile.rules
 
 CC=gcc
-CFILES=	src/base_json_storage.c \
+CFILES=src/base_json_storage.c \
+	src/base_json_parser.c \
 	src/ro_json_parser.c \
 	src/ro_json_storage.c \
 	src/ro_json_write.c \
-	ro_main.c
+	src/rw_json_parser.c \
+	src/rw_json_storage.c \
+	src/rw_json_write.c
 
 TARGET=json-parser
 
 all: clean $(TARGET)
 	./$(TARGET) t.json
 
+rw: clean
+	$(CC) $(CFLAGS) $(CFILES) rw_main.c -o $(TARGET) -lm
+	./$(TARGET) t.json
+
 .PHONY:
 $(TARGET):
-	$(CC) $(CFLAGS) $(CFILES) -o $(TARGET) \
+	$(CC) $(CFLAGS) $(CFILES) ro_main.c -o $(TARGET) \
 		-lm # math library for pow function
 
 clean:
@@ -25,7 +32,7 @@ valgrind-compile: clean
 		-DVALGRING_DISABLE_PRINT \
 		$(CFILES) -o $(TARGET)
 
-valgrind:  valgrind-compile
+valgrind: valgrind-compile
 	valgrind --tool=callgrind --dump-instr=yes --simulate-cache=yes \
 		--collect-jumps=yes ./$(TARGET) big.json
 

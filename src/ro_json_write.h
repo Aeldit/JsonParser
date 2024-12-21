@@ -1,5 +1,5 @@
-#ifndef JSON_WRITE_H
-#define JSON_WRITE_H
+#ifndef RO_JSON_WRITE_H
+#define RO_JSON_WRITE_H
 
 #include "ro_json_storage.h"
 
@@ -19,4 +19,4 @@ typedef struct
 
 void write_ro_json_to_file(ro_json_t *j, char *file_name);
 
-#endif // !JSON_WRITE_H
+#endif // !RO_JSON_WRITE_H

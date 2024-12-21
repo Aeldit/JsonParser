@@ -93,47 +93,39 @@ typedef struct
 } rw_json_t;
 
 /*******************************************************************************
-**                                 FUNCTIONS **
+**                                 FUNCTIONS                                  **
 *******************************************************************************/
-void array_add_str(rw_array_t *a, string_t value);
-void array_add_int(rw_array_t *a, int value);
-void array_add_double(rw_array_t *a, double value);
-void array_add_bool(rw_array_t *a, char value);
-void array_add_null(rw_array_t *a);
+rw_json_t *init_rw_json(char is_array, rw_array_t *a, rw_dict_t *d);
+
+void rw_array_add_str(rw_array_t *a, string_t value);
+void rw_array_add_int(rw_array_t *a, int value);
+void rw_array_add_double(rw_array_t *a, double value);
+void rw_array_add_bool(rw_array_t *a, char value);
+void rw_array_add_null(rw_array_t *a);
 // WARN: Check if the array is added to itself, and deep-copy it if so to
 // prevent infinite recursion
-void array_add_array(rw_array_t *a, rw_array_t *value);
-void array_add_dict(rw_array_t *a, rw_dict_t *value);
+void rw_array_add_array(rw_array_t *a, rw_array_t *value);
+void rw_array_add_dict(rw_array_t *a, rw_dict_t *value);
 
-void dict_add_str(rw_dict_t *d, string_t key, string_t value);
-void dict_add_int(rw_dict_t *d, string_t key, int value);
-void dict_add_double(rw_dict_t *d, string_t key, double value);
-void dict_add_bool(rw_dict_t *d, string_t key, char value);
-void dict_add_null(rw_dict_t *d, string_t key);
-void dict_add_array(rw_dict_t *d, string_t key, rw_array_t *value);
+void rw_dict_add_str(rw_dict_t *d, string_t key, string_t value);
+void rw_dict_add_int(rw_dict_t *d, string_t key, int value);
+void rw_dict_add_double(rw_dict_t *d, string_t key, double value);
+void rw_dict_add_bool(rw_dict_t *d, string_t key, char value);
+void rw_dict_add_null(rw_dict_t *d, string_t key);
+void rw_dict_add_array(rw_dict_t *d, string_t key, rw_array_t *value);
 // WARN: Check if the dict is added to itself, and deep-copy it if so to
 // prevent infinite recursion
-void dict_add_dict(rw_dict_t *d, string_t key, rw_dict_t *value);
+void rw_dict_add_dict(rw_dict_t *d, string_t key, rw_dict_t *value);
 
-void arr_remove(rw_array_t *a, unsigned index);
-void dict_remove(rw_dict_t *d, string_t key);
+void rw_array_remove(rw_array_t *a, unsigned index);
+void rw_dict_remove(rw_dict_t *d, string_t key);
 
-/**
-** \returns A Value struct containing the type and the value of the correct
-*type
-*/
-rw_value_t array_get(rw_array_t *a, unsigned index);
-rw_item_t dict_get(rw_dict_t *d, string_t key);
+rw_value_t rw_array_get(rw_array_t *a, unsigned index);
+rw_item_t rw_dict_get(rw_dict_t *d, string_t key);
 
-/**
-** \brief Prints the contents of the given object to stdout
-*/
 void rw_array_print(rw_array_t *a);
 void rw_dict_print(rw_dict_t *d);
 
-/**
-** \brief Frees the allocated memory
-*/
 void destroy_rw_array(rw_array_t *a);
 void destroy_rw_dict(rw_dict_t *d);
 void destroy_rw_json(rw_json_t *j);

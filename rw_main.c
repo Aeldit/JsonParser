@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "base_json_storage.h"
-#include "json_parser.h"
-#include "json_write.h"
+#include "src/base_json_storage.h"
+#include "src/rw_json_parser.h"
+#include "src/rw_json_write.h"
 
 int main(int argc, char *argv[])
 {
@@ -12,28 +12,28 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    json_t *j = parse(argv[1]);
+    rw_json_t *j = rw_parse(argv[1]);
     if (IS_ARRAY(j))
     {
-        arr_print(j->array);
+        rw_array_print(j->array);
         printf("\n");
 
-        array_t *a = calloc(1, sizeof(array_t));
+        rw_array_t *a = calloc(1, sizeof(rw_array_t));
         if (a)
         {
-            arr_add_int(a, 1);
-            arr_add_int(a, 2);
-            arr_add_int(a, 3);
-            arr_add_int(a, 4);
-            arr_add_int(a, 5);
-            arr_add_arr(j->array, a);
-            write_json_to_file(j, "out.json");
+            rw_array_add_int(a, 1);
+            rw_array_add_int(a, 2);
+            rw_array_add_int(a, 3);
+            rw_array_add_int(a, 4);
+            rw_array_add_int(a, 5);
+            rw_array_add_array(j->array, a);
+            write_rw_json_to_file(j, "out.json");
         }
     }
     else if (IS_DICT(j))
     {
-        dict_print(j->dict);
+        rw_dict_print(j->dict);
     }
-    destroy_json(j);
+    destroy_rw_json(j);
     return 0;
 }
