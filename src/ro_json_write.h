@@ -3,20 +3,6 @@
 
 #include "ro_json_storage.h"
 
-typedef struct str_link
-{
-    string_t s;
-    char s_needs_free;
-    char is_from_str;
-    struct str_link *next;
-} string_link_t;
-
-typedef struct
-{
-    string_link_t *head;
-    string_link_t *tail;
-} string_linked_list_t;
-
 void write_ro_json_to_file(ro_json_t *j, char *file_name);
 
 #endif // !RO_JSON_WRITE_H

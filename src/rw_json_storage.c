@@ -758,12 +758,12 @@ void rw_array_print_indent(rw_array_t *a, unsigned indent, char fromDict)
 
 void rw_array_print(rw_array_t *a)
 {
-#ifndef VALGRING_DISABLE_PRINT
     if (a)
     {
+#ifndef VALGRING_DISABLE_PRINT
         rw_array_print_indent(a, 1, 0);
-    }
 #endif
+    }
 }
 
 void rw_dict_print_indent(rw_dict_t *d, unsigned indent, char fromDict)
@@ -846,12 +846,12 @@ void rw_dict_print_indent(rw_dict_t *d, unsigned indent, char fromDict)
 
 void rw_dict_print(rw_dict_t *d)
 {
-#ifndef VALGRING_DISABLE_PRINT
     if (d)
     {
+#ifndef VALGRING_DISABLE_PRINT
         rw_dict_print_indent(d, 1, 0);
-    }
 #endif
+    }
 }
 
 /*******************************************************************************

@@ -1,8 +1,9 @@
 -include Makefile.rules
 
 CC=gcc
-CFILES=src/base_json_storage.c \
-	src/base_json_parser.c \
+CFILES=src/base_json_parser.c \
+	src/base_json_storage.c \
+	src/base_json_write.c \
 	src/ro_json_parser.c \
 	src/ro_json_storage.c \
 	src/ro_json_write.c \
@@ -30,7 +31,7 @@ clean:
 valgrind-compile: clean
 	$(CC) $(CFLAGS) -lm \
 		-DVALGRING_DISABLE_PRINT \
-		$(CFILES) -o $(TARGET)
+		$(CFILES) ro_main.c -o $(TARGET)
 
 valgrind: valgrind-compile
 	valgrind --tool=callgrind --dump-instr=yes --simulate-cache=yes \

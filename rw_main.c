@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
     rw_json_t *j = rw_parse(argv[1]);
     if (IS_ARRAY(j))
     {
-        rw_array_print(j->array);
+        // rw_array_print(j->array);
         printf("\n");
 
         rw_array_t *a = calloc(1, sizeof(rw_array_t));
