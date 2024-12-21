@@ -225,7 +225,7 @@ unsigned fill_string_ll_with_items(string_linked_list_t *ll, dict_t *d,
 }
 
 /*******************************************************************************
-**                                GETS AS STR **
+**                                GETS AS STR                                 **
 *******************************************************************************/
 string_t get_int_as_str(int value)
 {
@@ -488,6 +488,7 @@ string_t get_dict_as_str(dict_t *d, unsigned indent)
     }
     else
     {
+        // TODO: Use spaces instead of tabs
         // Tabs before the last '}'
         memset(str + insert_idx, '\t', indent - 1);
         insert_idx += indent - 1;

@@ -1,4 +1,4 @@
-#include "json_storage.h"
+#include "rw_json_storage.h"
 
 /*******************************************************************************
 **                                  INCLUDES                                  **
@@ -8,52 +8,48 @@
 /*******************************************************************************
 **                                   MACROS                                   **
 *******************************************************************************/
-#define ERROR_VALUE ((value_t){ .type = T_ERROR })
-#define ERROR_ITEM ((item_t){ .type = T_ERROR })
-
-#ifdef EDITING_MODE
 /**
 ** \def Adds an element to the given array_t or dict_t
 ** \param TypeLink Can be either 'ValueLink' or 'ItemLink'
 ** \param x The name of the array_t or dict_t variable (a for array_t, d for
-*dict_t)
+**          dict_t)
 */
-#    define ADD(TypeLink, x)                                                   \
-        if (!x->head)                                                          \
+#define ADD(TypeLink, x)                                                       \
+    if (!x->head)                                                              \
+    {                                                                          \
+        TypeLink *l = calloc(1, sizeof(TypeLink));                             \
+        if (!l)                                                                \
+        {                                                                      \
+            return;                                                            \
+        }                                                                      \
+        x->head = l;                                                           \
+        x->tail = l;                                                           \
+    }                                                                          \
+    else                                                                       \
+    {                                                                          \
+        if (!x->tail)                                                          \
+        {                                                                      \
+            return;                                                            \
+        }                                                                      \
+        /* If the current link's array_t is full */                            \
+        if (x->tail->insert_index >= ARRAY_LEN)                                \
         {                                                                      \
             TypeLink *l = calloc(1, sizeof(TypeLink));                         \
             if (!l)                                                            \
             {                                                                  \
                 return;                                                        \
             }                                                                  \
-            x->head = l;                                                       \
+            x->tail->next = l;                                                 \
             x->tail = l;                                                       \
         }                                                                      \
-        else                                                                   \
-        {                                                                      \
-            if (!x->tail)                                                      \
-            {                                                                  \
-                return;                                                        \
-            }                                                                  \
-            /* If the current link's array_t is full */                        \
-            if (x->tail->insert_index >= ARRAY_LEN)                            \
-            {                                                                  \
-                TypeLink *l = calloc(1, sizeof(TypeLink));                     \
-                if (!l)                                                        \
-                {                                                              \
-                    return;                                                    \
-                }                                                              \
-                x->tail->next = l;                                             \
-                x->tail = l;                                                   \
-            }                                                                  \
-        }                                                                      \
-        ++x->size
+    }                                                                          \
+    ++x->size
 
 /*******************************************************************************
 **                               LOCAL FUNCTIONS                              **
 *******************************************************************************/
-#    ifdef DEBUG
-#        include <stdio.h>
+#ifdef DEBUG
+#    include <stdio.h>
 /**
 ** \brief Debug function that allows printing the linked lists arrays
 */
@@ -109,7 +105,7 @@ void arr_print_array(array_t *a)
     }
     printf("\n");
 }
-#    endif // !DEBUG
+#endif // !DEBUG
 
 void arr_copy_array(value_t *src, value_t *dest)
 {
@@ -348,204 +344,10 @@ void defragment_dict(dict_t *d)
         }
     }
 }
-#else
-/*******************************************************************************
-**                                 FUNCTIONS                                  **
-*******************************************************************************/
-array_t *init_array(unsigned size)
-{
-    array_t *a = calloc(1, sizeof(array_t));
-    if (!a)
-    {
-        return 0;
-    }
-
-    if (!size)
-    {
-        return a;
-    }
-
-    a->values = calloc(size, sizeof(value_t));
-    if (!a->values)
-    {
-        free(a);
-        return 0;
-    }
-    a->size = size;
-    return a;
-}
-
-dict_t *init_dict(unsigned size)
-{
-    dict_t *d = calloc(1, sizeof(dict_t));
-    if (!d)
-    {
-        return 0;
-    }
-
-    if (!size)
-    {
-        return d;
-    }
-
-    d->items = calloc(size, sizeof(item_t));
-    if (!d->items)
-    {
-        free(d);
-        return 0;
-    }
-    d->size = size;
-    return d;
-}
-#endif // !EDITING_MODE
-
-json_t *init_json(char is_array, array_t *a, dict_t *d)
-{
-    json_t *j = calloc(1, sizeof(json_t));
-    if (!j)
-    {
-        return 0;
-    }
-    j->is_array = is_array;
-    if (is_array)
-    {
-        j->array = a;
-    }
-    else
-    {
-        j->dict = d;
-    }
-    return j;
-}
 
 /*******************************************************************************
 **                                     ADDS                                   **
 *******************************************************************************/
-#ifndef EDITING_MODE
-void arr_add_str(array_t *a, string_t value)
-{
-    if (a && a->values && a->insert_index < a->size)
-    {
-        a->values[a->insert_index++] =
-            (value_t){ .type = T_STR, .strv = value };
-    }
-}
-
-void arr_add_int(array_t *a, int value)
-{
-    if (a && a->values && a->insert_index < a->size)
-    {
-        a->values[a->insert_index++] =
-            (value_t){ .type = T_INT, .intv = value };
-    }
-}
-
-void arr_add_double(array_t *a, double value)
-{
-    if (a && a->values && a->insert_index < a->size)
-    {
-        a->values[a->insert_index++] =
-            (value_t){ .type = T_DOUBLE, .doublev = value };
-    }
-}
-
-void arr_add_bool(array_t *a, char value)
-{
-    if (a && a->values && a->insert_index < a->size)
-    {
-        a->values[a->insert_index++] =
-            (value_t){ .type = T_BOOL, .boolv = value };
-    }
-}
-
-void arr_add_null(array_t *a)
-{
-    if (a && a->values && a->insert_index < a->size)
-    {
-        a->values[a->insert_index++] = (value_t){ .type = T_NULL };
-    }
-}
-
-void arr_add_arr(array_t *a, array_t *value)
-{
-    if (a && a->values && value && a->insert_index < a->size)
-    {
-        a->values[a->insert_index++] =
-            (value_t){ .type = T_ARR, .arrayv = value };
-    }
-}
-
-void arr_add_dict(array_t *a, dict_t *value)
-{
-    if (a && a->values && value && a->insert_index < a->size)
-    {
-        a->values[a->insert_index++] =
-            (value_t){ .type = T_DICT, .dictv = value };
-    }
-}
-
-void dict_add_str(dict_t *d, string_t key, string_t value_t)
-{
-    if (d && d->items && d->insert_index < d->size)
-    {
-        d->items[d->insert_index++] =
-            (item_t){ .type = T_STR, .key = key, .strv = value_t };
-    }
-}
-
-void dict_add_int(dict_t *d, string_t key, int value_t)
-{
-    if (d && d->items && d->insert_index < d->size)
-    {
-        d->items[d->insert_index++] =
-            (item_t){ .type = T_INT, .key = key, .intv = value_t };
-    }
-}
-
-void dict_add_double(dict_t *d, string_t key, double value_t)
-{
-    if (d && d->items && d->insert_index < d->size)
-    {
-        d->items[d->insert_index++] =
-            (item_t){ .type = T_DOUBLE, .key = key, .doublev = value_t };
-    }
-}
-
-void dict_add_bool(dict_t *d, string_t key, char value_t)
-{
-    if (d && d->items && d->insert_index < d->size)
-    {
-        d->items[d->insert_index++] =
-            (item_t){ .type = T_BOOL, .key = key, .boolv = value_t };
-    }
-}
-
-void dict_add_null(dict_t *d, string_t key)
-{
-    if (d && d->items && d->insert_index < d->size)
-    {
-        d->items[d->insert_index++] = (item_t){ .type = T_NULL, .key = key };
-    }
-}
-
-void dict_add_arr(dict_t *d, string_t key, array_t *value_t)
-{
-    if (d && d->items && value_t && d->insert_index < d->size)
-    {
-        d->items[d->insert_index++] =
-            (item_t){ .type = T_ARR, .key = key, .arrayv = value_t };
-    }
-}
-
-void dict_add_dict(dict_t *d, string_t key, dict_t *value_t)
-{
-    if (d && d->items && value_t && d->insert_index < d->size)
-    {
-        d->items[d->insert_index++] =
-            (item_t){ .type = T_DICT, .key = key, .dictv = value_t };
-    }
-}
-#else
 void arr_add_str(array_t *a, string_t value)
 {
     if (a)
@@ -787,7 +589,6 @@ void dict_remove(dict_t *d, string_t key)
         link = link->next;
     }
 }
-#endif // !EDITING_MODE
 
 /*******************************************************************************
 **                                    GETS                                    **
@@ -799,9 +600,6 @@ value_t array_get(array_t *a, unsigned index)
         return ERROR_VALUE;
     }
 
-#ifndef EDITING_MODE
-    return index < a->size ? a->values[index] : ERROR_VALUE;
-#else
     value_link_t *link = a->head;
     unsigned non_null_values = 0;
     while (link)
@@ -820,7 +618,6 @@ value_t array_get(array_t *a, unsigned index)
         link = link->next;
     }
     return ERROR_VALUE;
-#endif // !EDITING_MODE
 }
 
 item_t dict_get(dict_t *d, string_t key)
@@ -830,18 +627,6 @@ item_t dict_get(dict_t *d, string_t key)
         return ERROR_ITEM;
     }
 
-#ifndef EDITING_MODE
-    item_t *items = d->items;
-    unsigned size = d->size;
-    for (unsigned i = 0; i < size; ++i)
-    {
-        item_t it = items[i];
-        if (strings_equals(key, it.key))
-        {
-            return it;
-        }
-    }
-#else
     item_link_t *link = d->head;
     unsigned non_null_values = 0;
     while (link)
@@ -860,7 +645,6 @@ item_t dict_get(dict_t *d, string_t key)
         }
         link = link->next;
     }
-#endif // !EDITING_MODE
     return ERROR_ITEM;
 }
 
@@ -874,27 +658,6 @@ void destroy_array(array_t *a)
         return;
     }
 
-#ifndef EDITING_MODE
-    value_t *values = a->values;
-    unsigned size = a->size;
-    for (unsigned i = 0; i < size; ++i)
-    {
-        value_t val = values[i];
-        switch (val.type)
-        {
-        case T_STR:
-            free(val.strv.str);
-            break;
-        case T_ARR:
-            destroy_array(val.arrayv);
-            break;
-        case T_DICT:
-            destroy_dict(val.dictv);
-            break;
-        }
-    }
-    free(values);
-#else
     value_link_t *link = a->head;
     while (link)
     {
@@ -918,7 +681,6 @@ void destroy_array(array_t *a)
         }
         free(tmp);
     }
-#endif // !EDITING_MODE
     free(a);
 }
 
@@ -929,28 +691,6 @@ void destroy_dict(dict_t *d)
         return;
     }
 
-#ifndef EDITING_MODE
-    item_t *items = d->items;
-    unsigned size = d->size;
-    for (unsigned i = 0; i < size; ++i)
-    {
-        item_t it = items[i];
-        free(it.key.str);
-        switch (it.type)
-        {
-        case T_STR:
-            free(it.strv.str);
-            break;
-        case T_ARR:
-            destroy_array(it.arrayv);
-            break;
-        case T_DICT:
-            destroy_dict(it.dictv);
-            break;
-        }
-    }
-    free(items);
-#else
     item_link_t *link = d->head;
     while (link)
     {
@@ -975,7 +715,6 @@ void destroy_dict(dict_t *d)
         }
         free(tmp);
     }
-#endif // !EDITING_MODE
     free(d);
 }
 
@@ -996,29 +735,4 @@ void destroy_json(json_t *j)
     }
 
     free(j);
-}
-
-char strings_equals(string_t s1, string_t s2)
-{
-    unsigned length = s1.length;
-    if (length != s2.length)
-    {
-        return 0;
-    }
-
-    const char *a = s1.str;
-    const char *b = s2.str;
-    if (!a || !b)
-    {
-        return 0;
-    }
-
-    for (unsigned i = 0; i < length; ++i)
-    {
-        if (a[i] != b[i])
-        {
-            return 0;
-        }
-    }
-    return 1;
 }
