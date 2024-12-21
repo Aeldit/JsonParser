@@ -99,7 +99,7 @@ void ro_dict_add_null(ro_dict_t *d, string_t key);
 void ro_dict_add_array(ro_dict_t *d, string_t key, ro_array_t *value);
 // WARN: Check if the dict is added to itself, and deep-copy it if so to
 // prevent infinite recursion
-void dict_add_dict(ro_dict_t *d, string_t key, ro_dict_t *value);
+void ro_dict_add_dict(ro_dict_t *d, string_t key, ro_dict_t *value);
 
 /**
 ** \returns A Value struct containing the type and the value of the correct
@@ -107,6 +107,12 @@ void dict_add_dict(ro_dict_t *d, string_t key, ro_dict_t *value);
 */
 ro_value_t ro_array_get(ro_array_t *a, unsigned index);
 ro_item_t ro_dict_get(ro_dict_t *d, string_t key);
+
+/**
+** \brief Prints the contents of the given object to stdout
+*/
+void ro_array_print(ro_array_t *a);
+void ro_dict_print(ro_dict_t *d);
 
 /**
 ** \brief Frees the allocated memory

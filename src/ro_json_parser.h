@@ -4,7 +4,7 @@
 /*******************************************************************************
 **                                  INCLUDES                                  **
 *******************************************************************************/
-#include "base_json_storage.h"
+#include "ro_json_storage.h"
 
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
@@ -12,6 +12,6 @@
 /**
 ** \brief Parse the given file and returns the associated JSON object
 */
-json_t *parse(char *file);
+ro_json_t *ro_parse(char *file);
 
 #endif // !PARSER_H

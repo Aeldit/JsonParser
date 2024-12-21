@@ -3,6 +3,7 @@
 /*******************************************************************************
 **                                  INCLUDES                                  **
 *******************************************************************************/
+#include <stdio.h>
 #include <stdlib.h>
 
 /*******************************************************************************
@@ -234,7 +235,179 @@ ro_item_t dict_get(ro_dict_t *d, string_t key)
 }
 
 /*******************************************************************************
-**                                   DESTROYS                                 **
+**                                   PRINTING                                 **
+*******************************************************************************/
+void ro_dict_print_indent(ro_dict_t *d, unsigned indent, char fromDict);
+void ro_dict_print(ro_dict_t *d);
+
+void ro_array_print_indent(ro_array_t *a, unsigned indent, char fromDict)
+{
+    if (!a)
+    {
+        return;
+    }
+
+    // Obtains the number of tab characters that will be printed
+    char *tabs = calloc(indent, sizeof(char));
+    if (!tabs)
+    {
+        return;
+    }
+    for (unsigned i = 0; i < indent - 1; ++i)
+    {
+        tabs[i] = '\t';
+    }
+    tabs[indent - 1] = '\0';
+
+    unsigned size = a->size;
+    // Empty array
+    if (size == 0)
+    {
+        printf("%s[]", fromDict ? "" : tabs);
+        free(tabs);
+        return;
+    }
+
+    printf("%s[\n", fromDict ? "" : tabs);
+
+    ro_value_t *values = a->values;
+    for (unsigned i = 0; i < size; ++i)
+    {
+        ro_value_t v = values[i];
+        if (v.type == T_ERROR)
+        {
+            continue;
+        }
+
+        switch (v.type)
+        {
+        case T_STR:
+            printf("\t%s\"%s\"", tabs, v.strv.str ? v.strv.str : "");
+            break;
+        case T_INT:
+            printf("\t%s%d", tabs, v.intv);
+            break;
+        case T_DOUBLE:
+            printf("\t%s%f", tabs, v.doublev);
+            break;
+        case T_BOOL:
+            printf("\t%s%s", tabs, v.boolv ? "true" : "false");
+            break;
+        case T_NULL:
+            printf("\t%snull", tabs);
+            break;
+        case T_ARR:
+            ro_array_print_indent(v.arrayv, indent + 1, 0);
+            break;
+        case T_DICT:
+            ro_dict_print_indent(v.dictv, indent + 1, 0);
+            break;
+        }
+
+        if (i < size - 1)
+        {
+            printf(",\n");
+        }
+    }
+    printf("\n%s]", tabs);
+    free(tabs);
+}
+
+void ro_array_print(ro_array_t *a)
+{
+#ifndef VALGRING_DISABLE_PRINT
+    if (a)
+    {
+        ro_array_print_indent(a, 1, 0);
+    }
+#endif
+}
+
+void ro_dict_print_indent(ro_dict_t *d, unsigned indent, char fromDict)
+{
+    // Obtains the number of tab characters that will be printed
+    char *tabs = calloc(indent, sizeof(char));
+    if (!tabs)
+    {
+        return;
+    }
+    for (unsigned i = 0; i < indent - 1; ++i)
+    {
+        tabs[i] = '\t';
+    }
+    tabs[indent - 1] = '\0';
+
+    unsigned size = d->size;
+    if (size == 0)
+    {
+        printf("%s{}", fromDict ? "" : tabs);
+        free(tabs);
+        return;
+    }
+
+    printf("%s{\n", fromDict ? "" : tabs);
+
+    unsigned i = 0;
+    ro_item_t *items = d->items;
+    for (; i < size; ++i)
+    {
+        ro_item_t it = items[i];
+        if (it.type == T_ERROR)
+        {
+            continue;
+        }
+
+        string_t key = it.key;
+        switch (it.type)
+        {
+        case T_STR:
+            printf("\t%s\"%s\" : \"%s\"", tabs, key.str,
+                   it.strv.str ? it.strv.str : "");
+            break;
+        case T_INT:
+            printf("\t%s\"%s\" : %d", tabs, key.str, it.intv);
+            break;
+        case T_DOUBLE:
+            printf("\t%s\"%s\" : %f", tabs, key.str, it.doublev);
+            break;
+        case T_BOOL:
+            printf("\t%s\"%s\" : %s", tabs, key.str,
+                   it.boolv ? "true" : "false");
+            break;
+        case T_NULL:
+            printf("\t%s\"%s\" : null", tabs, key.str);
+            break;
+        case T_ARR:
+            printf("\t%s\"%s\" : ", tabs, key.str);
+            ro_array_print_indent(it.arrayv, indent + 1, 1);
+            break;
+        case T_DICT:
+            printf("\t%s\"%s\" : ", tabs, key.str);
+            ro_dict_print_indent(it.dictv, indent + 1, 1);
+            break;
+        }
+
+        if (i < size - 1)
+        {
+            printf(",\n");
+        }
+    }
+    printf("\n%s}", tabs);
+    free(tabs);
+}
+
+void ro_dict_print(ro_dict_t *d)
+{
+#ifndef VALGRING_DISABLE_PRINT
+    if (d)
+    {
+        ro_dict_print_indent(d, 1, 0);
+    }
+#endif
+}
+
+/*******************************************************************************
+**                                 DESTRUCTION                                **
 *******************************************************************************/
 void destroy_ro_array(ro_array_t *a)
 {

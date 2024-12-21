@@ -1,11 +1,11 @@
 -include Makefile.rules
 
 CC=gcc
-CFILES=src/json_parser.c \
-	src/json_printing.c \
-	src/json_storage.c \
-	src/json_write.c \
-	src/main.c
+CFILES=	src/base_json_storage.c \
+	src/ro_json_parser.c \
+	src/ro_json_storage.c \
+	src/ro_json_write.c \
+	ro_main.c
 
 TARGET=json-parser
 

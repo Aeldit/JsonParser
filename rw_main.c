@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "base_json_storage.h"
 #include "json_parser.h"
-#include "json_storage.h"
 #include "json_write.h"
 
 int main(int argc, char *argv[])
