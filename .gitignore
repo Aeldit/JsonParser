@@ -1,6 +1,4 @@
 *.o
 json-parser
 Makefile.rules
-*.json
-!t.json
 

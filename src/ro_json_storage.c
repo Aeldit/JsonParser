@@ -79,7 +79,7 @@ ro_json_t *init_ro_json(char is_array, ro_array_t *a, ro_dict_t *d)
 *******************************************************************************/
 void ro_array_add_str(ro_array_t *a, string_t value)
 {
-    if (a && a->values && a->insert_index < a->size)
+    if (a && a->values && a->insert_index < a->size && value.str)
     {
         a->values[a->insert_index++] =
             (ro_value_t){ .type = T_STR, .strv = value };
@@ -139,65 +139,65 @@ void ro_array_add_dict(ro_array_t *a, ro_dict_t *value)
     }
 }
 
-void ro_dict_add_str(ro_dict_t *d, string_t key, string_t ro_value_t)
+void ro_dict_add_str(ro_dict_t *d, string_t key, string_t value)
 {
-    if (d && d->items && d->insert_index < d->size)
+    if (d && d->items && d->insert_index < d->size && key.str && value.str)
     {
         d->items[d->insert_index++] =
-            (ro_item_t){ .type = T_STR, .key = key, .strv = ro_value_t };
+            (ro_item_t){ .type = T_STR, .key = key, .strv = value };
     }
 }
 
-void ro_dict_add_int(ro_dict_t *d, string_t key, int ro_value_t)
+void ro_dict_add_int(ro_dict_t *d, string_t key, int value)
 {
-    if (d && d->items && d->insert_index < d->size)
+    if (d && d->items && d->insert_index < d->size && key.str)
     {
         d->items[d->insert_index++] =
-            (ro_item_t){ .type = T_INT, .key = key, .intv = ro_value_t };
+            (ro_item_t){ .type = T_INT, .key = key, .intv = value };
     }
 }
 
-void ro_dict_add_double(ro_dict_t *d, string_t key, double ro_value_t)
+void ro_dict_add_double(ro_dict_t *d, string_t key, double value)
 {
-    if (d && d->items && d->insert_index < d->size)
+    if (d && d->items && d->insert_index < d->size && key.str)
     {
         d->items[d->insert_index++] =
-            (ro_item_t){ .type = T_DOUBLE, .key = key, .doublev = ro_value_t };
+            (ro_item_t){ .type = T_DOUBLE, .key = key, .doublev = value };
     }
 }
 
-void ro_dict_add_bool(ro_dict_t *d, string_t key, char ro_value_t)
+void ro_dict_add_bool(ro_dict_t *d, string_t key, char value)
 {
-    if (d && d->items && d->insert_index < d->size)
+    if (d && d->items && d->insert_index < d->size && key.str)
     {
         d->items[d->insert_index++] =
-            (ro_item_t){ .type = T_BOOL, .key = key, .boolv = ro_value_t };
+            (ro_item_t){ .type = T_BOOL, .key = key, .boolv = value };
     }
 }
 
 void ro_dict_add_null(ro_dict_t *d, string_t key)
 {
-    if (d && d->items && d->insert_index < d->size)
+    if (d && d->items && d->insert_index < d->size && key.str)
     {
         d->items[d->insert_index++] = (ro_item_t){ .type = T_NULL, .key = key };
     }
 }
 
-void ro_dict_add_array(ro_dict_t *d, string_t key, ro_array_t *ro_value_t)
+void ro_dict_add_array(ro_dict_t *d, string_t key, ro_array_t *value)
 {
-    if (d && d->items && ro_value_t && d->insert_index < d->size)
+    if (d && d->items && value && d->insert_index < d->size && key.str)
     {
         d->items[d->insert_index++] =
-            (ro_item_t){ .type = T_ARR, .key = key, .arrayv = ro_value_t };
+            (ro_item_t){ .type = T_ARR, .key = key, .arrayv = value };
     }
 }
 
-void ro_dict_add_dict(ro_dict_t *d, string_t key, ro_dict_t *ro_value_t)
+void ro_dict_add_dict(ro_dict_t *d, string_t key, ro_dict_t *value)
 {
-    if (d && d->items && ro_value_t && d->insert_index < d->size)
+    if (d && d->items && value && d->insert_index < d->size && key.str)
     {
         d->items[d->insert_index++] =
-            (ro_item_t){ .type = T_DICT, .key = key, .dictv = ro_value_t };
+            (ro_item_t){ .type = T_DICT, .key = key, .dictv = value };
     }
 }
 
@@ -216,7 +216,7 @@ ro_value_t array_get(ro_array_t *a, unsigned index)
 
 ro_item_t dict_get(ro_dict_t *d, string_t key)
 {
-    if (!d)
+    if (!d || !key.str)
     {
         return ERROR_RO_ITEM;
     }
@@ -423,7 +423,7 @@ void destroy_ro_array(ro_array_t *a)
         switch (val.type)
         {
         case T_STR:
-            free(val.strv.str);
+            destroy_string(val.strv);
             break;
         case T_ARR:
             destroy_ro_array(val.arrayv);
@@ -449,11 +449,11 @@ void destroy_ro_dict(ro_dict_t *d)
     for (unsigned i = 0; i < size; ++i)
     {
         ro_item_t it = items[i];
-        free(it.key.str);
+        destroy_string(it.key);
         switch (it.type)
         {
         case T_STR:
-            free(it.strv.str);
+            destroy_string(it.strv);
             break;
         case T_ARR:
             destroy_ro_array(it.arrayv);

@@ -14,7 +14,7 @@
 #define T_DICT 7
 
 #define STRING_OF(s, l) ((string_t){ .str = (s), .len = (l) })
-#define EMPTY_STRING ((string_t){ .str = 0, .len = 0 })
+#define EMPTY_STRING ((string_t){ .str = 0 })
 
 /*
 ** \def Checks if the JSON instance is not null, if the JSON instance is an
@@ -41,5 +41,12 @@ typedef struct
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
 char strings_equals(string_t s1, string_t s2);
+
+/**
+** \brief If the string is not null but its length is 0, it means that it
+**        was not allocated so we don't free it (added with STRING_OF("\0", 0)).
+**        Otherwise, we free the char array
+*/
+void destroy_string(string_t s);
 
 #endif // !BASE_JSON_STORAGE_H

@@ -372,7 +372,7 @@ rw_json_t *init_rw_json(char is_array, rw_array_t *a, rw_dict_t *d)
 *******************************************************************************/
 void rw_array_add_str(rw_array_t *a, string_t value)
 {
-    if (a)
+    if (a && value.str)
     {
         ADD(value_link_t, a);
         a->tail->values[a->tail->insert_index++] =
@@ -440,49 +440,49 @@ void rw_array_add_dict(rw_array_t *a, rw_dict_t *value)
     }
 }
 
-void rw_dict_add_str(rw_dict_t *d, string_t key, string_t rw_value_t)
+void rw_dict_add_str(rw_dict_t *d, string_t key, string_t value)
 {
-    if (d)
+    if (d && key.str)
     {
         ADD(item_link_t, d);
         d->tail->items[d->tail->insert_index++] =
-            (rw_item_t){ .type = T_STR, .key = key, .strv = rw_value_t };
+            (rw_item_t){ .type = T_STR, .key = key, .strv = value };
     }
 }
 
-void rw_dict_add_int(rw_dict_t *d, string_t key, int rw_value_t)
+void rw_dict_add_int(rw_dict_t *d, string_t key, int value)
 {
-    if (d)
+    if (d && key.str)
     {
         ADD(item_link_t, d);
         d->tail->items[d->tail->insert_index++] =
-            (rw_item_t){ .type = T_INT, .key = key, .intv = rw_value_t };
+            (rw_item_t){ .type = T_INT, .key = key, .intv = value };
     }
 }
 
-void rw_dict_add_double(rw_dict_t *d, string_t key, double rw_value_t)
+void rw_dict_add_double(rw_dict_t *d, string_t key, double value)
 {
-    if (d)
+    if (d && key.str)
     {
         ADD(item_link_t, d);
         d->tail->items[d->tail->insert_index++] =
-            (rw_item_t){ .type = T_DOUBLE, .key = key, .doublev = rw_value_t };
+            (rw_item_t){ .type = T_DOUBLE, .key = key, .doublev = value };
     }
 }
 
-void rw_dict_add_bool(rw_dict_t *d, string_t key, char rw_value_t)
+void rw_dict_add_bool(rw_dict_t *d, string_t key, char value)
 {
-    if (d)
+    if (d && key.str)
     {
         ADD(item_link_t, d);
         d->tail->items[d->tail->insert_index++] =
-            (rw_item_t){ .type = T_BOOL, .key = key, .boolv = rw_value_t };
+            (rw_item_t){ .type = T_BOOL, .key = key, .boolv = value };
     }
 }
 
 void rw_dict_add_null(rw_dict_t *d, string_t key)
 {
-    if (d)
+    if (d && key.str)
     {
         ADD(item_link_t, d);
         d->tail->items[d->tail->insert_index++] =
@@ -490,23 +490,23 @@ void rw_dict_add_null(rw_dict_t *d, string_t key)
     }
 }
 
-void rw_dict_add_array(rw_dict_t *d, string_t key, rw_array_t *rw_value_t)
+void rw_dict_add_array(rw_dict_t *d, string_t key, rw_array_t *value)
 {
-    if (d && rw_value_t)
+    if (d && key.str && value)
     {
         ADD(item_link_t, d);
         d->tail->items[d->tail->insert_index++] =
-            (rw_item_t){ .type = T_ARR, .key = key, .arrayv = rw_value_t };
+            (rw_item_t){ .type = T_ARR, .key = key, .arrayv = value };
     }
 }
 
-void rw_dict_add_dict(rw_dict_t *d, string_t key, rw_dict_t *rw_value_t)
+void rw_dict_add_dict(rw_dict_t *d, string_t key, rw_dict_t *value)
 {
-    if (d && rw_value_t)
+    if (d && key.str && value)
     {
         ADD(item_link_t, d);
         d->tail->items[d->tail->insert_index++] =
-            (rw_item_t){ .type = T_DICT, .key = key, .dictv = rw_value_t };
+            (rw_item_t){ .type = T_DICT, .key = key, .dictv = value };
     }
 }
 
@@ -537,7 +537,7 @@ void rw_array_remove(rw_array_t *a, unsigned index)
                 switch (v.type)
                 {
                 case T_STR:
-                    free(v.strv.str);
+                    destroy_string(v.strv);
                     v.strv.str = 0;
                     break;
                 case T_ARR:
@@ -583,7 +583,7 @@ void rw_dict_remove(rw_dict_t *d, string_t key)
                 switch (it.type)
                 {
                 case T_STR:
-                    free(it.strv.str);
+                    destroy_string(it.strv);
                     it.strv.str = 0;
                     break;
                 case T_ARR:
@@ -875,7 +875,7 @@ void destroy_rw_array(rw_array_t *a)
             switch (values[i].type)
             {
             case T_STR:
-                free(values[i].strv.str);
+                destroy_string(values[i].strv);
                 break;
             case T_ARR:
                 destroy_rw_array(values[i].arrayv);
@@ -908,7 +908,7 @@ void destroy_rw_dict(rw_dict_t *d)
             switch (items[i].type)
             {
             case T_STR:
-                free(items[i].strv.str);
+                destroy_string(items[i].strv);
                 break;
             case T_ARR:
                 destroy_rw_array(items[i].arrayv);
@@ -917,7 +917,7 @@ void destroy_rw_dict(rw_dict_t *d)
                 destroy_rw_dict(items[i].dictv);
                 break;
             }
-            free(items[i].key.str);
+            destroy_string(items[i].key);
         }
         free(tmp);
     }
