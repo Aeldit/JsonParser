@@ -1,0 +1,39 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "src/base_json_storage.h"
+#include "src/rw_json_parser.h"
+#include "src/rw_json_write.h"
+
+int main(int argc, char *argv[])
+{
+    if (argc < 2)
+    {
+        return 1;
+    }
+
+    rw_json_t *j = rw_parse(argv[1]);
+    if (IS_ARRAY(j))
+    {
+        // rw_array_print(j->array);
+        printf("\n");
+
+        rw_array_t *a = calloc(1, sizeof(rw_array_t));
+        if (a)
+        {
+            rw_array_add_int(a, 1);
+            rw_array_add_int(a, 2);
+            rw_array_add_int(a, 3);
+            rw_array_add_int(a, 4);
+            rw_array_add_int(a, 5);
+            rw_array_add_array(j->array, a);
+            write_rw_json_to_file(j, "out.json");
+        }
+    }
+    else if (IS_DICT(j))
+    {
+        rw_dict_print(j->dict);
+    }
+    destroy_rw_json(j);
+    return 0;
+}
