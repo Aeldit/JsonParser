@@ -1,40 +1,70 @@
 # Json Parser
 
 ![logo](https://raw.githubusercontent.com/Aeldit/Aeldit/2c162a9bf611658c32247bd5bba500a30d1b6ad9/github_profile/json-parser.svg)
-
-![nvim](https://raw.githubusercontent.com/Aeldit/Aeldit/267a0998a55b0462b042d3e471c02f137dbad551/images/nvim.svg)
 ![c](https://raw.githubusercontent.com/Aeldit/Aeldit/7abcf209fcfe3cbc0f29ffdc22668087fc9cea67/images/made-with-c11.svg)
 
-The goal of this project is to allow its user to give the script a `json` file and be able to store it and access its elements in C.
+This parser has 2 modes: **read-only** and **read-write**, which will be refered to respectively as `ro` and `rw`
 
 > [!WARNING]\
 > This parser does not sanitize the content it reads (for now, at least). Use at your own risk.
 
-## Description
-
-For now, the best way to see the script working is to print the contents of the json in the terminal, which is what the script does when launched.
-
-User friendly usage has not been thought about yet, but I will
-
 ## Build
 
-To build the script, clone the repository on your computer :
+To build the program, first clone it from GitHub :
 
 ```shell
-git clone git@github.com:Aeldit/JsonParser.git
-cd JsonParser
+git clone https://github.com/Aeldit/JsonParser.git
 ```
 
-Then run the following commands :
-
-> If you want to compile using `fsanitize`, use `./configure S`,
-> and if you want to compile using `gdb`, use `./configure D`
+Then, enter the following commands
 
 ```shell
 ./configure
-make
-./json-parser <your_file.json>
+make json-parser
+./json-parser <your_json_file.json>
 ```
+
+The configure script accepts the following options :
+- `S` : Runs the script with the `-fsanitize=address` gcc flag (checks for memory leaks)
+- `D` : Displays some debug informations
+- `SD` or `DS` : Use both options
+
+
+## Makefile rules
+
+Base rules :
+- `all` : compiles and runs the program in `ro` mode with the file `t.json`
+- `rw` : same as `all` but  in `rw` mode (the main file is `rw_main.c`)
+- `json-parser` : Compiles the project in `ro` mode
+- `clean` : removes the executable
+
+Valgrind rules :
+- `valgrind-compile` : compiles the parser with the `-DVALGRING_DISABLE_PRINT` flag (disables the printing functions to only have the time of the parsing functions when using a profiler)
+- `valgrind` : calls `valgrind-compile` and generates a callgrind file usable by the `KCachegrind` profiling software
+- `leaks` : checks for leaks but using valgrind (using the file `t.json`)
+
+## Compilation options
+
+You can change some defines directly at compilation time, depending on your use of this parser
+
+#### MAX_READ_BUFF_SIZE
+
+Defines the maximum size of the allocated buffer that is used to store the file (defaults to `2 << 30`, which is roughly equals to 1GB)
+
+#### MAX_NESTED_ARRAYS
+
+Defines the maximum number of nested arrays (defaults to `UINT_FAST8_MAX`)
+
+If you want to change this, you can use the following additional flag
+`-DMAX_NESTED_ARRAYS=<your_value>`
+
+#### MAX_NESTED_DICTS
+
+Defines the maximum number of nested dict objects (defaults to `UINT_FAST8_MAX`)
+
+If you want to change this, you can use the following additional flags
+`-DMAX_NESTED_DICTS=<your_value>`
+
 
 ## Usage
 
@@ -48,35 +78,35 @@ cd <your_code_directory>
 mv src/ json-parser/
 ```
 
-To read a json file in your code, call the `parse()` function :
-```c
-JSON *j = parse(file_path);
-// Once you have this JSON instance, you first have to check whether it is an array or a dict :
 
-// The macros 'IS_ARRAY' and 'IS_DICT' check if 'j' is NULL, if 'j' is an array
-// and if j->array is not null
+> Notice how each struct (json, array, dict, value, item) or the parse function is prefixed with `ro`. For read-write mode, they will be prefixed by `rw`
+
+To read a json file in `ro` mode, call the `ro_parse()` function :
+```c
+ro_json_t *j = ro_parse(file_path);
+// Once you have this ro_json_t struct pointer, you first have to check whether it is an array or a dict :
 if (IS_ARRAY(j))
 {
-    Array *a = j->array;
+    ro_array_ *a = j->array;
     // Do stuff with the array
 }
 else if (IS_DICT(j))
 {
-    Dict *d = j->dict;
+    ro_dict_t *d = j->dict;
     // Do stuff with the dict
 }
 ```
 
-The arrays contains `Value` elements, while the dicts contain `Item` elements :
+The arrays contains `ro_value_t` elements, while the dicts contain `ro_item_t` elements :
 
-> Also note the usage of `String`, it is a simple typedef struct
+> Also note the usage of `string_t`, it is a simple typedef struct
 
 <center>
 <table>
 <tr>
-<th>Value</th>
-<th>Item</th>
-<th>String</th>
+<th>ro_value_t</th>
+<th>ro_item_t</th>
+<th>string_t</th>
 </tr>
 <tr>
 <td>
@@ -87,14 +117,14 @@ typedef struct
     char type;
     union
     {
-        String strv;
+        string_t strv;
         int intv;
         double doublev;
         char boolv;
-        Array *arrayv;
-        Dict *dictv;
+        ro_array_t *arrayv;
+        ro_dict_t *dictv;
     };
-} Value;
+} ro_value_t;
 ```
 
 </td>
@@ -104,17 +134,17 @@ typedef struct
 typedef struct
 {
     char type;
-    String key;
+    string_t key;
     union
     {
-        String strv;
+        string_t strv;
         int intv;
         double doublev;
         char boolv;
-        Array *arrayv;
-        Dict *dictv;
+        ro_array_t *arrayv;
+        ro_dict_t *dictv;
     };
-} Item;
+} ro_item_t;
 ```
 
 </td>
@@ -124,8 +154,8 @@ typedef struct
 typedef struct
 {
     char *str;
-    uint_strlen_t length;
-} String;
+    unsigned length;
+} string_t;
 ```
 
 </td>
@@ -137,10 +167,10 @@ To access the elements of the array or dict :
 
 ```c
 // For arrays
-Value v = array_get(a, index);
+ro_value_t v = array_get(a, index);
 
 // For dicts
-Item it = dict_get(d, key);
+ro_item_t it = dict_get(d, key);
 
 // The rest is the same for both, except that the arrays don't have keys
 if (v.type == T_ERROR)
