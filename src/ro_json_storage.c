@@ -216,7 +216,6 @@ ro_value_t array_get(ro_array_t *a, unsigned index)
 
 ro_item_t dict_get(ro_dict_t *d, string_t key)
 {
-    // WARN:Check if json allows empty keys string
     if (!d || !key.str)
     {
         return ERROR_RO_ITEM;
@@ -283,7 +282,6 @@ void ro_array_print_indent(ro_array_t *a, unsigned indent, char fromDict)
         switch (v.type)
         {
         case T_STR:
-            // TODO: Che for length too
             printf("\t%s\"%s\"", tabs, v.strv.str ? v.strv.str : "");
             break;
         case T_INT:
@@ -425,13 +423,7 @@ void destroy_ro_array(ro_array_t *a)
         switch (val.type)
         {
         case T_STR:
-            // If the string is not null but its length is 0, it means that it
-            // was not allocated so we don't free it
-            // (added with STRING_OF("\0", 0))
-            if (val.strv.str && val.strv.len)
-            {
-                free(val.strv.str);
-            }
+            destroy_string(val.strv);
             break;
         case T_ARR:
             destroy_ro_array(val.arrayv);
@@ -457,17 +449,11 @@ void destroy_ro_dict(ro_dict_t *d)
     for (unsigned i = 0; i < size; ++i)
     {
         ro_item_t it = items[i];
-        free(it.key.str);
+        destroy_string(it.key);
         switch (it.type)
         {
         case T_STR:
-            // If the string is not null but its length is 0, it means that it
-            // was not allocated so we don't free it
-            // (added with STRING_OF("\0", 0))
-            if (it.strv.str && it.strv.len)
-            {
-                free(it.strv.str);
-            }
+            destroy_string(it.strv);
             break;
         case T_ARR:
             destroy_ro_array(it.arrayv);

@@ -537,13 +537,7 @@ void rw_array_remove(rw_array_t *a, unsigned index)
                 switch (v.type)
                 {
                 case T_STR:
-                    // If the string is not null but its length is 0, it means
-                    // that it was not allocated so we don't free it (added with
-                    // STRING_OF("\0", 0))
-                    if (v.strv.str && v.strv.len)
-                    {
-                        free(v.strv.str);
-                    }
+                    destroy_string(v.strv);
                     v.strv.str = 0;
                     break;
                 case T_ARR:
@@ -589,13 +583,7 @@ void rw_dict_remove(rw_dict_t *d, string_t key)
                 switch (it.type)
                 {
                 case T_STR:
-                    // If the string is not null but its length is 0, it means
-                    // that it was not allocated so we don't free it (added with
-                    // STRING_OF("\0", 0))
-                    if (it.strv.str && it.strv.len)
-                    {
-                        free(it.strv.str);
-                    }
+                    destroy_string(it.strv);
                     it.strv.str = 0;
                     break;
                 case T_ARR:
@@ -887,13 +875,7 @@ void destroy_rw_array(rw_array_t *a)
             switch (values[i].type)
             {
             case T_STR:
-                // If the string is not null but its length is 0, it means that
-                // it was not allocated so we don't free it (added with
-                // STRING_OF("\0", 0))
-                if (values[i].strv.str && values[i].strv.len)
-                {
-                    free(values[i].strv.str);
-                }
+                destroy_string(values[i].strv);
                 break;
             case T_ARR:
                 destroy_rw_array(values[i].arrayv);
@@ -926,13 +908,7 @@ void destroy_rw_dict(rw_dict_t *d)
             switch (items[i].type)
             {
             case T_STR:
-                // If the string is not null but its length is 0, it means that
-                // it was not allocated so we don't free it (added with
-                // STRING_OF("\0", 0))
-                if (items[i].strv.str && items[i].strv.len)
-                {
-                    free(items[i].strv.str);
-                }
+                destroy_string(items[i].strv);
                 break;
             case T_ARR:
                 destroy_rw_array(items[i].arrayv);
@@ -941,7 +917,7 @@ void destroy_rw_dict(rw_dict_t *d)
                 destroy_rw_dict(items[i].dictv);
                 break;
             }
-            free(items[i].key.str);
+            destroy_string(items[i].key);
         }
         free(tmp);
     }

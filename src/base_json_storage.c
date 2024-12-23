@@ -1,5 +1,7 @@
 #include "base_json_storage.h"
 
+#include <stdlib.h>
+
 /*******************************************************************************
 **                                  FUNCTIONS                                 **
 *******************************************************************************/
@@ -26,4 +28,12 @@ char strings_equals(string_t s1, string_t s2)
         }
     }
     return 1;
+}
+
+void destroy_string(string_t s)
+{
+    if (s.str && s.len)
+    {
+        free(s.str);
+    }
 }

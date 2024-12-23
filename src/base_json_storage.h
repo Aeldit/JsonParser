@@ -42,4 +42,11 @@ typedef struct
 *******************************************************************************/
 char strings_equals(string_t s1, string_t s2);
 
+/**
+** \brief If the string is not null but its length is 0, it means that it
+**        was not allocated so we don't free it (added with STRING_OF("\0", 0)).
+**        Otherwise, we free the char array
+*/
+void destroy_string(string_t s);
+
 #endif // !BASE_JSON_STORAGE_H
