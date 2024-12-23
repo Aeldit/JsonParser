@@ -206,7 +206,7 @@ string_t parse_string_buff(char *buff, unsigned long *idx)
 
     // + 1 to not read the last '"' when returning in the calling function
     *idx += len + 1;
-    return (string_t){ .str = str, .length = len };
+    return (string_t){ .str = str, .len = len };
 }
 
 str_and_len_tuple_t parse_number_buff(char *buff, unsigned long *idx)
@@ -469,7 +469,7 @@ string_t parse_string(FILE *f, unsigned long *pos)
 
     // +1 to not read the last '"' when returning in the calling function
     *pos += len + 1;
-    return (string_t){ .str = str, .length = len };
+    return (string_t){ .str = str, .len = len };
 }
 
 str_and_len_tuple_t parse_number(FILE *f, unsigned long *pos)

@@ -70,7 +70,7 @@ typedef struct
         /* We add 1 for the comma if we are not at the last value */           \
         /* We add 1 for the line return */                                     \
         /* We add 'indent' for the tabs */                                     \
-        nb += tmp_str.length + (i < total_size ? 1 : 0) + 1 + indent * 4;      \
+        nb += tmp_str.len + (i < total_size ? 1 : 0) + 1 + indent * 4;         \
     }
 
 #define HANDLE_ITEMS_FOR_MODE(rx_item_t, get_rx_array_as_str,                  \
@@ -112,12 +112,12 @@ typedef struct
         }                                                                      \
         add_link(ll, it.key, 0, 1);                                            \
         /* + 4 because we add '": "' after the key */                          \
-        nb += it.key.length + 4;                                               \
+        nb += it.key.len + 4;                                                  \
         add_link(ll, tmp_str, it.type != T_STR, it.type == T_STR);             \
         /* We add 1 for the comma if we are not at the last value */           \
         /* We add 1 for the line return */                                     \
         /* We add 'indent' for the tabs */                                     \
-        nb += tmp_str.length + (i < total_size ? 1 : 0) + 1 + indent * 4;      \
+        nb += tmp_str.len + (i < total_size ? 1 : 0) + 1 + indent * 4;         \
         is_key = !is_key;                                                      \
     }
 
@@ -169,8 +169,8 @@ typedef struct
             str[insert_idx++] = '"';                                           \
         }                                                                      \
         /* Value as string */                                                  \
-        memcpy(str + insert_idx, link->s.str, link->s.length);                 \
-        insert_idx += link->s.length;                                          \
+        memcpy(str + insert_idx, link->s.str, link->s.len);                    \
+        insert_idx += link->s.len;                                             \
         if (link->is_from_str)                                                 \
         {                                                                      \
             str[insert_idx++] = '"';                                           \
@@ -245,8 +245,8 @@ typedef struct
             insert_idx += nb_chars_indent;                                     \
             str[insert_idx++] = '"';                                           \
             /* String's contents */                                            \
-            memcpy(str + insert_idx, link->s.str, link->s.length);             \
-            insert_idx += link->s.length;                                      \
+            memcpy(str + insert_idx, link->s.str, link->s.len);                \
+            insert_idx += link->s.len;                                         \
             memcpy(str + insert_idx, "\": ", 3);                               \
             insert_idx += 3;                                                   \
         }                                                                      \
@@ -256,8 +256,8 @@ typedef struct
             {                                                                  \
                 str[insert_idx++] = '"';                                       \
             }                                                                  \
-            memcpy(str + insert_idx, link->s.str, link->s.length);             \
-            insert_idx += link->s.length;                                      \
+            memcpy(str + insert_idx, link->s.str, link->s.len);                \
+            insert_idx += link->s.len;                                         \
             if (link->is_from_str)                                             \
             {                                                                  \
                 str[insert_idx++] = '"';                                       \
@@ -306,7 +306,7 @@ typedef struct
         return;                                                                \
     }                                                                          \
     printf("%s", s.str);                                                       \
-    fwrite(s.str, sizeof(char), s.length, f);                                  \
+    fwrite(s.str, sizeof(char), s.len, f);                                     \
     free(s.str);                                                               \
     fclose(f)
 

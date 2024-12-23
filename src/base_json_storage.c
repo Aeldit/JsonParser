@@ -5,8 +5,8 @@
 *******************************************************************************/
 char strings_equals(string_t s1, string_t s2)
 {
-    unsigned length = s1.length;
-    if (length != s2.length)
+    unsigned length = s1.len;
+    if (length != s2.len)
     {
         return 0;
     }

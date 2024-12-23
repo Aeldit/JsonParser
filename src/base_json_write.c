@@ -141,7 +141,7 @@ string_t get_double_as_str(double value)
     }
 
     string_t s = STRING_OF(str, nb_chars + nb_decimals - (nb_decimals ? 0 : 1));
-    memcpy(str, double_str, s.length);
+    memcpy(str, double_str, s.len);
     return s;
 }
 

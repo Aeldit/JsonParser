@@ -13,8 +13,8 @@
 #define T_ARR 6
 #define T_DICT 7
 
-#define STRING_OF(string, len) ((string_t){ .str = (string), .length = (len) })
-#define EMPTY_STRING ((string_t){ .str = 0, .length = 0 })
+#define STRING_OF(s, l) ((string_t){ .str = (s), .len = (l) })
+#define EMPTY_STRING ((string_t){ .str = 0, .len = 0 })
 
 /*
 ** \def Checks if the JSON instance is not null, if the JSON instance is an
@@ -34,7 +34,7 @@
 typedef struct
 {
     char *str;
-    unsigned length;
+    unsigned len;
 } string_t;
 
 /*******************************************************************************
