@@ -79,7 +79,7 @@ ro_json_t *init_ro_json(char is_array, ro_array_t *a, ro_dict_t *d)
 *******************************************************************************/
 void ro_array_add_str(ro_array_t *a, string_t value)
 {
-    if (a && a->values && a->insert_index < a->size)
+    if (a && a->values && a->insert_index < a->size && value.str)
     {
         a->values[a->insert_index++] =
             (ro_value_t){ .type = T_STR, .strv = value };
@@ -139,65 +139,65 @@ void ro_array_add_dict(ro_array_t *a, ro_dict_t *value)
     }
 }
 
-void ro_dict_add_str(ro_dict_t *d, string_t key, string_t ro_value_t)
+void ro_dict_add_str(ro_dict_t *d, string_t key, string_t value)
 {
-    if (d && d->items && d->insert_index < d->size)
+    if (d && d->items && d->insert_index < d->size && key.str && value.str)
     {
         d->items[d->insert_index++] =
-            (ro_item_t){ .type = T_STR, .key = key, .strv = ro_value_t };
+            (ro_item_t){ .type = T_STR, .key = key, .strv = value };
     }
 }
 
-void ro_dict_add_int(ro_dict_t *d, string_t key, int ro_value_t)
+void ro_dict_add_int(ro_dict_t *d, string_t key, int value)
 {
-    if (d && d->items && d->insert_index < d->size)
+    if (d && d->items && d->insert_index < d->size && key.str)
     {
         d->items[d->insert_index++] =
-            (ro_item_t){ .type = T_INT, .key = key, .intv = ro_value_t };
+            (ro_item_t){ .type = T_INT, .key = key, .intv = value };
     }
 }
 
-void ro_dict_add_double(ro_dict_t *d, string_t key, double ro_value_t)
+void ro_dict_add_double(ro_dict_t *d, string_t key, double value)
 {
-    if (d && d->items && d->insert_index < d->size)
+    if (d && d->items && d->insert_index < d->size && key.str)
     {
         d->items[d->insert_index++] =
-            (ro_item_t){ .type = T_DOUBLE, .key = key, .doublev = ro_value_t };
+            (ro_item_t){ .type = T_DOUBLE, .key = key, .doublev = value };
     }
 }
 
-void ro_dict_add_bool(ro_dict_t *d, string_t key, char ro_value_t)
+void ro_dict_add_bool(ro_dict_t *d, string_t key, char value)
 {
-    if (d && d->items && d->insert_index < d->size)
+    if (d && d->items && d->insert_index < d->size && key.str)
     {
         d->items[d->insert_index++] =
-            (ro_item_t){ .type = T_BOOL, .key = key, .boolv = ro_value_t };
+            (ro_item_t){ .type = T_BOOL, .key = key, .boolv = value };
     }
 }
 
 void ro_dict_add_null(ro_dict_t *d, string_t key)
 {
-    if (d && d->items && d->insert_index < d->size)
+    if (d && d->items && d->insert_index < d->size && key.str)
     {
         d->items[d->insert_index++] = (ro_item_t){ .type = T_NULL, .key = key };
     }
 }
 
-void ro_dict_add_array(ro_dict_t *d, string_t key, ro_array_t *ro_value_t)
+void ro_dict_add_array(ro_dict_t *d, string_t key, ro_array_t *value)
 {
-    if (d && d->items && ro_value_t && d->insert_index < d->size)
+    if (d && d->items && value && d->insert_index < d->size && key.str)
     {
         d->items[d->insert_index++] =
-            (ro_item_t){ .type = T_ARR, .key = key, .arrayv = ro_value_t };
+            (ro_item_t){ .type = T_ARR, .key = key, .arrayv = value };
     }
 }
 
-void ro_dict_add_dict(ro_dict_t *d, string_t key, ro_dict_t *ro_value_t)
+void ro_dict_add_dict(ro_dict_t *d, string_t key, ro_dict_t *value)
 {
-    if (d && d->items && ro_value_t && d->insert_index < d->size)
+    if (d && d->items && value && d->insert_index < d->size && key.str)
     {
         d->items[d->insert_index++] =
-            (ro_item_t){ .type = T_DICT, .key = key, .dictv = ro_value_t };
+            (ro_item_t){ .type = T_DICT, .key = key, .dictv = value };
     }
 }
 
@@ -216,7 +216,8 @@ ro_value_t array_get(ro_array_t *a, unsigned index)
 
 ro_item_t dict_get(ro_dict_t *d, string_t key)
 {
-    if (!d)
+    // WARN:Check if json allows empty keys string
+    if (!d || !key.str)
     {
         return ERROR_RO_ITEM;
     }
@@ -282,6 +283,7 @@ void ro_array_print_indent(ro_array_t *a, unsigned indent, char fromDict)
         switch (v.type)
         {
         case T_STR:
+            // TODO: Che for length too
             printf("\t%s\"%s\"", tabs, v.strv.str ? v.strv.str : "");
             break;
         case T_INT:
@@ -423,7 +425,13 @@ void destroy_ro_array(ro_array_t *a)
         switch (val.type)
         {
         case T_STR:
-            free(val.strv.str);
+            // If the string is not null but its length is 0, it means that it
+            // was not allocated so we don't free it
+            // (added with STRING_OF("\0", 0))
+            if (val.strv.str && val.strv.len)
+            {
+                free(val.strv.str);
+            }
             break;
         case T_ARR:
             destroy_ro_array(val.arrayv);
@@ -453,7 +461,13 @@ void destroy_ro_dict(ro_dict_t *d)
         switch (it.type)
         {
         case T_STR:
-            free(it.strv.str);
+            // If the string is not null but its length is 0, it means that it
+            // was not allocated so we don't free it
+            // (added with STRING_OF("\0", 0))
+            if (it.strv.str && it.strv.len)
+            {
+                free(it.strv.str);
+            }
             break;
         case T_ARR:
             destroy_ro_array(it.arrayv);
