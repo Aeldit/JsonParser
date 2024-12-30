@@ -13,12 +13,13 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Add apt repository
-      run: sudo add-apt-repository ppa:snaipewastaken/ppa
-    - name: Apt update
+
+    - name: Update version
       run: sudo apt-get update
-    - name: Install criterion
-      run: sudo apt-get install criterion-dev
+    - name: Install Homebrew
+      run: sudo apt-get install build-essential procps curl file git
+    - name: Install Criterion
+      run: brew install snaipe/soft/criterion
     - name: configure
       run: ./configure
     - name: make
