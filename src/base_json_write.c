@@ -8,6 +8,20 @@
 #include <string.h>
 
 /*******************************************************************************
+**                               LOCAL FUNCTIONS                              **
+*******************************************************************************/
+unsigned get_nb_char_long(long n)
+{
+    unsigned nb_char = n < 0 ? 2 : 1;
+    n *= n < 0 ? -1 : 1;
+    while (n /= 10)
+    {
+        ++nb_char;
+    }
+    return nb_char;
+}
+
+/*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
 void add_link(string_linked_list_t *ll, string_t str, char str_needs_free,
@@ -69,24 +83,14 @@ void destroy_linked_list(string_linked_list_t *ll)
 *******************************************************************************/
 string_t get_long_as_str(long value)
 {
-    char is_neg = value < 0;
-    unsigned nb_chars = is_neg ? 2 : 1;
-
-    long tmp_value = value * (is_neg ? -1 : 1);
-    while (tmp_value /= 10)
-    {
-        ++nb_chars;
-    }
-
+    unsigned nb_chars = get_nb_char_long(value);
     char *str = calloc(nb_chars + 1, sizeof(char));
     if (!str)
     {
         return EMPTY_STRING;
     }
-
-    string_t s = STRING_OF(str, nb_chars);
     snprintf(str, nb_chars + 1, "%ld", value);
-    return s;
+    return STRING_OF(str, nb_chars);
 }
 
 string_t get_double_as_str(double value)
@@ -126,9 +130,9 @@ string_t get_double_as_str(double value)
         return EMPTY_STRING;
     }
 
-    string_t s = STRING_OF(str, nb_chars + nb_decimals - (nb_decimals ? 0 : 1));
-    memcpy(str, double_str, s.len);
-    return s;
+    unsigned len = nb_chars + nb_decimals - (nb_decimals ? 0 : 1);
+    memcpy(str, double_str, len);
+    return STRING_OF(str, len);
 }
 
 string_t get_exp_long_as_str(exponent_long_t value)
@@ -136,21 +140,8 @@ string_t get_exp_long_as_str(exponent_long_t value)
     long number = value.number;
     long exponent = value.exponent;
 
-    char is_neg = number < 0;
-    char is_exp_neg = exponent < 0;
-    unsigned nb_chars_number = is_neg ? 2 : 1;
-    unsigned nb_chars_exponent = is_exp_neg ? 2 : 1;
-
-    long tmp_number = number * (is_neg ? -1 : 1);
-    while (tmp_number /= 10)
-    {
-        ++nb_chars_number;
-    }
-    long tmp_exponent = exponent * (is_exp_neg ? -1 : 1);
-    while (tmp_exponent /= 10)
-    {
-        ++nb_chars_exponent;
-    }
+    unsigned nb_chars_number = get_nb_char_long(number);
+    unsigned nb_chars_exponent = get_nb_char_long(exponent);
 
     long len = nb_chars_number + 1 + nb_chars_exponent;
     char *str = calloc(len + 1, sizeof(char));
@@ -158,20 +149,23 @@ string_t get_exp_long_as_str(exponent_long_t value)
     {
         return EMPTY_STRING;
     }
-    string_t s = STRING_OF(str, len);
 
     snprintf(str, nb_chars_number + 1, "%ld", number);
     str[nb_chars_number] = 'e';
     snprintf(str + nb_chars_number + 1, nb_chars_exponent + 1, "%ld", exponent);
-    return s;
+    return STRING_OF(str, len);
 }
+
+union print
+{
+    double value;
+    char str[sizeof(double)];
+};
 
 string_t get_exp_double_as_str(exponent_double_t value)
 {
     double number = value.number;
     long exponent = value.exponent;
-
-    exponent *= exponent < 0 ? -1 : 1;
 
     // 18 : 10 int digits + '.' + 6 floating point digits + '\0'
     char double_str[18];
@@ -201,16 +195,19 @@ string_t get_exp_double_as_str(exponent_double_t value)
             ++nb_chars;
         }
     }
+    unsigned exp_len = get_nb_char_long(exponent);
 
-    char *str = calloc(18, sizeof(char));
+    char *str = calloc(18 + 1 + exp_len, sizeof(char));
     if (!str)
     {
         return EMPTY_STRING;
     }
 
-    string_t s = STRING_OF(str, nb_chars + nb_decimals - (nb_decimals ? 0 : 1));
-    memcpy(str, double_str, s.len);
-    return s;
+    unsigned num_len = nb_chars + nb_decimals - (nb_decimals ? 0 : 1);
+    memcpy(str, double_str, num_len);
+    str[num_len] = 'e';
+    snprintf(str + num_len + 1, exp_len + 1, "%ld", exponent);
+    return STRING_OF(str, num_len + 1 + exp_len);
 }
 
 string_t get_bool_as_str(char value)
