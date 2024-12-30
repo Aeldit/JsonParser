@@ -7,6 +7,14 @@
 #include <stdlib.h>
 
 /*******************************************************************************
+**                              DEFINES / MACROS                              **
+*******************************************************************************/
+#define RW_VALUE_OF(T_TYPE, type_field)                                        \
+    ((rw_value_t){ .type = T_TYPE, .type_field = value })
+#define RW_ITEM_OF(T_TYPE, type_field)                                         \
+    ((rw_item_t){ .type = T_TYPE, .key = key, .type_field = value })
+
+/*******************************************************************************
 **                                   MACROS                                   **
 *******************************************************************************/
 /**
@@ -77,8 +85,8 @@ void arr_print_array(rw_array_t *a)
                 case T_STR:
                     printf("\"%s\", ", v.strv.str ? v.strv.str : "");
                     break;
-                case T_INT:
-                    printf("%d, ", v.intv);
+                case T_LONG:
+                    printf("%ld, ", v.longv);
                     break;
                 case T_DOUBLE:
                     printf("%f, ", v.doublev);
@@ -375,18 +383,16 @@ void rw_array_add_str(rw_array_t *a, string_t value)
     if (a && value.str)
     {
         ADD(value_link_t, a);
-        a->tail->values[a->tail->insert_index++] =
-            (rw_value_t){ .type = T_STR, .strv = value };
+        a->tail->values[a->tail->insert_index++] = RW_VALUE_OF(T_STR, strv);
     }
 }
 
-void rw_array_add_int(rw_array_t *a, int value)
+void rw_array_add_long(rw_array_t *a, long value)
 {
     if (a)
     {
         ADD(value_link_t, a);
-        a->tail->values[a->tail->insert_index++] =
-            (rw_value_t){ .type = T_INT, .intv = value };
+        a->tail->values[a->tail->insert_index++] = RW_VALUE_OF(T_LONG, longv);
     }
 }
 
@@ -396,7 +402,27 @@ void rw_array_add_double(rw_array_t *a, double value)
     {
         ADD(value_link_t, a);
         a->tail->values[a->tail->insert_index++] =
-            (rw_value_t){ .type = T_DOUBLE, .doublev = value };
+            RW_VALUE_OF(T_DOUBLE, doublev);
+    }
+}
+
+void rw_array_add_exp_long(rw_array_t *a, exponent_long_t value)
+{
+    if (a)
+    {
+        ADD(value_link_t, a);
+        a->tail->values[a->tail->insert_index++] =
+            RW_VALUE_OF(T_EXP_LONG, exp_longv);
+    }
+}
+
+void rw_array_add_exp_double(rw_array_t *a, exponent_double_t value)
+{
+    if (a)
+    {
+        ADD(value_link_t, a);
+        a->tail->values[a->tail->insert_index++] =
+            RW_VALUE_OF(T_EXP_DOUBLE, exp_doublev);
     }
 }
 
@@ -405,8 +431,7 @@ void rw_array_add_bool(rw_array_t *a, char value)
     if (a)
     {
         ADD(value_link_t, a);
-        a->tail->values[a->tail->insert_index++] =
-            (rw_value_t){ .type = T_BOOL, .boolv = value };
+        a->tail->values[a->tail->insert_index++] = RW_VALUE_OF(T_BOOL, boolv);
     }
 }
 
@@ -425,8 +450,7 @@ void rw_array_add_array(rw_array_t *a, rw_array_t *value)
     if (a && value)
     {
         ADD(value_link_t, a);
-        a->tail->values[a->tail->insert_index++] =
-            (rw_value_t){ .type = T_ARR, .arrayv = value };
+        a->tail->values[a->tail->insert_index++] = RW_VALUE_OF(T_ARR, arrayv);
     }
 }
 
@@ -435,8 +459,7 @@ void rw_array_add_dict(rw_array_t *a, rw_dict_t *value)
     if (a && value)
     {
         ADD(value_link_t, a);
-        a->tail->values[a->tail->insert_index++] =
-            (rw_value_t){ .type = T_DICT, .dictv = value };
+        a->tail->values[a->tail->insert_index++] = RW_VALUE_OF(T_DICT, dictv);
     }
 }
 
@@ -445,18 +468,16 @@ void rw_dict_add_str(rw_dict_t *d, string_t key, string_t value)
     if (d && key.str)
     {
         ADD(item_link_t, d);
-        d->tail->items[d->tail->insert_index++] =
-            (rw_item_t){ .type = T_STR, .key = key, .strv = value };
+        d->tail->items[d->tail->insert_index++] = RW_ITEM_OF(T_STR, strv);
     }
 }
 
-void rw_dict_add_int(rw_dict_t *d, string_t key, int value)
+void rw_dict_add_long(rw_dict_t *d, string_t key, long value)
 {
     if (d && key.str)
     {
         ADD(item_link_t, d);
-        d->tail->items[d->tail->insert_index++] =
-            (rw_item_t){ .type = T_INT, .key = key, .intv = value };
+        d->tail->items[d->tail->insert_index++] = RW_ITEM_OF(T_LONG, longv);
     }
 }
 
@@ -465,8 +486,27 @@ void rw_dict_add_double(rw_dict_t *d, string_t key, double value)
     if (d && key.str)
     {
         ADD(item_link_t, d);
+        d->tail->items[d->tail->insert_index++] = RW_ITEM_OF(T_DOUBLE, doublev);
+    }
+}
+
+void rw_dict_add_exp_long(rw_dict_t *d, string_t key, exponent_long_t value)
+{
+    if (d && key.str)
+    {
+        ADD(item_link_t, d);
         d->tail->items[d->tail->insert_index++] =
-            (rw_item_t){ .type = T_DOUBLE, .key = key, .doublev = value };
+            RW_ITEM_OF(T_EXP_LONG, exp_longv);
+    }
+}
+
+void rw_dict_add_exp_double(rw_dict_t *d, string_t key, exponent_double_t value)
+{
+    if (d && key.str)
+    {
+        ADD(item_link_t, d);
+        d->tail->items[d->tail->insert_index++] =
+            RW_ITEM_OF(T_EXP_DOUBLE, exp_doublev);
     }
 }
 
@@ -475,8 +515,7 @@ void rw_dict_add_bool(rw_dict_t *d, string_t key, char value)
     if (d && key.str)
     {
         ADD(item_link_t, d);
-        d->tail->items[d->tail->insert_index++] =
-            (rw_item_t){ .type = T_BOOL, .key = key, .boolv = value };
+        d->tail->items[d->tail->insert_index++] = RW_ITEM_OF(T_BOOL, boolv);
     }
 }
 
@@ -495,8 +534,7 @@ void rw_dict_add_array(rw_dict_t *d, string_t key, rw_array_t *value)
     if (d && key.str && value)
     {
         ADD(item_link_t, d);
-        d->tail->items[d->tail->insert_index++] =
-            (rw_item_t){ .type = T_ARR, .key = key, .arrayv = value };
+        d->tail->items[d->tail->insert_index++] = RW_ITEM_OF(T_ARR, arrayv);
     }
 }
 
@@ -505,8 +543,7 @@ void rw_dict_add_dict(rw_dict_t *d, string_t key, rw_dict_t *value)
     if (d && key.str && value)
     {
         ADD(item_link_t, d);
-        d->tail->items[d->tail->insert_index++] =
-            (rw_item_t){ .type = T_DICT, .key = key, .dictv = value };
+        d->tail->items[d->tail->insert_index++] = RW_ITEM_OF(T_DICT, dictv);
     }
 }
 
@@ -725,8 +762,8 @@ void rw_array_print_indent(rw_array_t *a, unsigned indent, char fromDict)
             case T_STR:
                 printf("\t%s\"%s\"", tabs, v.strv.str ? v.strv.str : "");
                 break;
-            case T_INT:
-                printf("\t%s%d", tabs, v.intv);
+            case T_LONG:
+                printf("\t%s%ld", tabs, v.longv);
                 break;
             case T_DOUBLE:
                 printf("\t%s%f", tabs, v.doublev);
@@ -810,8 +847,8 @@ void rw_dict_print_indent(rw_dict_t *d, unsigned indent, char fromDict)
                 printf("\t%s\"%s\" : \"%s\"", tabs, key.str,
                        it.strv.str ? it.strv.str : "");
                 break;
-            case T_INT:
-                printf("\t%s\"%s\" : %d", tabs, key.str, it.intv);
+            case T_LONG:
+                printf("\t%s\"%s\" : %ld", tabs, key.str, it.longv);
                 break;
             case T_DOUBLE:
                 printf("\t%s\"%s\" : %f", tabs, key.str, it.doublev);

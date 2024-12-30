@@ -28,8 +28,10 @@ typedef struct
     union
     {
         string_t strv;
-        int intv;
+        long longv;
         double doublev;
+        exponent_long_t exp_longv;
+        exponent_double_t exp_doublev;
         char boolv;
         rw_array_t *arrayv;
         rw_dict_t *dictv;
@@ -44,8 +46,10 @@ typedef struct
     union
     {
         string_t strv;
-        int intv;
+        long longv;
         double doublev;
+        exponent_long_t exp_longv;
+        exponent_double_t exp_doublev;
         char boolv;
         rw_array_t *arrayv;
         rw_dict_t *dictv;
@@ -98,8 +102,10 @@ typedef struct
 rw_json_t *init_rw_json(char is_array, rw_array_t *a, rw_dict_t *d);
 
 void rw_array_add_str(rw_array_t *a, string_t value);
-void rw_array_add_int(rw_array_t *a, int value);
+void rw_array_add_long(rw_array_t *a, long value);
 void rw_array_add_double(rw_array_t *a, double value);
+void rw_array_add_exp_long(rw_array_t *a, exponent_long_t value);
+void rw_array_add_exp_double(rw_array_t *a, exponent_double_t value);
 void rw_array_add_bool(rw_array_t *a, char value);
 void rw_array_add_null(rw_array_t *a);
 // WARN: Check if the array is added to itself, and deep-copy it if so to
@@ -108,8 +114,11 @@ void rw_array_add_array(rw_array_t *a, rw_array_t *value);
 void rw_array_add_dict(rw_array_t *a, rw_dict_t *value);
 
 void rw_dict_add_str(rw_dict_t *d, string_t key, string_t value);
-void rw_dict_add_int(rw_dict_t *d, string_t key, int value);
+void rw_dict_add_long(rw_dict_t *d, string_t key, long value);
 void rw_dict_add_double(rw_dict_t *d, string_t key, double value);
+void rw_dict_add_exp_long(rw_dict_t *d, string_t key, exponent_long_t value);
+void rw_dict_add_exp_double(rw_dict_t *d, string_t key,
+                            exponent_double_t value);
 void rw_dict_add_bool(rw_dict_t *d, string_t key, char value);
 void rw_dict_add_null(rw_dict_t *d, string_t key);
 void rw_dict_add_array(rw_dict_t *d, string_t key, rw_array_t *value);

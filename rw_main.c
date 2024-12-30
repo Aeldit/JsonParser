@@ -21,11 +21,11 @@ int main(int argc, char *argv[])
         rw_array_t *a = calloc(1, sizeof(rw_array_t));
         if (a)
         {
-            rw_array_add_int(a, 1);
-            rw_array_add_int(a, 2);
-            rw_array_add_int(a, 3);
-            rw_array_add_int(a, 4);
-            rw_array_add_int(a, 5);
+            rw_array_add_long(a, 1);
+            rw_array_add_long(a, 2);
+            rw_array_add_long(a, 3);
+            rw_array_add_long(a, 4);
+            rw_array_add_long(a, 5);
             rw_array_add_array(j->array, a);
             write_rw_json_to_file(j, "out.json");
         }
