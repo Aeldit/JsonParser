@@ -42,8 +42,7 @@ leaks: valgrind-compile
 	valgrind --leak-check=full --show-leak-kinds=all \
          --track-origins=yes ./$(TARGET) t.json
 
-.PHONY:
-tests: clean
-	$(CC) $(CFLAGS) $(CFILES) $(TESTFILES) -o json-parser-tests -lcriterion
+check: clean
+	$(CC) $(CFLAGS) -fprofile-arcs –ftest-coverage $(CFILES) $(TESTFILES) -o json-parser-tests -lcriterion
 	./json-parser-tests
 
