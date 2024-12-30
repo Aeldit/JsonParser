@@ -71,12 +71,8 @@ string_t get_long_as_str(long value)
 {
     char is_neg = value < 0;
     unsigned nb_chars = is_neg ? 2 : 1;
-    if (is_neg)
-    {
-        value *= -1;
-    }
 
-    long tmp_value = value;
+    long tmp_value = value * (is_neg ? -1 : 1);
     while (tmp_value /= 10)
     {
         ++nb_chars;
@@ -89,17 +85,7 @@ string_t get_long_as_str(long value)
     }
 
     string_t s = STRING_OF(str, nb_chars);
-
-    while (nb_chars)
-    {
-        str[--nb_chars] = value % 10 + '0';
-        value /= 10;
-    }
-
-    if (is_neg)
-    {
-        str[0] = '-';
-    }
+    snprintf(str, nb_chars + 1, "%ld", value);
     return s;
 }
 
@@ -111,6 +97,88 @@ string_t get_double_as_str(double value)
 
     int nb_chars = 0;
     int nb_decimals = 6;
+    char is_in_decimals = 1;
+    char non_zero_decimal_found = 0;
+    for (int i = 17; i >= 0; --i)
+    {
+        char s = double_str[i];
+        if (s == '.')
+        {
+            is_in_decimals = 0;
+        }
+        if (is_in_decimals && '1' <= s && s <= '9')
+        {
+            non_zero_decimal_found = 1;
+        }
+        if (s == '0' && is_in_decimals && !non_zero_decimal_found)
+        {
+            --nb_decimals;
+        }
+        if (!is_in_decimals)
+        {
+            ++nb_chars;
+        }
+    }
+
+    char *str = calloc(18, sizeof(char));
+    if (!str)
+    {
+        return EMPTY_STRING;
+    }
+
+    string_t s = STRING_OF(str, nb_chars + nb_decimals - (nb_decimals ? 0 : 1));
+    memcpy(str, double_str, s.len);
+    return s;
+}
+
+string_t get_exp_long_as_str(exponent_long_t value)
+{
+    long number = value.number;
+    long exponent = value.exponent;
+
+    char is_neg = number < 0;
+    char is_exp_neg = exponent < 0;
+    unsigned nb_chars_number = is_neg ? 2 : 1;
+    unsigned nb_chars_exponent = is_exp_neg ? 2 : 1;
+
+    long tmp_number = number * (is_neg ? -1 : 1);
+    while (tmp_number /= 10)
+    {
+        ++nb_chars_number;
+    }
+    long tmp_exponent = exponent * (is_exp_neg ? -1 : 1);
+    while (tmp_exponent /= 10)
+    {
+        ++nb_chars_exponent;
+    }
+
+    long len = nb_chars_number + 1 + nb_chars_exponent;
+    char *str = calloc(len + 1, sizeof(char));
+    if (!str)
+    {
+        return EMPTY_STRING;
+    }
+    string_t s = STRING_OF(str, len);
+
+    snprintf(str, nb_chars_number + 1, "%ld", number);
+    str[nb_chars_number] = 'e';
+    snprintf(str + nb_chars_number + 1, nb_chars_exponent + 1, "%ld", exponent);
+    return s;
+}
+
+string_t get_exp_double_as_str(exponent_double_t value)
+{
+    double number = value.number;
+    long exponent = value.exponent;
+
+    exponent *= exponent < 0 ? -1 : 1;
+
+    // 18 : 10 int digits + '.' + 6 floating point digits + '\0'
+    char double_str[18];
+    snprintf(double_str, 18, "%lf", number);
+
+    unsigned nb_chars = 0;
+    unsigned nb_decimals = 6;
     char is_in_decimals = 1;
     char non_zero_decimal_found = 0;
     for (int i = 17; i >= 0; --i)

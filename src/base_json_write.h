@@ -53,6 +53,12 @@ typedef struct
         case T_DOUBLE:                                                         \
             tmp_str = get_double_as_str(v.doublev);                            \
             break;                                                             \
+        case T_EXP_LONG:                                                       \
+            tmp_str = get_exp_long_as_str(v.exp_longv);                        \
+            break;                                                             \
+        case T_EXP_DOUBLE:                                                     \
+            tmp_str = get_exp_double_as_str(v.exp_doublev);                    \
+            break;                                                             \
         case T_BOOL:                                                           \
             tmp_str = get_bool_as_str(v.boolv);                                \
             break;                                                             \
@@ -96,6 +102,12 @@ typedef struct
             break;                                                             \
         case T_DOUBLE:                                                         \
             tmp_str = get_double_as_str(it.doublev);                           \
+            break;                                                             \
+        case T_EXP_LONG:                                                       \
+            tmp_str = get_exp_long_as_str(it.exp_longv);                       \
+            break;                                                             \
+        case T_EXP_DOUBLE:                                                     \
+            tmp_str = get_exp_double_as_str(it.exp_doublev);                   \
             break;                                                             \
         case T_BOOL:                                                           \
             tmp_str = get_bool_as_str(it.boolv);                               \
@@ -315,6 +327,8 @@ typedef struct
 *******************************************************************************/
 string_t get_long_as_str(long value);
 string_t get_double_as_str(double value);
+string_t get_exp_long_as_str(exponent_long_t value);
+string_t get_exp_double_as_str(exponent_double_t value);
 string_t get_bool_as_str(char value);
 string_t get_null_as_str();
 

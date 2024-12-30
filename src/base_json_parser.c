@@ -86,9 +86,9 @@ double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t *sl)
     }
 
     double number = 0; // Integer part
-    double dot_res = 0; // Decimal part
-    long exponent = 0; // Only used if sl->has_exponent() is true
-    unsigned long nb_digits_dot = 1;
+    double decimals = 0; // Decimal part
+    long exponent = 0; // Only used if sl->has_exponent is true
+    unsigned long nb_digits_decimals = 1;
     unsigned char exp_idx = 0;
     // If the number is negative, this is set to -1 and the final res is
     // multiplied by it
@@ -117,8 +117,8 @@ double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t *sl)
             }
             else if (dot_reached)
             {
-                dot_res = dot_res * 10 + c - '0';
-                nb_digits_dot *= 10;
+                decimals = decimals * 10 + c - '0';
+                nb_digits_decimals *= 10;
             }
             else
             {
@@ -135,16 +135,17 @@ double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t *sl)
         return (double_with_or_without_exponent_t){
             .has_exponent = 1,
             .double_exp_value =
-                (exponent_double_t){ .number =
-                                         (number + (dot_res / nb_digits_dot))
-                                         * is_negative,
-                                     .exponent = exponent * is_exp_negative },
+                (exponent_double_t){
+                    .number = (number + (decimals / nb_digits_decimals))
+                        * is_negative,
+                    .exponent = exponent * is_exp_negative },
             .double_value = 0
         };
     }
     return (double_with_or_without_exponent_t){
         .has_exponent = 0,
-        .double_value = (number + (dot_res / nb_digits_dot)) * is_negative,
+        .double_value =
+            (number + (decimals / nb_digits_decimals)) * is_negative,
         .double_exp_value = (exponent_double_t){ .number = 0, .exponent = 0 }
     };
 }
