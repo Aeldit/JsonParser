@@ -3,8 +3,6 @@
 ![logo](https://raw.githubusercontent.com/Aeldit/Aeldit/2c162a9bf611658c32247bd5bba500a30d1b6ad9/github_profile/json-parser.svg)
 ![c](https://raw.githubusercontent.com/Aeldit/Aeldit/7abcf209fcfe3cbc0f29ffdc22668087fc9cea67/images/made-with-c11.svg)
 
-[![codecov](https://codecov.io/gh/Aeldit/JsonParser/graph/badge.svg?token=RR2Q5WAJTX)](https://codecov.io/gh/Aeldit/JsonParser)
-
 This parser has 2 modes: **read-only** and **read-write**, which will be refered to respectively as `ro` and `rw`
 
 > [!WARNING]\

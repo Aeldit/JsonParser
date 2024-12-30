@@ -22,8 +22,3 @@ jobs:
       run: make
     - name: make check
       run: make check
-
-    - name: Upload coverage reports to Codecov
-      uses: codecov/codecov-action@v5
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
