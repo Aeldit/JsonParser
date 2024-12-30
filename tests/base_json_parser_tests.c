@@ -1,152 +1,174 @@
 #include <criterion/criterion.h>
+#include <criterion/logging.h>
 
 #include "../src/base_json_parser.h"
 
-str_and_len_tuple_t *get_tuple(char *str, char is_float, char has_exponent)
+void base_str_to_long(char *str, char is_float, char has_exponent,
+                      char expected_has_exponent, long expected_value,
+                      long expected_number, long expected_exponent)
 {
     str_and_len_tuple_t *sl = calloc(1, sizeof(str_and_len_tuple_t));
     if (!sl)
     {
-        return 0;
+        return;
     }
     sl->str = str;
     sl->len = strlen(str);
     sl->is_float = is_float;
     sl->has_exponent = has_exponent;
-    return sl;
+
+    long_with_or_without_exponent_t lwowe = str_to_long(sl);
+
+    cr_expect(lwowe.has_exponent == expected_has_exponent,
+              "Expected 'has_exponent' to be '%s' but it was '%s'",
+              has_exponent ? "true" : "false",
+              sl->has_exponent ? "true" : "false");
+    cr_expect(lwowe.long_value == expected_value,
+              "Expected 'long_value' to be '%ld' but got '%ld'", expected_value,
+              lwowe.long_value);
+    cr_expect(lwowe.long_exp_value.number == expected_number,
+              "Expected 'number' to be '%ld' but got '%ld'", expected_number,
+              lwowe.long_exp_value.number);
+    cr_expect(lwowe.long_exp_value.exponent == expected_exponent,
+              "Expected 'exponent' to be '%ld' but got '%ld'",
+              expected_exponent, lwowe.long_exp_value.exponent);
+    free(sl);
 }
 
-Test(base_json_parser, str_to_long_noexp)
+void base_str_to_double(char *str, char is_float, char has_exponent,
+                        char expected_has_exponent, double expected_value,
+                        double expected_number, long expected_exponent)
 {
-    str_and_len_tuple_t *sl = get_tuple("123456", 0, 0);
+    str_and_len_tuple_t *sl = calloc(1, sizeof(str_and_len_tuple_t));
     if (!sl)
     {
         return;
     }
-    long_with_or_without_exponent_t lwowe = str_to_long(sl);
-    cr_expect(lwowe.has_exponent == 0);
-    cr_expect(lwowe.long_value == 123456);
-    cr_expect(lwowe.long_exp_value.number == 0);
-    cr_expect(lwowe.long_exp_value.exponent == 0);
+    sl->str = str;
+    sl->len = strlen(str);
+    sl->is_float = is_float;
+    sl->has_exponent = has_exponent;
+
+    double_with_or_without_exponent_t dwowe = str_to_double(sl);
+
+    cr_expect(dwowe.has_exponent == expected_has_exponent,
+              "Expected 'has_exponent' to be '%s' but it was '%s'",
+              has_exponent ? "true" : "false",
+              sl->has_exponent ? "true" : "false");
+    cr_expect(dwowe.double_value == expected_value,
+              "Expected 'double_value' to be '%lf' but got '%lf'",
+              expected_value, dwowe.double_value);
+    cr_expect(dwowe.double_exp_value.number == expected_number,
+              "Expected 'number' to be '%lf' but got '%lf'", expected_number,
+              dwowe.double_exp_value.number);
+    cr_expect(dwowe.double_exp_value.exponent == expected_exponent,
+              "Expected 'exponent' to be '%ld' but got '%ld'",
+              expected_exponent, dwowe.double_exp_value.exponent);
     free(sl);
+}
+
+/*******************************************************************************
+**                                 STR_TO_LONG                                **
+*******************************************************************************/
+Test(base_json_parser, str_to_long_noexp)
+{
+    base_str_to_long("123456", 0, 0, 0, 123456, 0, 0);
+}
+
+Test(base_json_parser, str_to_long_negative_noexp)
+{
+    base_str_to_long("-123456", 0, 0, 0, -123456, 0, 0);
 }
 
 Test(base_json_parser, str_to_long_exp_lower_positive)
 {
-    str_and_len_tuple_t *sl = get_tuple("123456e10", 0, 1);
-    if (!sl)
-    {
-        return;
-    }
-    long_with_or_without_exponent_t lwowe = str_to_long(sl);
-    cr_expect(lwowe.has_exponent == 1);
-    cr_expect(lwowe.long_value == 0);
-    cr_expect(lwowe.long_exp_value.number == 123456);
-    cr_expect(lwowe.long_exp_value.exponent == 10);
-    free(sl);
+    base_str_to_long("123456e10", 0, 1, 1, 0, 123456, 10);
 }
 
 Test(base_json_parser, str_to_long_exp_upper_positive)
 {
-    str_and_len_tuple_t *sl = get_tuple("123456E10", 0, 1);
-    if (!sl)
-    {
-        return;
-    }
-    long_with_or_without_exponent_t lwowe = str_to_long(sl);
-    cr_expect(lwowe.has_exponent == 1);
-    cr_expect(lwowe.long_value == 0);
-    cr_expect(lwowe.long_exp_value.number == 123456);
-    cr_expect(lwowe.long_exp_value.exponent == 10);
-    free(sl);
+    base_str_to_long("123456E10", 0, 1, 1, 0, 123456, 10);
 }
 
 Test(base_json_parser, str_to_long_exp_lower_negative)
 {
-    str_and_len_tuple_t *sl = get_tuple("123e-95", 0, 1);
-    if (!sl)
-    {
-        return;
-    }
-    long_with_or_without_exponent_t lwowe = str_to_long(sl);
-    cr_expect(lwowe.has_exponent == 1);
-    cr_expect(lwowe.long_value == 0);
-    cr_expect(lwowe.long_exp_value.number == 123);
-    cr_expect(lwowe.long_exp_value.exponent == -95);
-    free(sl);
+    base_str_to_long("123e-95", 0, 1, 1, 0, 123, -95);
 }
 
 Test(base_json_parser, str_to_long_exp_upper_negative)
 {
-    str_and_len_tuple_t *sl = get_tuple("12E-150", 0, 1);
-    if (!sl)
-    {
-        return;
-    }
-    long_with_or_without_exponent_t lwowe = str_to_long(sl);
-    cr_expect(lwowe.has_exponent == 1);
-    cr_expect(lwowe.long_value == 0);
-    cr_expect(lwowe.long_exp_value.number == 12);
-    cr_expect(lwowe.long_exp_value.exponent == -150);
-    free(sl);
+    base_str_to_long("12E-150", 0, 1, 1, 0, 12, -150);
 }
 
 Test(base_json_parser, str_to_long_negative_exp_lower_positive)
 {
-    str_and_len_tuple_t *sl = get_tuple("-123456e10", 0, 1);
-    if (!sl)
-    {
-        return;
-    }
-    long_with_or_without_exponent_t lwowe = str_to_long(sl);
-    cr_expect(lwowe.has_exponent == 1);
-    cr_expect(lwowe.long_value == 0);
-    cr_expect(lwowe.long_exp_value.number == -123456);
-    cr_expect(lwowe.long_exp_value.exponent == 10);
-    free(sl);
+    base_str_to_long("-123456e10", 0, 1, 1, 0, -123456, 10);
 }
 
 Test(base_json_parser, str_to_long_negative_exp_upper_positive)
 {
-    str_and_len_tuple_t *sl = get_tuple("-123456E10", 0, 1);
-    if (!sl)
-    {
-        return;
-    }
-    long_with_or_without_exponent_t lwowe = str_to_long(sl);
-    cr_expect(lwowe.has_exponent == 1);
-    cr_expect(lwowe.long_value == 0);
-    cr_expect(lwowe.long_exp_value.number == -123456);
-    cr_expect(lwowe.long_exp_value.exponent == 10);
-    free(sl);
+    base_str_to_long("-123456E10", 0, 1, 1, 0, -123456, 10);
 }
 
 Test(base_json_parser, str_to_long_negative_exp_lower_negative)
 {
-    str_and_len_tuple_t *sl = get_tuple("-123e-95", 0, 1);
-    if (!sl)
-    {
-        return;
-    }
-    long_with_or_without_exponent_t lwowe = str_to_long(sl);
-    cr_expect(lwowe.has_exponent == 1);
-    cr_expect(lwowe.long_value == 0);
-    cr_expect(lwowe.long_exp_value.number == -123);
-    cr_expect(lwowe.long_exp_value.exponent == -95);
-    free(sl);
+    base_str_to_long("-123e-95", 0, 1, 1, 0, -123, -95);
 }
 
 Test(base_json_parser, str_to_long_negative_exp_upper_negative)
 {
-    str_and_len_tuple_t *sl = get_tuple("-12E-150", 0, 1);
-    if (!sl)
-    {
-        return;
-    }
-    long_with_or_without_exponent_t lwowe = str_to_long(sl);
-    cr_expect(lwowe.has_exponent == 1);
-    cr_expect(lwowe.long_value == 0);
-    cr_expect(lwowe.long_exp_value.number == -12);
-    cr_expect(lwowe.long_exp_value.exponent == -150);
-    free(sl);
+    base_str_to_long("-12E-150", 0, 1, 1, 0, -12, -150);
+}
+
+/*******************************************************************************
+**                                 STR_TO_LONG                                **
+*******************************************************************************/
+Test(base_json_parser, str_to_double_noexp)
+{
+    base_str_to_double("123.456", 1, 0, 0, 123.456, 0, 0);
+}
+
+Test(base_json_parser, str_to_double_negative_noexp)
+{
+    base_str_to_double("-123.456", 1, 0, 0, -123.456, 0, 0);
+}
+
+Test(base_json_parser, str_to_double_exp_lower_positive)
+{
+    base_str_to_double("12.3e10", 1, 1, 1, 0, 12.3, 10);
+}
+
+Test(base_json_parser, str_to_double_exp_upper_positive)
+{
+    base_str_to_double("1.23456E10", 1, 1, 1, 0, 1.23456, 10);
+}
+
+Test(base_json_parser, str_to_double_exp_lower_negative)
+{
+    base_str_to_double("123e-95", 1, 1, 1, 0, 123, -95);
+}
+
+Test(base_json_parser, str_to_double_exp_upper_negative)
+{
+    base_str_to_double("12.0E-150", 1, 1, 1, 0, 12, -150);
+}
+
+Test(base_json_parser, str_to_double_negative_exp_lower_positive)
+{
+    base_str_to_double("-1234.56e10", 1, 1, 1, 0, -1234.56, 10);
+}
+
+Test(base_json_parser, str_to_double_negative_exp_upper_positive)
+{
+    base_str_to_double("-12.3456E10", 1, 1, 1, 0, -12.3456, 10);
+}
+
+Test(base_json_parser, str_to_double_negative_exp_lower_negative)
+{
+    base_str_to_double("-12.3e-95", 1, 1, 1, 0, -12.3, -95);
+}
+
+Test(base_json_parser, str_to_double_negative_exp_upper_negative)
+{
+    base_str_to_double("-1.2E-150", 1, 1, 1, 0, -1.2, -150);
 }
