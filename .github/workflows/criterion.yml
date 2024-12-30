@@ -16,14 +16,8 @@ jobs:
 
     - name: Update version
       run: sudo apt-get update
-    - name: Install Homebrew
-      run: sudo apt-get install build-essential procps curl file git
-    - name: Install brew
-      run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    - name: Add brew to PATH
-      run: test -d ~/.linuxbrew && eval "$(~/.linuxbrew/bin/brew shellenv)" && test -d /home/linuxbrew/.linuxbrew && eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)" && echo "eval \"\$($(brew --prefix)/bin/brew shellenv)\"" >> ~/.bashrc
-    - name: Install Criterion
-      run: brew install snaipe/soft/criterion
+    - name: Install criterion from apt
+      run: sudo apt-get install libcriterion-dev
     - name: configure
       run: ./configure
     - name: make
