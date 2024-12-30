@@ -43,6 +43,7 @@ leaks: valgrind-compile
          --track-origins=yes ./$(TARGET) t.json
 
 check: clean
-	$(CC) $(CFLAGS) -fprofile-arcs –ftest-coverage $(CFILES) $(TESTFILES) -o json-parser-tests -lcriterion
+	# -fprofile-arcs –ftest-coverage
+	$(CC) $(CFLAGS) $(CFILES) $(TESTFILES) -o json-parser-tests -lcriterion
 	./json-parser-tests
 
