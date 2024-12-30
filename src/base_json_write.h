@@ -47,8 +47,8 @@ typedef struct
             tmp_str = v.strv;                                                  \
             nb += 2; /* Strings are encased by 2 double-quotes (\"\")*/        \
             break;                                                             \
-        case T_INT:                                                            \
-            tmp_str = get_int_as_str(v.intv);                                  \
+        case T_LONG:                                                           \
+            tmp_str = get_long_as_str(v.longv);                                \
             break;                                                             \
         case T_DOUBLE:                                                         \
             tmp_str = get_double_as_str(v.doublev);                            \
@@ -91,8 +91,8 @@ typedef struct
             tmp_str = it.strv;                                                 \
             nb += 2; /* Strings are encased by 2 double-quotes (\"\") */       \
             break;                                                             \
-        case T_INT:                                                            \
-            tmp_str = get_int_as_str(it.intv);                                 \
+        case T_LONG:                                                           \
+            tmp_str = get_long_as_str(it.longv);                               \
             break;                                                             \
         case T_DOUBLE:                                                         \
             tmp_str = get_double_as_str(it.doublev);                           \
@@ -313,7 +313,7 @@ typedef struct
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
-string_t get_int_as_str(int value);
+string_t get_long_as_str(long value);
 string_t get_double_as_str(double value);
 string_t get_bool_as_str(char value);
 string_t get_null_as_str();

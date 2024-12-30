@@ -67,11 +67,27 @@ rw_array_t *rw_parse_array_buff(char *b, unsigned long *idx)
 
             if (sl.is_float)
             {
-                rw_array_add_double(a, str_to_double(&sl));
+                double_with_or_without_exponent_t dwowe = str_to_double(&sl);
+                if (dwowe.has_exponent)
+                {
+                    rw_array_add_exp_double(a, dwowe.double_exp_value);
+                }
+                else
+                {
+                    rw_array_add_double(a, dwowe.double_value);
+                }
             }
             else
             {
-                rw_array_add_int(a, str_to_long(&sl));
+                long_with_or_without_exponent_t lwowe = str_to_long(&sl);
+                if (lwowe.has_exponent)
+                {
+                    rw_array_add_exp_long(a, lwowe.long_exp_value);
+                }
+                else
+                {
+                    rw_array_add_long(a, lwowe.long_value);
+                }
             }
             free(sl.str);
             ++nb_elts_parsed;
@@ -186,11 +202,27 @@ rw_dict_t *rw_parse_dict_buff(char *b, unsigned long *idx)
 
             if (sl.is_float)
             {
-                rw_dict_add_double(d, key, str_to_double(&sl));
+                double_with_or_without_exponent_t dwowe = str_to_double(&sl);
+                if (dwowe.has_exponent)
+                {
+                    rw_dict_add_exp_double(d, key, dwowe.double_exp_value);
+                }
+                else
+                {
+                    rw_dict_add_double(d, key, dwowe.double_value);
+                }
             }
             else
             {
-                rw_dict_add_int(d, key, str_to_long(&sl));
+                long_with_or_without_exponent_t lwowe = str_to_long(&sl);
+                if (lwowe.has_exponent)
+                {
+                    rw_dict_add_exp_long(d, key, lwowe.long_exp_value);
+                }
+                else
+                {
+                    rw_dict_add_long(d, key, lwowe.long_value);
+                }
             }
             free(sl.str);
             ++nb_elts_parsed;
@@ -288,11 +320,27 @@ rw_array_t *rw_parse_array(FILE *f, unsigned long *pos)
 
             if (sl.is_float)
             {
-                rw_array_add_double(a, str_to_double(&sl));
+                double_with_or_without_exponent_t dwowe = str_to_double(&sl);
+                if (dwowe.has_exponent)
+                {
+                    rw_array_add_exp_double(a, dwowe.double_exp_value);
+                }
+                else
+                {
+                    rw_array_add_double(a, dwowe.double_value);
+                }
             }
             else
             {
-                rw_array_add_int(a, str_to_long(&sl));
+                long_with_or_without_exponent_t lwowe = str_to_long(&sl);
+                if (lwowe.has_exponent)
+                {
+                    rw_array_add_exp_long(a, lwowe.long_exp_value);
+                }
+                else
+                {
+                    rw_array_add_long(a, lwowe.long_value);
+                }
             }
             free(sl.str);
             ++nb_elts_parsed;
@@ -428,11 +476,27 @@ rw_dict_t *rw_parse_dict(FILE *f, unsigned long *pos)
 
             if (sl.is_float)
             {
-                rw_dict_add_double(d, key, str_to_double(&sl));
+                double_with_or_without_exponent_t dwowe = str_to_double(&sl);
+                if (dwowe.has_exponent)
+                {
+                    rw_dict_add_exp_double(d, key, dwowe.double_exp_value);
+                }
+                else
+                {
+                    rw_dict_add_double(d, key, dwowe.double_value);
+                }
             }
             else
             {
-                rw_dict_add_int(d, key, str_to_long(&sl));
+                long_with_or_without_exponent_t lwowe = str_to_long(&sl);
+                if (lwowe.has_exponent)
+                {
+                    rw_dict_add_exp_long(d, key, lwowe.long_exp_value);
+                }
+                else
+                {
+                    rw_dict_add_long(d, key, lwowe.long_value);
+                }
             }
             free(sl.str);
             ++nb_elts_parsed;

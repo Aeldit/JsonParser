@@ -3,30 +3,31 @@
 /*******************************************************************************
 **                                  INCLUDES                                  **
 *******************************************************************************/
-#include <math.h>
 #include <stdlib.h>
 #include <string.h>
 
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
-long str_to_long(str_and_len_tuple_t *sl)
+long_with_or_without_exponent_t str_to_long(str_and_len_tuple_t *sl)
 {
     if (!sl)
     {
-        return 0;
+        return ERROR_LWOWE;
     }
 
     char *str = sl->str;
     unsigned long len = sl->len;
     if (!str || len == 0)
     {
-        return 0;
+        return ERROR_LWOWE;
     }
 
-    long res = 0;
-    unsigned long exponent = 0;
+    long number = 0;
+    long exponent = 0;
+    unsigned char exp_idx = 0;
     char is_negative = str[0] == '-' ? -1 : 1;
+    char is_exp_negative = 1;
     char is_in_exponent = 0;
     char c = 0;
     for (unsigned long i = 0; i < len; ++i)
@@ -34,6 +35,7 @@ long str_to_long(str_and_len_tuple_t *sl)
         c = str[i];
         if (sl->has_exponent && (c == 'e' || c == 'E'))
         {
+            exp_idx = i;
             is_in_exponent = 1;
         }
         else if ('0' <= c && c <= '9')
@@ -44,35 +46,54 @@ long str_to_long(str_and_len_tuple_t *sl)
             }
             else
             {
-                res = res * 10 + c - '0';
+                number = number * 10 + c - '0';
             }
         }
+        else if (c == '-' && exp_idx && i - 1 == exp_idx)
+        {
+            is_exp_negative = -1;
+        }
     }
-    return sl->has_exponent ? pow(res * is_negative, exponent)
-                            : res * is_negative;
+    if (sl->has_exponent)
+    {
+        return (long_with_or_without_exponent_t){
+            .has_exponent = 1,
+            .long_exp_value =
+                (exponent_long_t){ .number = number * is_negative,
+                                   .exponent = exponent * is_exp_negative },
+            .long_value = 0
+        };
+    }
+    return (long_with_or_without_exponent_t){
+        .has_exponent = 0,
+        .long_value = number * is_negative,
+        .long_exp_value = (exponent_long_t){ .number = 0, .exponent = 0 }
+    };
 }
 
-double str_to_double(str_and_len_tuple_t *sl)
+double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t *sl)
 {
     if (!sl)
     {
-        return 0;
+        return ERROR_DWOWE;
     }
 
     char *str = sl->str;
     unsigned long len = sl->len;
     if (!str || len == 0)
     {
-        return 0;
+        return ERROR_DWOWE;
     }
 
-    double res = 0; // Integer part
+    double number = 0; // Integer part
     double dot_res = 0; // Decimal part
-    unsigned long exponent = 0; // Only used if sl->has_exponent() is true
+    long exponent = 0; // Only used if sl->has_exponent() is true
     unsigned long nb_digits_dot = 1;
+    unsigned char exp_idx = 0;
     // If the number is negative, this is set to -1 and the final res is
     // multiplied by it
     char is_negative = str[0] == '-' ? -1 : 1;
+    char is_exp_negative = 1;
     char dot_reached = 0;
     char is_in_exponent = 0;
     char c = 0;
@@ -85,6 +106,7 @@ double str_to_double(str_and_len_tuple_t *sl)
         }
         else if (sl->has_exponent && (c == 'e' || c == 'E'))
         {
+            exp_idx = i;
             is_in_exponent = 1;
         }
         else if ('0' <= c && c <= '9')
@@ -100,13 +122,34 @@ double str_to_double(str_and_len_tuple_t *sl)
             }
             else
             {
-                res = res * 10 + c - '0';
+                number = number * 10 + c - '0';
             }
         }
+        else if (c == '-' && exp_idx && i - 1 == exp_idx)
+        {
+            is_exp_negative = -1;
+        }
     }
-    return sl->has_exponent
-        ? pow(is_negative * (res + (dot_res / nb_digits_dot)), exponent)
-        : is_negative * (res + (dot_res / nb_digits_dot));
+    if (sl->has_exponent)
+    {
+        return (double_with_or_without_exponent_t){
+            .has_exponent = 1,
+            .double_exp_value =
+                (exponent_double_t){ .number =
+                                         (number + (dot_res / nb_digits_dot))
+                                         * is_negative,
+                                     .exponent = exponent * is_exp_negative },
+            .double_value = 0
+        };
+    }
+    return (double_with_or_without_exponent_t){
+        .has_exponent = 0,
+        .double_value = (number + (dot_res / nb_digits_dot)) * is_negative,
+        .double_exp_value = (exponent_double_t){ .number = 0, .exponent = 0 }
+    };
+    // return sl->has_exponent
+    //   ? pow(is_negative * (number + (dot_res / nb_digits_dot)), exponent)
+    //: is_negative * (number + (dot_res / nb_digits_dot));
 }
 
 char is_float(char *str, unsigned long len)

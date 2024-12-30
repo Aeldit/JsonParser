@@ -25,8 +25,10 @@ typedef struct
     union
     {
         string_t strv;
-        int intv;
+        long longv;
         double doublev;
+        exponent_long_t exp_longv;
+        exponent_double_t exp_doublev;
         char boolv;
         ro_array_t *arrayv;
         ro_dict_t *dictv;
@@ -41,8 +43,10 @@ typedef struct
     union
     {
         string_t strv;
-        int intv;
+        long longv;
         double doublev;
+        exponent_long_t exp_longv;
+        exponent_double_t exp_doublev;
         char boolv;
         ro_array_t *arrayv;
         ro_dict_t *dictv;
@@ -81,16 +85,21 @@ ro_dict_t *init_ro_dict(unsigned size);
 ro_json_t *init_ro_json(char is_array, ro_array_t *a, ro_dict_t *d);
 
 void ro_array_add_str(ro_array_t *a, string_t value);
-void ro_array_add_int(ro_array_t *a, int value);
+void ro_array_add_long(ro_array_t *a, long value);
 void ro_array_add_double(ro_array_t *a, double value);
+void ro_array_add_exp_long(ro_array_t *a, exponent_long_t value);
+void ro_array_add_exp_double(ro_array_t *a, exponent_double_t value);
 void ro_array_add_bool(ro_array_t *a, char value);
 void ro_array_add_null(ro_array_t *a);
 void ro_array_add_array(ro_array_t *a, ro_array_t *value);
 void ro_array_add_dict(ro_array_t *a, ro_dict_t *value);
 
 void ro_dict_add_str(ro_dict_t *d, string_t key, string_t value);
-void ro_dict_add_int(ro_dict_t *d, string_t key, int value);
+void ro_dict_add_long(ro_dict_t *d, string_t key, long value);
 void ro_dict_add_double(ro_dict_t *d, string_t key, double value);
+void ro_dict_add_exp_long(ro_dict_t *d, string_t key, exponent_long_t value);
+void ro_dict_add_exp_double(ro_dict_t *d, string_t key,
+                            exponent_double_t value);
 void ro_dict_add_bool(ro_dict_t *d, string_t key, char value);
 void ro_dict_add_null(ro_dict_t *d, string_t key);
 void ro_dict_add_array(ro_dict_t *d, string_t key, ro_array_t *value);

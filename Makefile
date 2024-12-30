@@ -17,19 +17,18 @@ all: clean $(TARGET)
 	./$(TARGET) t.json
 
 rw: clean
-	$(CC) $(CFLAGS) $(CFILES) rw_main.c -o $(TARGET) -lm
+	$(CC) $(CFLAGS) $(CFILES) rw_main.c -o $(TARGET)
 	./$(TARGET) t.json
 
 .PHONY:
 $(TARGET):
-	$(CC) $(CFLAGS) $(CFILES) ro_main.c -o $(TARGET) \
-		-lm # math library for pow function
+	$(CC) $(CFLAGS) $(CFILES) ro_main.c -o $(TARGET)
 
 clean:
 	if [ -f "$(TARGET)" ]; then rm $(TARGET); fi
 
 valgrind-compile: clean
-	$(CC) $(CFLAGS) -lm \
+	$(CC) $(CFLAGS) \
 		-DVALGRING_DISABLE_PRINT \
 		$(CFILES) ro_main.c -o $(TARGET)
 

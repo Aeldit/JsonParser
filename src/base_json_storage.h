@@ -6,12 +6,14 @@
 *******************************************************************************/
 #define T_ERROR 0
 #define T_STR 1
-#define T_INT 2
+#define T_LONG 2
 #define T_DOUBLE 3
-#define T_BOOL 4
-#define T_NULL 5
-#define T_ARR 6
-#define T_DICT 7
+#define T_EXP_LONG 4
+#define T_EXP_DOUBLE 5
+#define T_BOOL 6
+#define T_NULL 7
+#define T_ARR 8
+#define T_DICT 9
 
 #define STRING_OF(s, l) ((string_t){ .str = (s), .len = (l) })
 #define EMPTY_STRING ((string_t){ .str = 0 })
@@ -36,6 +38,18 @@ typedef struct
     char *str;
     unsigned len;
 } string_t;
+
+typedef struct
+{
+    long number;
+    long exponent;
+} exponent_long_t;
+
+typedef struct
+{
+    double number;
+    long exponent;
+} exponent_double_t;
 
 /*******************************************************************************
 **                                 FUNCTIONS                                  **

@@ -7,6 +7,7 @@
 #include <stdio.h>
 
 #include "base_json_storage.h"
+#include "ro_json_storage.h"
 
 /*******************************************************************************
 **                                   MACROS                                   **
@@ -42,13 +43,16 @@
 #endif
 
 #define NULL_STR_AND_LEN_TUPLE ((str_and_len_tuple_t){ .str = 0, .len = 0 })
+#define ERROR_LWOWE ((long_with_or_without_exponent_t){ .has_exponent = 2 })
+#define ERROR_DWOWE ((double_with_or_without_exponent_t){ .has_exponent = 2 })
 
 /*******************************************************************************
-**                                 STRUCTURES                                 **
+**                                 STRUCTURES **
 *******************************************************************************/
 /**
-** \typedef StrAndLenTuple
-** \brief Used by the parse_number() function to return multiple informations
+** \typedef str_and_len_tuple_t
+** \brief Used by the parse_number() function to return multiple
+*informations
 */
 typedef struct
 {
@@ -57,6 +61,20 @@ typedef struct
     char is_float;
     char has_exponent;
 } str_and_len_tuple_t;
+
+typedef struct
+{
+    exponent_long_t long_exp_value;
+    long long_value;
+    char has_exponent; // 0 => false | 1 => true | 2 => error
+} long_with_or_without_exponent_t;
+
+typedef struct
+{
+    exponent_double_t double_exp_value;
+    double double_value;
+    char has_exponent; // 0 => false | 1 => true | 2 => error
+} double_with_or_without_exponent_t;
 
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
@@ -69,7 +87,7 @@ typedef struct
 ** \returns The 0 in case of error (or if the number was 0), the number
 **          otherwise
 */
-long str_to_long(str_and_len_tuple_t *sl);
+long_with_or_without_exponent_t str_to_long(str_and_len_tuple_t *sl);
 
 /**
 ** \brief Takes sl's char array and transforms it into a double.
@@ -79,7 +97,7 @@ long str_to_long(str_and_len_tuple_t *sl);
 ** \returns The 0 in case of error (or if the number was 0), the number
 **          otherwise
 */
-double str_to_double(str_and_len_tuple_t *sl);
+double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t *sl);
 
 char is_float(char *str, unsigned long len);
 char has_exponent(char *str, unsigned long len);

@@ -7,6 +7,14 @@
 #include <stdlib.h>
 
 /*******************************************************************************
+**                              DEFINES / MACROS                              **
+*******************************************************************************/
+#define RO_VALUE_OF(T_TYPE, type_field)                                        \
+    ((ro_value_t){ .type = T_TYPE, .type_field = value })
+#define RO_ITEM_OF(T_TYPE, type_field)                                         \
+    ((ro_item_t){ .type = T_TYPE, .key = key, .type_field = value })
+
+/*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
 ro_array_t *init_ro_array(unsigned size)
@@ -81,17 +89,15 @@ void ro_array_add_str(ro_array_t *a, string_t value)
 {
     if (a && a->values && a->insert_index < a->size && value.str)
     {
-        a->values[a->insert_index++] =
-            (ro_value_t){ .type = T_STR, .strv = value };
+        a->values[a->insert_index++] = RO_VALUE_OF(T_STR, strv);
     }
 }
 
-void ro_array_add_int(ro_array_t *a, int value)
+void ro_array_add_long(ro_array_t *a, long value)
 {
     if (a && a->values && a->insert_index < a->size)
     {
-        a->values[a->insert_index++] =
-            (ro_value_t){ .type = T_INT, .intv = value };
+        a->values[a->insert_index++] = RO_VALUE_OF(T_LONG, longv);
     }
 }
 
@@ -99,8 +105,23 @@ void ro_array_add_double(ro_array_t *a, double value)
 {
     if (a && a->values && a->insert_index < a->size)
     {
-        a->values[a->insert_index++] =
-            (ro_value_t){ .type = T_DOUBLE, .doublev = value };
+        a->values[a->insert_index++] = RO_VALUE_OF(T_DOUBLE, doublev);
+    }
+}
+
+void ro_array_add_exp_long(ro_array_t *a, exponent_long_t value)
+{
+    if (a && a->values && a->insert_index < a->size)
+    {
+        a->values[a->insert_index++] = RO_VALUE_OF(T_EXP_LONG, exp_longv);
+    }
+}
+
+void ro_array_add_exp_double(ro_array_t *a, exponent_double_t value)
+{
+    if (a && a->values && a->insert_index < a->size)
+    {
+        a->values[a->insert_index++] = RO_VALUE_OF(T_EXP_DOUBLE, exp_doublev);
     }
 }
 
@@ -108,8 +129,7 @@ void ro_array_add_bool(ro_array_t *a, char value)
 {
     if (a && a->values && a->insert_index < a->size)
     {
-        a->values[a->insert_index++] =
-            (ro_value_t){ .type = T_BOOL, .boolv = value };
+        a->values[a->insert_index++] = RO_VALUE_OF(T_BOOL, boolv);
     }
 }
 
@@ -125,8 +145,7 @@ void ro_array_add_array(ro_array_t *a, ro_array_t *value)
 {
     if (a && a->values && value && a->insert_index < a->size)
     {
-        a->values[a->insert_index++] =
-            (ro_value_t){ .type = T_ARR, .arrayv = value };
+        a->values[a->insert_index++] = RO_VALUE_OF(T_ARR, arrayv);
     }
 }
 
@@ -134,8 +153,7 @@ void ro_array_add_dict(ro_array_t *a, ro_dict_t *value)
 {
     if (a && a->values && value && a->insert_index < a->size)
     {
-        a->values[a->insert_index++] =
-            (ro_value_t){ .type = T_DICT, .dictv = value };
+        a->values[a->insert_index++] = RO_VALUE_OF(T_DICT, dictv);
     }
 }
 
@@ -143,17 +161,15 @@ void ro_dict_add_str(ro_dict_t *d, string_t key, string_t value)
 {
     if (d && d->items && d->insert_index < d->size && key.str && value.str)
     {
-        d->items[d->insert_index++] =
-            (ro_item_t){ .type = T_STR, .key = key, .strv = value };
+        d->items[d->insert_index++] = RO_ITEM_OF(T_STR, strv);
     }
 }
 
-void ro_dict_add_int(ro_dict_t *d, string_t key, int value)
+void ro_dict_add_long(ro_dict_t *d, string_t key, long value)
 {
     if (d && d->items && d->insert_index < d->size && key.str)
     {
-        d->items[d->insert_index++] =
-            (ro_item_t){ .type = T_INT, .key = key, .intv = value };
+        d->items[d->insert_index++] = RO_ITEM_OF(T_LONG, longv);
     }
 }
 
@@ -161,8 +177,23 @@ void ro_dict_add_double(ro_dict_t *d, string_t key, double value)
 {
     if (d && d->items && d->insert_index < d->size && key.str)
     {
-        d->items[d->insert_index++] =
-            (ro_item_t){ .type = T_DOUBLE, .key = key, .doublev = value };
+        d->items[d->insert_index++] = RO_ITEM_OF(T_DOUBLE, doublev);
+    }
+}
+
+void ro_dict_add_exp_long(ro_dict_t *d, string_t key, exponent_long_t value)
+{
+    if (d && d->items && d->insert_index < d->size && key.str)
+    {
+        d->items[d->insert_index++] = RO_ITEM_OF(T_EXP_LONG, exp_longv);
+    }
+}
+
+void ro_dict_add_exp_double(ro_dict_t *d, string_t key, exponent_double_t value)
+{
+    if (d && d->items && d->insert_index < d->size && key.str)
+    {
+        d->items[d->insert_index++] = RO_ITEM_OF(T_EXP_DOUBLE, exp_doublev);
     }
 }
 
@@ -170,8 +201,7 @@ void ro_dict_add_bool(ro_dict_t *d, string_t key, char value)
 {
     if (d && d->items && d->insert_index < d->size && key.str)
     {
-        d->items[d->insert_index++] =
-            (ro_item_t){ .type = T_BOOL, .key = key, .boolv = value };
+        d->items[d->insert_index++] = RO_ITEM_OF(T_BOOL, boolv);
     }
 }
 
@@ -187,8 +217,7 @@ void ro_dict_add_array(ro_dict_t *d, string_t key, ro_array_t *value)
 {
     if (d && d->items && value && d->insert_index < d->size && key.str)
     {
-        d->items[d->insert_index++] =
-            (ro_item_t){ .type = T_ARR, .key = key, .arrayv = value };
+        d->items[d->insert_index++] = RO_ITEM_OF(T_ARR, arrayv);
     }
 }
 
@@ -196,8 +225,7 @@ void ro_dict_add_dict(ro_dict_t *d, string_t key, ro_dict_t *value)
 {
     if (d && d->items && value && d->insert_index < d->size && key.str)
     {
-        d->items[d->insert_index++] =
-            (ro_item_t){ .type = T_DICT, .key = key, .dictv = value };
+        d->items[d->insert_index++] = RO_ITEM_OF(T_DICT, dictv);
     }
 }
 
@@ -284,11 +312,19 @@ void ro_array_print_indent(ro_array_t *a, unsigned indent, char fromDict)
         case T_STR:
             printf("\t%s\"%s\"", tabs, v.strv.str ? v.strv.str : "");
             break;
-        case T_INT:
-            printf("\t%s%d", tabs, v.intv);
+        case T_LONG:
+            printf("\t%s%ld", tabs, v.longv);
             break;
         case T_DOUBLE:
             printf("\t%s%f", tabs, v.doublev);
+            break;
+        case T_EXP_LONG:
+            printf("\t%s%lde%ld", tabs, v.exp_longv.number,
+                   v.exp_longv.exponent);
+            break;
+        case T_EXP_DOUBLE:
+            printf("\t%s%fe%ld", tabs, v.exp_doublev.number,
+                   v.exp_doublev.exponent);
             break;
         case T_BOOL:
             printf("\t%s%s", tabs, v.boolv ? "true" : "false");
@@ -363,11 +399,19 @@ void ro_dict_print_indent(ro_dict_t *d, unsigned indent, char fromDict)
             printf("\t%s\"%s\" : \"%s\"", tabs, key.str,
                    it.strv.str ? it.strv.str : "");
             break;
-        case T_INT:
-            printf("\t%s\"%s\" : %d", tabs, key.str, it.intv);
+        case T_LONG:
+            printf("\t%s\"%s\" : %ld", tabs, key.str, it.longv);
             break;
         case T_DOUBLE:
             printf("\t%s\"%s\" : %f", tabs, key.str, it.doublev);
+            break;
+        case T_EXP_LONG:
+            printf("\t%s\"%s\" : %lde%ld", tabs, key.str, it.exp_longv.number,
+                   it.exp_longv.exponent);
+            break;
+        case T_EXP_DOUBLE:
+            printf("\t%s\"%s\" : %fe%ld", tabs, key.str, it.exp_doublev.number,
+                   it.exp_doublev.exponent);
             break;
         case T_BOOL:
             printf("\t%s\"%s\" : %s", tabs, key.str,

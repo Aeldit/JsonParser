@@ -67,7 +67,7 @@ void destroy_linked_list(string_linked_list_t *ll)
 /*******************************************************************************
 **                                GETS AS STR                                 **
 *******************************************************************************/
-string_t get_int_as_str(int value)
+string_t get_long_as_str(long value)
 {
     char is_neg = value < 0;
     unsigned nb_chars = is_neg ? 2 : 1;
@@ -76,7 +76,7 @@ string_t get_int_as_str(int value)
         value *= -1;
     }
 
-    int tmp_value = value;
+    long tmp_value = value;
     while (tmp_value /= 10)
     {
         ++nb_chars;
