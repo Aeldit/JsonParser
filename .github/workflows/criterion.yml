@@ -18,6 +18,8 @@ jobs:
       run: sudo apt-get update
     - name: Install Homebrew
       run: sudo apt-get install build-essential procps curl file git
+    - name: Install brew
+      run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     - name: Install Criterion
       run: brew install snaipe/soft/criterion
     - name: configure
