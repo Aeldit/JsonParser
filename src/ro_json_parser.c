@@ -68,6 +68,10 @@ ro_array_t *ro_parse_array_buff(char *b, unsigned long *idx)
             if (sl.is_float)
             {
                 double_with_or_without_exponent_t dwowe = str_to_double(&sl);
+                if (dwowe.has_exponent == 2)
+                {
+                    continue;
+                }
                 if (dwowe.has_exponent)
                 {
                     ro_array_add_exp_double(a, dwowe.double_exp_value);
@@ -80,6 +84,10 @@ ro_array_t *ro_parse_array_buff(char *b, unsigned long *idx)
             else
             {
                 long_with_or_without_exponent_t lwowe = str_to_long(&sl);
+                if (lwowe.has_exponent == 2)
+                {
+                    continue;
+                }
                 if (lwowe.has_exponent)
                 {
                     ro_array_add_exp_long(a, lwowe.long_exp_value);
@@ -203,6 +211,10 @@ ro_dict_t *ro_parse_dict_buff(char *b, unsigned long *idx)
             if (sl.is_float)
             {
                 double_with_or_without_exponent_t dwowe = str_to_double(&sl);
+                if (dwowe.has_exponent == 2)
+                {
+                    continue;
+                }
                 if (dwowe.has_exponent)
                 {
                     ro_dict_add_exp_double(d, key, dwowe.double_exp_value);
@@ -215,6 +227,10 @@ ro_dict_t *ro_parse_dict_buff(char *b, unsigned long *idx)
             else
             {
                 long_with_or_without_exponent_t lwowe = str_to_long(&sl);
+                if (lwowe.has_exponent == 2)
+                {
+                    continue;
+                }
                 if (lwowe.has_exponent)
                 {
                     ro_dict_add_exp_long(d, key, lwowe.long_exp_value);
@@ -321,6 +337,10 @@ ro_array_t *ro_parse_array(FILE *f, unsigned long *pos)
             if (sl.is_float)
             {
                 double_with_or_without_exponent_t dwowe = str_to_double(&sl);
+                if (dwowe.has_exponent == 2)
+                {
+                    continue;
+                }
                 if (dwowe.has_exponent)
                 {
                     ro_array_add_exp_double(a, dwowe.double_exp_value);
@@ -333,6 +353,10 @@ ro_array_t *ro_parse_array(FILE *f, unsigned long *pos)
             else
             {
                 long_with_or_without_exponent_t lwowe = str_to_long(&sl);
+                if (lwowe.has_exponent == 2)
+                {
+                    continue;
+                }
                 if (lwowe.has_exponent)
                 {
                     ro_array_add_exp_long(a, lwowe.long_exp_value);
@@ -477,6 +501,10 @@ ro_dict_t *ro_parse_dict(FILE *f, unsigned long *pos)
             if (sl.is_float)
             {
                 double_with_or_without_exponent_t dwowe = str_to_double(&sl);
+                if (dwowe.has_exponent == 2)
+                {
+                    continue;
+                }
                 if (dwowe.has_exponent)
                 {
                     ro_dict_add_exp_double(d, key, dwowe.double_exp_value);
@@ -489,6 +517,10 @@ ro_dict_t *ro_parse_dict(FILE *f, unsigned long *pos)
             else
             {
                 long_with_or_without_exponent_t lwowe = str_to_long(&sl);
+                if (lwowe.has_exponent == 2)
+                {
+                    continue;
+                }
                 if (lwowe.has_exponent)
                 {
                     ro_dict_add_exp_long(d, key, lwowe.long_exp_value);

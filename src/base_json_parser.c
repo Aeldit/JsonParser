@@ -147,9 +147,6 @@ double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t *sl)
         .double_value = (number + (dot_res / nb_digits_dot)) * is_negative,
         .double_exp_value = (exponent_double_t){ .number = 0, .exponent = 0 }
     };
-    // return sl->has_exponent
-    //   ? pow(is_negative * (number + (dot_res / nb_digits_dot)), exponent)
-    //: is_negative * (number + (dot_res / nb_digits_dot));
 }
 
 char is_float(char *str, unsigned long len)
