@@ -28,6 +28,7 @@ $(TARGET):
 
 clean:
 	if [ -f "$(TARGET)" ]; then rm $(TARGET); fi
+	if [ -f "json-parser-tests" ]; then rm json-parser-tests; fi
 
 valgrind-compile: clean
 	$(CC) $(CFLAGS) \

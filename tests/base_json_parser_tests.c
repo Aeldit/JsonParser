@@ -465,3 +465,47 @@ Test(base_json_parser, parse_number_buff_float_upperexp)
     unsigned long idx = 20;
     test_parse_number_buff("{\"test\":\"aaa\",\"num\":123.45E6}", &idx, s);
 }
+
+/*******************************************************************************
+**                              PARSE_BOOLEAN_BUFF                            **
+*******************************************************************************/
+void test_parse_boolean_buff(char *buff, unsigned long *idx,
+                             unsigned long expected_len)
+{
+    unsigned long initial_idx = idx ? *idx : 0;
+    unsigned long b = parse_boolean_buff(buff, idx);
+
+    cr_expect(b == expected_len,
+              "Expected the boolean len to be '%lu' but got '%lu'",
+              expected_len, b);
+    if (buff && idx)
+    {
+        cr_expect(*idx - initial_idx == b - 1,
+                  "Expected '*idx' to be incremented by '%lu' but it got "
+                  "incremented by '%lu'",
+                  b - 1, *idx - initial_idx);
+    }
+}
+
+Test(base_json_parser, parse_boolean_buff_true)
+{
+    unsigned long idx = 8;
+    test_parse_boolean_buff("{\"test\":true,\"num\":123.45E6}", &idx, 4);
+}
+
+Test(base_json_parser, parse_boolean_buff_false)
+{
+    unsigned long idx = 8;
+    test_parse_boolean_buff("{\"test\":false,\"num\":123.45E6}", &idx, 5);
+}
+
+Test(base_json_parser, parse_boolean_buff_null_buff)
+{
+    unsigned long idx = 8;
+    test_parse_boolean_buff(0, &idx, 0);
+}
+
+Test(base_json_parser, parse_boolean_buff_null_idx)
+{
+    test_parse_boolean_buff("{\"test\":false,\"num\":123.45E6}", 0, 0);
+}
