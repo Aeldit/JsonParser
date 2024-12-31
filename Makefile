@@ -42,8 +42,7 @@ leaks: valgrind-compile
 	valgrind --leak-check=full --show-leak-kinds=all \
          --track-origins=yes ./$(TARGET) t.json
 
-check: clean
-	# -fprofile-arcs –ftest-coverage
+check:
 	$(CC) $(CFLAGS) $(CFILES) $(TESTFILES) -o json-parser-tests -lcriterion
 	./json-parser-tests
 
