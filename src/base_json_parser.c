@@ -269,7 +269,7 @@ string_t parse_string(FILE *f, unsigned long *pos)
         prev_c = c;
     }
 
-    unsigned len = i - i - *pos - 1;
+    unsigned len = i - *pos - 1;
     if (!len)
     {
         ++(*pos);

@@ -331,3 +331,59 @@ Test(base_json_parser, parse_string_buff_long_string)
                            "meaning, you should find an answer with its own "
                            "meaning");
 }
+
+/*******************************************************************************
+**                                PARSE_STRING                                **
+*******************************************************************************/
+void test_parse_string(char *file_path, unsigned long *pos, char *expected_str)
+{
+    unsigned long initial_idx = pos ? *pos : 0;
+    FILE *f = fopen(file_path, "r");
+    if (f)
+    {
+        if (pos && fseek(f, (*pos)++, SEEK_SET) != 0)
+        {
+            fclose(f);
+            return;
+        }
+    }
+
+    string_t s = parse_string(f, pos);
+    unsigned long expected_len = expected_str ? strlen(expected_str) : 0;
+
+    cr_expect(strncmp(s.str, expected_str,
+                      s.len < expected_len ? expected_len : s.len)
+                  == 0,
+              "Expected 'str' to be '%s' but got '%s'", expected_str, s.str);
+    cr_expect(s.len == expected_len, "Expected 'len' to be '%lu' but got '%u'",
+              expected_len, s.len);
+    if (f && pos)
+    {
+        cr_expect(*pos - initial_idx - 1 == s.len + 1,
+                  "Expected '*idx' to be incremented by '%u' but it got "
+                  "incremented by '%lu'",
+                  s.len + 1, *pos - initial_idx - 1);
+    }
+    destroy_string(s);
+    if (f)
+    {
+        fclose(f);
+    }
+}
+
+Test(base_json_parser, parse_string_normal_string)
+{
+    unsigned long idx = 6;
+    test_parse_string("tests/test.json", &idx, "first");
+}
+
+Test(base_json_parser, parse_string_null_pos)
+{
+    test_parse_string("tests/test.json", 0, "");
+}
+
+Test(base_json_parser, parse_string_null_file)
+{
+    unsigned long idx = 6;
+    test_parse_string("tes.json", &idx, "");
+}
