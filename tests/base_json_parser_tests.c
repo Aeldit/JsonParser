@@ -558,6 +558,90 @@ Test(base_json_parser, parse_number_negative_nofloat_exp)
     test_parse_number(&pos, STR_AND_LEN_OF("-53e4", 5, 0, 1));
 }
 
+Test(base_json_parser, parse_number_positive_nofloat_negativeexp)
+{
+    unsigned long pos = 185;
+    test_parse_number(&pos, STR_AND_LEN_OF("200e-10", 7, 0, 1));
+}
+
+Test(base_json_parser, parse_number_negative_nofloat_negativeexp)
+{
+    unsigned long pos = 202;
+    test_parse_number(&pos, STR_AND_LEN_OF("-251e-10", 8, 0, 1));
+}
+
+Test(base_json_parser, parse_number_positive_float_exp)
+{
+    unsigned long pos = 220;
+    test_parse_number(&pos, STR_AND_LEN_OF("200.50e10", 9, 1, 1));
+}
+
+Test(base_json_parser, parse_number_negative_float_exp)
+{
+    unsigned long pos = 239;
+    test_parse_number(&pos, STR_AND_LEN_OF("-200.50e10", 10, 1, 1));
+}
+
+Test(base_json_parser, parse_number_positive_float_negativeexp)
+{
+    unsigned long pos = 259;
+    test_parse_number(&pos, STR_AND_LEN_OF("200.50e-10", 10, 1, 1));
+}
+
+Test(base_json_parser, parse_number_negative_float_negativeexp)
+{
+    unsigned long pos = 279;
+    test_parse_number(&pos, STR_AND_LEN_OF("-200.50e-10", 11, 1, 1));
+}
+
+Test(base_json_parser, parse_number_positive_nofloat_upperexp)
+{
+    unsigned long pos = 300;
+    test_parse_number(&pos, STR_AND_LEN_OF("2E8", 3, 0, 1));
+}
+
+Test(base_json_parser, parse_number_negative_nofloat_upperexp)
+{
+    unsigned long pos = 313;
+    test_parse_number(&pos, STR_AND_LEN_OF("-53E4", 5, 0, 1));
+}
+
+Test(base_json_parser, parse_number_positive_nofloat_uppernegativeexp)
+{
+    unsigned long pos = 328;
+    test_parse_number(&pos, STR_AND_LEN_OF("200E-10", 7, 0, 1));
+}
+
+Test(base_json_parser, parse_number_negative_nofloat_uppernegativeexp)
+{
+    unsigned long pos = 345;
+    test_parse_number(&pos, STR_AND_LEN_OF("-251E-10", 8, 0, 1));
+}
+
+Test(base_json_parser, parse_number_positive_float_upperexp)
+{
+    unsigned long pos = 363;
+    test_parse_number(&pos, STR_AND_LEN_OF("200.50E10", 9, 1, 1));
+}
+
+Test(base_json_parser, parse_number_negative_float_upperexp)
+{
+    unsigned long pos = 382;
+    test_parse_number(&pos, STR_AND_LEN_OF("-200.50E10", 10, 1, 1));
+}
+
+Test(base_json_parser, parse_number_positive_float_uppernegativeexp)
+{
+    unsigned long pos = 402;
+    test_parse_number(&pos, STR_AND_LEN_OF("200.50E-10", 10, 1, 1));
+}
+
+Test(base_json_parser, parse_number_negative_float_uppernegativeexp)
+{
+    unsigned long pos = 422;
+    test_parse_number(&pos, STR_AND_LEN_OF("-200.50E-10", 11, 1, 1));
+}
+
 /*******************************************************************************
 **                              PARSE_BOOLEAN_BUFF                            **
 *******************************************************************************/
