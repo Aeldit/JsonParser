@@ -272,16 +272,16 @@ Test(base_json_parser, doesnt_have_exponent)
 *******************************************************************************/
 void test_parse_string(unsigned long *idx, char *expected_str, char is_buff)
 {
-    unsigned long initial_idx = idx ? *idx : 0;
-    unsigned long expected_len = expected_str ? strlen(expected_str) : 0;
-    string_t s;
-    char *buff;
-
     FILE *f = fopen("tests/test.json", "r");
     if (!f)
     {
         return;
     }
+
+    unsigned long initial_idx = idx ? *idx : 0;
+    unsigned long expected_len = expected_str ? strlen(expected_str) : 0;
+    string_t s = EMPTY_STRING;
+    char *buff = 0;
 
     if (is_buff)
     {
@@ -307,7 +307,7 @@ void test_parse_string(unsigned long *idx, char *expected_str, char is_buff)
     }
     else
     {
-        if (f && idx && fseek(f, (*idx)++, SEEK_SET) != 0)
+        if (idx && fseek(f, (*idx)++, SEEK_SET) != 0)
         {
             fclose(f);
             return;
@@ -320,8 +320,8 @@ void test_parse_string(unsigned long *idx, char *expected_str, char is_buff)
                   == 0,
               "Expected 'str' to be '%s' but got '%s'", expected_str, s.str);
     cr_expect(s.len == expected_len, "Expected 'len' to be '%lu' but got '%u'",
-              expected_len, s.len);
-    if ((is_buff && buff && idx) || (!is_buff && f && idx))
+              expected_len, f && s.len);
+    if ((is_buff && buff) && idx)
     {
         cr_expect(*idx - initial_idx - !is_buff == s.len + 1,
                   "Expected '*idx' to be incremented by '%u' but it got "
@@ -333,10 +333,7 @@ void test_parse_string(unsigned long *idx, char *expected_str, char is_buff)
     {
         free(buff);
     }
-    if (f)
-    {
-        fclose(f);
-    }
+    fclose(f);
 }
 
 Test(base_json_parser, parse_string_buff_nullidx)
@@ -356,6 +353,7 @@ Test(base_json_parser, parse_string_buff_empty_string)
     test_parse_string(&idx, "", 1);
 }
 
+// Files
 Test(base_json_parser, parse_string_null_pos)
 {
     test_parse_string(0, "", 0);
@@ -374,104 +372,55 @@ Test(base_json_parser, parse_string_empty_string)
 }
 
 /*******************************************************************************
-**                              PARSE_NUMBER_BUFF                             **
+**                                PARSE_NUMBER                                **
 *******************************************************************************/
-void test_parse_number_buff(char *buff, unsigned long *idx,
-                            str_and_len_tuple_t expected_str_and_len)
+void test_parse_number(unsigned long *idx,
+                       str_and_len_tuple_t expected_str_and_len, char is_buff)
 {
-    unsigned long initial_idx = idx ? *idx : 0;
-    str_and_len_tuple_t s = parse_number_buff(buff, idx);
+    FILE *f = fopen("tests/test.json", "r");
+    if (!f)
+    {
+        return;
+    }
 
+    unsigned long initial_idx = idx ? *idx : 0;
     char *expected_str = expected_str_and_len.str;
     unsigned long expected_len = expected_str_and_len.len;
 
-    cr_expect(strncmp(s.str, expected_str,
-                      s.len < expected_len ? expected_len : s.len)
-                  == 0,
-              "Expected 'str' to be '%s' but got '%s'", expected_str, s.str);
-    cr_expect(s.len == expected_len, "Expected 'len' to be '%lu' but got '%u'",
-              expected_len, s.len);
-    if (buff && idx)
+    str_and_len_tuple_t s = NULL_STR_AND_LEN_TUPLE;
+    char *buff = 0;
+
+    if (is_buff)
     {
-        cr_expect(*idx - initial_idx == s.len - 1,
-                  "Expected '*idx' to be incremented by '%u' but it got "
-                  "incremented by '%lu'",
-                  s.len - 1, *idx - initial_idx);
-        cr_expect(s.is_float == expected_str_and_len.is_float,
-                  "Expected '%s' to %s a float but it %s", s.str,
-                  expected_str_and_len.is_float ? "be" : "not be",
-                  s.is_float ? "was" : "wasn't");
-        cr_expect(s.has_exponent == expected_str_and_len.has_exponent,
-                  "Expected '%s' to %s an exponent but it %s", s.str,
-                  expected_str_and_len.has_exponent ? "have" : "not have",
-                  s.has_exponent ? "did" : "didn't");
-    }
-    free(s.str);
-}
-
-Test(base_json_parser, parse_number_buff_nofloat_noexp)
-{
-    str_and_len_tuple_t s = STR_AND_LEN_OF("123456", 6, 0, 0);
-    unsigned long idx = 20;
-    test_parse_number_buff("{\"test\":\"aaa\",\"num\":123456}", &idx, s);
-}
-
-Test(base_json_parser, parse_number_buff_float_noexp)
-{
-    str_and_len_tuple_t s = STR_AND_LEN_OF("123.456", 7, 1, 0);
-    unsigned long idx = 20;
-    test_parse_number_buff("{\"test\":\"aaa\",\"num\":123.456}", &idx, s);
-}
-
-Test(base_json_parser, parse_number_buff_nofloat_exp)
-{
-    str_and_len_tuple_t s = STR_AND_LEN_OF("1234e56", 7, 0, 1);
-    unsigned long idx = 20;
-    test_parse_number_buff("{\"test\":\"aaa\",\"num\":1234e56}", &idx, s);
-}
-
-Test(base_json_parser, parse_number_buff_float_exp)
-{
-    str_and_len_tuple_t s = STR_AND_LEN_OF("123.45e6", 8, 1, 1);
-    unsigned long idx = 20;
-    test_parse_number_buff("{\"test\":\"aaa\",\"num\":123.45e6}", &idx, s);
-}
-
-Test(base_json_parser, parse_number_buff_nofloat_upperexp)
-{
-    str_and_len_tuple_t s = STR_AND_LEN_OF("1234E56", 7, 0, 1);
-    unsigned long idx = 20;
-    test_parse_number_buff("{\"test\":\"aaa\",\"num\":1234E56}", &idx, s);
-}
-
-Test(base_json_parser, parse_number_buff_float_upperexp)
-{
-    str_and_len_tuple_t s = STR_AND_LEN_OF("123.45E6", 8, 1, 1);
-    unsigned long idx = 20;
-    test_parse_number_buff("{\"test\":\"aaa\",\"num\":123.45E6}", &idx, s);
-}
-
-/*******************************************************************************
-**                                PARSE_NUMBER                                **
-*******************************************************************************/
-void test_parse_number(unsigned long *pos,
-                       str_and_len_tuple_t expected_str_and_len)
-{
-    FILE *f = fopen("tests/test.json", "r");
-    if (f)
-    {
-        if (pos && fseek(f, (*pos)++, SEEK_SET) != 0)
+        if (fseek(f, 0, SEEK_SET) != 0)
         {
             fclose(f);
             return;
         }
+
+        struct stat st;
+        stat("tests/test.json", &st);
+        unsigned long nb_chars = st.st_size;
+
+        buff = calloc(nb_chars + 1, sizeof(char));
+        if (!buff)
+        {
+            fclose(f);
+            return;
+        }
+        fread(buff, sizeof(char), nb_chars, f);
+
+        s = parse_number_buff(buff, idx);
     }
-
-    unsigned long initial_idx = pos ? *pos : 0;
-    str_and_len_tuple_t s = parse_number(f, pos);
-
-    char *expected_str = expected_str_and_len.str;
-    unsigned long expected_len = expected_str_and_len.len;
+    else
+    {
+        if (idx && fseek(f, (*idx)++, SEEK_SET) != 0)
+        {
+            fclose(f);
+            return;
+        }
+        s = parse_number(f, idx);
+    }
 
     cr_expect(strncmp(s.str, expected_str,
                       s.len < expected_len ? expected_len : s.len)
@@ -479,12 +428,12 @@ void test_parse_number(unsigned long *pos,
               "Expected 'str' to be '%s' but got '%s'", expected_str, s.str);
     cr_expect(s.len == expected_len, "Expected 'len' to be '%lu' but got '%u'",
               expected_len, s.len);
-    if (f && pos)
+    if (f && idx)
     {
-        cr_expect(*pos - initial_idx == s.len - 1,
+        cr_expect(*idx - initial_idx - !is_buff == s.len - 1,
                   "Expected '*idx' to be incremented by '%u' but it got "
                   "incremented by '%lu'",
-                  s.len - 1, *pos - initial_idx);
+                  s.len - 1, *idx - initial_idx - !is_buff);
         cr_expect(s.is_float == expected_str_and_len.is_float,
                   "Expected '%s' to %s a float but it %s", s.str,
                   expected_str_and_len.is_float ? "be" : "not be",
@@ -495,130 +444,252 @@ void test_parse_number(unsigned long *pos,
                   s.has_exponent ? "did" : "didn't");
     }
     free(s.str);
-    if (f)
+    if (is_buff)
     {
-        fclose(f);
+        free(buff);
     }
+    fclose(f);
 }
 
+Test(base_json_parser, parse_number_buff_positive_nofloat_noexp)
+{
+    unsigned long pos = 95;
+    test_parse_number(&pos, STR_AND_LEN_OF("64220", 5, 0, 0), 1);
+}
+
+Test(base_json_parser, parse_number_buff_negative_nofloat_noexp)
+{
+    unsigned long pos = 110;
+    test_parse_number(&pos, STR_AND_LEN_OF("-512", 4, 0, 0), 1);
+}
+
+Test(base_json_parser, parse_number_buff_positive_float_noexp)
+{
+    unsigned long pos = 124;
+    test_parse_number(&pos, STR_AND_LEN_OF("642.25", 6, 1, 0), 1);
+}
+
+Test(base_json_parser, parse_number_buff_negative_float_noexp)
+{
+    unsigned long pos = 140;
+    test_parse_number(&pos, STR_AND_LEN_OF("-642.25", 7, 1, 0), 1);
+}
+
+Test(base_json_parser, parse_number_buff_positive_nofloat_exp)
+{
+    unsigned long pos = 157;
+    test_parse_number(&pos, STR_AND_LEN_OF("2e8", 3, 0, 1), 1);
+}
+
+Test(base_json_parser, parse_number_buff_negative_nofloat_exp)
+{
+    unsigned long pos = 170;
+    test_parse_number(&pos, STR_AND_LEN_OF("-53e4", 5, 0, 1), 1);
+}
+
+Test(base_json_parser, parse_number_buff_positive_nofloat_negativeexp)
+{
+    unsigned long pos = 185;
+    test_parse_number(&pos, STR_AND_LEN_OF("200e-10", 7, 0, 1), 1);
+}
+
+Test(base_json_parser, parse_number_buff_negative_nofloat_negativeexp)
+{
+    unsigned long pos = 202;
+    test_parse_number(&pos, STR_AND_LEN_OF("-251e-10", 8, 0, 1), 1);
+}
+
+Test(base_json_parser, parse_number_buff_positive_float_exp)
+{
+    unsigned long pos = 220;
+    test_parse_number(&pos, STR_AND_LEN_OF("200.50e10", 9, 1, 1), 1);
+}
+
+Test(base_json_parser, parse_number_buff_negative_float_exp)
+{
+    unsigned long pos = 239;
+    test_parse_number(&pos, STR_AND_LEN_OF("-200.50e10", 10, 1, 1), 1);
+}
+
+Test(base_json_parser, parse_number_buff_positive_float_negativeexp)
+{
+    unsigned long pos = 259;
+    test_parse_number(&pos, STR_AND_LEN_OF("200.50e-10", 10, 1, 1), 1);
+}
+
+Test(base_json_parser, parse_number_buff_negative_float_negativeexp)
+{
+    unsigned long pos = 279;
+    test_parse_number(&pos, STR_AND_LEN_OF("-200.50e-10", 11, 1, 1), 1);
+}
+
+Test(base_json_parser, parse_number_buff_positive_nofloat_upperexp)
+{
+    unsigned long pos = 300;
+    test_parse_number(&pos, STR_AND_LEN_OF("2E8", 3, 0, 1), 1);
+}
+
+Test(base_json_parser, parse_number_buff_negative_nofloat_upperexp)
+{
+    unsigned long pos = 313;
+    test_parse_number(&pos, STR_AND_LEN_OF("-53E4", 5, 0, 1), 1);
+}
+
+Test(base_json_parser, parse_number_buff_positive_nofloat_uppernegativeexp)
+{
+    unsigned long pos = 328;
+    test_parse_number(&pos, STR_AND_LEN_OF("200E-10", 7, 0, 1), 1);
+}
+
+Test(base_json_parser, parse_number_buff_negative_nofloat_uppernegativeexp)
+{
+    unsigned long pos = 345;
+    test_parse_number(&pos, STR_AND_LEN_OF("-251E-10", 8, 0, 1), 1);
+}
+
+Test(base_json_parser, parse_number_buff_positive_float_upperexp)
+{
+    unsigned long pos = 363;
+    test_parse_number(&pos, STR_AND_LEN_OF("200.50E10", 9, 1, 1), 1);
+}
+
+Test(base_json_parser, parse_number_buff_negative_float_upperexp)
+{
+    unsigned long pos = 382;
+    test_parse_number(&pos, STR_AND_LEN_OF("-200.50E10", 10, 1, 1), 1);
+}
+
+Test(base_json_parser, parse_number_buff_positive_float_uppernegativeexp)
+{
+    unsigned long pos = 402;
+    test_parse_number(&pos, STR_AND_LEN_OF("200.50E-10", 10, 1, 1), 1);
+}
+
+Test(base_json_parser, parse_number_buff_negative_float_uppernegativeexp)
+{
+    unsigned long pos = 422;
+    test_parse_number(&pos, STR_AND_LEN_OF("-200.50E-10", 11, 1, 1), 1);
+}
+
+// Files
 Test(base_json_parser, parse_number_positive_nofloat_noexp)
 {
     unsigned long pos = 95;
-    test_parse_number(&pos, STR_AND_LEN_OF("64220", 5, 0, 0));
+    test_parse_number(&pos, STR_AND_LEN_OF("64220", 5, 0, 0), 0);
 }
 
 Test(base_json_parser, parse_number_negative_nofloat_noexp)
 {
     unsigned long pos = 110;
-    test_parse_number(&pos, STR_AND_LEN_OF("-512", 4, 0, 0));
+    test_parse_number(&pos, STR_AND_LEN_OF("-512", 4, 0, 0), 0);
 }
 
 Test(base_json_parser, parse_number_positive_float_noexp)
 {
     unsigned long pos = 124;
-    test_parse_number(&pos, STR_AND_LEN_OF("642.25", 6, 1, 0));
+    test_parse_number(&pos, STR_AND_LEN_OF("642.25", 6, 1, 0), 0);
 }
 
 Test(base_json_parser, parse_number_negative_float_noexp)
 {
     unsigned long pos = 140;
-    test_parse_number(&pos, STR_AND_LEN_OF("-642.25", 7, 1, 0));
+    test_parse_number(&pos, STR_AND_LEN_OF("-642.25", 7, 1, 0), 0);
 }
 
 Test(base_json_parser, parse_number_positive_nofloat_exp)
 {
     unsigned long pos = 157;
-    test_parse_number(&pos, STR_AND_LEN_OF("2e8", 3, 0, 1));
+    test_parse_number(&pos, STR_AND_LEN_OF("2e8", 3, 0, 1), 0);
 }
 
 Test(base_json_parser, parse_number_negative_nofloat_exp)
 {
     unsigned long pos = 170;
-    test_parse_number(&pos, STR_AND_LEN_OF("-53e4", 5, 0, 1));
+    test_parse_number(&pos, STR_AND_LEN_OF("-53e4", 5, 0, 1), 0);
 }
 
 Test(base_json_parser, parse_number_positive_nofloat_negativeexp)
 {
     unsigned long pos = 185;
-    test_parse_number(&pos, STR_AND_LEN_OF("200e-10", 7, 0, 1));
+    test_parse_number(&pos, STR_AND_LEN_OF("200e-10", 7, 0, 1), 0);
 }
 
 Test(base_json_parser, parse_number_negative_nofloat_negativeexp)
 {
     unsigned long pos = 202;
-    test_parse_number(&pos, STR_AND_LEN_OF("-251e-10", 8, 0, 1));
+    test_parse_number(&pos, STR_AND_LEN_OF("-251e-10", 8, 0, 1), 0);
 }
 
 Test(base_json_parser, parse_number_positive_float_exp)
 {
     unsigned long pos = 220;
-    test_parse_number(&pos, STR_AND_LEN_OF("200.50e10", 9, 1, 1));
+    test_parse_number(&pos, STR_AND_LEN_OF("200.50e10", 9, 1, 1), 0);
 }
 
 Test(base_json_parser, parse_number_negative_float_exp)
 {
     unsigned long pos = 239;
-    test_parse_number(&pos, STR_AND_LEN_OF("-200.50e10", 10, 1, 1));
+    test_parse_number(&pos, STR_AND_LEN_OF("-200.50e10", 10, 1, 1), 0);
 }
 
 Test(base_json_parser, parse_number_positive_float_negativeexp)
 {
     unsigned long pos = 259;
-    test_parse_number(&pos, STR_AND_LEN_OF("200.50e-10", 10, 1, 1));
+    test_parse_number(&pos, STR_AND_LEN_OF("200.50e-10", 10, 1, 1), 0);
 }
 
 Test(base_json_parser, parse_number_negative_float_negativeexp)
 {
     unsigned long pos = 279;
-    test_parse_number(&pos, STR_AND_LEN_OF("-200.50e-10", 11, 1, 1));
+    test_parse_number(&pos, STR_AND_LEN_OF("-200.50e-10", 11, 1, 1), 0);
 }
 
 Test(base_json_parser, parse_number_positive_nofloat_upperexp)
 {
     unsigned long pos = 300;
-    test_parse_number(&pos, STR_AND_LEN_OF("2E8", 3, 0, 1));
+    test_parse_number(&pos, STR_AND_LEN_OF("2E8", 3, 0, 1), 0);
 }
 
 Test(base_json_parser, parse_number_negative_nofloat_upperexp)
 {
     unsigned long pos = 313;
-    test_parse_number(&pos, STR_AND_LEN_OF("-53E4", 5, 0, 1));
+    test_parse_number(&pos, STR_AND_LEN_OF("-53E4", 5, 0, 1), 0);
 }
 
 Test(base_json_parser, parse_number_positive_nofloat_uppernegativeexp)
 {
     unsigned long pos = 328;
-    test_parse_number(&pos, STR_AND_LEN_OF("200E-10", 7, 0, 1));
+    test_parse_number(&pos, STR_AND_LEN_OF("200E-10", 7, 0, 1), 0);
 }
 
 Test(base_json_parser, parse_number_negative_nofloat_uppernegativeexp)
 {
     unsigned long pos = 345;
-    test_parse_number(&pos, STR_AND_LEN_OF("-251E-10", 8, 0, 1));
+    test_parse_number(&pos, STR_AND_LEN_OF("-251E-10", 8, 0, 1), 0);
 }
 
 Test(base_json_parser, parse_number_positive_float_upperexp)
 {
     unsigned long pos = 363;
-    test_parse_number(&pos, STR_AND_LEN_OF("200.50E10", 9, 1, 1));
+    test_parse_number(&pos, STR_AND_LEN_OF("200.50E10", 9, 1, 1), 0);
 }
 
 Test(base_json_parser, parse_number_negative_float_upperexp)
 {
     unsigned long pos = 382;
-    test_parse_number(&pos, STR_AND_LEN_OF("-200.50E10", 10, 1, 1));
+    test_parse_number(&pos, STR_AND_LEN_OF("-200.50E10", 10, 1, 1), 0);
 }
 
 Test(base_json_parser, parse_number_positive_float_uppernegativeexp)
 {
     unsigned long pos = 402;
-    test_parse_number(&pos, STR_AND_LEN_OF("200.50E-10", 10, 1, 1));
+    test_parse_number(&pos, STR_AND_LEN_OF("200.50E-10", 10, 1, 1), 0);
 }
 
 Test(base_json_parser, parse_number_negative_float_uppernegativeexp)
 {
     unsigned long pos = 422;
-    test_parse_number(&pos, STR_AND_LEN_OF("-200.50E-10", 11, 1, 1));
+    test_parse_number(&pos, STR_AND_LEN_OF("-200.50E-10", 11, 1, 1), 0);
 }
 
 /*******************************************************************************
