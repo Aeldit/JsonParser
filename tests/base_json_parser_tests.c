@@ -373,8 +373,14 @@ void test_parse_string(char *file_path, unsigned long *pos, char *expected_str)
 
 Test(base_json_parser, parse_string_normal_string)
 {
-    unsigned long idx = 6;
-    test_parse_string("tests/test.json", &idx, "first");
+    unsigned long idx = 27;
+    test_parse_string("tests/test.json", &idx, "testing normal string");
+}
+
+Test(base_json_parser, parse_string_empty_string)
+{
+    unsigned long idx = 59;
+    test_parse_string("tests/test.json", &idx, "");
 }
 
 Test(base_json_parser, parse_string_null_pos)
@@ -469,10 +475,10 @@ Test(base_json_parser, parse_number_buff_float_upperexp)
 /*******************************************************************************
 **                                PARSE_NUMBER                                **
 *******************************************************************************/
-void test_parse_number(char *file_path, unsigned long *pos,
+void test_parse_number(unsigned long *pos,
                        str_and_len_tuple_t expected_str_and_len)
 {
-    FILE *f = fopen(file_path, "r");
+    FILE *f = fopen("tests/test.json", "r");
     if (f)
     {
         if (pos && fseek(f, (*pos)++, SEEK_SET) != 0)
@@ -516,53 +522,40 @@ void test_parse_number(char *file_path, unsigned long *pos,
     }
 }
 
-Test(base_json_parser, parse_number_nofloat_noexp)
+Test(base_json_parser, parse_number_positive_nofloat_noexp)
 {
-    str_and_len_tuple_t s = STR_AND_LEN_OF("-512", 4, 0, 0);
-    unsigned long idx = 66;
-    test_parse_number("tests/test.json", &idx, s);
+    unsigned long pos = 95;
+    test_parse_number(&pos, STR_AND_LEN_OF("64220", 5, 0, 0));
 }
 
-Test(base_json_parser, parse_number_float_noexp)
+Test(base_json_parser, parse_number_negative_nofloat_noexp)
 {
-    str_and_len_tuple_t s = STR_AND_LEN_OF("642.25", 6, 1, 0);
-    unsigned long idx = 108;
-    test_parse_number("tests/test.json", &idx, s);
+    unsigned long pos = 110;
+    test_parse_number(&pos, STR_AND_LEN_OF("-512", 4, 0, 0));
 }
 
-Test(base_json_parser, parse_number_nofloat_exp)
+Test(base_json_parser, parse_number_positive_float_noexp)
 {
-    str_and_len_tuple_t s = STR_AND_LEN_OF("2e8", 3, 0, 1);
-    unsigned long idx = 132;
-    test_parse_number("tests/test.json", &idx, s);
+    unsigned long pos = 124;
+    test_parse_number(&pos, STR_AND_LEN_OF("642.25", 6, 1, 0));
 }
 
-Test(base_json_parser, parse_number_nofloat_negativeexp)
+Test(base_json_parser, parse_number_negative_float_noexp)
 {
-    str_and_len_tuple_t s = STR_AND_LEN_OF("200e-10", 7, 0, 1);
-    unsigned long idx = 158;
-    test_parse_number("tests/test.json", &idx, s);
+    unsigned long pos = 140;
+    test_parse_number(&pos, STR_AND_LEN_OF("-642.25", 7, 1, 0));
 }
 
-Test(base_json_parser, parse_number_float_exp)
+Test(base_json_parser, parse_number_positive_nofloat_exp)
 {
-    str_and_len_tuple_t s = STR_AND_LEN_OF("-200.50e-10", 11, 1, 1);
-    unsigned long idx = 190;
-    test_parse_number("tests/test.json", &idx, s);
+    unsigned long pos = 157;
+    test_parse_number(&pos, STR_AND_LEN_OF("2e8", 3, 0, 1));
 }
 
-Test(base_json_parser, parse_number_nofloat_upperexp)
+Test(base_json_parser, parse_number_negative_nofloat_exp)
 {
-    str_and_len_tuple_t s = STR_AND_LEN_OF("27E53", 5, 0, 1);
-    unsigned long idx = 227;
-    test_parse_number("tests/test.json", &idx, s);
-}
-
-Test(base_json_parser, parse_number_float_upperexp)
-{
-    str_and_len_tuple_t s = STR_AND_LEN_OF("27.652E53", 9, 1, 1);
-    unsigned long idx = 256;
-    test_parse_number("tests/test.json", &idx, s);
+    unsigned long pos = 170;
+    test_parse_number(&pos, STR_AND_LEN_OF("-53e4", 5, 0, 1));
 }
 
 /*******************************************************************************
@@ -744,6 +737,49 @@ Test(base_json_parser, get_nb_elts_dict_buff_normal)
 }
 
 Test(base_json_parser, get_nb_elts_dict_buff_long)
+{
+    test_get_nb_elts_dict_buff(
+        "{\"test\":1,\"array\":[\"testing\",false,null,true,123456789,1,2,3,4,"
+        "5,6,7,8,9,1,2,3,4,5,6,7,8,9],\"twergs\":1,\"ersgsrtgrsgsr\":83465,"
+        "\"ta\":true}",
+        1, 5);
+}
+
+/*******************************************************************************
+**                              GET_NB_ELTS_DICT                              **
+*******************************************************************************/
+void test_get_nb_elts_dict(FILE *f, unsigned long idx,
+                           unsigned long expected_len)
+{
+    unsigned long len = get_nb_elts_dict(f, idx);
+
+    cr_expect(len == expected_len,
+              "Expected the length of the dict to be '%lu' but got '%lu'",
+              expected_len, len);
+}
+
+Test(base_json_parser, get_nb_elts_dict_nullbuff)
+{
+    test_get_nb_elts_dict_buff(0, 0, 0);
+}
+
+Test(base_json_parser, get_nb_elts_dict_empty)
+{
+    test_get_nb_elts_dict_buff("{}", 1, 0);
+}
+
+Test(base_json_parser, get_nb_elts_dict_short)
+{
+    test_get_nb_elts_dict_buff("{\"a\":1,\"b\":2}", 1, 2);
+}
+
+Test(base_json_parser, get_nb_elts_dict_normal)
+{
+    test_get_nb_elts_dict_buff(
+        "{\"test\":1,\"array\":[\"testing\",false,null,true,123456789]}", 1, 2);
+}
+
+Test(base_json_parser, get_nb_elts_dict_long)
 {
     test_get_nb_elts_dict_buff(
         "{\"test\":1,\"array\":[\"testing\",false,null,true,123456789,1,2,3,4,"
