@@ -266,6 +266,7 @@ Test(base_json_parser, doesnt_have_exponent)
     test_has_exponent("123456", 0);
 }
 
+// TODO: Use the test.json file for the buffer functions too
 /*******************************************************************************
 **                              PARSE_STRING_BUFF                             **
 *******************************************************************************/
