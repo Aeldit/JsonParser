@@ -8,6 +8,8 @@
     "exponent": 2e8,
     "long_exponent": 200e-10,
     "double_exponent": -200.50e-10,
+    "nofloat_upperexp": 27E53,
+    "float_upperexp": 27.652E53,
     "array": [
         1,
         2,

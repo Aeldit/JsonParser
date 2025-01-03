@@ -467,6 +467,105 @@ Test(base_json_parser, parse_number_buff_float_upperexp)
 }
 
 /*******************************************************************************
+**                                PARSE_NUMBER                                **
+*******************************************************************************/
+void test_parse_number(char *file_path, unsigned long *pos,
+                       str_and_len_tuple_t expected_str_and_len)
+{
+    FILE *f = fopen(file_path, "r");
+    if (f)
+    {
+        if (pos && fseek(f, (*pos)++, SEEK_SET) != 0)
+        {
+            fclose(f);
+            return;
+        }
+    }
+
+    unsigned long initial_idx = pos ? *pos : 0;
+    str_and_len_tuple_t s = parse_number(f, pos);
+
+    char *expected_str = expected_str_and_len.str;
+    unsigned long expected_len = expected_str_and_len.len;
+
+    cr_expect(strncmp(s.str, expected_str,
+                      s.len < expected_len ? expected_len : s.len)
+                  == 0,
+              "Expected 'str' to be '%s' but got '%s'", expected_str, s.str);
+    cr_expect(s.len == expected_len, "Expected 'len' to be '%lu' but got '%u'",
+              expected_len, s.len);
+    if (f && pos)
+    {
+        cr_expect(*pos - initial_idx == s.len - 1,
+                  "Expected '*idx' to be incremented by '%u' but it got "
+                  "incremented by '%lu'",
+                  s.len - 1, *pos - initial_idx);
+        cr_expect(s.is_float == expected_str_and_len.is_float,
+                  "Expected '%s' to %s a float but it %s", s.str,
+                  expected_str_and_len.is_float ? "be" : "not be",
+                  s.is_float ? "was" : "wasn't");
+        cr_expect(s.has_exponent == expected_str_and_len.has_exponent,
+                  "Expected '%s' to %s an exponent but it %s", s.str,
+                  expected_str_and_len.has_exponent ? "have" : "not have",
+                  s.has_exponent ? "did" : "didn't");
+    }
+    free(s.str);
+    if (f)
+    {
+        fclose(f);
+    }
+}
+
+Test(base_json_parser, parse_number_nofloat_noexp)
+{
+    str_and_len_tuple_t s = STR_AND_LEN_OF("-512", 4, 0, 0);
+    unsigned long idx = 66;
+    test_parse_number("tests/test.json", &idx, s);
+}
+
+Test(base_json_parser, parse_number_float_noexp)
+{
+    str_and_len_tuple_t s = STR_AND_LEN_OF("642.25", 6, 1, 0);
+    unsigned long idx = 108;
+    test_parse_number("tests/test.json", &idx, s);
+}
+
+Test(base_json_parser, parse_number_nofloat_exp)
+{
+    str_and_len_tuple_t s = STR_AND_LEN_OF("2e8", 3, 0, 1);
+    unsigned long idx = 132;
+    test_parse_number("tests/test.json", &idx, s);
+}
+
+Test(base_json_parser, parse_number_nofloat_negativeexp)
+{
+    str_and_len_tuple_t s = STR_AND_LEN_OF("200e-10", 7, 0, 1);
+    unsigned long idx = 158;
+    test_parse_number("tests/test.json", &idx, s);
+}
+
+Test(base_json_parser, parse_number_float_exp)
+{
+    str_and_len_tuple_t s = STR_AND_LEN_OF("-200.50e-10", 11, 1, 1);
+    unsigned long idx = 190;
+    test_parse_number("tests/test.json", &idx, s);
+}
+
+Test(base_json_parser, parse_number_nofloat_upperexp)
+{
+    str_and_len_tuple_t s = STR_AND_LEN_OF("27E53", 5, 0, 1);
+    unsigned long idx = 227;
+    test_parse_number("tests/test.json", &idx, s);
+}
+
+Test(base_json_parser, parse_number_float_upperexp)
+{
+    str_and_len_tuple_t s = STR_AND_LEN_OF("27.652E53", 9, 1, 1);
+    unsigned long idx = 256;
+    test_parse_number("tests/test.json", &idx, s);
+}
+
+/*******************************************************************************
 **                              PARSE_BOOLEAN_BUFF                            **
 *******************************************************************************/
 void test_parse_boolean_buff(char *buff, unsigned long *idx,
