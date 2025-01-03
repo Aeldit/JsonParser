@@ -11,6 +11,8 @@ CFILES=src/base_json_parser.c \
 	src/rw_json_storage.c \
 	src/rw_json_write.c
 
+TESTFILES=tests/base_json_parser_tests.c
+
 TARGET=json-parser
 
 all: clean $(TARGET)
@@ -26,6 +28,7 @@ $(TARGET):
 
 clean:
 	if [ -f "$(TARGET)" ]; then rm $(TARGET); fi
+	if [ -f "json-parser-tests" ]; then rm json-parser-tests; fi
 
 valgrind-compile: clean
 	$(CC) $(CFLAGS) \
@@ -39,4 +42,8 @@ valgrind: valgrind-compile
 leaks: valgrind-compile
 	valgrind --leak-check=full --show-leak-kinds=all \
          --track-origins=yes ./$(TARGET) t.json
+
+check:
+	$(CC) $(CFLAGS) $(CFILES) $(TESTFILES) -o json-parser-tests -lcriterion
+	./json-parser-tests
 

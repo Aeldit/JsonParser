@@ -269,7 +269,7 @@ string_t parse_string(FILE *f, unsigned long *pos)
         prev_c = c;
     }
 
-    unsigned len = i - i - *pos - 1;
+    unsigned len = i - *pos - 1;
     if (!len)
     {
         ++(*pos);
@@ -331,10 +331,7 @@ str_and_len_tuple_t parse_number_buff(char *buff, unsigned long *idx)
     memcpy(str, buff + initial_i, len);
 
     *idx += len - 1;
-    return (str_and_len_tuple_t){ .str = str,
-                                  .len = len,
-                                  .is_float = is_float(str, len),
-                                  .has_exponent = has_exponent(str, len) };
+    return STR_AND_LEN_OF(str, len, is_float(str, len), has_exponent(str, len));
 }
 
 str_and_len_tuple_t parse_number(FILE *f, unsigned long *pos)
@@ -377,10 +374,7 @@ str_and_len_tuple_t parse_number(FILE *f, unsigned long *pos)
     fread(str, sizeof(char), len, f);
 
     *pos += len - 1;
-    return (str_and_len_tuple_t){ .str = str,
-                                  .len = len,
-                                  .is_float = is_float(str, len),
-                                  .has_exponent = has_exponent(str, len) };
+    return STR_AND_LEN_OF(str, len, is_float(str, len), has_exponent(str, len));
 }
 
 unsigned long parse_boolean_buff(char *buff, unsigned long *idx)

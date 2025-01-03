@@ -1,0 +1,65 @@
+{
+    "strings": [
+        "testing normal string",
+        ""
+    ],
+    "numbers": [
+        64220,
+        -512,
+        642.25,
+        -642.25,
+        2e8,
+        -53e4,
+        200e-10,
+        -251e-10,
+        200.50e10,
+        -200.50e10,
+        200.50e-10,
+        -200.50e-10,
+        2E8,
+        -53E4,
+        200E-10,
+        -251E-10,
+        200.50E10,
+        -200.50E10,
+        200.50E-10,
+        -200.50E-10
+    ],
+    "booleans": [
+        true,
+        false
+    ],
+    "empty": {},
+    "": "sadwda",
+    "test": -512,
+    "testing": 64220,
+    "double": 642.25,
+    "exponent": 2e8,
+    "long_exponent": 200e-10,
+    "double_exponent": -200.50e-10,
+    "nofloat_upperexp": 27E53,
+    "float_upperexp": 27.652E53,
+    "true_d": true,
+    "false_d": false,
+    "array": [
+        1,
+        2,
+        [],
+        3,
+        [
+            "",
+            5,
+            [
+                "dd",
+                true,
+                5
+            ],
+            {}
+        ],
+        {},
+        {
+            "first": "w"
+        },
+        {}
+    ]
+}

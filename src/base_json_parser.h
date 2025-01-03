@@ -46,6 +46,10 @@
 #define ERROR_LWOWE ((long_with_or_without_exponent_t){ .has_exponent = 2 })
 #define ERROR_DWOWE ((double_with_or_without_exponent_t){ .has_exponent = 2 })
 
+#define STR_AND_LEN_OF(s, l, float, exponent)                                  \
+    ((str_and_len_tuple_t){                                                    \
+        .str = s, .len = l, .is_float = float, .has_exponent = exponent })
+
 /*******************************************************************************
 **                                 STRUCTURES **
 *******************************************************************************/
