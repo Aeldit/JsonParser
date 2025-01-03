@@ -1,5 +1,6 @@
 #include <criterion/criterion.h>
 #include <criterion/logging.h>
+#include <sys/stat.h>
 
 #include "../src/base_json_parser.h"
 
@@ -266,91 +267,53 @@ Test(base_json_parser, doesnt_have_exponent)
     test_has_exponent("123456", 0);
 }
 
-// TODO: Use the test.json file for the buffer functions too
-/*******************************************************************************
-**                              PARSE_STRING_BUFF                             **
-*******************************************************************************/
-void test_parse_string_buff(char *buff, unsigned long *idx, char *expected_str)
-{
-    unsigned long initial_idx = idx ? *idx : 0;
-    string_t s = parse_string_buff(buff, idx);
-    unsigned long expected_len = expected_str ? strlen(expected_str) : 0;
-
-    cr_expect(strncmp(s.str, expected_str,
-                      s.len < expected_len ? expected_len : s.len)
-                  == 0,
-              "Expected 'str' to be '%s' but got '%s'", expected_str, s.str);
-    cr_expect(s.len == expected_len, "Expected 'len' to be '%lu' but got '%u'",
-              expected_len, s.len);
-    if (buff && idx)
-    {
-        cr_expect(*idx - initial_idx == s.len + 1,
-                  "Expected '*idx' to be incremented by '%u' but it got "
-                  "incremented by '%lu'",
-                  s.len + 1, *idx - initial_idx);
-    }
-    destroy_string(s);
-}
-
-Test(base_json_parser, parse_string_buff_null_buff)
-{
-    unsigned long idx = 10;
-    test_parse_string_buff(0, &idx, 0);
-}
-
-Test(base_json_parser, parse_string_buff_null_idx)
-{
-    test_parse_string_buff("Null index", 0, 0);
-}
-
-Test(base_json_parser, parse_string_buff_null_buff_null_idx)
-{
-    test_parse_string_buff(0, 0, 0);
-}
-
-Test(base_json_parser, parse_string_buff_empty_string)
-{
-    unsigned long idx = 14;
-    test_parse_string_buff("{\"test\":false,\"\":\"testing\"}", &idx, "");
-}
-
-Test(base_json_parser, parse_string_buff_normal_string)
-{
-    unsigned long idx = 1;
-    test_parse_string_buff("{\"test\":false,\"aaaaah\":\"testing\"}", &idx,
-                           "test");
-}
-
-Test(base_json_parser, parse_string_buff_long_string)
-{
-    unsigned long idx = 1;
-    test_parse_string_buff("{\"testing with the meaning of the "
-                           "meaning, you should find an answer with its own "
-                           "meaning\":false,\"aaaaah\":\"testing\"}",
-                           &idx,
-                           "testing with the meaning of the "
-                           "meaning, you should find an answer with its own "
-                           "meaning");
-}
-
 /*******************************************************************************
 **                                PARSE_STRING                                **
 *******************************************************************************/
-void test_parse_string(char *file_path, unsigned long *pos, char *expected_str)
+void test_parse_string(unsigned long *idx, char *expected_str, char is_buff)
 {
-    unsigned long initial_idx = pos ? *pos : 0;
-    FILE *f = fopen(file_path, "r");
-    if (f)
+    unsigned long initial_idx = idx ? *idx : 0;
+    unsigned long expected_len = expected_str ? strlen(expected_str) : 0;
+    string_t s;
+    char *buff;
+
+    FILE *f = fopen("tests/test.json", "r");
+    if (!f)
     {
-        if (pos && fseek(f, (*pos)++, SEEK_SET) != 0)
+        return;
+    }
+
+    if (is_buff)
+    {
+        if (fseek(f, 0, SEEK_SET) != 0)
         {
             fclose(f);
             return;
         }
-    }
 
-    string_t s = parse_string(f, pos);
-    unsigned long expected_len = expected_str ? strlen(expected_str) : 0;
+        struct stat st;
+        stat("tests/test.json", &st);
+        unsigned long nb_chars = st.st_size;
+
+        buff = calloc(nb_chars + 1, sizeof(char));
+        if (!buff)
+        {
+            fclose(f);
+            return;
+        }
+        fread(buff, sizeof(char), nb_chars, f);
+
+        s = parse_string_buff(buff, idx);
+    }
+    else
+    {
+        if (f && idx && fseek(f, (*idx)++, SEEK_SET) != 0)
+        {
+            fclose(f);
+            return;
+        }
+        s = parse_string(f, idx);
+    }
 
     cr_expect(strncmp(s.str, expected_str,
                       s.len < expected_len ? expected_len : s.len)
@@ -358,41 +321,56 @@ void test_parse_string(char *file_path, unsigned long *pos, char *expected_str)
               "Expected 'str' to be '%s' but got '%s'", expected_str, s.str);
     cr_expect(s.len == expected_len, "Expected 'len' to be '%lu' but got '%u'",
               expected_len, s.len);
-    if (f && pos)
+    if ((is_buff && buff && idx) || (!is_buff && f && idx))
     {
-        cr_expect(*pos - initial_idx - 1 == s.len + 1,
+        cr_expect(*idx - initial_idx - !is_buff == s.len + 1,
                   "Expected '*idx' to be incremented by '%u' but it got "
                   "incremented by '%lu'",
-                  s.len + 1, *pos - initial_idx - 1);
+                  s.len + 1, *idx - initial_idx - !is_buff);
     }
     destroy_string(s);
+    if (is_buff)
+    {
+        free(buff);
+    }
     if (f)
     {
         fclose(f);
     }
 }
 
+Test(base_json_parser, parse_string_buff_nullidx)
+{
+    test_parse_string(0, "", 1);
+}
+
+Test(base_json_parser, parse_string_buff_normal_string)
+{
+    unsigned long idx = 27;
+    test_parse_string(&idx, "testing normal string", 1);
+}
+
+Test(base_json_parser, parse_string_buff_empty_string)
+{
+    unsigned long idx = 59;
+    test_parse_string(&idx, "", 1);
+}
+
+Test(base_json_parser, parse_string_null_pos)
+{
+    test_parse_string(0, "", 0);
+}
+
 Test(base_json_parser, parse_string_normal_string)
 {
     unsigned long idx = 27;
-    test_parse_string("tests/test.json", &idx, "testing normal string");
+    test_parse_string(&idx, "testing normal string", 0);
 }
 
 Test(base_json_parser, parse_string_empty_string)
 {
     unsigned long idx = 59;
-    test_parse_string("tests/test.json", &idx, "");
-}
-
-Test(base_json_parser, parse_string_null_pos)
-{
-    test_parse_string("tests/test.json", 0, "");
-}
-
-Test(base_json_parser, parse_string_null_file)
-{
-    unsigned long idx = 6;
-    test_parse_string("tes.json", &idx, "");
+    test_parse_string(&idx, "", 0);
 }
 
 /*******************************************************************************
@@ -690,10 +668,9 @@ Test(base_json_parser, parse_boolean_buff_null_idx)
 /*******************************************************************************
 **                               PARSE_BOOLEAN                                **
 *******************************************************************************/
-void test_parse_boolean(char *file_path, unsigned long *pos,
-                        unsigned long expected_len)
+void test_parse_boolean(unsigned long *pos, unsigned long expected_len)
 {
-    FILE *f = fopen(file_path, "r");
+    FILE *f = fopen("tests/test.json", "r");
     if (f)
     {
         if (pos && fseek(f, (*pos)++, SEEK_SET) != 0)
@@ -723,25 +700,14 @@ void test_parse_boolean(char *file_path, unsigned long *pos,
 
 Test(base_json_parser, parse_boolean_true)
 {
-    unsigned long idx = 281;
-    test_parse_boolean("tests/test.json", &idx, 4);
+    unsigned long idx = 467;
+    test_parse_boolean(&idx, 4);
 }
 
 Test(base_json_parser, parse_boolean_false)
 {
-    unsigned long idx = 302;
-    test_parse_boolean("tests/test.json", &idx, 5);
-}
-
-Test(base_json_parser, parse_boolean_nofile)
-{
-    unsigned long idx = 8;
-    test_parse_boolean(0, &idx, 0);
-}
-
-Test(base_json_parser, parse_boolean_buff_null_pos)
-{
-    test_parse_boolean("tests/test.json", 0, 0);
+    unsigned long idx = 481;
+    test_parse_boolean(&idx, 5);
 }
 
 /*******************************************************************************

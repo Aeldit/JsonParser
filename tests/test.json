@@ -25,6 +25,10 @@
         200.50E-10,
         -200.50E-10
     ],
+    "booleans": [
+        true,
+        false
+    ],
     "empty": {},
     "": "sadwda",
     "test": -512,
