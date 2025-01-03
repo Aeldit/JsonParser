@@ -572,17 +572,17 @@ void test_parse_boolean_buff(char *buff, unsigned long *idx,
                              unsigned long expected_len)
 {
     unsigned long initial_idx = idx ? *idx : 0;
-    unsigned long b = parse_boolean_buff(buff, idx);
+    unsigned long len = parse_boolean_buff(buff, idx);
 
-    cr_expect(b == expected_len,
+    cr_expect(len == expected_len,
               "Expected the boolean len to be '%lu' but got '%lu'",
-              expected_len, b);
+              expected_len, len);
     if (buff && idx)
     {
-        cr_expect(*idx - initial_idx == b - 1,
+        cr_expect(*idx - initial_idx == len - 1,
                   "Expected '*idx' to be incremented by '%lu' but it got "
                   "incremented by '%lu'",
-                  b - 1, *idx - initial_idx);
+                  len - 1, *idx - initial_idx);
     }
 }
 
@@ -664,4 +664,90 @@ Test(base_json_parser, parse_boolean_nofile)
 Test(base_json_parser, parse_boolean_buff_null_pos)
 {
     test_parse_boolean("tests/test.json", 0, 0);
+}
+
+/*******************************************************************************
+**                            GET_NB_ELTS_ARRAY_BUFF                          **
+*******************************************************************************/
+void test_get_nb_elts_array_buff(char *buff, unsigned long idx,
+                                 unsigned long expected_len)
+{
+    unsigned long len = get_nb_elts_array_buff(buff, idx);
+
+    cr_expect(len == expected_len,
+              "Expected the length of the array to be '%lu' but got '%lu'",
+              expected_len, len);
+}
+
+Test(base_json_parser, get_nb_elts_array_buff_nullbuff)
+{
+    test_get_nb_elts_array_buff(0, 0, 0);
+}
+
+Test(base_json_parser, get_nb_elts_array_buff_empty)
+{
+    test_get_nb_elts_array_buff("[]", 1, 0);
+}
+
+Test(base_json_parser, get_nb_elts_array_buff_short)
+{
+    test_get_nb_elts_array_buff("[1,2,3,4,5,6]", 1, 6);
+}
+
+Test(base_json_parser, get_nb_elts_array_buff_normal)
+{
+    test_get_nb_elts_array_buff(
+        "{\"test\":1,\"array\":[\"testing\",false,null,true,123456789]}", 19,
+        5);
+}
+
+Test(base_json_parser, get_nb_elts_array_buff_long)
+{
+    test_get_nb_elts_array_buff(
+        "{\"test\":1,\"array\":[\"testing\",false,null,true,123456789,1,2,3,4,"
+        "5,6,7,8,9,1,2,3,4,5,6,7,8,9]}",
+        19, 23);
+}
+
+/*******************************************************************************
+**                            GET_NB_ELTS_DICT_BUFF                           **
+*******************************************************************************/
+void test_get_nb_elts_dict_buff(char *buff, unsigned long idx,
+                                unsigned long expected_len)
+{
+    unsigned long len = get_nb_elts_dict_buff(buff, idx);
+
+    cr_expect(len == expected_len,
+              "Expected the length of the dict to be '%lu' but got '%lu'",
+              expected_len, len);
+}
+
+Test(base_json_parser, get_nb_elts_dict_buff_nullbuff)
+{
+    test_get_nb_elts_dict_buff(0, 0, 0);
+}
+
+Test(base_json_parser, get_nb_elts_dict_buff_empty)
+{
+    test_get_nb_elts_dict_buff("{}", 1, 0);
+}
+
+Test(base_json_parser, get_nb_elts_dict_buff_short)
+{
+    test_get_nb_elts_dict_buff("{\"a\":1,\"b\":2}", 1, 2);
+}
+
+Test(base_json_parser, get_nb_elts_dict_buff_normal)
+{
+    test_get_nb_elts_dict_buff(
+        "{\"test\":1,\"array\":[\"testing\",false,null,true,123456789]}", 1, 2);
+}
+
+Test(base_json_parser, get_nb_elts_dict_buff_long)
+{
+    test_get_nb_elts_dict_buff(
+        "{\"test\":1,\"array\":[\"testing\",false,null,true,123456789,1,2,3,4,"
+        "5,6,7,8,9,1,2,3,4,5,6,7,8,9],\"twergs\":1,\"ersgsrtgrsgsr\":83465,"
+        "\"ta\":true}",
+        1, 5);
 }
