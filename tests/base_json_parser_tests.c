@@ -608,3 +608,60 @@ Test(base_json_parser, parse_boolean_buff_null_idx)
 {
     test_parse_boolean_buff("{\"test\":false,\"num\":123.45E6}", 0, 0);
 }
+
+/*******************************************************************************
+**                               PARSE_BOOLEAN                                **
+*******************************************************************************/
+void test_parse_boolean(char *file_path, unsigned long *pos,
+                        unsigned long expected_len)
+{
+    FILE *f = fopen(file_path, "r");
+    if (f)
+    {
+        if (pos && fseek(f, (*pos)++, SEEK_SET) != 0)
+        {
+            fclose(f);
+            return;
+        }
+    }
+
+    unsigned long initial_idx = pos ? *pos : 0;
+    unsigned long len = parse_boolean(f, pos);
+
+    cr_expect(len == expected_len, "Expected 'len' to be '%lu' but got '%lu'",
+              expected_len, len);
+    if (f && pos)
+    {
+        cr_expect(*pos - initial_idx == len - 1,
+                  "Expected '*idx' to be incremented by '%lu' but it got "
+                  "incremented by '%lu'",
+                  len - 1, *pos - initial_idx);
+    }
+    if (f)
+    {
+        fclose(f);
+    }
+}
+
+Test(base_json_parser, parse_boolean_true)
+{
+    unsigned long idx = 281;
+    test_parse_boolean("tests/test.json", &idx, 4);
+}
+
+Test(base_json_parser, parse_boolean_false)
+{
+    unsigned long idx = 302;
+    test_parse_boolean("tests/test.json", &idx, 5);
+}
+
+Test(base_json_parser, parse_boolean_nofile)
+{
+    unsigned long idx = 8;
+    test_parse_boolean(0, &idx, 0);
+}
+
+Test(base_json_parser, parse_boolean_buff_null_pos)
+{
+    test_parse_boolean("tests/test.json", 0, 0);
+}

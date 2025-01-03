@@ -10,6 +10,8 @@
     "double_exponent": -200.50e-10,
     "nofloat_upperexp": 27E53,
     "float_upperexp": 27.652E53,
+    "true_d": true,
+    "false_d": false,
     "array": [
         1,
         2,
