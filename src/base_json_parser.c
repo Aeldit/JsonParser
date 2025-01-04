@@ -600,70 +600,6 @@ unsigned long get_nb_elts_array(FILE *f, unsigned long pos)
     return nb_elts;
 }
 
-unsigned long get_nb_chars_in_array(FILE *f, unsigned long pos)
-{
-    if (!f)
-    {
-        return 0;
-    }
-
-    unsigned long nb_chars = 0;
-
-    long is_in_array = 1;
-    long is_in_dict = 0;
-    char is_in_string = 0;
-    char is_backslashing = 0;
-
-    char c = 0;
-    while (SEEK_AND_GET_CHAR(pos))
-    {
-        if (c == '\\')
-        {
-            is_backslashing = !is_backslashing;
-        }
-
-        // If we are not in a string or if the string just ended
-        if (!is_in_string || (is_in_string && c == '"' && !is_backslashing))
-        {
-            if (c == '"')
-            {
-                is_in_string = !is_in_string;
-            }
-            else if (c == '[')
-            {
-                if (max_nested_arrays_reached(is_in_array))
-                {
-                    return 0;
-                }
-                ++is_in_array;
-            }
-            else if (c == ']')
-            {
-                --is_in_array;
-            }
-            else if (c == '{')
-            {
-                if (max_nested_dicts_reached(is_in_dict))
-                {
-                    return 0;
-                }
-                ++is_in_dict;
-            }
-            else if (c == '}')
-            {
-                --is_in_dict;
-            }
-        }
-        ++nb_chars;
-
-        if (!is_in_array)
-        {
-            break;
-        }
-    }
-    return nb_chars;
-}
-
 unsigned long get_nb_elts_dict_buff(char *buff, unsigned long idx)
 {
     if (!buff || idx >= MAX_READ_BUFF_SIZE || buff[idx] == '}')
@@ -807,6 +743,70 @@ unsigned long get_nb_elts_dict(FILE *f, unsigned long pos)
     return nb_elts == 0 ? single_elt_found : nb_elts + 1;
 }
 
+unsigned long get_nb_chars_in_array(FILE *f, unsigned long pos)
+{
+    if (!f)
+    {
+        return 0;
+    }
+
+    unsigned long nb_chars = 0;
+
+    long is_in_array = 1;
+    long is_in_dict = 0;
+    char is_in_string = 0;
+    char is_backslashing = 0;
+
+    char c = 0;
+    while (SEEK_AND_GET_CHAR(pos))
+    {
+        if (c == '\\')
+        {
+            is_backslashing = !is_backslashing;
+        }
+
+        // If we are not in a string or if the string just ended
+        if (!is_in_string || (is_in_string && c == '"' && !is_backslashing))
+        {
+            if (c == '"')
+            {
+                is_in_string = !is_in_string;
+            }
+            else if (c == '[')
+            {
+                if (max_nested_arrays_reached(is_in_array))
+                {
+                    return 0;
+                }
+                ++is_in_array;
+            }
+            else if (c == ']')
+            {
+                --is_in_array;
+            }
+            else if (c == '{')
+            {
+                if (max_nested_dicts_reached(is_in_dict))
+                {
+                    return 0;
+                }
+                ++is_in_dict;
+            }
+            else if (c == '}')
+            {
+                --is_in_dict;
+            }
+        }
+
+        if (!is_in_array)
+        {
+            break;
+        }
+        ++nb_chars;
+    }
+    return nb_chars;
+}
+
 unsigned long get_nb_chars_in_dict(FILE *f, unsigned long pos)
 {
     if (!f)
@@ -861,12 +861,12 @@ unsigned long get_nb_chars_in_dict(FILE *f, unsigned long pos)
                 --is_in_dict;
             }
         }
-        ++nb_chars;
 
         if (!is_in_dict)
         {
             break;
         }
+        ++nb_chars;
     }
     return nb_chars;
 }
