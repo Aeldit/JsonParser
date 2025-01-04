@@ -217,7 +217,7 @@ string_t parse_string_buff(char *buff, unsigned long *idx)
 {
     if (!buff || !idx)
     {
-        return EMPTY_STRING;
+        return NULL_STRING;
     }
 
     unsigned long start_idx = *idx + 1;
@@ -245,7 +245,7 @@ string_t parse_string_buff(char *buff, unsigned long *idx)
     char *str = calloc(len + 1, sizeof(char));
     if (!str)
     {
-        return EMPTY_STRING;
+        return NULL_STRING;
     }
     memcpy(str, buff + start_idx, len);
 
@@ -258,7 +258,7 @@ string_t parse_string(FILE *f, unsigned long *pos)
 {
     if (!f || !pos)
     {
-        return EMPTY_STRING;
+        return NULL_STRING;
     }
 
     unsigned long i = *pos;
@@ -279,13 +279,13 @@ string_t parse_string(FILE *f, unsigned long *pos)
     char *str = calloc(len + 1, sizeof(char));
     if (!str)
     {
-        return EMPTY_STRING;
+        return NULL_STRING;
     }
 
     if (fseek(f, *pos, SEEK_SET) != 0)
     {
         free(str);
-        return EMPTY_STRING;
+        return NULL_STRING;
     }
     fread(str, sizeof(char), len, f);
 

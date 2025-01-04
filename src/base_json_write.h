@@ -136,14 +136,14 @@ typedef struct
 #define GET_ARRAY_AS_STR(fill_rx_string_ll_with_values)                        \
     if (!a)                                                                    \
     {                                                                          \
-        return EMPTY_STRING;                                                   \
+        return NULL_STRING;                                                    \
     }                                                                          \
     if (!a->size)                                                              \
     {                                                                          \
         char *str = calloc(3, sizeof(char));                                   \
         if (!str)                                                              \
         {                                                                      \
-            return EMPTY_STRING;                                               \
+            return NULL_STRING;                                                \
         }                                                                      \
         memcpy(str, "[]", 2);                                                  \
         return STRING_OF(str, 2);                                              \
@@ -151,7 +151,7 @@ typedef struct
     string_linked_list_t *ll = calloc(1, sizeof(string_linked_list_t));        \
     if (!ll)                                                                   \
     {                                                                          \
-        return EMPTY_STRING;                                                   \
+        return NULL_STRING;                                                    \
     }                                                                          \
     /* '[' + '\n' + (indent - 1) * 4 * ' ' + ']' + '\n'*/                      \
     /* indents are 4 spaces */                                                 \
@@ -164,7 +164,7 @@ typedef struct
     if (!str)                                                                  \
     {                                                                          \
         destroy_linked_list(ll);                                               \
-        return EMPTY_STRING;                                                   \
+        return NULL_STRING;                                                    \
     }                                                                          \
     /* |-> Start building the string */                                        \
     str[0] = '[';                                                              \
@@ -214,14 +214,14 @@ typedef struct
 #define GET_DICT_AS_STR(fill_rx_string_ll_with_items)                          \
     if (!d)                                                                    \
     {                                                                          \
-        return EMPTY_STRING;                                                   \
+        return NULL_STRING;                                                    \
     }                                                                          \
     if (!d->size)                                                              \
     {                                                                          \
         char *str = calloc(3, sizeof(char));                                   \
         if (!str)                                                              \
         {                                                                      \
-            return EMPTY_STRING;                                               \
+            return NULL_STRING;                                                \
         }                                                                      \
         memcpy(str, "{}", 2);                                                  \
         return STRING_OF(str, 2);                                              \
@@ -229,7 +229,7 @@ typedef struct
     string_linked_list_t *ll = calloc(1, sizeof(string_linked_list_t));        \
     if (!ll)                                                                   \
     {                                                                          \
-        return EMPTY_STRING;                                                   \
+        return NULL_STRING;                                                    \
     }                                                                          \
     /* '{' + '\n' + (indent - 1) * '\t' + '}' + '\n'*/                         \
     /* indent == 1 -> if we are in the 'root' dict, we add a \n at the end */  \
@@ -240,7 +240,7 @@ typedef struct
     if (!str)                                                                  \
     {                                                                          \
         destroy_linked_list(ll);                                               \
-        return EMPTY_STRING;                                                   \
+        return NULL_STRING;                                                    \
     }                                                                          \
     /* |-> Start building the string */                                        \
     str[0] = '{';                                                              \

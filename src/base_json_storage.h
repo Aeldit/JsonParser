@@ -16,7 +16,7 @@
 #define T_DICT 9
 
 #define STRING_OF(s, l) ((string_t){ .str = (s), .len = (l) })
-#define EMPTY_STRING ((string_t){ .str = 0 })
+#define NULL_STRING ((string_t){ .str = 0 })
 
 /*
 ** \def Checks if the JSON instance is not null, if the JSON instance is an

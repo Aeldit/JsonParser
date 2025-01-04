@@ -173,7 +173,7 @@ rw_dict_t *rw_parse_dict_buff(char *b, unsigned long *idx)
         return d;
     }
 
-    string_t key = EMPTY_STRING;
+    string_t key = NULL_STRING;
     char c = 0;
     char is_waiting_key = 1;
     // We start at 1 because if we entered this function, it means that we
@@ -470,7 +470,7 @@ rw_dict_t *rw_parse_dict(FILE *f, unsigned long *pos)
         return d;
     }
 
-    string_t key = EMPTY_STRING;
+    string_t key = NULL_STRING;
     char c = 0;
     char is_waiting_key = 1;
     // We start at 1 because if we entered this function, it means that we
