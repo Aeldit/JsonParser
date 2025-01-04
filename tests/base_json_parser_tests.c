@@ -1142,14 +1142,14 @@ Test(base_json_parser, error_parse_string_buff_nullidx)
 }
 
 // parse_string
-Test(base_json_parser, error_parse_string_nullstr)
+Test(base_json_parser, error_parse_string_nullstream)
 {
     unsigned long idx = 5;
     string_t s = parse_string(0, &idx);
     cr_expect(!s.str,
               "Expected parse_string(0, &idx) to a NULL_STRING, but it "
-              "returned '%s'",
-              s.str);
+              "returned { .str = %s, .len = %u }",
+              s.str, s.len);
 }
 
 Test(base_json_parser, error_parse_string_nullidx)
@@ -1157,6 +1157,150 @@ Test(base_json_parser, error_parse_string_nullidx)
     string_t s = parse_string(stdin, 0);
     cr_expect(!s.str,
               "Expected parse_string(stdin, 0) to a NULL_STRING, but it "
-              "returned '%s'",
-              s.str);
+              "returned { .str = %s, .len = %u }",
+              s.str, s.len);
+}
+
+// parse_number_buff
+Test(base_json_parser, error_parse_number_buff_nullstr)
+{
+    unsigned long idx = 5;
+    str_and_len_tuple_t s = parse_number_buff(0, &idx);
+    cr_expect(!s.str,
+              "Expected parse_number_buff(0, &idx) to a "
+              "NULL_STR_AND_LEN_TUPLE, but it returned { .str = %s, .len = %u, "
+              ".is_float = %d, .has_exponent = %d }",
+              s.str, s.len, s.is_float, s.has_exponent);
+}
+
+Test(base_json_parser, error_parse_number_buff_nullidx)
+{
+    str_and_len_tuple_t s = parse_number_buff("", 0);
+    cr_expect(!s.str,
+              "Expected parse_number_buff(0, &idx) to a "
+              "NULL_STR_AND_LEN_TUPLE, but it returned { .str = %s, .len = %u, "
+              ".is_float = %d, .has_exponent = %d }",
+              s.str, s.len, s.is_float, s.has_exponent);
+}
+
+// parse_number
+Test(base_json_parser, error_parse_number_nullstream)
+{
+    unsigned long idx = 5;
+    str_and_len_tuple_t s = parse_number(0, &idx);
+    cr_expect(!s.str,
+              "Expected parse_number(0, &idx) to a "
+              "NULL_STR_AND_LEN_TUPLE, but it returned { .str = %s, .len = %u, "
+              ".is_float = %d, .has_exponent = %d }",
+              s.str, s.len, s.is_float, s.has_exponent);
+}
+
+Test(base_json_parser, error_parse_number_nullidx)
+{
+    str_and_len_tuple_t s = parse_number(stdin, 0);
+    cr_expect(!s.str,
+              "Expected parse_number(0, &idx) to a "
+              "NULL_STR_AND_LEN_TUPLE, but it returned { .str = %s, .len = %u, "
+              ".is_float = %d, .has_exponent = %d }",
+              s.str, s.len, s.is_float, s.has_exponent);
+}
+
+// parse_boolean_buff
+Test(base_json_parser, error_parse_boolean_buff_nullstr)
+{
+    unsigned long idx = 5;
+    unsigned long len = parse_boolean_buff(0, &idx);
+    cr_expect(!len,
+              "Expected parse_boolean_buff(0, &idx) to return 0, but it "
+              "returned '%lu'",
+              len);
+}
+
+Test(base_json_parser, error_parse_boolean_buff_nullidx)
+{
+    unsigned long len = parse_boolean_buff("", 0);
+    cr_expect(!len,
+              "Expected parse_boolean_buff(0, &idx) to return 0, but it "
+              "returned '%lu'",
+              len);
+}
+
+// parse_boolean
+Test(base_json_parser, error_parse_boolean_nullstream)
+{
+    unsigned long idx = 5;
+    unsigned long len = parse_boolean(0, &idx);
+    cr_expect(!len,
+              "Expected parse_boolean(0, &idx) to return 0, but it "
+              "returned '%lu'",
+              len);
+}
+
+Test(base_json_parser, error_parse_boolean_nullidx)
+{
+    unsigned long len = parse_boolean(stdin, 0);
+    cr_expect(!len,
+              "Expected parse_boolean(0, &idx) to return 0, but it "
+              "returned '%lu'",
+              len);
+}
+
+// get_nb_elts_array_buff
+Test(base_json_parser, error_get_nb_elts_array_buff_nullbuff)
+{
+    unsigned long len = get_nb_elts_array_buff(0, 5);
+    cr_expect(!len,
+              "Expected get_nb_elts_array_buff(0, 5) to return 0, but it "
+              "returned '%lu'",
+              len);
+}
+
+// get_nb_elts_array
+Test(base_json_parser, error_get_nb_elts_array_nullstream)
+{
+    unsigned long len = get_nb_elts_array(0, 5);
+    cr_expect(!len,
+              "Expected get_nb_elts_array(0, 5) to return 0, but it "
+              "returned '%lu'",
+              len);
+}
+
+// get_nb_elts_dict_buff
+Test(base_json_parser, error_get_nb_elts_dict_buff_nullbuff)
+{
+    unsigned long len = get_nb_elts_dict_buff(0, 5);
+    cr_expect(!len,
+              "Expected get_nb_elts_dict_buff(0, 5) to return 0, but it "
+              "returned '%lu'",
+              len);
+}
+
+// get_nb_elts_dict
+Test(base_json_parser, error_get_nb_elts_dict_nullstream)
+{
+    unsigned long len = get_nb_elts_dict(0, 5);
+    cr_expect(!len,
+              "Expected get_nb_elts_dict(0, 5) to return 0, but it "
+              "returned '%lu'",
+              len);
+}
+
+// get_nb_chars_in_array
+Test(base_json_parser, error_get_nb_chars_in_array_nullstream)
+{
+    unsigned long len = get_nb_chars_in_array(0, 5);
+    cr_expect(!len,
+              "Expected get_nb_chars_in_array(0, 5) to return 0, but it "
+              "returned '%lu'",
+              len);
+}
+
+// get_nb_chars_in_dict
+Test(base_json_parser, error_get_nb_chars_in_dict_nullstream)
+{
+    unsigned long len = get_nb_chars_in_dict(0, 5);
+    cr_expect(!len,
+              "Expected get_nb_chars_in_dict(0, 5) to return 0, but it "
+              "returned '%lu'",
+              len);
 }
