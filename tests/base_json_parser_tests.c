@@ -282,7 +282,7 @@ void test_parse_string(unsigned long *idx, char *expected_str, char is_buff)
 
     unsigned long initial_idx = idx ? *idx : 0;
     unsigned long expected_len = expected_str ? strlen(expected_str) : 0;
-    string_t s = EMPTY_STRING;
+    string_t s = NULL_STRING;
     char *buff = 0;
 
     if (is_buff)
@@ -1044,3 +1044,119 @@ Test(base_json_parser, get_nb_chars_in_dict_nested)
 /*******************************************************************************
 **                                   ERRORS                                   **
 *******************************************************************************/
+Test(base_json_parser, error_str_to_long_nullarg)
+{
+    long_with_or_without_exponent_t lwowe = str_to_long(0);
+    cr_expect(lwowe.has_exponent == 2,
+              "Expected str_to_long(0) to set the 'has_exponent' field to 2, "
+              "but it was set to '%d'",
+              lwowe.has_exponent);
+}
+
+Test(base_json_parser, error_str_to_long_nullstr)
+{
+    str_and_len_tuple_t sl = STR_AND_LEN_OF(0, 1, 0, 0);
+    long_with_or_without_exponent_t lwowe = str_to_long(&sl);
+    cr_expect(lwowe.has_exponent == 2,
+              "Expected str_to_long(0) to set the 'has_exponent' field to 2, "
+              "but it was set to '%d'",
+              lwowe.has_exponent);
+}
+
+Test(base_json_parser, error_str_to_long_zerolen)
+{
+    str_and_len_tuple_t sl = STR_AND_LEN_OF("", 0, 0, 0);
+    long_with_or_without_exponent_t lwowe = str_to_long(&sl);
+    cr_expect(lwowe.has_exponent == 2,
+              "Expected str_to_long(sl) ; with 'sl' having a null string ; to "
+              "set the 'has_exponent' field to 2, but it was set to '%d'",
+              lwowe.has_exponent);
+}
+
+// str_to_double
+Test(base_json_parser, error_str_to_double_nullarg)
+{
+    double_with_or_without_exponent_t dwowe = str_to_double(0);
+    cr_expect(dwowe.has_exponent == 2,
+              "Expected str_to_long(0) to set the 'has_exponent' field to 2, "
+              "but it was set to '%d'",
+              dwowe.has_exponent);
+}
+
+Test(base_json_parser, error_str_to_double_nullstr)
+{
+    str_and_len_tuple_t sl = STR_AND_LEN_OF(0, 1, 0, 0);
+    double_with_or_without_exponent_t dwowe = str_to_double(&sl);
+    cr_expect(dwowe.has_exponent == 2,
+              "Expected str_to_long(0) to set the 'has_exponent' field to 2, "
+              "but it was set to '%d'",
+              dwowe.has_exponent);
+}
+
+Test(base_json_parser, error_str_to_double_zerolen)
+{
+    str_and_len_tuple_t sl = STR_AND_LEN_OF("", 0, 0, 0);
+    double_with_or_without_exponent_t dwowe = str_to_double(&sl);
+    cr_expect(dwowe.has_exponent == 2,
+              "Expected str_to_long(sl) ; with 'sl' having a null string ; to "
+              "set the 'has_exponent' field to 2, but it was set to '%d'",
+              dwowe.has_exponent);
+}
+
+// is_float
+Test(base_json_parser, error_is_float_null_str)
+{
+    char res = is_float(0, 0);
+    cr_expect(!res,
+              "Expected is_float(0, len) to return 0, but it returned '%d'",
+              res);
+}
+
+// has_exponent
+Test(base_json_parser, error_has_exponent_null_str)
+{
+    char res = has_exponent(0, 0);
+    cr_expect(!res,
+              "Expected has_exponent(0, len) to return 0, but it returned '%d'",
+              res);
+}
+
+// parse_string_buff
+Test(base_json_parser, error_parse_string_buff_nullstr)
+{
+    unsigned long idx = 5;
+    string_t s = parse_string_buff(0, &idx);
+    cr_expect(!s.str,
+              "Expected parse_string_buff(0, &idx) to a NULL_STRING, but it "
+              "returned '%s'",
+              s.str);
+}
+
+Test(base_json_parser, error_parse_string_buff_nullidx)
+{
+    string_t s = parse_string_buff("", 0);
+    cr_expect(!s.str,
+              "Expected parse_string_buff(\"\", 0) to a NULL_STRING, but it "
+              "returned '%s'",
+              s.str);
+}
+
+// parse_string
+Test(base_json_parser, error_parse_string_nullstr)
+{
+    unsigned long idx = 5;
+    string_t s = parse_string(0, &idx);
+    cr_expect(!s.str,
+              "Expected parse_string(0, &idx) to a NULL_STRING, but it "
+              "returned '%s'",
+              s.str);
+}
+
+Test(base_json_parser, error_parse_string_nullidx)
+{
+    string_t s = parse_string(stdin, 0);
+    cr_expect(!s.str,
+              "Expected parse_string(stdin, 0) to a NULL_STRING, but it "
+              "returned '%s'",
+              s.str);
+}
