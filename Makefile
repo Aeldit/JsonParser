@@ -11,7 +11,8 @@ CFILES=src/base_json_parser.c \
 	src/rw_json_storage.c \
 	src/rw_json_write.c
 
-TESTFILES=tests/base_json_parser_tests.c
+TESTFILES=tests/base_json_parser_tests.c \
+	tests/base_json_storage_tests.c
 
 TARGET=json-parser
 

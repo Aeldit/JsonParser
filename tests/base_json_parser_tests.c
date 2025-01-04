@@ -1,5 +1,4 @@
 #include <criterion/criterion.h>
-#include <criterion/logging.h>
 #include <sys/stat.h>
 
 #include "../src/base_json_parser.h"
