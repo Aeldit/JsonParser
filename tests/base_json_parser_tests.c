@@ -331,7 +331,7 @@ void test_parse_string(unsigned long *idx, char *expected_str, char is_buff)
                   s.len + 1, *idx - initial_idx - !is_buff);
     }
     destroy_string(s);
-    if (is_buff)
+    if (buff)
     {
         free(buff);
     }
@@ -446,7 +446,7 @@ void test_parse_number(unsigned long *idx,
                   s.has_exponent ? "did" : "didn't");
     }
     free(s.str);
-    if (is_buff)
+    if (buff)
     {
         free(buff);
     }
@@ -753,7 +753,10 @@ void test_parse_boolean(unsigned long *idx, unsigned long expected_len,
                   "incremented by '%lu'",
                   len - 1, *idx - initial_idx - !is_buff);
     }
-    free(buff);
+    if (buff)
+    {
+        free(buff);
+    }
     fclose(f);
 }
 
@@ -836,6 +839,7 @@ void test_get_nb_elts_array(unsigned long idx, unsigned long expected_len,
     {
         free(buff);
     }
+    fclose(f);
 }
 
 Test(base_json_parser, get_nb_elts_array_buff_empty)
@@ -923,6 +927,7 @@ void test_get_nb_elts_dict(unsigned long idx, unsigned long expected_len,
     {
         free(buff);
     }
+    fclose(f);
 }
 
 Test(base_json_parser, get_nb_elts_dict_buff_empty)
@@ -955,3 +960,87 @@ Test(base_json_parser, get_nb_elts_dict_nested)
 {
     test_get_nb_elts_dict(906, 1, 0);
 }
+
+/*******************************************************************************
+**                            GET_NB_CHARS_IN_ARRAY                           **
+*******************************************************************************/
+void test_get_nb_chars_in_array(unsigned long idx, unsigned long expected_len)
+{
+    FILE *f = fopen(JSON_TESTS_FILE, "r");
+    if (!f)
+    {
+        return;
+    }
+
+    if (fseek(f, idx, SEEK_SET) != 0)
+    {
+        fclose(f);
+        return;
+    }
+    unsigned long len = get_nb_chars_in_array(f, idx);
+
+    cr_expect(len == expected_len,
+              "Expected the number of characters of the array to be '%lu' but "
+              "got '%lu'",
+              expected_len, len);
+    fclose(f);
+}
+
+Test(base_json_parser, get_nb_chars_in_array_empty)
+{
+    test_get_nb_chars_in_array(519, 0);
+}
+
+Test(base_json_parser, get_nb_chars_in_array_normal)
+{
+    test_get_nb_chars_in_array(18, 49);
+}
+
+Test(base_json_parser, get_nb_chars_in_array_nested)
+{
+    test_get_nb_chars_in_array(509, 277);
+}
+
+/*******************************************************************************
+**                             GET_NB_CHARS_IN_DICT                           **
+*******************************************************************************/
+void test_get_nb_chars_in_dict(unsigned long idx, unsigned long expected_len)
+{
+    FILE *f = fopen(JSON_TESTS_FILE, "r");
+    if (!f)
+    {
+        return;
+    }
+
+    if (fseek(f, idx, SEEK_SET) != 0)
+    {
+        fclose(f);
+        return;
+    }
+    unsigned long len = get_nb_chars_in_dict(f, idx);
+
+    cr_expect(len == expected_len,
+              "Expected the number of characters of the array to be '%lu' but "
+              "got '%lu'",
+              expected_len, len);
+    fclose(f);
+}
+
+Test(base_json_parser, get_nb_chars_in_dict_empty)
+{
+    test_get_nb_chars_in_dict(813, 0);
+}
+
+Test(base_json_parser, get_nb_chars_in_dict_normal)
+{
+    test_get_nb_chars_in_dict(825, 68);
+}
+
+Test(base_json_parser, get_nb_chars_in_dict_nested)
+{
+    test_get_nb_chars_in_dict(905, 211);
+}
+
+/*******************************************************************************
+**                                   ERRORS                                   **
+*******************************************************************************/
