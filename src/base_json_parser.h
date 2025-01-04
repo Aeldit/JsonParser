@@ -188,9 +188,6 @@ unsigned long get_nb_elts_dict(FILE *f, unsigned long pos);
 ** \param f The file stream
 ** \param pos The position in the file of the character after the '[' that
 **            begins the current array
-** \param err A pointer to a char that will be updated if an error occurs
-**            (we return the number of chars, so we can't use a number to
-**            indicate an error)
 ** \returns The total number of characters in the current array - 1 (the
 **          first '[' is not counted)
 */
