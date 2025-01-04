@@ -785,8 +785,8 @@ Test(base_json_parser, parse_boolean_false)
 /*******************************************************************************
 **                            GET_NB_ELTS_ARRAY_BUFF                          **
 *******************************************************************************/
-void test_get_nb_elts_array_buff(unsigned long idx, unsigned long expected_len,
-                                 char is_buff)
+void test_get_nb_elts_array(unsigned long idx, unsigned long expected_len,
+                            char is_buff)
 {
     FILE *f = fopen(JSON_TESTS_FILE, "r");
     if (!f)
@@ -821,41 +821,52 @@ void test_get_nb_elts_array_buff(unsigned long idx, unsigned long expected_len,
     }
     else
     {
+        if (fseek(f, idx, SEEK_SET) != 0)
+        {
+            fclose(f);
+            return;
+        }
+        len = get_nb_elts_array(f, idx);
     }
 
     cr_expect(len == expected_len,
               "Expected the length of the array to be '%lu' but got '%lu'",
               expected_len, len);
-}
-
-Test(base_json_parser, get_nb_elts_array_buff_nullbuff)
-{
-    test_get_nb_elts_array_buff(0, 0, 0);
+    if (buff)
+    {
+        free(buff);
+    }
 }
 
 Test(base_json_parser, get_nb_elts_array_buff_empty)
 {
-    test_get_nb_elts_array_buff("[]", 1, 0);
+    test_get_nb_elts_array(541, 0, 1);
 }
 
-Test(base_json_parser, get_nb_elts_array_buff_short)
+Test(base_json_parser, get_nb_elts_array_buff_long_nested)
 {
-    test_get_nb_elts_array_buff("[1,2,3,4,5,6]", 1, 6);
+    test_get_nb_elts_array(509, 8, 1);
 }
 
 Test(base_json_parser, get_nb_elts_array_buff_normal)
 {
-    test_get_nb_elts_array_buff(
-        "{\"test\":1,\"array\":[\"testing\",false,null,true,123456789]}", 19,
-        5);
+    test_get_nb_elts_array(18, 2, 1);
 }
 
-Test(base_json_parser, get_nb_elts_array_buff_long)
+// Files
+Test(base_json_parser, get_nb_elts_array_empty)
 {
-    test_get_nb_elts_array_buff(
-        "{\"test\":1,\"array\":[\"testing\",false,null,true,123456789,1,2,3,4,"
-        "5,6,7,8,9,1,2,3,4,5,6,7,8,9]}",
-        19, 23);
+    test_get_nb_elts_array(541, 0, 0);
+}
+
+Test(base_json_parser, get_nb_elts_array_long_nested)
+{
+    test_get_nb_elts_array(509, 8, 0);
+}
+
+Test(base_json_parser, get_nb_elts_array_normal)
+{
+    test_get_nb_elts_array(18, 2, 0);
 }
 
 /*******************************************************************************
