@@ -4,6 +4,8 @@
 
 #include "../src/base_json_parser.h"
 
+#define JSON_TESTS_FILE ("tests/test.json")
+
 /*******************************************************************************
 **                                 STR_TO_LONG                                **
 *******************************************************************************/
@@ -272,7 +274,7 @@ Test(base_json_parser, doesnt_have_exponent)
 *******************************************************************************/
 void test_parse_string(unsigned long *idx, char *expected_str, char is_buff)
 {
-    FILE *f = fopen("tests/test.json", "r");
+    FILE *f = fopen(JSON_TESTS_FILE, "r");
     if (!f)
     {
         return;
@@ -292,7 +294,7 @@ void test_parse_string(unsigned long *idx, char *expected_str, char is_buff)
         }
 
         struct stat st;
-        stat("tests/test.json", &st);
+        stat(JSON_TESTS_FILE, &st);
         unsigned long nb_chars = st.st_size;
 
         buff = calloc(nb_chars + 1, sizeof(char));
@@ -377,7 +379,7 @@ Test(base_json_parser, parse_string_empty_string)
 void test_parse_number(unsigned long *idx,
                        str_and_len_tuple_t expected_str_and_len, char is_buff)
 {
-    FILE *f = fopen("tests/test.json", "r");
+    FILE *f = fopen(JSON_TESTS_FILE, "r");
     if (!f)
     {
         return;
@@ -399,7 +401,7 @@ void test_parse_number(unsigned long *idx,
         }
 
         struct stat st;
-        stat("tests/test.json", &st);
+        stat(JSON_TESTS_FILE, &st);
         unsigned long nb_chars = st.st_size;
 
         buff = calloc(nb_chars + 1, sizeof(char));
@@ -695,99 +697,131 @@ Test(base_json_parser, parse_number_negative_float_uppernegativeexp)
 /*******************************************************************************
 **                              PARSE_BOOLEAN_BUFF                            **
 *******************************************************************************/
-void test_parse_boolean_buff(char *buff, unsigned long *idx,
-                             unsigned long expected_len)
+void test_parse_boolean(unsigned long *idx, unsigned long expected_len,
+                        char is_buff)
 {
+    FILE *f = fopen(JSON_TESTS_FILE, "r");
+    if (!f)
+    {
+        return;
+    }
+
     unsigned long initial_idx = idx ? *idx : 0;
-    unsigned long len = parse_boolean_buff(buff, idx);
+    unsigned long len = 0;
+    char *buff = 0;
+
+    if (is_buff)
+    {
+        if (fseek(f, 0, SEEK_SET) != 0)
+        {
+            fclose(f);
+            return;
+        }
+
+        struct stat st;
+        stat(JSON_TESTS_FILE, &st);
+        unsigned long nb_chars = st.st_size;
+
+        buff = calloc(nb_chars + 1, sizeof(char));
+        if (!buff)
+        {
+            fclose(f);
+            return;
+        }
+        fread(buff, sizeof(char), nb_chars, f);
+
+        len = parse_boolean_buff(buff, idx);
+    }
+    else
+    {
+        if (idx && fseek(f, (*idx)++, SEEK_SET) != 0)
+        {
+            fclose(f);
+            return;
+        }
+
+        len = parse_boolean(f, idx);
+    }
 
     cr_expect(len == expected_len,
               "Expected the boolean len to be '%lu' but got '%lu'",
               expected_len, len);
     if (buff && idx)
     {
-        cr_expect(*idx - initial_idx == len - 1,
+        cr_expect(*idx - initial_idx - !is_buff == len - 1,
                   "Expected '*idx' to be incremented by '%lu' but it got "
                   "incremented by '%lu'",
-                  len - 1, *idx - initial_idx);
+                  len - 1, *idx - initial_idx - !is_buff);
     }
+    free(buff);
+    fclose(f);
 }
 
 Test(base_json_parser, parse_boolean_buff_true)
 {
-    unsigned long idx = 8;
-    test_parse_boolean_buff("{\"test\":true,\"num\":123.45E6}", &idx, 4);
+    unsigned long idx = 467;
+    test_parse_boolean(&idx, 4, 1);
 }
 
 Test(base_json_parser, parse_boolean_buff_false)
 {
-    unsigned long idx = 8;
-    test_parse_boolean_buff("{\"test\":false,\"num\":123.45E6}", &idx, 5);
+    unsigned long idx = 481;
+    test_parse_boolean(&idx, 5, 1);
 }
 
-Test(base_json_parser, parse_boolean_buff_null_buff)
-{
-    unsigned long idx = 8;
-    test_parse_boolean_buff(0, &idx, 0);
-}
-
-Test(base_json_parser, parse_boolean_buff_null_idx)
-{
-    test_parse_boolean_buff("{\"test\":false,\"num\":123.45E6}", 0, 0);
-}
-
-/*******************************************************************************
-**                               PARSE_BOOLEAN                                **
-*******************************************************************************/
-void test_parse_boolean(unsigned long *pos, unsigned long expected_len)
-{
-    FILE *f = fopen("tests/test.json", "r");
-    if (f)
-    {
-        if (pos && fseek(f, (*pos)++, SEEK_SET) != 0)
-        {
-            fclose(f);
-            return;
-        }
-    }
-
-    unsigned long initial_idx = pos ? *pos : 0;
-    unsigned long len = parse_boolean(f, pos);
-
-    cr_expect(len == expected_len, "Expected 'len' to be '%lu' but got '%lu'",
-              expected_len, len);
-    if (f && pos)
-    {
-        cr_expect(*pos - initial_idx == len - 1,
-                  "Expected '*idx' to be incremented by '%lu' but it got "
-                  "incremented by '%lu'",
-                  len - 1, *pos - initial_idx);
-    }
-    if (f)
-    {
-        fclose(f);
-    }
-}
-
+// Files
 Test(base_json_parser, parse_boolean_true)
 {
     unsigned long idx = 467;
-    test_parse_boolean(&idx, 4);
+    test_parse_boolean(&idx, 4, 0);
 }
 
 Test(base_json_parser, parse_boolean_false)
 {
     unsigned long idx = 481;
-    test_parse_boolean(&idx, 5);
+    test_parse_boolean(&idx, 5, 0);
 }
 
 /*******************************************************************************
 **                            GET_NB_ELTS_ARRAY_BUFF                          **
 *******************************************************************************/
-void test_get_nb_elts_array_buff(char *buff, unsigned long idx,
-                                 unsigned long expected_len)
+void test_get_nb_elts_array_buff(unsigned long idx, unsigned long expected_len,
+                                 char is_buff)
 {
-    unsigned long len = get_nb_elts_array_buff(buff, idx);
+    FILE *f = fopen(JSON_TESTS_FILE, "r");
+    if (!f)
+    {
+        return;
+    }
+
+    unsigned long len = 0;
+    char *buff = 0;
+
+    if (is_buff)
+    {
+        if (fseek(f, 0, SEEK_SET) != 0)
+        {
+            fclose(f);
+            return;
+        }
+
+        struct stat st;
+        stat(JSON_TESTS_FILE, &st);
+        unsigned long nb_chars = st.st_size;
+
+        buff = calloc(nb_chars + 1, sizeof(char));
+        if (!buff)
+        {
+            fclose(f);
+            return;
+        }
+        fread(buff, sizeof(char), nb_chars, f);
+
+        len = get_nb_elts_array_buff(buff, idx);
+    }
+    else
+    {
+    }
 
     cr_expect(len == expected_len,
               "Expected the length of the array to be '%lu' but got '%lu'",
