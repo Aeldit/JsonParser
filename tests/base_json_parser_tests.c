@@ -783,7 +783,7 @@ Test(base_json_parser, parse_boolean_false)
 }
 
 /*******************************************************************************
-**                            GET_NB_ELTS_ARRAY_BUFF                          **
+**                              GET_NB_ELTS_ARRAY                             **
 *******************************************************************************/
 void test_get_nb_elts_array(unsigned long idx, unsigned long expected_len,
                             char is_buff)
@@ -840,12 +840,7 @@ void test_get_nb_elts_array(unsigned long idx, unsigned long expected_len,
 
 Test(base_json_parser, get_nb_elts_array_buff_empty)
 {
-    test_get_nb_elts_array(541, 0, 1);
-}
-
-Test(base_json_parser, get_nb_elts_array_buff_long_nested)
-{
-    test_get_nb_elts_array(509, 8, 1);
+    test_get_nb_elts_array(519, 0, 1);
 }
 
 Test(base_json_parser, get_nb_elts_array_buff_normal)
@@ -853,15 +848,15 @@ Test(base_json_parser, get_nb_elts_array_buff_normal)
     test_get_nb_elts_array(18, 2, 1);
 }
 
+Test(base_json_parser, get_nb_elts_array_buff_nested)
+{
+    test_get_nb_elts_array(509, 8, 1);
+}
+
 // Files
 Test(base_json_parser, get_nb_elts_array_empty)
 {
-    test_get_nb_elts_array(541, 0, 0);
-}
-
-Test(base_json_parser, get_nb_elts_array_long_nested)
-{
-    test_get_nb_elts_array(509, 8, 0);
+    test_get_nb_elts_array(519, 0, 0);
 }
 
 Test(base_json_parser, get_nb_elts_array_normal)
@@ -869,88 +864,94 @@ Test(base_json_parser, get_nb_elts_array_normal)
     test_get_nb_elts_array(18, 2, 0);
 }
 
-/*******************************************************************************
-**                            GET_NB_ELTS_DICT_BUFF                           **
-*******************************************************************************/
-void test_get_nb_elts_dict_buff(char *buff, unsigned long idx,
-                                unsigned long expected_len)
+Test(base_json_parser, get_nb_elts_array_nested)
 {
-    unsigned long len = get_nb_elts_dict_buff(buff, idx);
-
-    cr_expect(len == expected_len,
-              "Expected the length of the dict to be '%lu' but got '%lu'",
-              expected_len, len);
-}
-
-Test(base_json_parser, get_nb_elts_dict_buff_nullbuff)
-{
-    test_get_nb_elts_dict_buff(0, 0, 0);
-}
-
-Test(base_json_parser, get_nb_elts_dict_buff_empty)
-{
-    test_get_nb_elts_dict_buff("{}", 1, 0);
-}
-
-Test(base_json_parser, get_nb_elts_dict_buff_short)
-{
-    test_get_nb_elts_dict_buff("{\"a\":1,\"b\":2}", 1, 2);
-}
-
-Test(base_json_parser, get_nb_elts_dict_buff_normal)
-{
-    test_get_nb_elts_dict_buff(
-        "{\"test\":1,\"array\":[\"testing\",false,null,true,123456789]}", 1, 2);
-}
-
-Test(base_json_parser, get_nb_elts_dict_buff_long)
-{
-    test_get_nb_elts_dict_buff(
-        "{\"test\":1,\"array\":[\"testing\",false,null,true,123456789,1,2,3,4,"
-        "5,6,7,8,9,1,2,3,4,5,6,7,8,9],\"twergs\":1,\"ersgsrtgrsgsr\":83465,"
-        "\"ta\":true}",
-        1, 5);
+    test_get_nb_elts_array(509, 8, 0);
 }
 
 /*******************************************************************************
 **                              GET_NB_ELTS_DICT                              **
 *******************************************************************************/
-void test_get_nb_elts_dict(FILE *f, unsigned long idx,
-                           unsigned long expected_len)
+void test_get_nb_elts_dict(unsigned long idx, unsigned long expected_len,
+                           char is_buff)
 {
-    unsigned long len = get_nb_elts_dict(f, idx);
+    FILE *f = fopen(JSON_TESTS_FILE, "r");
+    if (!f)
+    {
+        return;
+    }
+
+    unsigned long len = 0;
+    char *buff = 0;
+
+    if (is_buff)
+    {
+        if (fseek(f, 0, SEEK_SET) != 0)
+        {
+            fclose(f);
+            return;
+        }
+
+        struct stat st;
+        stat(JSON_TESTS_FILE, &st);
+        unsigned long nb_chars = st.st_size;
+
+        buff = calloc(nb_chars + 1, sizeof(char));
+        if (!buff)
+        {
+            fclose(f);
+            return;
+        }
+        fread(buff, sizeof(char), nb_chars, f);
+
+        len = get_nb_elts_dict_buff(buff, idx);
+    }
+    else
+    {
+        if (fseek(f, idx, SEEK_SET) != 0)
+        {
+            fclose(f);
+            return;
+        }
+        len = get_nb_elts_dict(f, idx);
+    }
 
     cr_expect(len == expected_len,
               "Expected the length of the dict to be '%lu' but got '%lu'",
               expected_len, len);
+    if (buff)
+    {
+        free(buff);
+    }
 }
 
-Test(base_json_parser, get_nb_elts_dict_nullbuff)
+Test(base_json_parser, get_nb_elts_dict_buff_empty)
 {
-    test_get_nb_elts_dict_buff(0, 0, 0);
+    test_get_nb_elts_dict(813, 0, 1);
 }
 
+Test(base_json_parser, get_nb_elts_dict_buff_normal)
+{
+    test_get_nb_elts_dict(825, 3, 1);
+}
+
+Test(base_json_parser, get_nb_elts_dict_buff_nested)
+{
+    test_get_nb_elts_dict(906, 1, 1);
+}
+
+// Files
 Test(base_json_parser, get_nb_elts_dict_empty)
 {
-    test_get_nb_elts_dict_buff("{}", 1, 0);
-}
-
-Test(base_json_parser, get_nb_elts_dict_short)
-{
-    test_get_nb_elts_dict_buff("{\"a\":1,\"b\":2}", 1, 2);
+    test_get_nb_elts_dict(813, 0, 0);
 }
 
 Test(base_json_parser, get_nb_elts_dict_normal)
 {
-    test_get_nb_elts_dict_buff(
-        "{\"test\":1,\"array\":[\"testing\",false,null,true,123456789]}", 1, 2);
+    test_get_nb_elts_dict(825, 3, 0);
 }
 
-Test(base_json_parser, get_nb_elts_dict_long)
+Test(base_json_parser, get_nb_elts_dict_nested)
 {
-    test_get_nb_elts_dict_buff(
-        "{\"test\":1,\"array\":[\"testing\",false,null,true,123456789,1,2,3,4,"
-        "5,6,7,8,9,1,2,3,4,5,6,7,8,9],\"twergs\":1,\"ersgsrtgrsgsr\":83465,"
-        "\"ta\":true}",
-        1, 5);
+    test_get_nb_elts_dict(906, 1, 0);
 }
