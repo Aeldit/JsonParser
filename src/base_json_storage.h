@@ -15,7 +15,10 @@
 #define T_ARR 8
 #define T_DICT 9
 
-#define STRING_OF(s, l) ((string_t){ .str = (s), .len = (l) })
+#define STRING_OF(s, l)                                                        \
+    ((string_t){ .str = (s), .len = (l), .needs_freeing = 1 })
+#define STRING_NOFREE_OF(s, l)                                                 \
+    ((string_t){ .str = (s), .len = (l), .needs_freeing = 0 })
 #define NULL_STRING ((string_t){ .str = 0 })
 
 /*
@@ -37,6 +40,7 @@ typedef struct
 {
     char *str;
     unsigned len;
+    char needs_freeing;
 } string_t;
 
 typedef struct

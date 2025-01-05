@@ -32,7 +32,7 @@ char strings_equals(string_t s1, string_t s2)
 
 void destroy_string(string_t s)
 {
-    if (s.str && s.len)
+    if (s.str && s.needs_freeing)
     {
         free(s.str);
     }
