@@ -78,7 +78,7 @@ typedef struct
 } ro_json_t;
 
 /*******************************************************************************
-**                                 FUNCTIONS **
+**                                 FUNCTIONS                                  **
 *******************************************************************************/
 ro_array_t *init_ro_array(unsigned size);
 ro_dict_t *init_ro_dict(unsigned size);

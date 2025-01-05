@@ -232,7 +232,7 @@ void ro_dict_add_dict(ro_dict_t *d, string_t key, ro_dict_t *value)
 /*******************************************************************************
 **                                    GETS                                    **
 *******************************************************************************/
-ro_value_t array_get(ro_array_t *a, unsigned index)
+ro_value_t ro_array_get(ro_array_t *a, unsigned index)
 {
     if (!a || index >= a->size)
     {
@@ -242,7 +242,7 @@ ro_value_t array_get(ro_array_t *a, unsigned index)
     return index < a->size ? a->values[index] : ERROR_RO_VALUE;
 }
 
-ro_item_t dict_get(ro_dict_t *d, string_t key)
+ro_item_t ro_dict_get(ro_dict_t *d, string_t key)
 {
     if (!d || !key.str)
     {
