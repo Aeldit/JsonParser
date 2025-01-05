@@ -3,16 +3,17 @@
 CC=gcc
 CFILES=src/base_json_parser.c \
 	src/base_json_storage.c \
-	src/base_json_write.c \
+	src/base_json_writer.c \
 	src/ro_json_parser.c \
 	src/ro_json_storage.c \
-	src/ro_json_write.c \
+	src/ro_json_writer.c \
 	src/rw_json_parser.c \
 	src/rw_json_storage.c \
-	src/rw_json_write.c
+	src/rw_json_writer.c
 
 TESTFILES=tests/base_json_parser_tests.c \
-	tests/base_json_storage_tests.c
+	tests/base_json_storage_tests.c \
+	tests/base_json_writer_tests.c
 
 TARGET=json-parser
 
