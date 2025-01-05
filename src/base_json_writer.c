@@ -1,4 +1,4 @@
-#include "base_json_write.h"
+#include "base_json_writer.h"
 
 /*******************************************************************************
 **                                  INCLUDES                                  **
@@ -155,12 +155,6 @@ string_t get_exp_long_as_str(exponent_long_t value)
     snprintf(str + nb_chars_number + 1, nb_chars_exponent + 1, "%ld", exponent);
     return STRING_OF(str, len);
 }
-
-union print
-{
-    double value;
-    char str[sizeof(double)];
-};
 
 string_t get_exp_double_as_str(exponent_double_t value)
 {

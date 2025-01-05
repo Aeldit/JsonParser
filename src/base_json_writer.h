@@ -1,5 +1,5 @@
-#ifndef BASE_JSON_WRITE_H
-#define BASE_JSON_WRITE_H
+#ifndef BASE_JSON_WRITER_H
+#define BASE_JSON_WRITER_H
 
 /*******************************************************************************
 **                                  INCLUDES                                  **
@@ -45,7 +45,7 @@ typedef struct
         {                                                                      \
         case T_STR:                                                            \
             tmp_str = v.strv;                                                  \
-            nb += 2; /* Strings are encased by 2 double-quotes (\"\")*/        \
+            nb += 2; /* Strings are encased by 2 double-quotes (\"\") */       \
             break;                                                             \
         case T_LONG:                                                           \
             tmp_str = get_long_as_str(v.longv);                                \
@@ -75,7 +75,7 @@ typedef struct
         add_link(ll, tmp_str, v.type != T_STR, v.type == T_STR);               \
         /* We add 1 for the comma if we are not at the last value */           \
         /* We add 1 for the line return */                                     \
-        /* We add 'indent' for the tabs */                                     \
+        /* We add 'indent * 4' for the 4 spaces of indentation */              \
         nb += tmp_str.len + (i < total_size ? 1 : 0) + 1 + indent * 4;         \
     }
 
@@ -325,6 +325,8 @@ typedef struct
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
+unsigned get_nb_char_long(long n);
+
 string_t get_long_as_str(long value);
 string_t get_double_as_str(double value);
 string_t get_exp_long_as_str(exponent_long_t value);
@@ -336,4 +338,4 @@ void add_link(string_linked_list_t *ll, string_t str, char str_needs_free,
               char is_from_str);
 void destroy_linked_list(string_linked_list_t *ll);
 
-#endif // !BASE_JSON_WRITE_H
+#endif // !BASE_JSON_WRITER_H
