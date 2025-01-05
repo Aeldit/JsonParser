@@ -18,7 +18,7 @@ ro_dict_t *ro_parse_dict(FILE *f, unsigned long *pos);
 **                              LOCAL FUNCTIONS                               **
 *******************************************************************************/
 /**
-** \param buff The buffer containing the object currently being parsed
+** \param b The buffer containing the object currently being parsed
 ** \param idx The index of the character '[' that begins the current ro_array_t
 ** \returns The json ro_array_t parsed from the position
 */

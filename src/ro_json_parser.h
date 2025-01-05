@@ -4,11 +4,18 @@
 /*******************************************************************************
 **                                  INCLUDES                                  **
 *******************************************************************************/
+#include <stdio.h>
+
 #include "ro_json_storage.h"
 
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
+ro_array_t *ro_parse_array_buff(char *b, unsigned long *idx);
+ro_array_t *ro_parse_array(FILE *f, unsigned long *pos);
+
+ro_dict_t *ro_parse_dict_buff(char *b, unsigned long *idx);
+
 /**
 ** \brief Parse the given file and returns the associated JSON object
 */

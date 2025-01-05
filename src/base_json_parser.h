@@ -50,6 +50,9 @@
     ((str_and_len_tuple_t){                                                    \
         .str = s, .len = l, .is_float = float, .has_exponent = exponent })
 
+#define EXP_LONG_OF(n, e) ((exponent_long_t){ .number = n, .exponent = e })
+#define EXP_DOUBLE_OF(n, e) ((exponent_double_t){ .number = n, .exponent = e })
+
 /*******************************************************************************
 **                                 STRUCTURES **
 *******************************************************************************/

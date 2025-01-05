@@ -13,7 +13,7 @@ inline char exp_double_equals(exponent_double_t a, exponent_double_t b)
     return a.number == b.number && a.exponent == b.exponent;
 }
 
-char arrays_equal(ro_array_t *a, ro_array_t *b)
+char ro_arrays_equal(ro_array_t *a, ro_array_t *b)
 {
     if (!a || !b)
     {
@@ -65,10 +65,10 @@ char arrays_equal(ro_array_t *a, ro_array_t *b)
             is_equal = 1;
             break;
         case T_ARR:
-            is_equal = arrays_equal(a_val.arrayv, b_val.arrayv);
+            is_equal = ro_arrays_equal(a_val.arrayv, b_val.arrayv);
             break;
         case T_DICT:
-            is_equal = dicts_equal(a_val.dictv, b_val.dictv);
+            is_equal = ro_dicts_equal(a_val.dictv, b_val.dictv);
             break;
         }
 
@@ -80,7 +80,7 @@ char arrays_equal(ro_array_t *a, ro_array_t *b)
     return 1;
 }
 
-char dicts_equal(ro_dict_t *a, ro_dict_t *b)
+char ro_dicts_equal(ro_dict_t *a, ro_dict_t *b)
 {
     if (!a || !b)
     {
@@ -140,10 +140,10 @@ char dicts_equal(ro_dict_t *a, ro_dict_t *b)
             is_equal = 1;
             break;
         case T_ARR:
-            is_equal = arrays_equal(a_it.arrayv, b_it.arrayv);
+            is_equal = ro_arrays_equal(a_it.arrayv, b_it.arrayv);
             break;
         case T_DICT:
-            is_equal = dicts_equal(a_it.dictv, b_it.dictv);
+            is_equal = ro_dicts_equal(a_it.dictv, b_it.dictv);
             break;
         }
 
