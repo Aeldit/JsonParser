@@ -215,3 +215,16 @@ Test(base_json_writer, get_bool_as_str_false)
 {
     test_get_bool_as_str(0, 5, "false");
 }
+
+/*******************************************************************************
+**                               GET_NULL_AS_STR                              **
+*******************************************************************************/
+Test(base_json_writer, get_null_as_str)
+{
+    string_t s = get_null_as_str();
+    cr_expect(strings_equals(s, STRING_OF("null", 4)),
+              "Expected get_null_as_str() to return the string { .str = "
+              "\"null\", .len = 4 }, but got { .str = \"%s\", .len = %u }",
+              s.str, s.len);
+    free(s.str);
+}
