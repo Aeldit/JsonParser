@@ -1,9 +1,7 @@
 #include <criterion/criterion.h>
 
+#include "../src/base_json_parser.h"
 #include "../src/ro_equality.h"
-
-#define EXP_LONG_OF(n, e) ((exponent_long_t){ .number = n, .exponent = e })
-#define EXP_DOUBLE_OF(n, e) ((exponent_double_t){ .number = n, .exponent = e })
 
 /*******************************************************************************
 **                               EXP_LONG_EQUALS                              **
@@ -80,7 +78,7 @@ Test(ro_equality, exp_double_equals_numfalse_expfalse)
 *******************************************************************************/
 void test_arrays_equal(ro_array_t *a, ro_array_t *b, char expected_is_equal)
 {
-    char is_equal = arrays_equal(a, b);
+    char is_equal = ro_arrays_equal(a, b);
 
     cr_expect(is_equal == expected_is_equal,
               "Expected arrays_equal(a, b) to be %s, but it was %s",
@@ -472,7 +470,7 @@ Test(ro_equality, arrays_equal_diff_dicts_returns_false)
 *******************************************************************************/
 void test_dicts_equal(ro_dict_t *a, ro_dict_t *b, char expected_is_equal)
 {
-    char is_equal = dicts_equal(a, b);
+    char is_equal = ro_dicts_equal(a, b);
 
     cr_expect(is_equal == expected_is_equal,
               "Expected dicts_equal(a, b) to be %s, but it was %s",
