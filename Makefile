@@ -15,7 +15,7 @@ CFILES=src/base_json_parser.c \
 TESTFILES=tests/base_json_parser_tests.c \
 	tests/base_json_storage_tests.c \
 	tests/base_json_writer_tests.c \
-	tests/ro_json_parser_tests.c
+	tests/ro_equality_tests.c
 
 TARGET=json-parser
 
