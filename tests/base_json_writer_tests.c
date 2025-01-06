@@ -112,9 +112,9 @@ void test_get_double_as_str(double n, unsigned len, char *nstr)
 {
     string_t s = get_double_as_str(n);
     cr_expect(strings_equals(s, STRING_OF(nstr, len)),
-              "Expected get_double_as_str(%lf) to return the string { .str = "
-              "\"%lf\", .len = %u }, but got { .str = \"%s\", .len = %u }",
-              n, n, len, s.str, s.len);
+              "Expected get_double_as_str(%s) to return the string { .str = "
+              "\"%s\", .len = %u }, but got { .str = \"%s\", .len = %u }",
+              nstr, nstr, len, s.str, s.len);
     destroy_string(s);
 }
 
