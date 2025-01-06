@@ -239,7 +239,7 @@ string_t parse_string_buff(char *buff, unsigned long *idx)
     if (!len)
     {
         ++(*idx);
-        return STRING_NOFREE_OF("\0", 0);
+        return STRING_NOFREE_OF("", 0);
     }
 
     char *str = calloc(len + 1, sizeof(char));
@@ -273,7 +273,7 @@ string_t parse_string(FILE *f, unsigned long *pos)
     if (!len)
     {
         ++(*pos);
-        return STRING_NOFREE_OF("\0", 0);
+        return STRING_NOFREE_OF("", 0);
     }
 
     char *str = calloc(len + 1, sizeof(char));

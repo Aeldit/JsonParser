@@ -135,11 +135,11 @@ Test(ro_json_parser, ro_parse_array_buff_nested_multi_type)
     ro_array_add_long(b, 3);
 
     ro_array_t *a2 = init_ro_array(4);
-    ro_array_add_str(a2, STRING_NOFREE_OF("", 0));
+    ro_array_add_str(a2, string_nofree_of(""));
     ro_array_add_long(a2, 5);
 
     ro_array_t *a3 = init_ro_array(3);
-    ro_array_add_str(a3, STRING_NOFREE_OF("dd", 2));
+    ro_array_add_str(a3, string_nofree_of("dd"));
     ro_array_add_bool(a3, 1);
     ro_array_add_long(a3, 5);
 
@@ -150,7 +150,7 @@ Test(ro_json_parser, ro_parse_array_buff_nested_multi_type)
     ro_array_add_dict(b, init_ro_dict(0));
 
     ro_dict_t *d = init_ro_dict(1);
-    ro_dict_add_str(d, STRING_NOFREE_OF("first", 5), STRING_NOFREE_OF("w", 1));
+    ro_dict_add_str(d, string_nofree_of("first"), string_nofree_of("w"));
 
     ro_array_add_dict(b, d);
     ro_array_add_dict(b, init_ro_dict(0));
@@ -229,11 +229,11 @@ Test(ro_json_parser, ro_parse_array_nested_multi_type)
     ro_array_add_long(b, 3);
 
     ro_array_t *a2 = init_ro_array(4);
-    ro_array_add_str(a2, STRING_NOFREE_OF("", 0));
+    ro_array_add_str(a2, string_nofree_of(""));
     ro_array_add_long(a2, 5);
 
     ro_array_t *a3 = init_ro_array(3);
-    ro_array_add_str(a3, STRING_NOFREE_OF("dd", 2));
+    ro_array_add_str(a3, string_nofree_of("dd"));
     ro_array_add_bool(a3, 1);
     ro_array_add_long(a3, 5);
 
@@ -244,7 +244,7 @@ Test(ro_json_parser, ro_parse_array_nested_multi_type)
     ro_array_add_dict(b, init_ro_dict(0));
 
     ro_dict_t *d = init_ro_dict(1);
-    ro_dict_add_str(d, STRING_NOFREE_OF("first", 5), STRING_NOFREE_OF("w", 1));
+    ro_dict_add_str(d, string_nofree_of("first"), string_nofree_of("w"));
 
     ro_array_add_dict(b, d);
     ro_array_add_dict(b, init_ro_dict(0));
@@ -335,9 +335,9 @@ Test(ro_json_parser, ro_parse_dict_buff_numbers)
 
     ro_dict_t *b = init_ro_dict(3);
 
-    ro_dict_add_long(b, STRING_NOFREE_OF("1", 1), 1);
-    ro_dict_add_long(b, STRING_NOFREE_OF("2", 1), 2);
-    ro_dict_add_long(b, STRING_NOFREE_OF("3", 1), 3);
+    ro_dict_add_long(b, string_nofree_of("1"), 1);
+    ro_dict_add_long(b, string_nofree_of("2"), 2);
+    ro_dict_add_long(b, string_nofree_of("3"), 3);
 
     char is_equal = ro_dicts_equal(a, b);
 
@@ -352,17 +352,17 @@ Test(ro_json_parser, ro_parse_dict_buff_nested_multi_type)
     ro_dict_t *a = get_dict_from_file(&idx, 1);
 
     ro_array_t *a3 = init_ro_array(3);
-    ro_array_add_str(a3, STRING_NOFREE_OF("dd", 2));
+    ro_array_add_str(a3, string_nofree_of("dd"));
     ro_array_add_bool(a3, 1);
     ro_array_add_long(a3, 5);
 
     ro_dict_t *a2 = init_ro_dict(3);
-    ro_dict_add_long(a2, STRING_NOFREE_OF("", 0), 1);
-    ro_dict_add_array(a2, STRING_NOFREE_OF("arr", 3), a3);
-    ro_dict_add_dict(a2, STRING_NOFREE_OF("d", 1), init_ro_dict(0));
+    ro_dict_add_long(a2, string_nofree_of(""), 1);
+    ro_dict_add_array(a2, string_nofree_of("arr"), a3);
+    ro_dict_add_dict(a2, string_nofree_of("d"), init_ro_dict(0));
 
     ro_dict_t *b = init_ro_dict(1);
-    ro_dict_add_dict(b, STRING_NOFREE_OF("array", 5), a2);
+    ro_dict_add_dict(b, string_nofree_of("array"), a2);
 
     char is_equal = ro_dicts_equal(a, b);
 
@@ -391,9 +391,9 @@ Test(ro_json_parser, ro_parse_dict_numbers)
 
     ro_dict_t *b = init_ro_dict(3);
 
-    ro_dict_add_long(b, STRING_NOFREE_OF("1", 1), 1);
-    ro_dict_add_long(b, STRING_NOFREE_OF("2", 1), 2);
-    ro_dict_add_long(b, STRING_NOFREE_OF("3", 1), 3);
+    ro_dict_add_long(b, string_nofree_of("1"), 1);
+    ro_dict_add_long(b, string_nofree_of("2"), 2);
+    ro_dict_add_long(b, string_nofree_of("3"), 3);
 
     char is_equal = ro_dicts_equal(a, b);
 
@@ -408,17 +408,17 @@ Test(ro_json_parser, ro_parse_dict_nested_multi_type)
     ro_dict_t *a = get_dict_from_file(&idx, 0);
 
     ro_array_t *a3 = init_ro_array(3);
-    ro_array_add_str(a3, STRING_NOFREE_OF("dd", 2));
+    ro_array_add_str(a3, string_nofree_of("dd"));
     ro_array_add_bool(a3, 1);
     ro_array_add_long(a3, 5);
 
     ro_dict_t *a2 = init_ro_dict(3);
-    ro_dict_add_long(a2, STRING_NOFREE_OF("", 0), 1);
-    ro_dict_add_array(a2, STRING_NOFREE_OF("arr", 3), a3);
-    ro_dict_add_dict(a2, STRING_NOFREE_OF("d", 1), init_ro_dict(0));
+    ro_dict_add_long(a2, string_nofree_of(""), 1);
+    ro_dict_add_array(a2, string_nofree_of("arr"), a3);
+    ro_dict_add_dict(a2, string_nofree_of("d"), init_ro_dict(0));
 
     ro_dict_t *b = init_ro_dict(1);
-    ro_dict_add_dict(b, STRING_NOFREE_OF("array", 5), a2);
+    ro_dict_add_dict(b, string_nofree_of("array"), a2);
 
     char is_equal = ro_dicts_equal(a, b);
 
@@ -430,7 +430,7 @@ Test(ro_json_parser, ro_parse_dict_nested_multi_type)
 /*******************************************************************************
 **                                   RO_PARSE                                 **
 *******************************************************************************/
-Test(ro_json_parser, ro_parse_returns_true)
+Test(ro_json_parser, ro_parse)
 {
     ro_json_t *ro_json = ro_parse(JSON_TESTS_FILE);
     if (!ro_json)
