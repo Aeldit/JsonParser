@@ -154,3 +154,13 @@ char ro_dicts_equal(ro_dict_t *a, ro_dict_t *b)
     }
     return 1;
 }
+
+char ro_json_equal(ro_json_t *a, ro_json_t *b)
+{
+    if (!a || !b || a->is_array != b->is_array)
+    {
+        return 0;
+    }
+    return a->is_array ? ro_arrays_equal(a->array, b->array)
+                       : ro_dicts_equal(a->dict, b->dict);
+}

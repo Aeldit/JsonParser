@@ -58,6 +58,9 @@ typedef struct
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
+string_t string_of(char *s);
+string_t string_nofree_of(char *s);
+
 char strings_equals(string_t s1, string_t s2);
 
 /**
