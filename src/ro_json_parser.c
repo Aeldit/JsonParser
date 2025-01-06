@@ -501,33 +501,31 @@ ro_dict_t *ro_parse_dict(FILE *f, unsigned long *pos)
             if (sl.is_float)
             {
                 double_with_or_without_exponent_t dwowe = str_to_double(&sl);
-                if (dwowe.has_exponent == 2)
+                switch (dwowe.has_exponent)
                 {
-                    continue;
-                }
-                if (dwowe.has_exponent)
-                {
-                    ro_dict_add_exp_double(d, key, dwowe.double_exp_value);
-                }
-                else
-                {
+                case 0:
                     ro_dict_add_double(d, key, dwowe.double_value);
+                    break;
+                case 1:
+                    ro_dict_add_exp_double(d, key, dwowe.double_exp_value);
+                    break;
+                case 2:
+                    free(sl.str);
                 }
             }
             else
             {
                 long_with_or_without_exponent_t lwowe = str_to_long(&sl);
-                if (lwowe.has_exponent == 2)
+                switch (lwowe.has_exponent)
                 {
-                    continue;
-                }
-                if (lwowe.has_exponent)
-                {
-                    ro_dict_add_exp_long(d, key, lwowe.long_exp_value);
-                }
-                else
-                {
+                case 0:
                     ro_dict_add_long(d, key, lwowe.long_value);
+                    break;
+                case 1:
+                    ro_dict_add_exp_long(d, key, lwowe.long_exp_value);
+                    break;
+                case 2:
+                    free(sl.str);
                 }
             }
             free(sl.str);
