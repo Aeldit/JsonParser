@@ -65,6 +65,11 @@ ro_dict_t *init_ro_dict(unsigned size)
 
 ro_json_t *init_ro_json(char is_array, ro_array_t *a, ro_dict_t *d)
 {
+    if ((is_array && !a) || (!is_array && !d))
+    {
+        return 0;
+    }
+
     ro_json_t *j = calloc(1, sizeof(ro_json_t));
     if (!j)
     {

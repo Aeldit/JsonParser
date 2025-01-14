@@ -1,22 +1,9 @@
 -include Makefile.rules
 
 CC=gcc
-CFILES=src/base_json_parser.c \
-	src/base_json_storage.c \
-	src/base_json_writer.c \
-	src/ro_equality.c \
-	src/ro_json_parser.c \
-	src/ro_json_storage.c \
-	src/ro_json_writer.c \
-	src/rw_json_parser.c \
-	src/rw_json_storage.c \
-	src/rw_json_writer.c
+CFILES=src/*.c
 
-TESTFILES=tests/base_json_parser_tests.c \
-	tests/base_json_storage_tests.c \
-	tests/base_json_writer_tests.c \
-	tests/ro_equality_tests.c \
-	tests/ro_json_parser_tests.c
+TESTFILES=tests/*.c
 
 TARGET=json-parser
 
