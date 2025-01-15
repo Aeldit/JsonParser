@@ -13,9 +13,9 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Update version
-      run: sudo apt-get update
+      run: sudo apt update
     - name: Install criterion from apt
-      run: sudo apt-get install libcriterion-dev
+      run: sudo apt install libcriterion-dev
     - name: configure
       run: ./configure
     - name: make
