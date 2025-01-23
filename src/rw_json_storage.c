@@ -356,6 +356,16 @@ void defragment_dict(rw_dict_t *d)
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
+inline rw_array_t *init_rw_array()
+{
+    return calloc(1, sizeof(rw_array_t));
+}
+
+inline rw_dict_t *init_rw_dict()
+{
+    return calloc(1, sizeof(rw_dict_t));
+}
+
 rw_json_t *init_rw_json(char is_array, rw_array_t *a, rw_dict_t *d)
 {
     rw_json_t *j = calloc(1, sizeof(rw_json_t));

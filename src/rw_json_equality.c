@@ -1,6 +1,6 @@
 #include "rw_json_equality.h"
 
-#include "base_equality.h"
+#include "base_json_equality.h"
 
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
@@ -40,8 +40,6 @@ char rw_arrays_equal(rw_array_t *a, rw_array_t *b)
             char is_equal = 0;
             switch (a_val.type)
             {
-            case T_ERROR:
-                continue;
             case T_STR:
                 is_equal = strings_equals(a_val.strv, b_val.strv);
                 break;
@@ -103,7 +101,6 @@ char rw_dicts_equal(rw_dict_t *a, rw_dict_t *b)
         for (unsigned a = 0; a < ARRAY_LEN; ++a, ++i)
         {
             rw_item_t a_it = items[a];
-            string_t key = a_it.key;
             if (a_it.type == T_ERROR)
             {
                 continue;
@@ -157,8 +154,8 @@ char rw_dicts_equal(rw_dict_t *a, rw_dict_t *b)
                 return 0;
             }
         }
-        return 1;
     }
+    return 1;
 }
 
 char rw_json_equal(rw_json_t *a, rw_json_t *b)

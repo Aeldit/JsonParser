@@ -1,6 +1,6 @@
-#include "ro_equality.h"
+#include "ro_json_equality.h"
 
-#include "base_equality.h"
+#include "base_json_equality.h"
 
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
