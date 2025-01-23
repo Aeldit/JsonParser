@@ -1,16 +1,16 @@
-#ifndef RO_JSON_EQUALITY_H
-#define RO_JSON_EQUALITY_H
+#ifndef RW_JSON_EQUALITY_H
+#define RW_JSON_EQUALITY_H
 
 /*******************************************************************************
 **                                  INCLUDES                                  **
 *******************************************************************************/
-#include "ro_json_storage.h"
+#include "rw_json_storage.h"
 
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
-char ro_arrays_equal(ro_array_t *a, ro_array_t *b);
-char ro_dicts_equal(ro_dict_t *a, ro_dict_t *b);
-char ro_json_equal(ro_json_t *a, ro_json_t *b);
+char rw_arrays_equal(rw_array_t *a, rw_array_t *b);
+char rw_dicts_equal(rw_dict_t *a, rw_dict_t *b);
+char rw_json_equal(rw_json_t *a, rw_json_t *b);
 
-#endif // !RO_JSON_EQUALITY_H
+#endif // !RW_JSON_EQUALITY_H
