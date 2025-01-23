@@ -31,8 +31,8 @@ unsigned fill_rw_string_ll_with_values(string_linked_list_t *ll, rw_array_t *a,
         rw_value_t *values = link->values;
         unsigned size = ARRAY_LEN;
         unsigned total_size = a->size;
-        HANDLE_VALUES_FOR_MODE(rw_value_t, get_rw_array_as_str,
-                               get_rw_dict_as_str);
+        ADD_VALUES_FOR_MODE(rw_value_t, get_rw_array_as_str,
+                            get_rw_dict_as_str);
         nb_chars += nb;
         link = link->next;
     }
@@ -59,8 +59,7 @@ unsigned fill_rw_string_ll_with_items(string_linked_list_t *ll, rw_dict_t *d,
         rw_item_t *items = link->items;
         unsigned size = ARRAY_LEN;
         unsigned total_size = d->size;
-        HANDLE_ITEMS_FOR_MODE(rw_item_t, get_rw_array_as_str,
-                              get_rw_dict_as_str);
+        ADD_ITEMS_FOR_MODE(rw_item_t, get_rw_array_as_str, get_rw_dict_as_str);
         nb_chars += nb;
         link = link->next;
     }

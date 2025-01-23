@@ -30,8 +30,8 @@ typedef struct
 /*******************************************************************************
 **                              DEFINES / MACROS                              **
 *******************************************************************************/
-#define HANDLE_VALUES_FOR_MODE(rx_value_t, get_rx_array_as_str,                \
-                               get_rx_dict_as_str)                             \
+#define ADD_VALUES_FOR_MODE(rx_value_t, get_rx_array_as_str,                   \
+                            get_rx_dict_as_str)                                \
     unsigned nb = 0;                                                           \
     for (unsigned i = 0; i < size; ++i)                                        \
     {                                                                          \
@@ -79,8 +79,7 @@ typedef struct
         nb += tmp_str.len + (i < total_size ? 1 : 0) + 1 + indent * 4;         \
     }
 
-#define HANDLE_ITEMS_FOR_MODE(rx_item_t, get_rx_array_as_str,                  \
-                              get_rx_dict_as_str)                              \
+#define ADD_ITEMS_FOR_MODE(rx_item_t, get_rx_array_as_str, get_rx_dict_as_str) \
     unsigned nb = 0;                                                           \
     char is_key = 1;                                                           \
     for (unsigned i = 0; i < size; ++i)                                        \
