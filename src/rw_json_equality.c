@@ -75,6 +75,7 @@ char rw_arrays_equal(rw_array_t *a, rw_array_t *b)
                 return 0;
             }
         }
+        link = link->next;
     }
     return 1;
 }
@@ -111,7 +112,7 @@ char rw_dicts_equal(rw_dict_t *a, rw_dict_t *b)
             // OR
             // If the second dict contains the key but the associated
             // element is not of the same type
-            if (b_it.type == T_ERROR || a_it.type != b_it.type)
+            if (a_it.type != b_it.type)
             {
                 return 0;
             }
@@ -154,6 +155,7 @@ char rw_dicts_equal(rw_dict_t *a, rw_dict_t *b)
                 return 0;
             }
         }
+        link = link->next;
     }
     return 1;
 }

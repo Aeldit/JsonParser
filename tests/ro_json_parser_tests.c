@@ -4,7 +4,7 @@
 
 #include "../src/base_json_parser.h"
 #include "../src/base_json_storage.h"
-#include "../src/ro_equality.h"
+#include "../src/ro_json_equality.h"
 #include "../src/ro_json_parser.h"
 
 #define JSON_TESTS_FILE ("tests/test.json")

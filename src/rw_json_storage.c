@@ -6,6 +6,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "base_json_storage.h"
+
 /*******************************************************************************
 **                              DEFINES / MACROS                              **
 *******************************************************************************/
@@ -964,7 +966,10 @@ void destroy_rw_dict(rw_dict_t *d)
                 destroy_rw_dict(items[i].dictv);
                 break;
             }
-            destroy_string(items[i].key);
+            if (items[i].type != T_ERROR)
+            {
+                destroy_string(items[i].key);
+            }
         }
         free(tmp);
     }
