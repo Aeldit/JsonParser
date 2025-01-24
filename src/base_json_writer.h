@@ -316,7 +316,6 @@ typedef struct
         fclose(f);                                                             \
         return;                                                                \
     }                                                                          \
-    printf("%s", s.str);                                                       \
     fwrite(s.str, sizeof(char), s.len, f);                                     \
     free(s.str);                                                               \
     fclose(f)
