@@ -700,7 +700,6 @@ rw_item_t rw_dict_get(rw_dict_t *d, string_t key)
     }
 
     item_link_t *link = d->head;
-    unsigned non_null_values = 0;
     while (link)
     {
         for (unsigned i = 0; i < ARRAY_LEN; ++i)
@@ -709,10 +708,6 @@ rw_item_t rw_dict_get(rw_dict_t *d, string_t key)
             if (strings_equals(key, it.key))
             {
                 return it;
-            }
-            if (it.type != T_ERROR)
-            {
-                ++non_null_values;
             }
         }
         link = link->next;
