@@ -371,6 +371,11 @@ inline rw_dict_t *init_rw_dict()
 
 rw_json_t *init_rw_json(char is_array, rw_array_t *a, rw_dict_t *d)
 {
+    if ((is_array && !a) || (!is_array && !d))
+    {
+        return 0;
+    }
+
     rw_json_t *j = calloc(1, sizeof(rw_json_t));
     if (!j)
     {
