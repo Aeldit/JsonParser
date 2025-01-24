@@ -15,8 +15,11 @@
 #define T_ARR 8
 #define T_DICT 9
 
-#define STRING_OF(s, l) ((string_t){ .str = (s), .len = (l) })
-#define EMPTY_STRING ((string_t){ .str = 0 })
+#define STRING_OF(s, l)                                                        \
+    ((string_t){ .str = (s), .len = (l), .needs_freeing = 1 })
+#define STRING_NOFREE_OF(s, l)                                                 \
+    ((string_t){ .str = (s), .len = (l), .needs_freeing = 0 })
+#define NULL_STRING ((string_t){ .str = 0 })
 
 /*
 ** \def Checks if the JSON instance is not null, if the JSON instance is an
@@ -37,6 +40,7 @@ typedef struct
 {
     char *str;
     unsigned len;
+    char needs_freeing;
 } string_t;
 
 typedef struct
@@ -54,6 +58,9 @@ typedef struct
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
+string_t string_of(char *s);
+string_t string_nofree_of(char *s);
+
 char strings_equals(string_t s1, string_t s2);
 
 /**

@@ -1,17 +1,22 @@
 [
     {
-        "first": "y",
+        "first": "",
+        "boolean": true,
         "empty": {},
-        "next": "sadwda",
+        "": "sadwda",
         "test": -512,
         "testing": 64220,
+        "double": 642.25,
+        "exponent": 2e8,
+        "long_exponent": 200e-10,
+        "double_exponent": -200.50e-10,
         "array": [
             1,
             2,
             [],
             3,
             [
-                "testing",
+                "",
                 5,
                 [
                     "dd",
@@ -26,35 +31,5 @@
             },
             {}
         ]
-    },
-    {
-        "b1": false,
-        "a": [],
-        "te": {
-            "first": "z",
-            "next": "sa",
-            "test": -512,
-            "testing": 64220,
-            "array": [
-                1,
-                2,
-                3,
-                [
-                    "testing",
-                    5,
-                    [
-                        "dd",
-                        true,
-                        5
-                    ]
-                ]
-            ],
-            "b1": false,
-            "b2": true,
-            "b3": true
-        },
-        "b2": true,
-        "b3": true,
-        "x": []
     }
 ]

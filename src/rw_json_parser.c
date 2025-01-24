@@ -17,11 +17,6 @@ rw_dict_t *rw_parse_dict(FILE *f, unsigned long *pos);
 /*******************************************************************************
 **                              LOCAL FUNCTIONS                               **
 *******************************************************************************/
-/**
-** \param buff The buffer containing the object currently being parsed
-** \param idx The index of the character '[' that begins the current rw_array_t
-** \returns The json rw_array_t parsed from the position
-*/
 rw_array_t *rw_parse_array_buff(char *b, unsigned long *idx)
 {
     if (!b)
@@ -145,16 +140,6 @@ rw_array_t *rw_parse_array_buff(char *b, unsigned long *idx)
     return a;
 }
 
-/**
-** \param b The buffer containing the object currently being parsed
-** \param idx A pointer to the index of the character '{' that begins the
-**            current dict.
-**            If the given pointer is a nullptr, it means that the buffer is
-*a
-**            new one created just before calling this function, meaning the
-**            index starts at 0
-** \returns The json dict parsed from the index
-*/
 rw_dict_t *rw_parse_dict_buff(char *b, unsigned long *idx)
 {
     if (!b)
@@ -173,7 +158,7 @@ rw_dict_t *rw_parse_dict_buff(char *b, unsigned long *idx)
         return d;
     }
 
-    string_t key = EMPTY_STRING;
+    string_t key = NULL_STRING;
     char c = 0;
     char is_waiting_key = 1;
     // We start at 1 because if we entered this function, it means that we
@@ -292,12 +277,6 @@ rw_dict_t *rw_parse_dict_buff(char *b, unsigned long *idx)
     return d;
 }
 
-/**
-** \param f The file stream
-** \param pos The postion in the file of the character after the '[' that
-**            begins the current rw_array_t
-** \returns The json rw_array_t parsed from the position
-*/
 rw_array_t *rw_parse_array(FILE *f, unsigned long *pos)
 {
     if (!f || !pos)
@@ -444,13 +423,6 @@ rw_array_t *rw_parse_array(FILE *f, unsigned long *pos)
     return a;
 }
 
-/**
-** \param f The file stream
-** \param pos A pointer to the position in the file of the character after
-*the
-**            '{' that begins the current dict
-** \returns The json dict parsed from the position
-*/
 rw_dict_t *rw_parse_dict(FILE *f, unsigned long *pos)
 {
     if (!f || !pos)
@@ -470,7 +442,7 @@ rw_dict_t *rw_parse_dict(FILE *f, unsigned long *pos)
         return d;
     }
 
-    string_t key = EMPTY_STRING;
+    string_t key = NULL_STRING;
     char c = 0;
     char is_waiting_key = 1;
     // We start at 1 because if we entered this function, it means that we

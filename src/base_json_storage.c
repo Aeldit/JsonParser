@@ -1,10 +1,23 @@
 #include "base_json_storage.h"
 
 #include <stdlib.h>
+#include <string.h>
 
 /*******************************************************************************
 **                                  FUNCTIONS                                 **
 *******************************************************************************/
+inline string_t string_of(char *s)
+{
+    return s ? (string_t){ .str = s, .len = strlen(s), .needs_freeing = 1 }
+             : NULL_STRING;
+}
+
+inline string_t string_nofree_of(char *s)
+{
+    return s ? (string_t){ .str = s, .len = strlen(s), .needs_freeing = 0 }
+             : NULL_STRING;
+}
+
 char strings_equals(string_t s1, string_t s2)
 {
     unsigned length = s1.len;
@@ -32,7 +45,7 @@ char strings_equals(string_t s1, string_t s2)
 
 void destroy_string(string_t s)
 {
-    if (s.str && s.len)
+    if (s.str && s.needs_freeing)
     {
         free(s.str);
     }

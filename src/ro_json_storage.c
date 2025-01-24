@@ -65,6 +65,11 @@ ro_dict_t *init_ro_dict(unsigned size)
 
 ro_json_t *init_ro_json(char is_array, ro_array_t *a, ro_dict_t *d)
 {
+    if ((is_array && !a) || (!is_array && !d))
+    {
+        return 0;
+    }
+
     ro_json_t *j = calloc(1, sizeof(ro_json_t));
     if (!j)
     {
@@ -232,7 +237,7 @@ void ro_dict_add_dict(ro_dict_t *d, string_t key, ro_dict_t *value)
 /*******************************************************************************
 **                                    GETS                                    **
 *******************************************************************************/
-ro_value_t array_get(ro_array_t *a, unsigned index)
+ro_value_t ro_array_get(ro_array_t *a, unsigned index)
 {
     if (!a || index >= a->size)
     {
@@ -242,7 +247,7 @@ ro_value_t array_get(ro_array_t *a, unsigned index)
     return index < a->size ? a->values[index] : ERROR_RO_VALUE;
 }
 
-ro_item_t dict_get(ro_dict_t *d, string_t key)
+ro_item_t ro_dict_get(ro_dict_t *d, string_t key)
 {
     if (!d || !key.str)
     {

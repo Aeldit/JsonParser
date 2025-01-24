@@ -1,5 +1,5 @@
-#ifndef BASE_JSON_WRITE_H
-#define BASE_JSON_WRITE_H
+#ifndef BASE_JSON_WRITER_H
+#define BASE_JSON_WRITER_H
 
 /*******************************************************************************
 **                                  INCLUDES                                  **
@@ -30,8 +30,8 @@ typedef struct
 /*******************************************************************************
 **                              DEFINES / MACROS                              **
 *******************************************************************************/
-#define HANDLE_VALUES_FOR_MODE(rx_value_t, get_rx_array_as_str,                \
-                               get_rx_dict_as_str)                             \
+#define ADD_VALUES_FOR_MODE(rx_value_t, get_rx_array_as_str,                   \
+                            get_rx_dict_as_str)                                \
     unsigned nb = 0;                                                           \
     for (unsigned i = 0; i < size; ++i)                                        \
     {                                                                          \
@@ -45,7 +45,7 @@ typedef struct
         {                                                                      \
         case T_STR:                                                            \
             tmp_str = v.strv;                                                  \
-            nb += 2; /* Strings are encased by 2 double-quotes (\"\")*/        \
+            nb += 2; /* Strings are encased by 2 double-quotes (\"\") */       \
             break;                                                             \
         case T_LONG:                                                           \
             tmp_str = get_long_as_str(v.longv);                                \
@@ -75,12 +75,11 @@ typedef struct
         add_link(ll, tmp_str, v.type != T_STR, v.type == T_STR);               \
         /* We add 1 for the comma if we are not at the last value */           \
         /* We add 1 for the line return */                                     \
-        /* We add 'indent' for the tabs */                                     \
+        /* We add 'indent * 4' for the 4 spaces of indentation */              \
         nb += tmp_str.len + (i < total_size ? 1 : 0) + 1 + indent * 4;         \
     }
 
-#define HANDLE_ITEMS_FOR_MODE(rx_item_t, get_rx_array_as_str,                  \
-                              get_rx_dict_as_str)                              \
+#define ADD_ITEMS_FOR_MODE(rx_item_t, get_rx_array_as_str, get_rx_dict_as_str) \
     unsigned nb = 0;                                                           \
     char is_key = 1;                                                           \
     for (unsigned i = 0; i < size; ++i)                                        \
@@ -136,14 +135,14 @@ typedef struct
 #define GET_ARRAY_AS_STR(fill_rx_string_ll_with_values)                        \
     if (!a)                                                                    \
     {                                                                          \
-        return EMPTY_STRING;                                                   \
+        return NULL_STRING;                                                    \
     }                                                                          \
     if (!a->size)                                                              \
     {                                                                          \
         char *str = calloc(3, sizeof(char));                                   \
         if (!str)                                                              \
         {                                                                      \
-            return EMPTY_STRING;                                               \
+            return NULL_STRING;                                                \
         }                                                                      \
         memcpy(str, "[]", 2);                                                  \
         return STRING_OF(str, 2);                                              \
@@ -151,7 +150,7 @@ typedef struct
     string_linked_list_t *ll = calloc(1, sizeof(string_linked_list_t));        \
     if (!ll)                                                                   \
     {                                                                          \
-        return EMPTY_STRING;                                                   \
+        return NULL_STRING;                                                    \
     }                                                                          \
     /* '[' + '\n' + (indent - 1) * 4 * ' ' + ']' + '\n'*/                      \
     /* indents are 4 spaces */                                                 \
@@ -164,7 +163,7 @@ typedef struct
     if (!str)                                                                  \
     {                                                                          \
         destroy_linked_list(ll);                                               \
-        return EMPTY_STRING;                                                   \
+        return NULL_STRING;                                                    \
     }                                                                          \
     /* |-> Start building the string */                                        \
     str[0] = '[';                                                              \
@@ -214,14 +213,14 @@ typedef struct
 #define GET_DICT_AS_STR(fill_rx_string_ll_with_items)                          \
     if (!d)                                                                    \
     {                                                                          \
-        return EMPTY_STRING;                                                   \
+        return NULL_STRING;                                                    \
     }                                                                          \
     if (!d->size)                                                              \
     {                                                                          \
         char *str = calloc(3, sizeof(char));                                   \
         if (!str)                                                              \
         {                                                                      \
-            return EMPTY_STRING;                                               \
+            return NULL_STRING;                                                \
         }                                                                      \
         memcpy(str, "{}", 2);                                                  \
         return STRING_OF(str, 2);                                              \
@@ -229,7 +228,7 @@ typedef struct
     string_linked_list_t *ll = calloc(1, sizeof(string_linked_list_t));        \
     if (!ll)                                                                   \
     {                                                                          \
-        return EMPTY_STRING;                                                   \
+        return NULL_STRING;                                                    \
     }                                                                          \
     /* '{' + '\n' + (indent - 1) * '\t' + '}' + '\n'*/                         \
     /* indent == 1 -> if we are in the 'root' dict, we add a \n at the end */  \
@@ -240,7 +239,7 @@ typedef struct
     if (!str)                                                                  \
     {                                                                          \
         destroy_linked_list(ll);                                               \
-        return EMPTY_STRING;                                                   \
+        return NULL_STRING;                                                    \
     }                                                                          \
     /* |-> Start building the string */                                        \
     str[0] = '{';                                                              \
@@ -317,7 +316,6 @@ typedef struct
         fclose(f);                                                             \
         return;                                                                \
     }                                                                          \
-    printf("%s", s.str);                                                       \
     fwrite(s.str, sizeof(char), s.len, f);                                     \
     free(s.str);                                                               \
     fclose(f)
@@ -325,6 +323,8 @@ typedef struct
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
+unsigned get_nb_char_long(long n);
+
 string_t get_long_as_str(long value);
 string_t get_double_as_str(double value);
 string_t get_exp_long_as_str(exponent_long_t value);
@@ -336,4 +336,4 @@ void add_link(string_linked_list_t *ll, string_t str, char str_needs_free,
               char is_from_str);
 void destroy_linked_list(string_linked_list_t *ll);
 
-#endif // !BASE_JSON_WRITE_H
+#endif // !BASE_JSON_WRITER_H

@@ -1,0 +1,24 @@
+name: Criterion Unit Tests
+
+on:
+  push:
+    branches: [ "criterion-tests" ]
+  pull_request:
+    branches: [ "criterion-tests" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Update version
+      run: sudo apt update
+    - name: Install criterion from apt
+      run: sudo apt install libcriterion-dev
+    - name: configure
+      run: ./configure
+    - name: make
+      run: make
+    - name: make check
+      run: make check

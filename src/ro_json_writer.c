@@ -1,9 +1,9 @@
-#include "ro_json_write.h"
+#include "ro_json_writer.h"
 
 /*******************************************************************************
 **                                  INCLUDES                                  **
 *******************************************************************************/
-#include "base_json_write.h"
+#include "base_json_writer.h"
 
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
@@ -27,7 +27,7 @@ unsigned fill_ro_string_ll_with_values(string_linked_list_t *ll, ro_array_t *a,
     ro_value_t *values = a->values;
     unsigned size = a->size;
     unsigned total_size = size;
-    HANDLE_VALUES_FOR_MODE(ro_value_t, get_ro_array_as_str, get_ro_dict_as_str);
+    ADD_VALUES_FOR_MODE(ro_value_t, get_ro_array_as_str, get_ro_dict_as_str);
     return nb;
 }
 
@@ -47,7 +47,7 @@ unsigned fill_ro_string_ll_with_items(string_linked_list_t *ll, ro_dict_t *d,
     ro_item_t *items = d->items;
     unsigned size = d->size;
     unsigned total_size = size;
-    HANDLE_ITEMS_FOR_MODE(ro_item_t, get_ro_array_as_str, get_ro_dict_as_str);
+    ADD_ITEMS_FOR_MODE(ro_item_t, get_ro_array_as_str, get_ro_dict_as_str);
     return nb;
 }
 

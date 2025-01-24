@@ -5,6 +5,9 @@
 *******************************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
+#include "base_json_storage.h"
 
 /*******************************************************************************
 **                              DEFINES / MACROS                              **
@@ -356,8 +359,23 @@ void defragment_dict(rw_dict_t *d)
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
+inline rw_array_t *init_rw_array()
+{
+    return calloc(1, sizeof(rw_array_t));
+}
+
+inline rw_dict_t *init_rw_dict()
+{
+    return calloc(1, sizeof(rw_dict_t));
+}
+
 rw_json_t *init_rw_json(char is_array, rw_array_t *a, rw_dict_t *d)
 {
+    if ((is_array && !a) || (!is_array && !d))
+    {
+        return 0;
+    }
+
     rw_json_t *j = calloc(1, sizeof(rw_json_t));
     if (!j)
     {
@@ -670,10 +688,7 @@ rw_value_t rw_array_get(rw_array_t *a, unsigned index)
             {
                 return link->values[i];
             }
-            if (link->values[i].type != T_ERROR)
-            {
-                ++non_null_values;
-            }
+            non_null_values += link->values[i].type != T_ERROR;
         }
         link = link->next;
     }
@@ -688,7 +703,6 @@ rw_item_t rw_dict_get(rw_dict_t *d, string_t key)
     }
 
     item_link_t *link = d->head;
-    unsigned non_null_values = 0;
     while (link)
     {
         for (unsigned i = 0; i < ARRAY_LEN; ++i)
@@ -697,10 +711,6 @@ rw_item_t rw_dict_get(rw_dict_t *d, string_t key)
             if (strings_equals(key, it.key))
             {
                 return it;
-            }
-            if (it.type != T_ERROR)
-            {
-                ++non_null_values;
             }
         }
         link = link->next;
@@ -727,11 +737,7 @@ void rw_array_print_indent(rw_array_t *a, unsigned indent, char fromDict)
     {
         return;
     }
-    for (unsigned i = 0; i < indent - 1; ++i)
-    {
-        tabs[i] = '\t';
-    }
-    tabs[indent - 1] = '\0';
+    memset(tabs, '\t', indent - 1);
 
     unsigned size = a->size;
     // Empty array
@@ -744,7 +750,7 @@ void rw_array_print_indent(rw_array_t *a, unsigned indent, char fromDict)
 
     printf("%s[\n", fromDict ? "" : tabs);
 
-    unsigned b = 0;
+    unsigned nb_elts_printed = 0;
     value_link_t *link = a->head;
     while (link)
     {
@@ -752,13 +758,10 @@ void rw_array_print_indent(rw_array_t *a, unsigned indent, char fromDict)
         for (unsigned i = 0; i < ARRAY_LEN; ++i)
         {
             rw_value_t v = values[i];
-            if (v.type == T_ERROR)
-            {
-                continue;
-            }
-
             switch (v.type)
             {
+            case T_ERROR:
+                continue;
             case T_STR:
                 printf("\t%s\"%s\"", tabs, v.strv.str ? v.strv.str : "");
                 break;
@@ -767,6 +770,14 @@ void rw_array_print_indent(rw_array_t *a, unsigned indent, char fromDict)
                 break;
             case T_DOUBLE:
                 printf("\t%s%f", tabs, v.doublev);
+                break;
+            case T_EXP_LONG:
+                printf("\t%s%lde%ld", tabs, v.exp_longv.number,
+                       v.exp_longv.exponent);
+                break;
+            case T_EXP_DOUBLE:
+                printf("\t%s%fe%ld", tabs, v.exp_doublev.number,
+                       v.exp_doublev.exponent);
                 break;
             case T_BOOL:
                 printf("\t%s%s", tabs, v.boolv ? "true" : "false");
@@ -782,7 +793,7 @@ void rw_array_print_indent(rw_array_t *a, unsigned indent, char fromDict)
                 break;
             }
 
-            if (b++ < size - 1)
+            if (nb_elts_printed++ < size - 1)
             {
                 printf(",\n");
             }
@@ -811,11 +822,7 @@ void rw_dict_print_indent(rw_dict_t *d, unsigned indent, char fromDict)
     {
         return;
     }
-    for (unsigned i = 0; i < indent - 1; ++i)
-    {
-        tabs[i] = '\t';
-    }
-    tabs[indent - 1] = '\0';
+    memset(tabs, '\t', indent - 1);
 
     unsigned size = d->size;
     if (size == 0)
@@ -836,13 +843,10 @@ void rw_dict_print_indent(rw_dict_t *d, unsigned indent, char fromDict)
         {
             rw_item_t it = items[a];
             string_t key = it.key;
-            if (it.type == T_ERROR)
-            {
-                continue;
-            }
-
             switch (it.type)
             {
+            case T_ERROR:
+                continue;
             case T_STR:
                 printf("\t%s\"%s\" : \"%s\"", tabs, key.str,
                        it.strv.str ? it.strv.str : "");
@@ -852,6 +856,14 @@ void rw_dict_print_indent(rw_dict_t *d, unsigned indent, char fromDict)
                 break;
             case T_DOUBLE:
                 printf("\t%s\"%s\" : %f", tabs, key.str, it.doublev);
+                break;
+            case T_EXP_LONG:
+                printf("\t%s\"%s\" : %lde%ld", tabs, key.str,
+                       it.exp_longv.number, it.exp_longv.exponent);
+                break;
+            case T_EXP_DOUBLE:
+                printf("\t%s\"%s\" : %fe%ld", tabs, key.str,
+                       it.exp_doublev.number, it.exp_doublev.exponent);
                 break;
             case T_BOOL:
                 printf("\t%s\"%s\" : %s", tabs, key.str,
@@ -954,7 +966,10 @@ void destroy_rw_dict(rw_dict_t *d)
                 destroy_rw_dict(items[i].dictv);
                 break;
             }
-            destroy_string(items[i].key);
+            if (items[i].type != T_ERROR)
+            {
+                destroy_string(items[i].key);
+            }
         }
         free(tmp);
     }

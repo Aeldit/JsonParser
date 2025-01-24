@@ -9,19 +9,8 @@
 #include "base_json_parser.h"
 
 /*******************************************************************************
-**                           FUNCTIONS DECLARATIONS                           **
+**                                 FUNCTIONS                                  **
 *******************************************************************************/
-ro_dict_t *ro_parse_dict_buff(char *b, unsigned long *pos);
-ro_dict_t *ro_parse_dict(FILE *f, unsigned long *pos);
-
-/*******************************************************************************
-**                              LOCAL FUNCTIONS                               **
-*******************************************************************************/
-/**
-** \param buff The buffer containing the object currently being parsed
-** \param idx The index of the character '[' that begins the current ro_array_t
-** \returns The json ro_array_t parsed from the position
-*/
 ro_array_t *ro_parse_array_buff(char *b, unsigned long *idx)
 {
     if (!b)
@@ -29,6 +18,8 @@ ro_array_t *ro_parse_array_buff(char *b, unsigned long *idx)
         return 0;
     }
 
+    // We start at idx + 1 because if we entered this function, it means that we
+    // already read a '['
     unsigned long i = idx == 0 ? 0 : *idx + 1;
 
     unsigned long nb_elts_parsed = 0;
@@ -41,8 +32,6 @@ ro_array_t *ro_parse_array_buff(char *b, unsigned long *idx)
     }
 
     char c = 0;
-    // We start at 1 because if we entered this function, it means that we
-    // already read a '['
     unsigned long initial_i = i;
     while (1)
     {
@@ -68,33 +57,33 @@ ro_array_t *ro_parse_array_buff(char *b, unsigned long *idx)
             if (sl.is_float)
             {
                 double_with_or_without_exponent_t dwowe = str_to_double(&sl);
-                if (dwowe.has_exponent == 2)
+                switch (dwowe.has_exponent)
                 {
-                    continue;
-                }
-                if (dwowe.has_exponent)
-                {
-                    ro_array_add_exp_double(a, dwowe.double_exp_value);
-                }
-                else
-                {
+                case 0:
                     ro_array_add_double(a, dwowe.double_value);
+                    break;
+                case 1:
+                    ro_array_add_exp_double(a, dwowe.double_exp_value);
+                    break;
+                case 2:
+                    free(sl.str);
+                    continue;
                 }
             }
             else
             {
                 long_with_or_without_exponent_t lwowe = str_to_long(&sl);
-                if (lwowe.has_exponent == 2)
+                switch (lwowe.has_exponent)
                 {
-                    continue;
-                }
-                if (lwowe.has_exponent)
-                {
-                    ro_array_add_exp_long(a, lwowe.long_exp_value);
-                }
-                else
-                {
+                case 0:
                     ro_array_add_long(a, lwowe.long_value);
+                    break;
+                case 1:
+                    ro_array_add_exp_long(a, lwowe.long_exp_value);
+                    break;
+                case 2:
+                    free(sl.str);
+                    continue;
                 }
             }
             free(sl.str);
@@ -145,159 +134,6 @@ ro_array_t *ro_parse_array_buff(char *b, unsigned long *idx)
     return a;
 }
 
-/**
-** \param b The buffer containing the object currently being parsed
-** \param idx A pointer to the index of the character '{' that begins the
-**            current dict.
-**            If the given pointer is a nullptr, it means that the buffer is
-*a
-**            new one created just before calling this function, meaning the
-**            index starts at 0
-** \returns The json dict parsed from the index
-*/
-ro_dict_t *ro_parse_dict_buff(char *b, unsigned long *idx)
-{
-    if (!b)
-    {
-        return 0;
-    }
-
-    unsigned long i = idx == 0 ? 0 : *idx + 1;
-
-    unsigned long nb_elts_parsed = 0;
-    unsigned long nb_elts = get_nb_elts_dict_buff(b, i);
-
-    ro_dict_t *d = init_ro_dict(nb_elts);
-    if (!d || nb_elts == 0)
-    {
-        return d;
-    }
-
-    string_t key = EMPTY_STRING;
-    char c = 0;
-    char is_waiting_key = 1;
-    // We start at 1 because if we entered this function, it means that we
-    // already read a '{'
-    unsigned long initial_i = i;
-    while (1)
-    {
-        c = b[i];
-        if (c == 0 || nb_elts_parsed >= nb_elts)
-        {
-            break;
-        }
-
-        if (c == '"')
-        {
-            if (is_waiting_key)
-            {
-                key = parse_string_buff(b, &i);
-                is_waiting_key = 0;
-            }
-            else
-            {
-                ro_dict_add_str(d, key, parse_string_buff(b, &i));
-                ++nb_elts_parsed;
-            }
-        }
-        else if (IS_NUMBER_START(c))
-        {
-            str_and_len_tuple_t sl = parse_number_buff(b, &i);
-            if (!sl.str)
-            {
-                continue;
-            }
-
-            if (sl.is_float)
-            {
-                double_with_or_without_exponent_t dwowe = str_to_double(&sl);
-                if (dwowe.has_exponent == 2)
-                {
-                    continue;
-                }
-                if (dwowe.has_exponent)
-                {
-                    ro_dict_add_exp_double(d, key, dwowe.double_exp_value);
-                }
-                else
-                {
-                    ro_dict_add_double(d, key, dwowe.double_value);
-                }
-            }
-            else
-            {
-                long_with_or_without_exponent_t lwowe = str_to_long(&sl);
-                if (lwowe.has_exponent == 2)
-                {
-                    continue;
-                }
-                if (lwowe.has_exponent)
-                {
-                    ro_dict_add_exp_long(d, key, lwowe.long_exp_value);
-                }
-                else
-                {
-                    ro_dict_add_long(d, key, lwowe.long_value);
-                }
-            }
-            free(sl.str);
-            ++nb_elts_parsed;
-        }
-        else if (IS_BOOL_START(c))
-        {
-            unsigned long len = parse_boolean_buff(b, &i);
-            if (IS_NOT_BOOLEAN(c, len))
-            {
-                continue;
-            }
-            ro_dict_add_bool(d, key, len == 4 ? 1 : 0);
-            ++nb_elts_parsed;
-        }
-        else if (c == 'n')
-        {
-            ro_dict_add_null(d, key);
-            i += 3;
-            ++nb_elts_parsed;
-        }
-        else if (c == '[')
-        {
-            ro_array_t *tmp_ja = ro_parse_array_buff(b, &i);
-            if (!tmp_ja)
-            {
-                break;
-            }
-            ro_dict_add_array(d, key, tmp_ja);
-            ++nb_elts_parsed;
-        }
-        else if (c == '{')
-        {
-            ro_dict_t *tmp_jd = ro_parse_dict_buff(b, &i);
-            if (!tmp_jd)
-            {
-                break;
-            }
-            ro_dict_add_dict(d, key, tmp_jd);
-            ++nb_elts_parsed;
-        }
-        else if (c == ',')
-        {
-            is_waiting_key = 1;
-        }
-        ++i;
-    }
-    if (idx)
-    {
-        *idx += i - initial_i;
-    }
-    return d;
-}
-
-/**
-** \param f The file stream
-** \param pos The postion in the file of the character after the '[' that
-**            begins the current ro_array_t
-** \returns The json ro_array_t parsed from the position
-*/
 ro_array_t *ro_parse_array(FILE *f, unsigned long *pos)
 {
     if (!f || !pos)
@@ -337,33 +173,33 @@ ro_array_t *ro_parse_array(FILE *f, unsigned long *pos)
             if (sl.is_float)
             {
                 double_with_or_without_exponent_t dwowe = str_to_double(&sl);
-                if (dwowe.has_exponent == 2)
+                switch (dwowe.has_exponent)
                 {
-                    continue;
-                }
-                if (dwowe.has_exponent)
-                {
-                    ro_array_add_exp_double(a, dwowe.double_exp_value);
-                }
-                else
-                {
+                case 0:
                     ro_array_add_double(a, dwowe.double_value);
+                    break;
+                case 1:
+                    ro_array_add_exp_double(a, dwowe.double_exp_value);
+                    break;
+                case 2:
+                    free(sl.str);
+                    continue;
                 }
             }
             else
             {
                 long_with_or_without_exponent_t lwowe = str_to_long(&sl);
-                if (lwowe.has_exponent == 2)
+                switch (lwowe.has_exponent)
                 {
-                    continue;
-                }
-                if (lwowe.has_exponent)
-                {
-                    ro_array_add_exp_long(a, lwowe.long_exp_value);
-                }
-                else
-                {
+                case 0:
                     ro_array_add_long(a, lwowe.long_value);
+                    break;
+                case 1:
+                    ro_array_add_exp_long(a, lwowe.long_exp_value);
+                    break;
+                case 2:
+                    free(sl.str);
+                    continue;
                 }
             }
             free(sl.str);
@@ -444,13 +280,143 @@ ro_array_t *ro_parse_array(FILE *f, unsigned long *pos)
     return a;
 }
 
-/**
-** \param f The file stream
-** \param pos A pointer to the position in the file of the character after
-*the
-**            '{' that begins the current dict
-** \returns The json dict parsed from the position
-*/
+ro_dict_t *ro_parse_dict_buff(char *b, unsigned long *idx)
+{
+    if (!b)
+    {
+        return 0;
+    }
+
+    unsigned long i = idx == 0 ? 0 : *idx + 1;
+
+    unsigned long nb_elts_parsed = 0;
+    unsigned long nb_elts = get_nb_elts_dict_buff(b, i);
+
+    ro_dict_t *d = init_ro_dict(nb_elts);
+    if (!d || nb_elts == 0)
+    {
+        return d;
+    }
+
+    string_t key = NULL_STRING;
+    char c = 0;
+    char is_waiting_key = 1;
+    // We start at 1 because if we entered this function, it means that we
+    // already read a '{'
+    unsigned long initial_i = i;
+    while (1)
+    {
+        c = b[i];
+        if (c == 0 || nb_elts_parsed >= nb_elts)
+        {
+            break;
+        }
+
+        if (c == '"')
+        {
+            if (is_waiting_key)
+            {
+                key = parse_string_buff(b, &i);
+                is_waiting_key = 0;
+            }
+            else
+            {
+                ro_dict_add_str(d, key, parse_string_buff(b, &i));
+                ++nb_elts_parsed;
+            }
+        }
+        else if (IS_NUMBER_START(c))
+        {
+            str_and_len_tuple_t sl = parse_number_buff(b, &i);
+            if (!sl.str)
+            {
+                continue;
+            }
+
+            if (sl.is_float)
+            {
+                double_with_or_without_exponent_t dwowe = str_to_double(&sl);
+                switch (dwowe.has_exponent)
+                {
+                case 0:
+                    ro_dict_add_double(d, key, dwowe.double_value);
+                    break;
+                case 1:
+                    ro_dict_add_exp_double(d, key, dwowe.double_exp_value);
+                    break;
+                case 2:
+                    free(sl.str);
+                    continue;
+                }
+            }
+            else
+            {
+                long_with_or_without_exponent_t lwowe = str_to_long(&sl);
+                switch (lwowe.has_exponent)
+                {
+                case 0:
+                    ro_dict_add_long(d, key, lwowe.long_value);
+                    break;
+                case 1:
+                    ro_dict_add_exp_long(d, key, lwowe.long_exp_value);
+                    break;
+                case 2:
+                    free(sl.str);
+                    continue;
+                }
+            }
+            free(sl.str);
+            ++nb_elts_parsed;
+        }
+        else if (IS_BOOL_START(c))
+        {
+            unsigned long len = parse_boolean_buff(b, &i);
+            if (IS_NOT_BOOLEAN(c, len))
+            {
+                continue;
+            }
+            ro_dict_add_bool(d, key, len == 4 ? 1 : 0);
+            ++nb_elts_parsed;
+        }
+        else if (c == 'n')
+        {
+            ro_dict_add_null(d, key);
+            i += 3;
+            ++nb_elts_parsed;
+        }
+        else if (c == '[')
+        {
+            ro_array_t *tmp_ja = ro_parse_array_buff(b, &i);
+            if (!tmp_ja)
+            {
+                break;
+            }
+            ro_dict_add_array(d, key, tmp_ja);
+            ++nb_elts_parsed;
+        }
+        else if (c == '{')
+        {
+            ro_dict_t *tmp_jd = ro_parse_dict_buff(b, &i);
+            if (!tmp_jd)
+            {
+                break;
+            }
+            ro_dict_add_dict(d, key, tmp_jd);
+            ++nb_elts_parsed;
+        }
+        else if (c == ',')
+        {
+            is_waiting_key = 1;
+        }
+        ++i;
+    }
+    if (idx)
+    {
+        *idx += i - initial_i;
+    }
+    return d;
+}
+
 ro_dict_t *ro_parse_dict(FILE *f, unsigned long *pos)
 {
     if (!f || !pos)
@@ -470,7 +436,7 @@ ro_dict_t *ro_parse_dict(FILE *f, unsigned long *pos)
         return d;
     }
 
-    string_t key = EMPTY_STRING;
+    string_t key = NULL_STRING;
     char c = 0;
     char is_waiting_key = 1;
     // We start at 1 because if we entered this function, it means that we
@@ -501,33 +467,33 @@ ro_dict_t *ro_parse_dict(FILE *f, unsigned long *pos)
             if (sl.is_float)
             {
                 double_with_or_without_exponent_t dwowe = str_to_double(&sl);
-                if (dwowe.has_exponent == 2)
+                switch (dwowe.has_exponent)
                 {
-                    continue;
-                }
-                if (dwowe.has_exponent)
-                {
-                    ro_dict_add_exp_double(d, key, dwowe.double_exp_value);
-                }
-                else
-                {
+                case 0:
                     ro_dict_add_double(d, key, dwowe.double_value);
+                    break;
+                case 1:
+                    ro_dict_add_exp_double(d, key, dwowe.double_exp_value);
+                    break;
+                case 2:
+                    free(sl.str);
+                    continue;
                 }
             }
             else
             {
                 long_with_or_without_exponent_t lwowe = str_to_long(&sl);
-                if (lwowe.has_exponent == 2)
+                switch (lwowe.has_exponent)
                 {
-                    continue;
-                }
-                if (lwowe.has_exponent)
-                {
-                    ro_dict_add_exp_long(d, key, lwowe.long_exp_value);
-                }
-                else
-                {
+                case 0:
                     ro_dict_add_long(d, key, lwowe.long_value);
+                    break;
+                case 1:
+                    ro_dict_add_exp_long(d, key, lwowe.long_exp_value);
+                    break;
+                case 2:
+                    free(sl.str);
+                    continue;
                 }
             }
             free(sl.str);
@@ -612,9 +578,6 @@ ro_dict_t *ro_parse_dict(FILE *f, unsigned long *pos)
     return d;
 }
 
-/*******************************************************************************
-**                                 FUNCTIONS                                  **
-*******************************************************************************/
 ro_json_t *ro_parse(char *file)
 {
     FILE *f = fopen(file, "r");

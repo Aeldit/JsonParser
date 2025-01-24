@@ -1,4 +1,4 @@
-#include "base_json_write.h"
+#include "base_json_writer.h"
 
 /*******************************************************************************
 **                                  INCLUDES                                  **
@@ -87,7 +87,7 @@ string_t get_long_as_str(long value)
     char *str = calloc(nb_chars + 1, sizeof(char));
     if (!str)
     {
-        return EMPTY_STRING;
+        return NULL_STRING;
     }
     snprintf(str, nb_chars + 1, "%ld", value);
     return STRING_OF(str, nb_chars);
@@ -127,7 +127,7 @@ string_t get_double_as_str(double value)
     char *str = calloc(18, sizeof(char));
     if (!str)
     {
-        return EMPTY_STRING;
+        return NULL_STRING;
     }
 
     unsigned len = nb_chars + nb_decimals - (nb_decimals ? 0 : 1);
@@ -147,7 +147,7 @@ string_t get_exp_long_as_str(exponent_long_t value)
     char *str = calloc(len + 1, sizeof(char));
     if (!str)
     {
-        return EMPTY_STRING;
+        return NULL_STRING;
     }
 
     snprintf(str, nb_chars_number + 1, "%ld", number);
@@ -155,12 +155,6 @@ string_t get_exp_long_as_str(exponent_long_t value)
     snprintf(str + nb_chars_number + 1, nb_chars_exponent + 1, "%ld", exponent);
     return STRING_OF(str, len);
 }
-
-union print
-{
-    double value;
-    char str[sizeof(double)];
-};
 
 string_t get_exp_double_as_str(exponent_double_t value)
 {
@@ -200,7 +194,7 @@ string_t get_exp_double_as_str(exponent_double_t value)
     char *str = calloc(18 + 1 + exp_len, sizeof(char));
     if (!str)
     {
-        return EMPTY_STRING;
+        return NULL_STRING;
     }
 
     unsigned num_len = nb_chars + nb_decimals - (nb_decimals ? 0 : 1);
@@ -223,7 +217,7 @@ string_t get_null_as_str()
     char *str = calloc(5, sizeof(char));
     if (!str)
     {
-        return EMPTY_STRING;
+        return NULL_STRING;
     }
     memcpy(str, "null", 4);
     return STRING_OF(str, 4);

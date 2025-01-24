@@ -46,6 +46,13 @@
 #define ERROR_LWOWE ((long_with_or_without_exponent_t){ .has_exponent = 2 })
 #define ERROR_DWOWE ((double_with_or_without_exponent_t){ .has_exponent = 2 })
 
+#define STR_AND_LEN_OF(s, l, float, exponent)                                  \
+    ((str_and_len_tuple_t){                                                    \
+        .str = s, .len = l, .is_float = float, .has_exponent = exponent })
+
+#define EXP_LONG_OF(n, e) ((exponent_long_t){ .number = n, .exponent = e })
+#define EXP_DOUBLE_OF(n, e) ((exponent_double_t){ .number = n, .exponent = e })
+
 /*******************************************************************************
 **                                 STRUCTURES **
 *******************************************************************************/
@@ -184,9 +191,6 @@ unsigned long get_nb_elts_dict(FILE *f, unsigned long pos);
 ** \param f The file stream
 ** \param pos The position in the file of the character after the '[' that
 **            begins the current array
-** \param err A pointer to a char that will be updated if an error occurs
-**            (we return the number of chars, so we can't use a number to
-**            indicate an error)
 ** \returns The total number of characters in the current array - 1 (the
 **          first '[' is not counted)
 */
