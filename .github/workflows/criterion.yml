@@ -2,9 +2,9 @@ name: Criterion Unit Tests
 
 on:
   push:
-    branches: [ "criterion-tests" ]
+    branches: [ "*" ]
   pull_request:
-    branches: [ "criterion-tests" ]
+    branches: [ "*" ]
 
 jobs:
   build:
