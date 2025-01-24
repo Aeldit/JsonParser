@@ -12,7 +12,7 @@
 /*******************************************************************************
 **                              RO_PARSE_ARRAY_BUFF                           **
 *******************************************************************************/
-ro_array_t *get_array_from_file(unsigned long *idx, char is_buff)
+ro_array_t *get_ro_array_from_file(unsigned long *idx, char is_buff)
 {
     if (!idx)
     {
@@ -71,7 +71,7 @@ ro_array_t *get_array_from_file(unsigned long *idx, char is_buff)
 Test(ro_json_parser, ro_parse_array_buff_empty)
 {
     unsigned long idx = 518;
-    ro_array_t *a = get_array_from_file(&idx, 1);
+    ro_array_t *a = get_ro_array_from_file(&idx, 1);
 
     ro_array_t *b = init_ro_array(0);
     char is_equal = ro_arrays_equal(a, b);
@@ -84,7 +84,7 @@ Test(ro_json_parser, ro_parse_array_buff_empty)
 Test(ro_json_parser, ro_parse_array_buff_long_numbers)
 {
     unsigned long idx = 85;
-    ro_array_t *a = get_array_from_file(&idx, 1);
+    ro_array_t *a = get_ro_array_from_file(&idx, 1);
 
     ro_array_t *b = init_ro_array(20);
 
@@ -124,7 +124,7 @@ Test(ro_json_parser, ro_parse_array_buff_long_numbers)
 Test(ro_json_parser, ro_parse_array_buff_nested_multi_type)
 {
     unsigned long idx = 508;
-    ro_array_t *a = get_array_from_file(&idx, 1);
+    ro_array_t *a = get_ro_array_from_file(&idx, 1);
 
     ro_array_t *b = init_ro_array(8);
 
@@ -165,7 +165,7 @@ Test(ro_json_parser, ro_parse_array_buff_nested_multi_type)
 Test(ro_json_parser, ro_parse_array_empty)
 {
     unsigned long idx = 519;
-    ro_array_t *a = get_array_from_file(&idx, 0);
+    ro_array_t *a = get_ro_array_from_file(&idx, 0);
 
     ro_array_t *b = init_ro_array(0);
     char is_equal = ro_arrays_equal(a, b);
@@ -178,7 +178,7 @@ Test(ro_json_parser, ro_parse_array_empty)
 Test(ro_json_parser, ro_parse_array_long_numbers)
 {
     unsigned long idx = 86;
-    ro_array_t *a = get_array_from_file(&idx, 0);
+    ro_array_t *a = get_ro_array_from_file(&idx, 0);
 
     ro_array_t *b = init_ro_array(20);
 
@@ -218,7 +218,7 @@ Test(ro_json_parser, ro_parse_array_long_numbers)
 Test(ro_json_parser, ro_parse_array_nested_multi_type)
 {
     unsigned long idx = 509;
-    ro_array_t *a = get_array_from_file(&idx, 0);
+    ro_array_t *a = get_ro_array_from_file(&idx, 0);
 
     ro_array_t *b = init_ro_array(8);
 
@@ -259,7 +259,7 @@ Test(ro_json_parser, ro_parse_array_nested_multi_type)
 /*******************************************************************************
 **                               RO_PARSE_DICT_BUFF                           **
 *******************************************************************************/
-ro_dict_t *get_dict_from_file(unsigned long *idx, char is_buff)
+ro_dict_t *get_ro_dict_from_fileile(unsigned long *idx, char is_buff)
 {
     if (!idx)
     {
@@ -318,7 +318,7 @@ ro_dict_t *get_dict_from_file(unsigned long *idx, char is_buff)
 Test(ro_json_parser, ro_parse_dict_buff_empty)
 {
     unsigned long idx = 812;
-    ro_dict_t *a = get_dict_from_file(&idx, 1);
+    ro_dict_t *a = get_ro_dict_from_fileile(&idx, 1);
 
     ro_dict_t *b = init_ro_dict(0);
     char is_equal = ro_dicts_equal(a, b);
@@ -331,7 +331,7 @@ Test(ro_json_parser, ro_parse_dict_buff_empty)
 Test(ro_json_parser, ro_parse_dict_buff_numbers)
 {
     unsigned long idx = 824;
-    ro_dict_t *a = get_dict_from_file(&idx, 1);
+    ro_dict_t *a = get_ro_dict_from_fileile(&idx, 1);
 
     ro_dict_t *b = init_ro_dict(3);
 
@@ -349,7 +349,7 @@ Test(ro_json_parser, ro_parse_dict_buff_numbers)
 Test(ro_json_parser, ro_parse_dict_buff_nested_multi_type)
 {
     unsigned long idx = 905;
-    ro_dict_t *a = get_dict_from_file(&idx, 1);
+    ro_dict_t *a = get_ro_dict_from_fileile(&idx, 1);
 
     ro_array_t *a3 = init_ro_array(3);
     ro_array_add_str(a3, string_nofree_of("dd"));
@@ -374,7 +374,7 @@ Test(ro_json_parser, ro_parse_dict_buff_nested_multi_type)
 Test(ro_json_parser, ro_parse_dict_empty)
 {
     unsigned long idx = 813;
-    ro_dict_t *a = get_dict_from_file(&idx, 0);
+    ro_dict_t *a = get_ro_dict_from_fileile(&idx, 0);
 
     ro_dict_t *b = init_ro_dict(0);
     char is_equal = ro_dicts_equal(a, b);
@@ -387,7 +387,7 @@ Test(ro_json_parser, ro_parse_dict_empty)
 Test(ro_json_parser, ro_parse_dict_numbers)
 {
     unsigned long idx = 825;
-    ro_dict_t *a = get_dict_from_file(&idx, 0);
+    ro_dict_t *a = get_ro_dict_from_fileile(&idx, 0);
 
     ro_dict_t *b = init_ro_dict(3);
 
@@ -405,7 +405,7 @@ Test(ro_json_parser, ro_parse_dict_numbers)
 Test(ro_json_parser, ro_parse_dict_nested_multi_type)
 {
     unsigned long idx = 906;
-    ro_dict_t *a = get_dict_from_file(&idx, 0);
+    ro_dict_t *a = get_ro_dict_from_fileile(&idx, 0);
 
     ro_array_t *a3 = init_ro_array(3);
     ro_array_add_str(a3, string_nofree_of("dd"));
