@@ -36,7 +36,7 @@ ro_array_t *ro_parse_array_buff(char *b, unsigned long *idx)
     while (1)
     {
         c = b[i];
-        if (c == 0 || nb_elts_parsed >= nb_elts)
+        if (!c || nb_elts_parsed >= nb_elts)
         {
             break;
         }
