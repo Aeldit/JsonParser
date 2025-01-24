@@ -474,7 +474,7 @@ Test(ro_json_storage, ro_dict_get_empty)
     destroy_ro_dict(d);
 }
 
-char *get_type_as_str(char type)
+char *ro_get_type_as_str(char type)
 {
     switch (type)
     {
@@ -513,7 +513,7 @@ void ro_array_get_type(char *buff, char expected_type)
 
     cr_expect(v.type == expected_type,
               "Expected the value to be of type %s (got '%s')",
-              get_type_as_str(expected_type), get_type_as_str(v.type));
+              ro_get_type_as_str(expected_type), ro_get_type_as_str(v.type));
 
     destroy_ro_array(a);
 }
@@ -586,7 +586,7 @@ void ro_dict_get_type(char *buff, char expected_type)
 
     cr_expect(it.type == expected_type,
               "Expected the item to be of type %s (got '%s')",
-              get_type_as_str(expected_type), get_type_as_str(it.type));
+              ro_get_type_as_str(expected_type), ro_get_type_as_str(it.type));
 
     destroy_ro_dict(d);
 }
