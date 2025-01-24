@@ -406,7 +406,7 @@ void rw_test_dicts_equal(rw_dict_t *a, rw_dict_t *b, char expected_is_equal)
               is_equal ? "true" : "false");
 }
 
-/*Test(rw_equality, dicts_equal_true)
+Test(rw_equality, dicts_equal_true)
 {
     rw_dict_t *a = init_rw_dict();
     rw_dict_t *b = init_rw_dict();
@@ -714,7 +714,6 @@ Test(rw_equality, dicts_equal_diff_arrays)
     rw_dict_add_null(a, string_nofree_of(""));
     rw_dict_add_null(b, string_nofree_of(""));
 
-    rw_dict_add_array(a, string_nofree_of("array"), init_rw_array());
     rw_dict_add_array(b, string_nofree_of("array"), init_rw_array());
 
     rw_dict_add_dict(a, string_nofree_of("dict"), init_rw_dict());
@@ -758,10 +757,9 @@ Test(rw_equality, dicts_equal_diff_dicts)
     rw_dict_add_array(b, string_nofree_of("array"), init_rw_array());
 
     rw_dict_add_dict(a, string_nofree_of("dict"), init_rw_dict());
-    rw_dict_add_dict(b, string_nofree_of("dict"), init_rw_dict());
 
     rw_test_dicts_equal(a, b, 0);
 
     destroy_rw_dict(a);
     destroy_rw_dict(b);
-}*/
+}
