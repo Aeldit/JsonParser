@@ -401,36 +401,36 @@ void ro_dict_print_indent(ro_dict_t *d, unsigned indent, char fromDict)
         switch (it.type)
         {
         case T_STR:
-            printf("\t%s\"%s\" : \"%s\"", tabs, key.str,
+            printf("\t%s\"%s\": \"%s\"", tabs, key.str,
                    it.strv.str ? it.strv.str : "");
             break;
         case T_LONG:
-            printf("\t%s\"%s\" : %ld", tabs, key.str, it.longv);
+            printf("\t%s\"%s\": %ld", tabs, key.str, it.longv);
             break;
         case T_DOUBLE:
-            printf("\t%s\"%s\" : %f", tabs, key.str, it.doublev);
+            printf("\t%s\"%s\": %f", tabs, key.str, it.doublev);
             break;
         case T_EXP_LONG:
-            printf("\t%s\"%s\" : %lde%ld", tabs, key.str, it.exp_longv.number,
+            printf("\t%s\"%s\": %lde%ld", tabs, key.str, it.exp_longv.number,
                    it.exp_longv.exponent);
             break;
         case T_EXP_DOUBLE:
-            printf("\t%s\"%s\" : %fe%ld", tabs, key.str, it.exp_doublev.number,
+            printf("\t%s\"%s\": %fe%ld", tabs, key.str, it.exp_doublev.number,
                    it.exp_doublev.exponent);
             break;
         case T_BOOL:
-            printf("\t%s\"%s\" : %s", tabs, key.str,
+            printf("\t%s\"%s\": %s", tabs, key.str,
                    it.boolv ? "true" : "false");
             break;
         case T_NULL:
-            printf("\t%s\"%s\" : null", tabs, key.str);
+            printf("\t%s\"%s\": null", tabs, key.str);
             break;
         case T_ARR:
-            printf("\t%s\"%s\" : ", tabs, key.str);
+            printf("\t%s\"%s\": ", tabs, key.str);
             ro_array_print_indent(it.arrayv, indent + 1, 1);
             break;
         case T_DICT:
-            printf("\t%s\"%s\" : ", tabs, key.str);
+            printf("\t%s\"%s\": ", tabs, key.str);
             ro_dict_print_indent(it.dictv, indent + 1, 1);
             break;
         }
