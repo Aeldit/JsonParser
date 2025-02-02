@@ -30,6 +30,9 @@ typedef struct
 /*******************************************************************************
 **                              DEFINES / MACROS                              **
 *******************************************************************************/
+// The following MACROS are used because we have 2 'modes' (ro & rw), which
+// means we have different functions for each type. However, these functions do
+// exactly the same thing, so this macros prevents duplicated code
 #define ADD_VALUES_FOR_MODE(rx_value_t, get_rx_array_as_str,                   \
                             get_rx_dict_as_str)                                \
     unsigned nb = 0;                                                           \
