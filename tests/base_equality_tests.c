@@ -1,7 +1,7 @@
 #include <criterion/criterion.h>
 
-#include "../src/base_json_equality.h"
 #include "../src/base_json_parser.h"
+#include "../src/base_json_storage.h"
 
 /*******************************************************************************
 **                               EXP_LONG_EQUALS                              **
