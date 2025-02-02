@@ -58,10 +58,29 @@ typedef struct
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
+/**
+** \returns A string_t representation of the given char array
+*/
 string_t string_of(char *s);
+/**
+** \returns A string_t representation of the given char array but specifies that
+**          the string must no be freed (usually used when manually writing the
+**          string in teh code)
+*/
 string_t string_nofree_of(char *s);
 
+/**
+** \returns 1 If both strings are equal, 0 otherwise
+*/
 char strings_equals(string_t s1, string_t s2);
+/**
+** \returns 1 If both longs with exponents are equal, 0 otherwise
+*/
+char exp_long_equals(exponent_long_t a, exponent_long_t b);
+/**
+** \returns 1 If both doubles with exponents are equal, 0 otherwise
+*/
+char exp_double_equals(exponent_double_t a, exponent_double_t b);
 
 /**
 ** \brief If the string is not null but its length is 0, it means that it

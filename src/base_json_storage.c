@@ -8,14 +8,12 @@
 *******************************************************************************/
 inline string_t string_of(char *s)
 {
-    return s ? (string_t){ .str = s, .len = strlen(s), .needs_freeing = 1 }
-             : NULL_STRING;
+    return s ? STRING_OF(s, strlen(s)) : NULL_STRING;
 }
 
 inline string_t string_nofree_of(char *s)
 {
-    return s ? (string_t){ .str = s, .len = strlen(s), .needs_freeing = 0 }
-             : NULL_STRING;
+    return s ? STRING_NOFREE_OF(s, strlen(s)) : NULL_STRING;
 }
 
 char strings_equals(string_t s1, string_t s2)
@@ -41,6 +39,16 @@ char strings_equals(string_t s1, string_t s2)
         }
     }
     return 1;
+}
+
+inline char exp_long_equals(exponent_long_t a, exponent_long_t b)
+{
+    return a.number == b.number && a.exponent == b.exponent;
+}
+
+inline char exp_double_equals(exponent_double_t a, exponent_double_t b)
+{
+    return a.number == b.number && a.exponent == b.exponent;
 }
 
 void destroy_string(string_t s)
