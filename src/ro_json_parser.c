@@ -622,6 +622,13 @@ ro_json_t *ro_parse(char *file)
             }
             fread(b, sizeof(char), nb_chars, f);
 
+            if (!is_json_valid_buff(b))
+            {
+                printf("Invalid json file");
+                free(b);
+                return 0;
+            }
+
             d = ro_parse_dict_buff(b, 0);
             free(b);
         }
@@ -648,12 +655,11 @@ ro_json_t *ro_parse(char *file)
 
             if (!is_json_valid_buff(b))
             {
-                printf("invalid");
+                printf("Invalid json file");
                 free(b);
                 return 0;
             }
 
-            printf("valid");
             a = ro_parse_array_buff(b, 0);
             free(b);
         }

@@ -60,6 +60,11 @@ char is_json_valid_buff(char *buff)
     unsigned long buff_len = strlen(buff);
 
     unsigned long nb_quotes = 0;
+    unsigned long nb_opened_curly_brackets = 0;
+    unsigned long nb_opened_brackets = 0;
+    unsigned long nb_closed_curly_brackets = 0;
+    unsigned long nb_closed_brackets = 0;
+    // TODO: Check for missing ':' and ','
 
     char is_in_string = 0;
 
@@ -139,9 +144,18 @@ char is_json_valid_buff(char *buff)
             break;
 
         case '{':
+            ++nb_opened_curly_brackets;
+            break;
         case '[':
+            ++nb_opened_brackets;
+            break;
         case '}':
+            ++nb_closed_curly_brackets;
+            break;
         case ']':
+            ++nb_closed_brackets;
+            break;
+
         case ':':
         case ',':
         case '\n':
@@ -156,5 +170,7 @@ char is_json_valid_buff(char *buff)
         }
         prev_c = c;
     }
-    return nb_quotes % 2 == 0;
+    return nb_quotes % 2 == 0
+        && nb_opened_curly_brackets == nb_closed_curly_brackets
+        && nb_opened_brackets == nb_closed_brackets;
 }
