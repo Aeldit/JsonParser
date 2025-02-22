@@ -8,7 +8,7 @@ TESTFILES=tests/*.c
 TARGET=json-parser
 
 all: clean $(TARGET)
-	./$(TARGET) t.json
+	./$(TARGET) err.json
 
 rw: clean
 	$(CC) $(CFLAGS) $(CFILES) rw_main.c -o $(TARGET)

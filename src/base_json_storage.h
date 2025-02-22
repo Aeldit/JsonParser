@@ -19,7 +19,8 @@
     ((string_t){ .str = (s), .len = (l), .needs_freeing = 1 })
 #define STRING_NOFREE_OF(s, l)                                                 \
     ((string_t){ .str = (s), .len = (l), .needs_freeing = 0 })
-#define NULL_STRING ((string_t){ .str = 0 })
+#define NULL_STRING ((string_t){ .str = 0, .len = 0 })
+#define STRING_VALID(s) ((s).str)
 
 /*
 ** \def Checks if the JSON instance is not null, if the JSON instance is an

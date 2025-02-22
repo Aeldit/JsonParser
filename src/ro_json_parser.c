@@ -7,6 +7,9 @@
 #include <sys/stat.h>
 
 #include "base_json_parser.h"
+#include "base_json_storage.h"
+#include "ro_json_storage.h"
+#include "validator.h"
 
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
@@ -43,7 +46,13 @@ ro_array_t *ro_parse_array_buff(char *b, unsigned long *idx)
 
         if (c == '"')
         {
-            ro_array_add_str(a, parse_string_buff(b, &i));
+            string_t s = parse_string_buff(b, &i);
+            if (!STRING_VALID(s))
+            {
+                destroy_ro_array(a);
+                return 0;
+            }
+            ro_array_add_str(a, s);
             ++nb_elts_parsed;
         }
         else if (IS_NUMBER_START(c))
@@ -612,6 +621,7 @@ ro_json_t *ro_parse(char *file)
                 return 0;
             }
             fread(b, sizeof(char), nb_chars, f);
+
             d = ro_parse_dict_buff(b, 0);
             free(b);
         }
@@ -635,6 +645,15 @@ ro_json_t *ro_parse(char *file)
                 return 0;
             }
             fread(b, sizeof(char), nb_chars, f);
+
+            if (!is_json_valid_buff(b))
+            {
+                printf("invalid");
+                free(b);
+                return 0;
+            }
+
+            printf("valid");
             a = ro_parse_array_buff(b, 0);
             free(b);
         }

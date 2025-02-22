@@ -28,6 +28,9 @@ int main(int argc, char *argv[])
             rw_array_add_long(a, 5);
             rw_array_add_array(j->array, a);
             rw_array_remove(a, 2);
+            rw_value_t v = rw_array_get(j->array, 0);
+            rw_item_t it = rw_dict_get(v.dictv, string_nofree_of("emojis"));
+            printf("%s\n", it.strv.str);
             write_rw_json_to_file(j, "out.json");
         }
         rw_array_print(j->array);
