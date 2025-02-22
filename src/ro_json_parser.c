@@ -3,6 +3,7 @@
 /*******************************************************************************
 **                                  INCLUDES                                  **
 *******************************************************************************/
+#include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
 
@@ -634,6 +635,12 @@ ro_json_t *ro_parse(char *file)
         }
         else
         {
+            if (!is_json_valid(f))
+            {
+                printf("Invalid json file");
+                fclose(f);
+                return 0;
+            }
             d = ro_parse_dict(f, &offset);
         }
         fclose(f);
@@ -665,6 +672,12 @@ ro_json_t *ro_parse(char *file)
         }
         else
         {
+            if (!is_json_valid(f))
+            {
+                printf("Invalid json file");
+                fclose(f);
+                return 0;
+            }
             a = ro_parse_array(f, &offset);
         }
         fclose(f);

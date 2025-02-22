@@ -1,5 +1,6 @@
 #include "validator.h"
 
+#include <stdio.h>
 #include <string.h>
 
 /**
@@ -50,7 +51,12 @@ char is_number_valid(char *buff, unsigned long *idx)
     return 1;
 }
 
-char is_json_valid_buff(char *buff)
+/**
+** \brief Checks if the booleans and nulls are spelled correctly, if the numbers
+**        are valid, if the quotes are in even number, and brackets and curly
+**        brackets have a matching number of opening and closing
+*/
+char check_bools_nulls_numbers_counts(char *buff)
 {
     if (!buff)
     {
@@ -64,7 +70,6 @@ char is_json_valid_buff(char *buff)
     unsigned long nb_opened_brackets = 0;
     unsigned long nb_closed_curly_brackets = 0;
     unsigned long nb_closed_brackets = 0;
-    // TODO: Check for missing ':' and ','
 
     char is_in_string = 0;
 
@@ -164,7 +169,7 @@ char is_json_valid_buff(char *buff)
             break;
 
         default:
-            // character that is not part of the json syntax, which means
+            // The character that is not part of the json syntax, which means
             // invalid json
             return 0;
         }
@@ -173,4 +178,32 @@ char is_json_valid_buff(char *buff)
     return nb_quotes % 2 == 0
         && nb_opened_curly_brackets == nb_closed_curly_brackets
         && nb_opened_brackets == nb_closed_brackets;
+}
+
+char check_arrays_and_dicts(char *buff)
+{
+    if (!buff)
+    {
+        return 0;
+    }
+    return 1;
+}
+
+char is_json_valid_buff(char *buff)
+{
+    if (!buff)
+    {
+        return 0;
+    }
+    return check_bools_nulls_numbers_counts(buff);
+}
+
+// TODO: Implement
+char is_json_valid(FILE *f)
+{
+    if (!f)
+    {
+        return 0;
+    }
+    return 1;
 }
