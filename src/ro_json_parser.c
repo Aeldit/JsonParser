@@ -737,6 +737,7 @@ ro_json_t *ro_parse(char *file)
             {
                 printf("Invalid json file");
                 free(b);
+                fclose(f);
                 return 0;
             }
 
@@ -774,6 +775,7 @@ ro_json_t *ro_parse(char *file)
             {
                 printf("Invalid json file");
                 free(b);
+                fclose(f);
                 return 0;
             }
 
