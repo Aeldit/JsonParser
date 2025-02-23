@@ -4,7 +4,8 @@
 #include <string.h>
 
 /**
-** \brief Called after encountering a '+' or '-' sign, or any digit
+** \brief Called after encountering a '+' or '-' sign, or any digit.
+**        Starts from the sign or digit that started the number
 */
 char is_number_valid(char *buff, unsigned long *idx)
 {
@@ -13,7 +14,7 @@ char is_number_valid(char *buff, unsigned long *idx)
         return 0;
     }
 
-    unsigned long i = *idx;
+    unsigned long i = *idx - 1;
     char nb_inc_idx = 0;
     char c = 0;
     char prev_c = 0;
@@ -23,10 +24,10 @@ char is_number_valid(char *buff, unsigned long *idx)
         {
             break;
         }
-        ++nb_inc_idx;
 
         // sign not preceded by an exponent
-        if ((c == '+' || c == '-') && !(prev_c == 'e' || prev_c == 'E'))
+        if (nb_inc_idx > 0 && (c == '+' || c == '-')
+            && !(prev_c == 'e' || prev_c == 'E'))
         {
             return 0;
         }
@@ -45,6 +46,7 @@ char is_number_valid(char *buff, unsigned long *idx)
         {
             return 0;
         }
+        ++nb_inc_idx;
         prev_c = c;
     }
     *idx += nb_inc_idx;
