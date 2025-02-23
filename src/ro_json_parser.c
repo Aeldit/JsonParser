@@ -13,6 +13,21 @@
 #include "validator.h"
 
 /*******************************************************************************
+**                              LOCAL FUNCTIONS                               **
+*******************************************************************************/
+ro_array_t *destroy_ro_array_on_error(ro_array_t *a)
+{
+    destroy_ro_array(a);
+    return 0;
+}
+
+ro_dict_t *destroy_ro_dict_on_error(ro_dict_t *d)
+{
+    destroy_ro_dict(d);
+    return 0;
+}
+
+/*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
 ro_array_t *ro_parse_array_buff(char *b, unsigned long *idx)
@@ -37,10 +52,9 @@ ro_array_t *ro_parse_array_buff(char *b, unsigned long *idx)
 
     char c = 0;
     unsigned long initial_i = i;
-    while (1)
+    while ((c = b[i]))
     {
-        c = b[i];
-        if (!c || nb_elts_parsed >= nb_elts)
+        if (nb_elts_parsed >= nb_elts)
         {
             break;
         }
@@ -50,8 +64,7 @@ ro_array_t *ro_parse_array_buff(char *b, unsigned long *idx)
             string_t s = parse_string_buff(b, &i);
             if (!STRING_VALID(s))
             {
-                destroy_ro_array(a);
-                return 0;
+                return destroy_ro_array_on_error(a);
             }
             ro_array_add_str(a, s);
             ++nb_elts_parsed;
@@ -61,7 +74,7 @@ ro_array_t *ro_parse_array_buff(char *b, unsigned long *idx)
             str_and_len_tuple_t sl = parse_number_buff(b, &i);
             if (!sl.str)
             {
-                continue;
+                return destroy_ro_array_on_error(a);
             }
 
             if (sl.is_float)
@@ -77,7 +90,7 @@ ro_array_t *ro_parse_array_buff(char *b, unsigned long *idx)
                     break;
                 case 2:
                     free(sl.str);
-                    continue;
+                    return destroy_ro_array_on_error(a);
                 }
             }
             else
@@ -93,7 +106,7 @@ ro_array_t *ro_parse_array_buff(char *b, unsigned long *idx)
                     break;
                 case 2:
                     free(sl.str);
-                    continue;
+                    return destroy_ro_array_on_error(a);
                 }
             }
             free(sl.str);
@@ -104,7 +117,7 @@ ro_array_t *ro_parse_array_buff(char *b, unsigned long *idx)
             unsigned long len = parse_boolean_buff(b, &i);
             if (IS_NOT_BOOLEAN(c, len))
             {
-                continue;
+                return destroy_ro_array_on_error(a);
             }
             ro_array_add_bool(a, len == 4 ? 1 : 0);
             ++nb_elts_parsed;
@@ -120,7 +133,7 @@ ro_array_t *ro_parse_array_buff(char *b, unsigned long *idx)
             ro_array_t *tmp_a = ro_parse_array_buff(b, &i);
             if (!tmp_a)
             {
-                break;
+                return destroy_ro_array_on_error(a);
             }
             ro_array_add_array(a, tmp_a);
             ++nb_elts_parsed;
@@ -130,7 +143,7 @@ ro_array_t *ro_parse_array_buff(char *b, unsigned long *idx)
             ro_dict_t *tmp_jd = ro_parse_dict_buff(b, &i);
             if (!tmp_jd)
             {
-                break;
+                return destroy_ro_array_on_error(a);
             }
             ro_array_add_dict(a, tmp_jd);
             ++nb_elts_parsed;
@@ -327,11 +340,20 @@ ro_dict_t *ro_parse_dict_buff(char *b, unsigned long *idx)
             if (is_waiting_key)
             {
                 key = parse_string_buff(b, &i);
+                if (!STRING_VALID(key))
+                {
+                    return destroy_ro_dict_on_error(d);
+                }
                 is_waiting_key = 0;
             }
             else
             {
-                ro_dict_add_str(d, key, parse_string_buff(b, &i));
+                string_t s = parse_string_buff(b, &i);
+                if (!STRING_VALID(s))
+                {
+                    return destroy_ro_dict_on_error(d);
+                }
+                ro_dict_add_str(d, key, s);
                 ++nb_elts_parsed;
             }
         }
@@ -340,7 +362,7 @@ ro_dict_t *ro_parse_dict_buff(char *b, unsigned long *idx)
             str_and_len_tuple_t sl = parse_number_buff(b, &i);
             if (!sl.str)
             {
-                continue;
+                return destroy_ro_dict_on_error(d);
             }
 
             if (sl.is_float)
@@ -356,7 +378,7 @@ ro_dict_t *ro_parse_dict_buff(char *b, unsigned long *idx)
                     break;
                 case 2:
                     free(sl.str);
-                    continue;
+                    return destroy_ro_dict_on_error(d);
                 }
             }
             else
@@ -372,7 +394,7 @@ ro_dict_t *ro_parse_dict_buff(char *b, unsigned long *idx)
                     break;
                 case 2:
                     free(sl.str);
-                    continue;
+                    return destroy_ro_dict_on_error(d);
                 }
             }
             free(sl.str);
@@ -383,7 +405,7 @@ ro_dict_t *ro_parse_dict_buff(char *b, unsigned long *idx)
             unsigned long len = parse_boolean_buff(b, &i);
             if (IS_NOT_BOOLEAN(c, len))
             {
-                continue;
+                return destroy_ro_dict_on_error(d);
             }
             ro_dict_add_bool(d, key, len == 4 ? 1 : 0);
             ++nb_elts_parsed;
@@ -399,7 +421,7 @@ ro_dict_t *ro_parse_dict_buff(char *b, unsigned long *idx)
             ro_array_t *tmp_ja = ro_parse_array_buff(b, &i);
             if (!tmp_ja)
             {
-                break;
+                return destroy_ro_dict_on_error(d);
             }
             ro_dict_add_array(d, key, tmp_ja);
             ++nb_elts_parsed;
@@ -409,7 +431,7 @@ ro_dict_t *ro_parse_dict_buff(char *b, unsigned long *idx)
             ro_dict_t *tmp_jd = ro_parse_dict_buff(b, &i);
             if (!tmp_jd)
             {
-                break;
+                return destroy_ro_dict_on_error(d);
             }
             ro_dict_add_dict(d, key, tmp_jd);
             ++nb_elts_parsed;
