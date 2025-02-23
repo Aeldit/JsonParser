@@ -67,8 +67,7 @@ ro_array_t *ro_parse_array_buff(char *b, unsigned long *idx)
         switch (c)
         {
         case '"':
-            s = parse_string_buff(b, &i);
-            if (!STRING_VALID(s))
+            if (!(s = parse_string_buff(b, &i)).str)
             {
                 return destroy_ro_array_on_error(a);
             }
@@ -88,8 +87,7 @@ ro_array_t *ro_parse_array_buff(char *b, unsigned long *idx)
         case '7':
         case '8':
         case '9':
-            sl = parse_number_buff(b, &i);
-            if (!sl.str)
+            if (!(sl = parse_number_buff(b, &i)).str)
             {
                 return destroy_ro_array_on_error(a);
             }
@@ -148,8 +146,7 @@ ro_array_t *ro_parse_array_buff(char *b, unsigned long *idx)
             break;
 
         case '[':
-            tmp_a = ro_parse_array_buff(b, &i);
-            if (!tmp_a)
+            if (!(tmp_a = ro_parse_array_buff(b, &i)))
             {
                 return destroy_ro_array_on_error(a);
             }
@@ -158,8 +155,7 @@ ro_array_t *ro_parse_array_buff(char *b, unsigned long *idx)
             break;
 
         case '{':
-            tmp_jd = ro_parse_dict_buff(b, &i);
-            if (!tmp_jd)
+            if (!(tmp_jd = ro_parse_dict_buff(b, &i)))
             {
                 return destroy_ro_array_on_error(a);
             }
@@ -205,8 +201,7 @@ ro_array_t *ro_parse_array(FILE *f, unsigned long *pos)
         switch (c)
         {
         case '"':
-            s = parse_string(f, &i);
-            if (!STRING_VALID(s))
+            if (!(s = parse_string(f, &i)).str)
             {
                 return destroy_ro_array_on_error(a);
             }
@@ -226,8 +221,7 @@ ro_array_t *ro_parse_array(FILE *f, unsigned long *pos)
         case '7':
         case '8':
         case '9':
-            sl = parse_number(f, &i);
-            if (!sl.str)
+            if (!(sl = parse_number(f, &i)).str)
             {
                 return destroy_ro_array_on_error(a);
             }
@@ -298,8 +292,7 @@ ro_array_t *ro_parse_array(FILE *f, unsigned long *pos)
                     return destroy_ro_array_on_error(a);
                 }
                 fread(b, sizeof(char), nb_chars, f);
-                tmp_ja = ro_parse_array_buff(b, 0);
-                if (!tmp_ja)
+                if (!(tmp_ja = ro_parse_array_buff(b, 0)))
                 {
                     return destroy_ro_array_on_error(a);
                 }
@@ -308,8 +301,7 @@ ro_array_t *ro_parse_array(FILE *f, unsigned long *pos)
             }
             else
             {
-                tmp_ja = ro_parse_array(f, &i);
-                if (!tmp_ja)
+                if (!(tmp_ja = ro_parse_array(f, &i)))
                 {
                     return destroy_ro_array_on_error(a);
                 }
@@ -331,8 +323,7 @@ ro_array_t *ro_parse_array(FILE *f, unsigned long *pos)
                     return destroy_ro_array_on_error(a);
                 }
                 fread(b, sizeof(char), nb_chars, f);
-                tmp_jd = ro_parse_dict_buff(b, 0);
-                if (!tmp_jd)
+                if (!(tmp_jd = ro_parse_dict_buff(b, 0)))
                 {
                     return destroy_ro_array_on_error(a);
                 }
@@ -341,8 +332,7 @@ ro_array_t *ro_parse_array(FILE *f, unsigned long *pos)
             }
             else
             {
-                tmp_jd = ro_parse_dict(f, &i);
-                if (!tmp_jd)
+                if (!(tmp_jd = ro_parse_dict(f, &i)))
                 {
                     return destroy_ro_array_on_error(a);
                 }
@@ -387,6 +377,7 @@ ro_dict_t *ro_parse_dict_buff(char *b, unsigned long *idx)
             break;
         }
 
+        string_t s = NULL_STRING;
         str_and_len_tuple_t sl = NULL_STR_AND_LEN_TUPLE;
         unsigned long len = 0;
         ro_array_t *tmp_ja = 0;
@@ -396,8 +387,7 @@ ro_dict_t *ro_parse_dict_buff(char *b, unsigned long *idx)
         case '"':
             if (is_waiting_key)
             {
-                key = parse_string_buff(b, &i);
-                if (!STRING_VALID(key))
+                if (!(key = parse_string_buff(b, &i)).str)
                 {
                     return destroy_ro_dict_on_error(d);
                 }
@@ -405,8 +395,7 @@ ro_dict_t *ro_parse_dict_buff(char *b, unsigned long *idx)
             }
             else
             {
-                string_t s = parse_string_buff(b, &i);
-                if (!STRING_VALID(s))
+                if (!(s = parse_string_buff(b, &i)).str)
                 {
                     return destroy_ro_dict_on_error(d);
                 }
@@ -427,8 +416,7 @@ ro_dict_t *ro_parse_dict_buff(char *b, unsigned long *idx)
         case '7':
         case '8':
         case '9':
-            sl = parse_number_buff(b, &i);
-            if (!sl.str)
+            if (!(sl = parse_number_buff(b, &i)).str)
             {
                 return destroy_ro_dict_on_error(d);
             }
@@ -487,8 +475,7 @@ ro_dict_t *ro_parse_dict_buff(char *b, unsigned long *idx)
             break;
 
         case '[':
-            tmp_ja = ro_parse_array_buff(b, &i);
-            if (!tmp_ja)
+            if (!(tmp_ja = ro_parse_array_buff(b, &i)))
             {
                 return destroy_ro_dict_on_error(d);
             }
@@ -497,8 +484,7 @@ ro_dict_t *ro_parse_dict_buff(char *b, unsigned long *idx)
             break;
 
         case '{':
-            tmp_jd = ro_parse_dict_buff(b, &i);
-            if (!tmp_jd)
+            if (!(tmp_jd = ro_parse_dict_buff(b, &i)))
             {
                 return destroy_ro_dict_on_error(d);
             }
@@ -545,6 +531,7 @@ ro_dict_t *ro_parse_dict(FILE *f, unsigned long *pos)
     // already read a '['
     while (SEEK_AND_GET_CHAR(i) && nb_elts_parsed < nb_elts && c != 0)
     {
+        string_t s = NULL_STRING;
         str_and_len_tuple_t sl = NULL_STR_AND_LEN_TUPLE;
         unsigned long len = 0;
         unsigned long nb_chars = 0;
@@ -553,8 +540,7 @@ ro_dict_t *ro_parse_dict(FILE *f, unsigned long *pos)
         case '"':
             if (is_waiting_key)
             {
-                key = parse_string(f, &i);
-                if (!STRING_VALID(key))
+                if (!(key = parse_string(f, &i)).str)
                 {
                     return destroy_ro_dict_on_error(d);
                 }
@@ -562,8 +548,7 @@ ro_dict_t *ro_parse_dict(FILE *f, unsigned long *pos)
             }
             else
             {
-                string_t s = parse_string(f, &i);
-                if (!STRING_VALID(s))
+                if (!(s = parse_string(f, &i)).str)
                 {
                     return destroy_ro_dict_on_error(d);
                 }
@@ -584,8 +569,7 @@ ro_dict_t *ro_parse_dict(FILE *f, unsigned long *pos)
         case '7':
         case '8':
         case '9':
-            sl = parse_number(f, &i);
-            if (!sl.str)
+            if (!(sl = parse_number(f, &i)).str)
             {
                 return destroy_ro_dict_on_error(d);
             }
@@ -656,8 +640,7 @@ ro_dict_t *ro_parse_dict(FILE *f, unsigned long *pos)
                     return destroy_ro_dict_on_error(d);
                 }
                 fread(b, sizeof(char), nb_chars, f);
-                tmp_ja = ro_parse_array_buff(b, 0);
-                if (!tmp_ja)
+                if (!(tmp_ja = ro_parse_array_buff(b, 0)))
                 {
                     return destroy_ro_dict_on_error(d);
                 }
@@ -666,8 +649,7 @@ ro_dict_t *ro_parse_dict(FILE *f, unsigned long *pos)
             }
             else
             {
-                tmp_ja = ro_parse_array(f, &i);
-                if (!tmp_ja)
+                if (!(tmp_ja = ro_parse_array(f, &i)))
                 {
                     return destroy_ro_dict_on_error(d);
                 }
@@ -689,8 +671,7 @@ ro_dict_t *ro_parse_dict(FILE *f, unsigned long *pos)
                     return destroy_ro_dict_on_error(d);
                 }
                 fread(b, sizeof(char), nb_chars, f);
-                tmp_jd = ro_parse_dict_buff(b, 0);
-                if (!tmp_jd)
+                if (!(tmp_jd = ro_parse_dict_buff(b, 0)))
                 {
                     return destroy_ro_dict_on_error(d);
                 }
@@ -699,7 +680,10 @@ ro_dict_t *ro_parse_dict(FILE *f, unsigned long *pos)
             }
             else
             {
-                tmp_jd = ro_parse_dict(f, &i);
+                if (!(tmp_jd = ro_parse_dict(f, &i)))
+                {
+                    return destroy_ro_dict_on_error(d);
+                }
             }
             ro_dict_add_dict(d, key, tmp_jd);
             ++nb_elts_parsed;
