@@ -25,6 +25,8 @@ long_with_or_without_exponent_t str_to_long(str_and_len_tuple_t *sl)
         return ERROR_LWOWE;
     }
 
+    char has_exponent = sl->has_exponent;
+
     long number = 0;
     long exponent = 0;
     unsigned char exp_idx = 0;
@@ -35,7 +37,7 @@ long_with_or_without_exponent_t str_to_long(str_and_len_tuple_t *sl)
     for (unsigned long i = 0; i < len; ++i)
     {
         c = str[i];
-        if (sl->has_exponent && (c == 'e' || c == 'E'))
+        if (has_exponent && (c == 'e' || c == 'E'))
         {
             exp_idx = i;
             is_in_exponent = 1;
@@ -56,7 +58,7 @@ long_with_or_without_exponent_t str_to_long(str_and_len_tuple_t *sl)
             is_exp_negative = -1;
         }
     }
-    if (sl->has_exponent)
+    if (has_exponent)
     {
         return (long_with_or_without_exponent_t){
             .has_exponent = 1,
@@ -87,6 +89,8 @@ double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t *sl)
         return ERROR_DWOWE;
     }
 
+    char has_exponent = sl->has_exponent;
+
     double number = 0; // Integer part
     double decimals = 0; // Decimal part
     long exponent = 0; // Only used if sl->has_exponent is true
@@ -106,7 +110,7 @@ double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t *sl)
         {
             dot_reached = 1;
         }
-        else if (sl->has_exponent && (c == 'e' || c == 'E'))
+        else if (has_exponent && (c == 'e' || c == 'E'))
         {
             exp_idx = i;
             is_in_exponent = 1;
@@ -132,7 +136,7 @@ double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t *sl)
             is_exp_negative = -1;
         }
     }
-    if (sl->has_exponent)
+    if (has_exponent)
     {
         return (double_with_or_without_exponent_t){
             .has_exponent = 1,
