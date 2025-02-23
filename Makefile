@@ -1,7 +1,9 @@
 -include Makefile.rules
 
 CC=gcc
-CFILES=src/*.c
+CFILESBASE=src/base_*.c src/validator.c
+CFILESRO=src/ro_*.c ro_main.c
+CFILESRW=src/rw_*.c rw_main.c
 
 TESTFILES=tests/*.c
 
@@ -11,12 +13,12 @@ all: clean $(TARGET)
 	./$(TARGET) err.json
 
 rw: clean
-	$(CC) $(CFLAGS) $(CFILES) rw_main.c -o $(TARGET)
+	$(CC) $(CFLAGS) $(CFILESBASE) $(CFILESRW) -o $(TARGET)
 	./$(TARGET) t.json
 
 .PHONY:
 $(TARGET):
-	$(CC) $(CFLAGS) $(CFILES) ro_main.c -o $(TARGET)
+	$(CC) $(CFLAGS) $(CFILESBASE) $(CFILESRO) -o $(TARGET)
 
 clean:
 	if [ -f "$(TARGET)" ]; then rm $(TARGET); fi
@@ -25,7 +27,7 @@ clean:
 valgrind-compile: clean
 	$(CC) $(CFLAGS) \
 		-DVALGRING_DISABLE_PRINT \
-		$(CFILES) ro_main.c -o $(TARGET)
+		$(CFILESBASE) $(CFILESRO) -o $(TARGET)
 
 valgrind: valgrind-compile
 	valgrind --tool=callgrind --dump-instr=yes --simulate-cache=yes \
@@ -36,6 +38,6 @@ leaks: valgrind-compile
          --track-origins=yes ./$(TARGET) t.json
 
 check:
-	$(CC) $(CFLAGS) $(CFILES) $(TESTFILES) -o json-parser-tests -lcriterion
+	$(CC) $(CFLAGS) src/*.c $(TESTFILES) -o json-parser-tests -lcriterion
 	./json-parser-tests
 
