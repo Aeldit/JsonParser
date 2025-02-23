@@ -177,8 +177,6 @@ char check_bools_nulls_numbers_counts(char *buff, char is_dict)
         }
         prev_c = c;
     }
-    printf("\n%lu %lu %lu %lu %lu\n", nb_quotes, nb_opened_curly_brackets,
-           nb_closed_curly_brackets, nb_opened_brackets, nb_closed_brackets);
     return nb_quotes % 2 == 0
         && nb_opened_curly_brackets == nb_closed_curly_brackets
         && nb_opened_brackets == nb_closed_brackets;
