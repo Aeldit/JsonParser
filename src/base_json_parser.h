@@ -13,9 +13,6 @@
 **                                   MACROS                                   **
 *******************************************************************************/
 // The following MACROS are used int the parsing functions
-#define IS_NUMBER_START(c) (('0' <= (c) && (c) <= '9') || (c) == '-')
-#define IS_BOOL_START(c) ((c) == 't' || (c) == 'f')
-
 #define IS_END_CHAR(c)                                                         \
     ((c) == 0 || (c) == ',' || (c) == '\n' || (c) == ']' || (c) == '}')
 
