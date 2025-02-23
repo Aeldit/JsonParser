@@ -18,14 +18,6 @@
 */
 ro_array_t *ro_parse_array_buff(char *b, unsigned long *idx);
 /**
-** \param f The file stream
-** \param pos The postion in the file of the character after the '[' that
-**            begins the current array
-** \returns The json ro_array_t parsed from the position
-*/
-ro_array_t *ro_parse_array(FILE *f, unsigned long *pos);
-
-/**
 ** \param b The buffer containing the json currently being parsed
 ** \param idx A pointer to the index of the character '{' that begins the
 **            current dict.
@@ -35,6 +27,14 @@ ro_array_t *ro_parse_array(FILE *f, unsigned long *pos);
 ** \returns The json dict parsed from the index
 */
 ro_dict_t *ro_parse_dict_buff(char *b, unsigned long *idx);
+
+/**
+** \param f The file stream
+** \param pos The postion in the file of the character after the '[' that
+**            begins the current array
+** \returns The json ro_array_t parsed from the position
+*/
+ro_array_t *ro_parse_array(FILE *f, unsigned long *pos);
 /**
 ** \param f The file stream
 ** \param pos A pointer to the position in the file of the character after

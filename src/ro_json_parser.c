@@ -13,7 +13,7 @@
 #include "validator.h"
 
 /*******************************************************************************
-**                              LOCAL FUNCTIONS                               **
+**                               LOCAL FUNCTIONS                              **
 *******************************************************************************/
 ro_array_t *destroy_ro_array_on_error(ro_array_t *a)
 {
@@ -170,6 +170,165 @@ ro_array_t *ro_parse_array_buff(char *b, unsigned long *idx)
         *idx += i - initial_i;
     }
     return a;
+}
+
+ro_dict_t *ro_parse_dict_buff(char *b, unsigned long *idx)
+{
+    if (!b)
+    {
+        return 0;
+    }
+
+    unsigned long i = idx == 0 ? 0 : *idx + 1;
+
+    unsigned long nb_elts_parsed = 0;
+    unsigned long nb_elts = get_nb_elts_dict_buff(b, i);
+
+    ro_dict_t *d = init_ro_dict(nb_elts);
+    if (!d || nb_elts == 0)
+    {
+        return d;
+    }
+
+    string_t key = NULL_STRING;
+    char c = 0;
+    char is_waiting_key = 1;
+    // We start at 1 because if we entered this function, it means that we
+    // already read a '{'
+    unsigned long initial_i = i;
+    while ((c = b[i]))
+    {
+        if (nb_elts_parsed >= nb_elts)
+        {
+            break;
+        }
+
+        string_t s = NULL_STRING;
+        str_and_len_tuple_t sl = NULL_STR_AND_LEN_TUPLE;
+        unsigned long len = 0;
+        ro_array_t *tmp_ja = 0;
+        ro_dict_t *tmp_jd = 0;
+        switch (c)
+        {
+        case '"':
+            if (is_waiting_key)
+            {
+                if (!(key = parse_string_buff(b, &i)).str)
+                {
+                    return destroy_ro_dict_on_error(d);
+                }
+                is_waiting_key = 0;
+            }
+            else
+            {
+                if (!(s = parse_string_buff(b, &i)).str)
+                {
+                    return destroy_ro_dict_on_error(d);
+                }
+                ro_dict_add_str(d, key, s);
+                ++nb_elts_parsed;
+            }
+            break;
+
+        case '+':
+        case '-':
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+            if (!(sl = parse_number_buff(b, &i)).str)
+            {
+                return destroy_ro_dict_on_error(d);
+            }
+
+            if (sl.is_float)
+            {
+                double_with_or_without_exponent_t dwowe = str_to_double(&sl);
+                switch (dwowe.has_exponent)
+                {
+                case 0:
+                    ro_dict_add_double(d, key, dwowe.double_value);
+                    break;
+                case 1:
+                    ro_dict_add_exp_double(d, key, dwowe.double_exp_value);
+                    break;
+                case 2:
+                    free(sl.str);
+                    return destroy_ro_dict_on_error(d);
+                }
+            }
+            else
+            {
+                long_with_or_without_exponent_t lwowe = str_to_long(&sl);
+                switch (lwowe.has_exponent)
+                {
+                case 0:
+                    ro_dict_add_long(d, key, lwowe.long_value);
+                    break;
+                case 1:
+                    ro_dict_add_exp_long(d, key, lwowe.long_exp_value);
+                    break;
+                case 2:
+                    free(sl.str);
+                    return destroy_ro_dict_on_error(d);
+                }
+            }
+            free(sl.str);
+            ++nb_elts_parsed;
+            break;
+
+        case 't':
+        case 'f':
+            len = parse_boolean_buff(b, &i);
+            if (IS_NOT_BOOLEAN(c, len))
+            {
+                return destroy_ro_dict_on_error(d);
+            }
+            ro_dict_add_bool(d, key, len == 4 ? 1 : 0);
+            ++nb_elts_parsed;
+            break;
+
+        case 'n':
+            ro_dict_add_null(d, key);
+            i += 3;
+            ++nb_elts_parsed;
+            break;
+
+        case '[':
+            if (!(tmp_ja = ro_parse_array_buff(b, &i)))
+            {
+                return destroy_ro_dict_on_error(d);
+            }
+            ro_dict_add_array(d, key, tmp_ja);
+            ++nb_elts_parsed;
+            break;
+
+        case '{':
+            if (!(tmp_jd = ro_parse_dict_buff(b, &i)))
+            {
+                return destroy_ro_dict_on_error(d);
+            }
+            ro_dict_add_dict(d, key, tmp_jd);
+            ++nb_elts_parsed;
+            break;
+
+        case ',':
+            is_waiting_key = 1;
+            break;
+        }
+        ++i;
+    }
+    if (idx)
+    {
+        *idx += i - initial_i;
+    }
+    return d;
 }
 
 ro_array_t *ro_parse_array(FILE *f, unsigned long *pos)
@@ -344,165 +503,6 @@ ro_array_t *ro_parse_array(FILE *f, unsigned long *pos)
     }
     *pos = i - 1;
     return a;
-}
-
-ro_dict_t *ro_parse_dict_buff(char *b, unsigned long *idx)
-{
-    if (!b)
-    {
-        return 0;
-    }
-
-    unsigned long i = idx == 0 ? 0 : *idx + 1;
-
-    unsigned long nb_elts_parsed = 0;
-    unsigned long nb_elts = get_nb_elts_dict_buff(b, i);
-
-    ro_dict_t *d = init_ro_dict(nb_elts);
-    if (!d || nb_elts == 0)
-    {
-        return d;
-    }
-
-    string_t key = NULL_STRING;
-    char c = 0;
-    char is_waiting_key = 1;
-    // We start at 1 because if we entered this function, it means that we
-    // already read a '{'
-    unsigned long initial_i = i;
-    while ((c = b[i]))
-    {
-        if (nb_elts_parsed >= nb_elts)
-        {
-            break;
-        }
-
-        string_t s = NULL_STRING;
-        str_and_len_tuple_t sl = NULL_STR_AND_LEN_TUPLE;
-        unsigned long len = 0;
-        ro_array_t *tmp_ja = 0;
-        ro_dict_t *tmp_jd = 0;
-        switch (c)
-        {
-        case '"':
-            if (is_waiting_key)
-            {
-                if (!(key = parse_string_buff(b, &i)).str)
-                {
-                    return destroy_ro_dict_on_error(d);
-                }
-                is_waiting_key = 0;
-            }
-            else
-            {
-                if (!(s = parse_string_buff(b, &i)).str)
-                {
-                    return destroy_ro_dict_on_error(d);
-                }
-                ro_dict_add_str(d, key, s);
-                ++nb_elts_parsed;
-            }
-            break;
-
-        case '+':
-        case '-':
-        case '0':
-        case '1':
-        case '2':
-        case '3':
-        case '4':
-        case '5':
-        case '6':
-        case '7':
-        case '8':
-        case '9':
-            if (!(sl = parse_number_buff(b, &i)).str)
-            {
-                return destroy_ro_dict_on_error(d);
-            }
-
-            if (sl.is_float)
-            {
-                double_with_or_without_exponent_t dwowe = str_to_double(&sl);
-                switch (dwowe.has_exponent)
-                {
-                case 0:
-                    ro_dict_add_double(d, key, dwowe.double_value);
-                    break;
-                case 1:
-                    ro_dict_add_exp_double(d, key, dwowe.double_exp_value);
-                    break;
-                case 2:
-                    free(sl.str);
-                    return destroy_ro_dict_on_error(d);
-                }
-            }
-            else
-            {
-                long_with_or_without_exponent_t lwowe = str_to_long(&sl);
-                switch (lwowe.has_exponent)
-                {
-                case 0:
-                    ro_dict_add_long(d, key, lwowe.long_value);
-                    break;
-                case 1:
-                    ro_dict_add_exp_long(d, key, lwowe.long_exp_value);
-                    break;
-                case 2:
-                    free(sl.str);
-                    return destroy_ro_dict_on_error(d);
-                }
-            }
-            free(sl.str);
-            ++nb_elts_parsed;
-            break;
-
-        case 't':
-        case 'f':
-            len = parse_boolean_buff(b, &i);
-            if (IS_NOT_BOOLEAN(c, len))
-            {
-                return destroy_ro_dict_on_error(d);
-            }
-            ro_dict_add_bool(d, key, len == 4 ? 1 : 0);
-            ++nb_elts_parsed;
-            break;
-
-        case 'n':
-            ro_dict_add_null(d, key);
-            i += 3;
-            ++nb_elts_parsed;
-            break;
-
-        case '[':
-            if (!(tmp_ja = ro_parse_array_buff(b, &i)))
-            {
-                return destroy_ro_dict_on_error(d);
-            }
-            ro_dict_add_array(d, key, tmp_ja);
-            ++nb_elts_parsed;
-            break;
-
-        case '{':
-            if (!(tmp_jd = ro_parse_dict_buff(b, &i)))
-            {
-                return destroy_ro_dict_on_error(d);
-            }
-            ro_dict_add_dict(d, key, tmp_jd);
-            ++nb_elts_parsed;
-            break;
-
-        case ',':
-            is_waiting_key = 1;
-            break;
-        }
-        ++i;
-    }
-    if (idx)
-    {
-        *idx += i - initial_i;
-    }
-    return d;
 }
 
 ro_dict_t *ro_parse_dict(FILE *f, unsigned long *pos)
