@@ -20,11 +20,6 @@ char is_number_valid(char *buff, unsigned long *idx)
     char prev_c = 0;
     while ((c = buff[i++]))
     {
-        if (c == ',')
-        {
-            break;
-        }
-
         // sign not preceded by an exponent
         if (nb_inc_idx > 0 && (c == '+' || c == '-')
             && !(prev_c == 'e' || prev_c == 'E'))
@@ -47,9 +42,14 @@ char is_number_valid(char *buff, unsigned long *idx)
             return 0;
         }
         ++nb_inc_idx;
+
+        if (c == ',' || c == '\n')
+        {
+            break;
+        }
         prev_c = c;
     }
-    *idx += nb_inc_idx;
+    *idx += nb_inc_idx - 1;
     return 1;
 }
 
@@ -58,7 +58,7 @@ char is_number_valid(char *buff, unsigned long *idx)
 **        are valid, if the quotes are in even number, and brackets and curly
 **        brackets have a matching number of opening and closing
 */
-char check_bools_nulls_numbers_counts(char *buff)
+char check_bools_nulls_numbers_counts(char *buff, char is_dict)
 {
     if (!buff)
     {
@@ -68,8 +68,8 @@ char check_bools_nulls_numbers_counts(char *buff)
     unsigned long buff_len = strlen(buff);
 
     unsigned long nb_quotes = 0;
-    unsigned long nb_opened_curly_brackets = 0;
-    unsigned long nb_opened_brackets = 0;
+    unsigned long nb_opened_curly_brackets = is_dict;
+    unsigned long nb_opened_brackets = !is_dict;
     unsigned long nb_closed_curly_brackets = 0;
     unsigned long nb_closed_brackets = 0;
 
@@ -77,14 +77,14 @@ char check_bools_nulls_numbers_counts(char *buff)
 
     char c = 0;
     char prev_c = 0;
-    unsigned long i = 0;
+    unsigned long i = 1; // We already read the first character of the file
     while ((c = buff[i++]))
     {
         if (is_in_string)
         {
             if (c == '"' && prev_c != '\\') // String end
             {
-                --is_in_string;
+                is_in_string = 0;
                 ++nb_quotes;
                 prev_c = c;
             }
@@ -177,6 +177,8 @@ char check_bools_nulls_numbers_counts(char *buff)
         }
         prev_c = c;
     }
+    printf("\n%lu %lu %lu %lu %lu\n", nb_quotes, nb_opened_curly_brackets,
+           nb_closed_curly_brackets, nb_opened_brackets, nb_closed_brackets);
     return nb_quotes % 2 == 0
         && nb_opened_curly_brackets == nb_closed_curly_brackets
         && nb_opened_brackets == nb_closed_brackets;
@@ -191,13 +193,13 @@ char check_arrays_and_dicts(char *buff)
     return 1;
 }
 
-char is_json_valid_buff(char *buff)
+char is_json_valid_buff(char *buff, char is_dict)
 {
     if (!buff)
     {
         return 0;
     }
-    return check_bools_nulls_numbers_counts(buff);
+    return check_bools_nulls_numbers_counts(buff, is_dict);
 }
 
 // TODO: Implement

@@ -733,7 +733,7 @@ ro_json_t *ro_parse(char *file)
             }
             fread(b, sizeof(char), nb_chars, f);
 
-            if (!is_json_valid_buff(b))
+            if (!is_json_valid_buff(b, 1))
             {
                 printf("Invalid json file");
                 free(b);
@@ -770,7 +770,7 @@ ro_json_t *ro_parse(char *file)
             }
             fread(b, sizeof(char), nb_chars, f);
 
-            if (!is_json_valid_buff(b))
+            if (!is_json_valid_buff(b, 0))
             {
                 printf("Invalid json file");
                 free(b);
