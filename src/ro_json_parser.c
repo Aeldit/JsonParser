@@ -21,8 +21,9 @@ ro_array_t *destroy_ro_array_on_error(ro_array_t *a)
     return 0;
 }
 
-ro_dict_t *destroy_ro_dict_on_error(ro_dict_t *d)
+ro_dict_t *destroy_ro_dict_on_error(ro_dict_t *d, string_t key)
 {
+    destroy_string(key);
     destroy_ro_dict(d);
     return 0;
 }
@@ -215,7 +216,7 @@ ro_dict_t *ro_parse_dict_buff(char *b, unsigned long *idx)
             {
                 if (!(key = parse_string_buff(b, &i)).str)
                 {
-                    return destroy_ro_dict_on_error(d);
+                    return destroy_ro_dict_on_error(d, key);
                 }
                 is_waiting_key = 0;
             }
@@ -223,7 +224,7 @@ ro_dict_t *ro_parse_dict_buff(char *b, unsigned long *idx)
             {
                 if (!(s = parse_string_buff(b, &i)).str)
                 {
-                    return destroy_ro_dict_on_error(d);
+                    return destroy_ro_dict_on_error(d, key);
                 }
                 ro_dict_add_str(d, key, s);
                 ++nb_elts_parsed;
@@ -244,7 +245,7 @@ ro_dict_t *ro_parse_dict_buff(char *b, unsigned long *idx)
         case '9':
             if (!(sl = parse_number_buff(b, &i)).str)
             {
-                return destroy_ro_dict_on_error(d);
+                return destroy_ro_dict_on_error(d, key);
             }
 
             if (sl.is_float)
@@ -260,7 +261,7 @@ ro_dict_t *ro_parse_dict_buff(char *b, unsigned long *idx)
                     break;
                 case 2:
                     free(sl.str);
-                    return destroy_ro_dict_on_error(d);
+                    return destroy_ro_dict_on_error(d, key);
                 }
             }
             else
@@ -276,7 +277,7 @@ ro_dict_t *ro_parse_dict_buff(char *b, unsigned long *idx)
                     break;
                 case 2:
                     free(sl.str);
-                    return destroy_ro_dict_on_error(d);
+                    return destroy_ro_dict_on_error(d, key);
                 }
             }
             free(sl.str);
@@ -288,7 +289,7 @@ ro_dict_t *ro_parse_dict_buff(char *b, unsigned long *idx)
             len = parse_boolean_buff(b, &i);
             if (IS_NOT_BOOLEAN(c, len))
             {
-                return destroy_ro_dict_on_error(d);
+                return destroy_ro_dict_on_error(d, key);
             }
             ro_dict_add_bool(d, key, len == 4 ? 1 : 0);
             ++nb_elts_parsed;
@@ -303,7 +304,7 @@ ro_dict_t *ro_parse_dict_buff(char *b, unsigned long *idx)
         case '[':
             if (!(tmp_ja = ro_parse_array_buff(b, &i)))
             {
-                return destroy_ro_dict_on_error(d);
+                return destroy_ro_dict_on_error(d, key);
             }
             ro_dict_add_array(d, key, tmp_ja);
             ++nb_elts_parsed;
@@ -312,7 +313,7 @@ ro_dict_t *ro_parse_dict_buff(char *b, unsigned long *idx)
         case '{':
             if (!(tmp_jd = ro_parse_dict_buff(b, &i)))
             {
-                return destroy_ro_dict_on_error(d);
+                return destroy_ro_dict_on_error(d, key);
             }
             ro_dict_add_dict(d, key, tmp_jd);
             ++nb_elts_parsed;
@@ -542,7 +543,7 @@ ro_dict_t *ro_parse_dict(FILE *f, unsigned long *pos)
             {
                 if (!(key = parse_string(f, &i)).str)
                 {
-                    return destroy_ro_dict_on_error(d);
+                    return destroy_ro_dict_on_error(d, key);
                 }
                 is_waiting_key = 0;
             }
@@ -550,7 +551,7 @@ ro_dict_t *ro_parse_dict(FILE *f, unsigned long *pos)
             {
                 if (!(s = parse_string(f, &i)).str)
                 {
-                    return destroy_ro_dict_on_error(d);
+                    return destroy_ro_dict_on_error(d, key);
                 }
                 ro_dict_add_str(d, key, s);
                 ++nb_elts_parsed;
@@ -571,7 +572,7 @@ ro_dict_t *ro_parse_dict(FILE *f, unsigned long *pos)
         case '9':
             if (!(sl = parse_number(f, &i)).str)
             {
-                return destroy_ro_dict_on_error(d);
+                return destroy_ro_dict_on_error(d, key);
             }
 
             if (sl.is_float)
@@ -587,7 +588,7 @@ ro_dict_t *ro_parse_dict(FILE *f, unsigned long *pos)
                     break;
                 case 2:
                     free(sl.str);
-                    return destroy_ro_dict_on_error(d);
+                    return destroy_ro_dict_on_error(d, key);
                 }
             }
             else
@@ -603,7 +604,7 @@ ro_dict_t *ro_parse_dict(FILE *f, unsigned long *pos)
                     break;
                 case 2:
                     free(sl.str);
-                    return destroy_ro_dict_on_error(d);
+                    return destroy_ro_dict_on_error(d, key);
                 }
             }
             free(sl.str);
@@ -615,7 +616,7 @@ ro_dict_t *ro_parse_dict(FILE *f, unsigned long *pos)
             len = parse_boolean(f, &i);
             if (IS_NOT_BOOLEAN(c, len))
             {
-                return destroy_ro_dict_on_error(d);
+                return destroy_ro_dict_on_error(d, key);
             }
             ro_dict_add_bool(d, key, len == 4 ? 1 : 0);
             ++nb_elts_parsed;
@@ -637,12 +638,12 @@ ro_dict_t *ro_parse_dict(FILE *f, unsigned long *pos)
                 if (!b || fseek(f, i, SEEK_SET) != 0)
                 {
                     free(b);
-                    return destroy_ro_dict_on_error(d);
+                    return destroy_ro_dict_on_error(d, key);
                 }
                 fread(b, sizeof(char), nb_chars, f);
                 if (!(tmp_ja = ro_parse_array_buff(b, 0)))
                 {
-                    return destroy_ro_dict_on_error(d);
+                    return destroy_ro_dict_on_error(d, key);
                 }
                 free(b);
                 i += nb_chars;
@@ -651,7 +652,7 @@ ro_dict_t *ro_parse_dict(FILE *f, unsigned long *pos)
             {
                 if (!(tmp_ja = ro_parse_array(f, &i)))
                 {
-                    return destroy_ro_dict_on_error(d);
+                    return destroy_ro_dict_on_error(d, key);
                 }
             }
             ro_dict_add_array(d, key, tmp_ja);
@@ -668,12 +669,12 @@ ro_dict_t *ro_parse_dict(FILE *f, unsigned long *pos)
                 if (!b || fseek(f, i, SEEK_SET) != 0)
                 {
                     free(b);
-                    return destroy_ro_dict_on_error(d);
+                    return destroy_ro_dict_on_error(d, key);
                 }
                 fread(b, sizeof(char), nb_chars, f);
                 if (!(tmp_jd = ro_parse_dict_buff(b, 0)))
                 {
-                    return destroy_ro_dict_on_error(d);
+                    return destroy_ro_dict_on_error(d, key);
                 }
                 free(b);
                 i += nb_chars;
@@ -682,7 +683,7 @@ ro_dict_t *ro_parse_dict(FILE *f, unsigned long *pos)
             {
                 if (!(tmp_jd = ro_parse_dict(f, &i)))
                 {
-                    return destroy_ro_dict_on_error(d);
+                    return destroy_ro_dict_on_error(d, key);
                 }
             }
             ro_dict_add_dict(d, key, tmp_jd);
