@@ -442,10 +442,9 @@ unsigned long get_nb_elts_array_buff(char *buff, unsigned long idx)
     char is_in_string = 0;
     char is_backslashing = 0;
     char comma_encountered = 0;
-    while (1)
+    while ((c = buff[idx]))
     {
-        c = buff[idx];
-        if (!is_in_array || c == 0)
+        if (!is_in_array)
         {
             break;
         }
@@ -462,37 +461,42 @@ unsigned long get_nb_elts_array_buff(char *buff, unsigned long idx)
         // If we are not in a string or if the string just ended
         if (!is_in_string || (is_in_string && c == '"' && !is_backslashing))
         {
-            if (c == '"')
+            switch (c)
             {
+            case '"':
                 is_in_string = !is_in_string;
-            }
-            else if (c == '[')
-            {
+                break;
+
+            case '[':
                 if (max_nested_arrays_reached(is_in_array))
                 {
                     return 0;
                 }
                 ++is_in_array;
-            }
-            else if (c == ']')
-            {
+                break;
+
+            case ']':
                 --is_in_array;
-            }
-            else if (c == '{')
-            {
+                break;
+
+            case '{':
                 if (max_nested_dicts_reached(is_in_dict))
                 {
                     return 0;
                 }
                 ++is_in_dict;
-            }
-            else if (c == '}')
-            {
+                break;
+
+            case '}':
                 --is_in_dict;
-            }
-            else if (!is_in_dict && is_in_array == 1 && c == ',')
-            {
-                ++nb_elts;
+                break;
+
+            case ',':
+                if (!is_in_dict && is_in_array == 1)
+                {
+                    ++nb_elts;
+                }
+                break;
             }
         }
         ++idx;
@@ -549,44 +553,42 @@ unsigned long get_nb_elts_array(FILE *f, unsigned long pos)
         // If we are not in a string or if the string just ended
         if (!is_in_string || (is_in_string && c == '"' && !is_backslashing))
         {
-            if (c == '"')
+            switch (c)
             {
+            case '"':
                 is_in_string = !is_in_string;
-            }
-            else if (c == '[')
-            {
+                break;
+
+            case '[':
                 if (max_nested_arrays_reached(is_in_array))
                 {
                     return 0;
                 }
                 ++is_in_array;
-            }
-            else if (c == ']')
-            {
-                // Empty ro_array_t
-                // TODO: Remove this and put it at the top like in the
-                // buffered version
-                if (is_in_array == 1 && prev_c == 0)
-                {
-                    return 0;
-                }
+                break;
+
+            case ']':
                 --is_in_array;
-            }
-            else if (c == '{')
-            {
+                break;
+
+            case '{':
                 if (max_nested_dicts_reached(is_in_dict))
                 {
                     return 0;
                 }
                 ++is_in_dict;
-            }
-            else if (c == '}')
-            {
+                break;
+
+            case '}':
                 --is_in_dict;
-            }
-            else if (!is_in_dict && is_in_array == 1 && c == ',')
-            {
-                ++nb_elts;
+                break;
+
+            case ',':
+                if (!is_in_dict && is_in_array == 1)
+                {
+                    ++nb_elts;
+                }
+                break;
             }
         }
 
@@ -623,10 +625,9 @@ unsigned long get_nb_elts_dict_buff(char *buff, unsigned long idx)
     char is_in_string = 0;
     char is_backslashing = 0;
     char c = 0;
-    while (1)
+    while ((c = buff[idx]))
     {
-        c = buff[idx];
-        if (!is_in_dict || c == 0)
+        if (!is_in_dict)
         {
             break;
         }
@@ -639,38 +640,43 @@ unsigned long get_nb_elts_dict_buff(char *buff, unsigned long idx)
         // If we are not in a string or if the string just ended
         if (!is_in_string || (is_in_string && c == '"' && !is_backslashing))
         {
-            if (c == '"')
+            switch (c)
             {
+            case '"':
                 is_in_string = !is_in_string;
                 single_elt_found = 1;
-            }
-            else if (c == '[')
-            {
+                break;
+
+            case '[':
                 if (max_nested_arrays_reached(is_in_array))
                 {
                     return 0;
                 }
                 ++is_in_array;
-            }
-            else if (c == ']')
-            {
+                break;
+
+            case ']':
                 --is_in_array;
-            }
-            else if (c == '{')
-            {
+                break;
+
+            case '{':
                 if (max_nested_dicts_reached(is_in_dict))
                 {
                     return 0;
                 }
                 ++is_in_dict;
-            }
-            else if (c == '}')
-            {
+                break;
+
+            case '}':
                 --is_in_dict;
-            }
-            else if (!is_in_array && is_in_dict == 1 && c == ',')
-            {
-                ++nb_elts;
+                break;
+
+            case ',':
+                if (!is_in_array && is_in_dict == 1)
+                {
+                    ++nb_elts;
+                }
+                break;
             }
         }
         ++idx;
@@ -706,38 +712,43 @@ unsigned long get_nb_elts_dict(FILE *f, unsigned long pos)
         // If we are not in a string or if the string just ended
         if (!is_in_string || (is_in_string && c == '"' && !is_backslashing))
         {
-            if (c == '"')
+            switch (c)
             {
+            case '"':
                 is_in_string = !is_in_string;
                 single_elt_found = 1;
-            }
-            else if (c == '[')
-            {
+                break;
+
+            case '[':
                 if (max_nested_arrays_reached(is_in_array))
                 {
                     return 0;
                 }
                 ++is_in_array;
-            }
-            else if (c == ']')
-            {
+                break;
+
+            case ']':
                 --is_in_array;
-            }
-            else if (c == '{')
-            {
+                break;
+
+            case '{':
                 if (max_nested_dicts_reached(is_in_dict))
                 {
                     return 0;
                 }
                 ++is_in_dict;
-            }
-            else if (c == '}')
-            {
+                break;
+
+            case '}':
                 --is_in_dict;
-            }
-            else if (!is_in_array && is_in_dict == 1 && c == ',')
-            {
-                ++nb_elts;
+                break;
+
+            case ',':
+                if (!is_in_array && is_in_dict == 1)
+                {
+                    ++nb_elts;
+                }
+                break;
             }
         }
 
@@ -774,33 +785,35 @@ unsigned long get_nb_chars_in_array(FILE *f, unsigned long pos)
         // If we are not in a string or if the string just ended
         if (!is_in_string || (is_in_string && c == '"' && !is_backslashing))
         {
-            if (c == '"')
+            switch (c)
             {
+            case '"':
                 is_in_string = !is_in_string;
-            }
-            else if (c == '[')
-            {
+                break;
+
+            case '[':
                 if (max_nested_arrays_reached(is_in_array))
                 {
                     return 0;
                 }
                 ++is_in_array;
-            }
-            else if (c == ']')
-            {
+                break;
+
+            case ']':
                 --is_in_array;
-            }
-            else if (c == '{')
-            {
+                break;
+
+            case '{':
                 if (max_nested_dicts_reached(is_in_dict))
                 {
                     return 0;
                 }
                 ++is_in_dict;
-            }
-            else if (c == '}')
-            {
+                break;
+
+            case '}':
                 --is_in_dict;
+                break;
             }
         }
 
@@ -838,33 +851,35 @@ unsigned long get_nb_chars_in_dict(FILE *f, unsigned long pos)
         // If we are not in a string or if the string just ended
         if (!is_in_string || (is_in_string && c == '"' && !is_backslashing))
         {
-            if (c == '"')
+            switch (c)
             {
+            case '"':
                 is_in_string = !is_in_string;
-            }
-            else if (c == '[')
-            {
+                break;
+
+            case '[':
                 if (max_nested_arrays_reached(is_in_array))
                 {
                     return 0;
                 }
                 ++is_in_array;
-            }
-            else if (c == ']')
-            {
+                break;
+
+            case ']':
                 --is_in_array;
-            }
-            else if (c == '{')
-            {
+                break;
+
+            case '{':
                 if (max_nested_dicts_reached(is_in_dict))
                 {
                     return 0;
                 }
                 ++is_in_dict;
-            }
-            else if (c == '}')
-            {
+                break;
+
+            case '}':
                 --is_in_dict;
+                break;
             }
         }
 
