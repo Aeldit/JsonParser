@@ -1,8 +1,5 @@
 #include "validator.h"
 
-#include <stdio.h>
-#include <string.h>
-
 /**
 ** \brief Called after encountering a '+' or '-' sign, or any digit.
 **        Starts from the sign or digit that started the number
@@ -58,14 +55,13 @@ char is_number_valid(char *buff, unsigned long *idx)
 **        are valid, if the quotes are in even number, and brackets and curly
 **        brackets have a matching number of opening and closing
 */
-char check_bools_nulls_numbers_counts(char *buff, char is_dict)
+char check_bools_nulls_numbers_counts(char *buff, unsigned long buff_len,
+                                      char is_dict)
 {
     if (!buff)
     {
         return 0;
     }
-
-    unsigned long buff_len = strlen(buff);
 
     unsigned long nb_quotes = 0;
     unsigned long nb_opened_curly_brackets = is_dict;
@@ -191,13 +187,13 @@ char check_arrays_and_dicts(char *buff)
     return 1;
 }
 
-char is_json_valid_buff(char *buff, char is_dict)
+char is_json_valid_buff(char *buff, unsigned long buff_len, char is_dict)
 {
     if (!buff)
     {
         return 0;
     }
-    return check_bools_nulls_numbers_counts(buff, is_dict);
+    return check_bools_nulls_numbers_counts(buff, buff_len, is_dict);
 }
 
 // TODO: Implement

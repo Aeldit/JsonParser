@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 
-char is_json_valid_buff(char *buff, char is_dict);
+char is_json_valid_buff(char *buff, unsigned long buff_len, char is_dict);
 char is_json_valid(FILE *buff);
 
 #endif // !VALIDATOR_H
