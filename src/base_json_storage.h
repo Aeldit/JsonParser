@@ -1,6 +1,9 @@
 #ifndef BASE_JSON_STORAGE_H
 #define BASE_JSON_STORAGE_H
 
+#include <stddef.h>
+#include <stdint.h>
+
 /*******************************************************************************
 **                              DEFINES / MACROS                              **
 *******************************************************************************/
@@ -19,7 +22,7 @@
     ((string_t){ .str = (s), .len = (l), .needs_freeing = 1 })
 #define STRING_NOFREE_OF(s, l)                                                 \
     ((string_t){ .str = (s), .len = (l), .needs_freeing = 0 })
-#define NULL_STRING ((string_t){ .str = 0, .len = 0 })
+#define NULL_STRING ((string_t){ .str = 0, .len = 0, .needs_freeing = 0 })
 
 /*
 ** \def Checks if the JSON instance is not null, if the JSON instance is an
@@ -34,12 +37,16 @@
 #define IS_DICT(j) ((j) && !(j->is_array) && (j->dict))
 
 /*******************************************************************************
+**                                  TYPEDEFS                                  **
+*******************************************************************************/
+
+/*******************************************************************************
 **                                 STRUCTURES                                 **
 *******************************************************************************/
 typedef struct
 {
     char *str;
-    unsigned len;
+    size_t len;
     char needs_freeing;
 } string_t;
 

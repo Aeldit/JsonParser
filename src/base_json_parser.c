@@ -19,7 +19,7 @@ long_with_or_without_exponent_t str_to_long(str_and_len_tuple_t *sl)
     }
 
     char *str = sl->str;
-    unsigned long len = sl->len;
+    size_t len = sl->len;
     if (!str || len == 0)
     {
         return ERROR_LWOWE;
@@ -34,7 +34,7 @@ long_with_or_without_exponent_t str_to_long(str_and_len_tuple_t *sl)
     char is_exp_negative = 1;
     char is_in_exponent = 0;
     char c = 0;
-    for (unsigned long i = 0; i < len; ++i)
+    for (size_t i = 0; i < len; ++i)
     {
         c = str[i];
         if (has_exponent && (c == 'e' || c == 'E'))
@@ -83,7 +83,7 @@ double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t *sl)
     }
 
     char *str = sl->str;
-    unsigned long len = sl->len;
+    size_t len = sl->len;
     if (!str || len == 0)
     {
         return ERROR_DWOWE;
@@ -103,7 +103,7 @@ double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t *sl)
     char dot_reached = 0;
     char is_in_exponent = 0;
     char c = 0;
-    for (unsigned long i = 0; i < len; ++i)
+    for (size_t i = 0; i < len; ++i)
     {
         c = str[i];
         if (c == '.')
@@ -156,14 +156,14 @@ double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t *sl)
     };
 }
 
-char is_float(char *str, unsigned long len)
+char is_float(char *str, size_t len)
 {
     if (!str)
     {
         return 0;
     }
 
-    for (unsigned long i = 0; i < len; ++i)
+    for (size_t i = 0; i < len; ++i)
     {
         if (str[i] == '.')
         {
@@ -173,14 +173,14 @@ char is_float(char *str, unsigned long len)
     return 0;
 }
 
-char has_exponent(char *str, unsigned long len)
+char has_exponent(char *str, size_t len)
 {
     if (!str)
     {
         return 0;
     }
 
-    for (unsigned long i = 0; i < len; ++i)
+    for (size_t i = 0; i < len; ++i)
     {
         if (str[i] == 'e' || str[i] == 'E')
         {
@@ -219,15 +219,15 @@ char max_nested_dicts_reached(long is_in_dict)
 /***************************************
 **              PARSING               **
 ***************************************/
-string_t parse_string_buff(char *buff, unsigned long *idx)
+string_t parse_string_buff(char *buff, size_t *idx)
 {
     if (!buff || !idx)
     {
         return NULL_STRING;
     }
 
-    unsigned long start_idx = *idx + 1;
-    unsigned long len = 0;
+    size_t start_idx = *idx + 1;
+    size_t len = 0;
     char c = 0;
     char prev_c = 0;
     // Counts the number of characters until the first one that is an 'end char'
@@ -260,14 +260,14 @@ string_t parse_string_buff(char *buff, unsigned long *idx)
     return STRING_OF(str, len);
 }
 
-string_t parse_string(FILE *f, unsigned long *pos)
+string_t parse_string(FILE *f, size_t *pos)
 {
     if (!f || !pos)
     {
         return NULL_STRING;
     }
 
-    unsigned long i = *pos;
+    size_t i = *pos;
     char c = 0;
     char prev_c = 0;
     while (SEEK_AND_GET_CHAR(i) && !IS_STRING_END(c))
@@ -275,7 +275,7 @@ string_t parse_string(FILE *f, unsigned long *pos)
         prev_c = c;
     }
 
-    unsigned len = i - *pos - 1;
+    size_t len = i - *pos - 1;
     if (!len)
     {
         ++(*pos);
@@ -300,7 +300,7 @@ string_t parse_string(FILE *f, unsigned long *pos)
     return STRING_OF(str, len);
 }
 
-str_and_len_tuple_t parse_number_buff(char *buff, unsigned long *idx)
+str_and_len_tuple_t parse_number_buff(char *buff, size_t *idx)
 {
     if (!buff || !idx)
     {
@@ -308,8 +308,8 @@ str_and_len_tuple_t parse_number_buff(char *buff, unsigned long *idx)
     }
 
     // Counts the number of characters until the first one that is an 'end char'
-    unsigned long end_idx = *idx;
-    unsigned long initial_i = end_idx;
+    size_t end_idx = *idx;
+    size_t initial_i = end_idx;
     char c = 0;
     while (1)
     {
@@ -322,7 +322,7 @@ str_and_len_tuple_t parse_number_buff(char *buff, unsigned long *idx)
     }
 
     // Number of chars
-    unsigned long len = end_idx - initial_i;
+    size_t len = end_idx - initial_i;
     if (len == 0)
     {
         return NULL_STR_AND_LEN_TUPLE;
@@ -340,7 +340,7 @@ str_and_len_tuple_t parse_number_buff(char *buff, unsigned long *idx)
     return STR_AND_LEN_OF(str, len, is_float(str, len), has_exponent(str, len));
 }
 
-str_and_len_tuple_t parse_number(FILE *f, unsigned long *pos)
+str_and_len_tuple_t parse_number(FILE *f, size_t *pos)
 {
     if (!f || !pos)
     {
@@ -349,7 +349,7 @@ str_and_len_tuple_t parse_number(FILE *f, unsigned long *pos)
 
     // Obtains the length of the value
     // -1 because we already read the first digit (or sign)
-    unsigned long end_pos = *pos - 1;
+    size_t end_pos = *pos - 1;
 
     char c = 0;
     // end_pos is incremented for each character found to be part of a
@@ -358,7 +358,7 @@ str_and_len_tuple_t parse_number(FILE *f, unsigned long *pos)
     {
     }
 
-    unsigned long len = end_pos - *pos;
+    size_t len = end_pos - *pos;
     if (len == 0)
     {
         return NULL_STR_AND_LEN_TUPLE;
@@ -383,14 +383,14 @@ str_and_len_tuple_t parse_number(FILE *f, unsigned long *pos)
     return STR_AND_LEN_OF(str, len, is_float(str, len), has_exponent(str, len));
 }
 
-unsigned long parse_boolean_buff(char *buff, unsigned long *idx)
+size_t parse_boolean_buff(char *buff, size_t *idx)
 {
     if (!buff || !idx)
     {
         return 0;
     }
 
-    unsigned long end_idx = *idx;
+    size_t end_idx = *idx;
     char c = 0;
     while (1)
     {
@@ -401,12 +401,12 @@ unsigned long parse_boolean_buff(char *buff, unsigned long *idx)
         }
         ++end_idx;
     }
-    unsigned long len = end_idx - *idx;
+    size_t len = end_idx - *idx;
     *idx += len - 1;
     return len;
 }
 
-unsigned long parse_boolean(FILE *f, unsigned long *pos)
+size_t parse_boolean(FILE *f, size_t *pos)
 {
     if (!f || !pos)
     {
@@ -414,7 +414,7 @@ unsigned long parse_boolean(FILE *f, unsigned long *pos)
     }
 
     // -1 because we already read the first character
-    unsigned long end_pos = *pos - 1;
+    size_t end_pos = *pos - 1;
 
     char c = 0;
     // end_pos is incremented for each character found to be part of a
@@ -422,19 +422,20 @@ unsigned long parse_boolean(FILE *f, unsigned long *pos)
     while (SEEK_AND_GET_CHAR(end_pos) && !IS_END_CHAR(c))
     {
     }
-    unsigned long len = end_pos - *pos;
+    size_t len = end_pos - *pos;
     *pos += len - 1;
     return len;
 }
 
-unsigned long get_nb_elts_array_buff(char *buff, unsigned long idx)
+size_t get_nb_elts_array_buff(char *buff, size_t idx)
 {
     if (!buff || buff[idx] == ']')
     {
         return 0;
     }
 
-    unsigned long nb_elts = 0;
+    size_t nb_elts = 0;
+    // TODO: Check if we can put as unsigned
     long is_in_array = 1;
     long is_in_dict = 0;
     char c = 0;
@@ -517,14 +518,14 @@ unsigned long get_nb_elts_array_buff(char *buff, unsigned long idx)
     return nb_elts;
 }
 
-unsigned long get_nb_elts_array(FILE *f, unsigned long pos)
+size_t get_nb_elts_array(FILE *f, size_t pos)
 {
     if (!f)
     {
         return 0;
     }
 
-    unsigned long nb_elts = 0;
+    size_t nb_elts = 0;
 
     long is_in_array = 1;
     long is_in_dict = 0;
@@ -608,14 +609,15 @@ unsigned long get_nb_elts_array(FILE *f, unsigned long pos)
     return nb_elts;
 }
 
-unsigned long get_nb_elts_dict_buff(char *buff, unsigned long idx)
+size_t get_nb_elts_dict_buff(char *buff, size_t idx)
 {
     if (!buff || idx >= MAX_READ_BUFF_SIZE || buff[idx] == '}')
     {
         return 0;
     }
 
-    unsigned long nb_elts = 0;
+    size_t nb_elts = 0;
+
     // Used for the case where the dict contains only one element, and so
     // does not contain a ','
     unsigned long single_elt_found = 0;
@@ -624,6 +626,7 @@ unsigned long get_nb_elts_dict_buff(char *buff, unsigned long idx)
     long is_in_array = 0;
     char is_in_string = 0;
     char is_backslashing = 0;
+
     char c = 0;
     while ((c = buff[idx]))
     {
@@ -684,22 +687,23 @@ unsigned long get_nb_elts_dict_buff(char *buff, unsigned long idx)
     return nb_elts == 0 ? single_elt_found : nb_elts + 1;
 }
 
-unsigned long get_nb_elts_dict(FILE *f, unsigned long pos)
+size_t get_nb_elts_dict(FILE *f, size_t pos)
 {
     if (!f)
     {
         return 0;
     }
 
-    unsigned long nb_elts = 0;
+    size_t nb_elts = 0;
+
+    // Used for the case where the dict contains only one element, and so
+    // does not contain a ','
+    unsigned long single_elt_found = 0;
 
     long is_in_dict = 1;
     long is_in_array = 0;
     char is_in_string = 0;
     char is_backslashing = 0;
-    // Used for the case where the dict contains only one element, and so
-    // does not contain a ','
-    unsigned long single_elt_found = 0;
 
     char c = 0;
     while (SEEK_AND_GET_CHAR(pos))
@@ -760,14 +764,14 @@ unsigned long get_nb_elts_dict(FILE *f, unsigned long pos)
     return nb_elts == 0 ? single_elt_found : nb_elts + 1;
 }
 
-unsigned long get_nb_chars_in_array(FILE *f, unsigned long pos)
+size_t get_nb_chars_in_array(FILE *f, size_t pos)
 {
     if (!f)
     {
         return 0;
     }
 
-    unsigned long nb_chars = 0;
+    size_t nb_chars = 0;
 
     long is_in_array = 1;
     long is_in_dict = 0;
@@ -826,14 +830,14 @@ unsigned long get_nb_chars_in_array(FILE *f, unsigned long pos)
     return nb_chars;
 }
 
-unsigned long get_nb_chars_in_dict(FILE *f, unsigned long pos)
+size_t get_nb_chars_in_dict(FILE *f, size_t pos)
 {
     if (!f)
     {
         return 0;
     }
 
-    unsigned long nb_chars = 0;
+    size_t nb_chars = 0;
 
     long is_in_dict = 1;
     long is_in_array = 0;

@@ -4,6 +4,7 @@
 /*******************************************************************************
 **                                  INCLUDES                                  **
 *******************************************************************************/
+#include <stddef.h>
 #include <stdio.h>
 
 #include "base_json_storage.h"
@@ -61,7 +62,7 @@
 typedef struct
 {
     char *str;
-    unsigned len;
+    size_t len;
     char is_float;
     char has_exponent;
 } str_and_len_tuple_t;

@@ -1,5 +1,6 @@
 #include "base_json_storage.h"
 
+#include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -18,7 +19,7 @@ inline string_t string_nofree_of(char *s)
 
 char strings_equals(string_t s1, string_t s2)
 {
-    unsigned length = s1.len;
+    size_t length = s1.len;
     if (length != s2.len)
     {
         return 0;
@@ -31,7 +32,7 @@ char strings_equals(string_t s1, string_t s2)
         return 0;
     }
 
-    for (unsigned i = 0; i < length; ++i)
+    for (size_t i = 0; i < length; ++i)
     {
         if (a[i] != b[i])
         {

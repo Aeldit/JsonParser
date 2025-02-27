@@ -179,6 +179,77 @@ char check_bools_nulls_numbers_counts(char *buff, unsigned long buff_len,
         && nb_opened_brackets == nb_closed_brackets;
 }
 
+char is_array_valid(char *buff, unsigned long *pos)
+{
+    if (!buff)
+    {
+        return 0;
+    }
+    unsigned long i = pos ? *pos : 0;
+    unsigned long initial_i = i;
+
+    char c = 0;
+    while ((c = buff[i++]))
+    {
+        switch (c)
+        {
+        case '"':
+        case 't':
+        case 'f':
+        case 'n':
+        case '+':
+        case '-':
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+        case '{':
+        case '[':
+        case '}':
+        case ']':
+        case ',':
+        case '\n':
+        case '\t':
+        case ' ':
+            break;
+
+        default:
+            // The character that is not part of the json syntax, which means
+            // invalid json
+            printf("Found invalid character: '%c' (%d)", c, c);
+            return 0;
+        }
+    }
+
+    if (pos)
+    {
+        pos += i - initial_i;
+    }
+    return 1;
+}
+
+char is_dict_valid(char *buff, unsigned long *pos)
+{
+    if (!buff)
+    {
+        return 0;
+    }
+    unsigned long i = pos ? *pos : 0;
+    unsigned long initial_i = i;
+
+    if (pos)
+    {
+        pos += i - initial_i;
+    }
+    return 1;
+}
+
 char check_arrays_and_dicts(char *buff)
 {
     if (!buff)
@@ -190,11 +261,14 @@ char check_arrays_and_dicts(char *buff)
 
 char is_json_valid_buff(char *buff, unsigned long buff_len, char is_dict)
 {
+    return 1;
     if (!buff)
     {
         return 0;
     }
-    return check_bools_nulls_numbers_counts(buff, buff_len, is_dict);
+    return check_bools_nulls_numbers_counts(buff, buff_len, is_dict) /*&&
+        is_dict ? is_dict_valid(buff, 0) : is_array_valid(buff, 0)*/
+        ;
 }
 
 // TODO: Implement

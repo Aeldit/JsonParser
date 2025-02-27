@@ -27,7 +27,7 @@ clean:
 valgrind-compile: clean
 	$(CC) $(CFLAGS) \
 		-DVALGRING_DISABLE_PRINT \
-		$(CFILESBASE) $(CFILESRO) -o $(TARGET)
+		$(CFILESBASE) $(CFILESRO) -o $(TARGET) -g
 
 valgrind: valgrind-compile
 	valgrind --tool=callgrind --dump-instr=yes --simulate-cache=yes \
@@ -35,7 +35,7 @@ valgrind: valgrind-compile
 
 leaks: valgrind-compile
 	valgrind --leak-check=full --show-leak-kinds=all \
-         --track-origins=yes ./$(TARGET) t.json
+         --track-origins=yes ./$(TARGET) large-file.json
 
 check:
 	$(CC) $(CFLAGS) src/*.c $(TESTFILES) -o json-parser-tests -lcriterion
