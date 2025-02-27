@@ -17,14 +17,14 @@ char is_number_valid(char *buff, unsigned long *idx)
     char prev_c = 0;
     while ((c = buff[i++]))
     {
-        // sign not preceded by an exponent
+        // Sign not preceded by an exponent
         if (nb_inc_idx > 0 && (c == '+' || c == '-')
             && !(prev_c == 'e' || prev_c == 'E'))
         {
             return 0;
         }
 
-        // exponent not followed by a digit or a sign
+        // Exponent not followed by a digit or a sign
         if ((c == 'e' || c == 'E')
             && !((buff[i] >= '0' && buff[i] <= '9') || buff[i] == '+'
                  || buff[i] == '-'))
@@ -32,7 +32,7 @@ char is_number_valid(char *buff, unsigned long *idx)
             return 0;
         }
 
-        // floating point dot or sign not followed by a digit
+        // Floating point dot or sign not followed by a digit
         if ((c == '.' || c == '+' || c == '-')
             && !(buff[i] >= '0' && buff[i] <= '9'))
         {
@@ -169,6 +169,7 @@ char check_bools_nulls_numbers_counts(char *buff, unsigned long buff_len,
         default:
             // The character that is not part of the json syntax, which means
             // invalid json
+            printf("Found invalid character: '%c' (%d)", c, c);
             return 0;
         }
         prev_c = c;
