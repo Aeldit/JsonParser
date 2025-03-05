@@ -19,28 +19,31 @@ long_with_or_without_exponent_t str_to_long(str_and_len_tuple_t *sl)
     }
 
     char *str = sl->str;
-    unsigned long len = sl->len;
+    size_t len = sl->len;
     if (!str || len == 0)
     {
         return ERROR_LWOWE;
     }
 
-    char has_exponent = sl->has_exponent;
+    bool has_exponent = sl->has_exponent;
+    bool is_in_exponent = false;
 
-    long number = 0;
-    long exponent = 0;
-    unsigned char exp_idx = 0;
+    i64 number = 0;
+    i64 exponent = 0;
+
+    size_t exp_idx = 0;
+
     char is_negative = str[0] == '-' ? -1 : 1;
     char is_exp_negative = 1;
-    char is_in_exponent = 0;
+
     char c = 0;
-    for (unsigned long i = 0; i < len; ++i)
+    for (size_t i = 0; i < len; ++i)
     {
         c = str[i];
         if (has_exponent && (c == 'e' || c == 'E'))
         {
             exp_idx = i;
-            is_in_exponent = 1;
+            is_in_exponent = true;
         }
         else if ('0' <= c && c <= '9')
         {
@@ -83,37 +86,40 @@ double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t *sl)
     }
 
     char *str = sl->str;
-    unsigned long len = sl->len;
+    size_t len = sl->len;
     if (!str || len == 0)
     {
         return ERROR_DWOWE;
     }
 
-    char has_exponent = sl->has_exponent;
-
     double number = 0; // Integer part
     double decimals = 0; // Decimal part
-    long exponent = 0; // Only used if sl->has_exponent is true
-    unsigned long nb_digits_decimals = 1;
-    unsigned char exp_idx = 0;
+    i64 exponent = 0; // Only used if sl->has_exponent is true
+
+    i64 nb_digits_decimals = 1;
+    size_t exp_idx = 0;
+
+    bool has_exponent = sl->has_exponent;
+    bool dot_reached = false;
+    bool is_in_exponent = false;
+
     // If the number is negative, this is set to -1 and the final res is
     // multiplied by it
     char is_negative = str[0] == '-' ? -1 : 1;
     char is_exp_negative = 1;
-    char dot_reached = 0;
-    char is_in_exponent = 0;
+
     char c = 0;
-    for (unsigned long i = 0; i < len; ++i)
+    for (size_t i = 0; i < len; ++i)
     {
         c = str[i];
         if (c == '.')
         {
-            dot_reached = 1;
+            dot_reached = true;
         }
         else if (has_exponent && (c == 'e' || c == 'E'))
         {
             exp_idx = i;
-            is_in_exponent = 1;
+            is_in_exponent = true;
         }
         else if ('0' <= c && c <= '9')
         {
@@ -156,41 +162,41 @@ double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t *sl)
     };
 }
 
-char is_float(char *str, unsigned long len)
+bool is_float(char *str, size_t len)
 {
     if (!str)
     {
-        return 0;
+        return false;
     }
 
-    for (unsigned long i = 0; i < len; ++i)
+    for (size_t i = 0; i < len; ++i)
     {
         if (str[i] == '.')
         {
-            return 1;
+            return true;
         }
     }
-    return 0;
+    return false;
 }
 
-char has_exponent(char *str, unsigned long len)
+bool has_exponent(char *str, size_t len)
 {
     if (!str)
     {
-        return 0;
+        return false;
     }
 
-    for (unsigned long i = 0; i < len; ++i)
+    for (size_t i = 0; i < len; ++i)
     {
         if (str[i] == 'e' || str[i] == 'E')
         {
-            return 1;
+            return true;
         }
     }
-    return 0;
+    return false;
 }
 
-char max_nested_arrays_reached(long is_in_array)
+bool max_nested_arrays_reached(u64 is_in_array)
 {
     if (is_in_array == MAX_NESTED_ARRAYS)
     {
@@ -198,12 +204,12 @@ char max_nested_arrays_reached(long is_in_array)
         printf("Max number of nested arrays reached, aborting "
                "parsing\n");
 #endif
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 
-char max_nested_dicts_reached(long is_in_dict)
+bool max_nested_dicts_reached(u64 is_in_dict)
 {
     if (is_in_dict == MAX_NESTED_DICTS)
     {
@@ -211,23 +217,23 @@ char max_nested_dicts_reached(long is_in_dict)
         printf("Max number of nested dicts reached, aborting "
                "parsing\n");
 #endif
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 
 /***************************************
 **              PARSING               **
 ***************************************/
-string_t parse_string_buff(char *buff, unsigned long *idx)
+string_t parse_string_buff(char *buff, size_t *idx)
 {
     if (!buff || !idx)
     {
         return NULL_STRING;
     }
 
-    unsigned long start_idx = *idx + 1;
-    unsigned long len = 0;
+    size_t start_idx = *idx + 1;
+    size_t len = 0;
     char c = 0;
     char prev_c = 0;
     // Counts the number of characters until the first one that is an 'end char'
@@ -260,14 +266,14 @@ string_t parse_string_buff(char *buff, unsigned long *idx)
     return STRING_OF(str, len);
 }
 
-string_t parse_string(FILE *f, unsigned long *pos)
+string_t parse_string(FILE *f, size_t *pos)
 {
     if (!f || !pos)
     {
         return NULL_STRING;
     }
 
-    unsigned long i = *pos;
+    size_t i = *pos;
     char c = 0;
     char prev_c = 0;
     while (SEEK_AND_GET_CHAR(i) && !IS_STRING_END(c))
@@ -275,7 +281,7 @@ string_t parse_string(FILE *f, unsigned long *pos)
         prev_c = c;
     }
 
-    unsigned len = i - *pos - 1;
+    size_t len = i - *pos - 1;
     if (!len)
     {
         ++(*pos);
@@ -300,7 +306,7 @@ string_t parse_string(FILE *f, unsigned long *pos)
     return STRING_OF(str, len);
 }
 
-str_and_len_tuple_t parse_number_buff(char *buff, unsigned long *idx)
+str_and_len_tuple_t parse_number_buff(char *buff, size_t *idx)
 {
     if (!buff || !idx)
     {
@@ -308,8 +314,8 @@ str_and_len_tuple_t parse_number_buff(char *buff, unsigned long *idx)
     }
 
     // Counts the number of characters until the first one that is an 'end char'
-    unsigned long end_idx = *idx;
-    unsigned long initial_i = end_idx;
+    size_t end_idx = *idx;
+    size_t initial_i = end_idx;
     char c = 0;
     while (1)
     {
@@ -322,7 +328,7 @@ str_and_len_tuple_t parse_number_buff(char *buff, unsigned long *idx)
     }
 
     // Number of chars
-    unsigned long len = end_idx - initial_i;
+    size_t len = end_idx - initial_i;
     if (len == 0)
     {
         return NULL_STR_AND_LEN_TUPLE;
@@ -340,7 +346,7 @@ str_and_len_tuple_t parse_number_buff(char *buff, unsigned long *idx)
     return STR_AND_LEN_OF(str, len, is_float(str, len), has_exponent(str, len));
 }
 
-str_and_len_tuple_t parse_number(FILE *f, unsigned long *pos)
+str_and_len_tuple_t parse_number(FILE *f, size_t *pos)
 {
     if (!f || !pos)
     {
@@ -349,7 +355,7 @@ str_and_len_tuple_t parse_number(FILE *f, unsigned long *pos)
 
     // Obtains the length of the value
     // -1 because we already read the first digit (or sign)
-    unsigned long end_pos = *pos - 1;
+    size_t end_pos = *pos - 1;
 
     char c = 0;
     // end_pos is incremented for each character found to be part of a
@@ -358,7 +364,7 @@ str_and_len_tuple_t parse_number(FILE *f, unsigned long *pos)
     {
     }
 
-    unsigned long len = end_pos - *pos;
+    size_t len = end_pos - *pos;
     if (len == 0)
     {
         return NULL_STR_AND_LEN_TUPLE;
@@ -383,14 +389,14 @@ str_and_len_tuple_t parse_number(FILE *f, unsigned long *pos)
     return STR_AND_LEN_OF(str, len, is_float(str, len), has_exponent(str, len));
 }
 
-unsigned long parse_boolean_buff(char *buff, unsigned long *idx)
+size_t parse_boolean_buff(char *buff, size_t *idx)
 {
     if (!buff || !idx)
     {
         return 0;
     }
 
-    unsigned long end_idx = *idx;
+    size_t end_idx = *idx;
     char c = 0;
     while (1)
     {
@@ -401,12 +407,12 @@ unsigned long parse_boolean_buff(char *buff, unsigned long *idx)
         }
         ++end_idx;
     }
-    unsigned long len = end_idx - *idx;
+    size_t len = end_idx - *idx;
     *idx += len - 1;
     return len;
 }
 
-unsigned long parse_boolean(FILE *f, unsigned long *pos)
+size_t parse_boolean(FILE *f, size_t *pos)
 {
     if (!f || !pos)
     {
@@ -414,7 +420,7 @@ unsigned long parse_boolean(FILE *f, unsigned long *pos)
     }
 
     // -1 because we already read the first character
-    unsigned long end_pos = *pos - 1;
+    size_t end_pos = *pos - 1;
 
     char c = 0;
     // end_pos is incremented for each character found to be part of a
@@ -422,26 +428,30 @@ unsigned long parse_boolean(FILE *f, unsigned long *pos)
     while (SEEK_AND_GET_CHAR(end_pos) && !IS_END_CHAR(c))
     {
     }
-    unsigned long len = end_pos - *pos;
+    size_t len = end_pos - *pos;
     *pos += len - 1;
     return len;
 }
 
-unsigned long get_nb_elts_array_buff(char *buff, unsigned long idx)
+size_t get_nb_elts_array_buff(char *buff, size_t idx)
 {
     if (!buff || buff[idx] == ']')
     {
         return 0;
     }
 
-    unsigned long nb_elts = 0;
-    long is_in_array = 1;
-    long is_in_dict = 0;
+    size_t nb_elts = 0;
+
+    // Counts the number of arrays/dicts nesting at the current position
+    u64 is_in_array = 1;
+    u64 is_in_dict = 0;
+
+    bool is_in_string = false;
+    bool is_backslashing = false;
+    bool comma_encountered = false;
+
     char c = 0;
     char prev_c = 0;
-    char is_in_string = 0;
-    char is_backslashing = 0;
-    char comma_encountered = 0;
     while ((c = buff[idx]))
     {
         if (!is_in_array)
@@ -455,7 +465,7 @@ unsigned long get_nb_elts_array_buff(char *buff, unsigned long idx)
         }
         else if (!comma_encountered && c == ',' && is_in_array == 1)
         {
-            comma_encountered = 1;
+            comma_encountered = true;
         }
 
         // If we are not in a string or if the string just ended
@@ -517,20 +527,22 @@ unsigned long get_nb_elts_array_buff(char *buff, unsigned long idx)
     return nb_elts;
 }
 
-unsigned long get_nb_elts_array(FILE *f, unsigned long pos)
+size_t get_nb_elts_array(FILE *f, size_t pos)
 {
-    if (!f)
+    if (!f || (!fseek(f, pos++, SEEK_SET) && fgetc(f) == ']'))
     {
         return 0;
     }
 
-    unsigned long nb_elts = 0;
+    size_t nb_elts = 0;
 
-    long is_in_array = 1;
-    long is_in_dict = 0;
-    char is_in_string = 0;
-    char is_backslashing = 0;
-    char comma_encountered = 0;
+    // Counts the number of arrays/dicts nesting at the current position
+    u64 is_in_array = 1;
+    u64 is_in_dict = 0;
+
+    bool is_in_string = false;
+    bool is_backslashing = false;
+    bool comma_encountered = false;
 
     char c = 0;
     char prev_c = 0;
@@ -547,7 +559,7 @@ unsigned long get_nb_elts_array(FILE *f, unsigned long pos)
         }
         else if (!comma_encountered && c == ',' && is_in_array == 1)
         {
-            comma_encountered = 1;
+            comma_encountered = true;
         }
 
         // If we are not in a string or if the string just ended
@@ -608,22 +620,28 @@ unsigned long get_nb_elts_array(FILE *f, unsigned long pos)
     return nb_elts;
 }
 
-unsigned long get_nb_elts_dict_buff(char *buff, unsigned long idx)
+size_t get_nb_elts_dict_buff(char *buff, size_t idx)
 {
     if (!buff || idx >= MAX_READ_BUFF_SIZE || buff[idx] == '}')
     {
         return 0;
     }
 
-    unsigned long nb_elts = 0;
+    size_t nb_elts = 0;
+
     // Used for the case where the dict contains only one element, and so
     // does not contain a ','
-    unsigned long single_elt_found = 0;
+    // It can only be 0 or 1 but is stored as a size_t because it is compared to
+    // another size_t, so it will be cast to this size anyway
+    size_t single_elt_found = 0;
 
-    long is_in_dict = 1;
-    long is_in_array = 0;
-    char is_in_string = 0;
-    char is_backslashing = 0;
+    // Counts the number of arrays/dicts nesting at the current position
+    u64 is_in_dict = 1;
+    u64 is_in_array = 0;
+
+    bool is_in_string = false;
+    bool is_backslashing = false;
+
     char c = 0;
     while ((c = buff[idx]))
     {
@@ -684,22 +702,27 @@ unsigned long get_nb_elts_dict_buff(char *buff, unsigned long idx)
     return nb_elts == 0 ? single_elt_found : nb_elts + 1;
 }
 
-unsigned long get_nb_elts_dict(FILE *f, unsigned long pos)
+size_t get_nb_elts_dict(FILE *f, size_t pos)
 {
-    if (!f)
+    if (!f || (!fseek(f, pos++, SEEK_SET) && fgetc(f) == '}'))
     {
         return 0;
     }
 
-    unsigned long nb_elts = 0;
+    size_t nb_elts = 0;
 
-    long is_in_dict = 1;
-    long is_in_array = 0;
-    char is_in_string = 0;
-    char is_backslashing = 0;
     // Used for the case where the dict contains only one element, and so
     // does not contain a ','
-    unsigned long single_elt_found = 0;
+    // It can only be 0 or 1 but is stored as a size_t because it is compared to
+    // another size_t, so it will be cast to this size anyway
+    size_t single_elt_found = 0;
+
+    // Counts the number of arrays/dicts nesting at the current position
+    u64 is_in_dict = 1;
+    u64 is_in_array = 0;
+
+    bool is_in_string = false;
+    bool is_backslashing = false;
 
     char c = 0;
     while (SEEK_AND_GET_CHAR(pos))
@@ -760,19 +783,21 @@ unsigned long get_nb_elts_dict(FILE *f, unsigned long pos)
     return nb_elts == 0 ? single_elt_found : nb_elts + 1;
 }
 
-unsigned long get_nb_chars_in_array(FILE *f, unsigned long pos)
+size_t get_nb_chars_in_array(FILE *f, size_t pos)
 {
     if (!f)
     {
         return 0;
     }
 
-    unsigned long nb_chars = 0;
+    size_t nb_chars = 0;
 
-    long is_in_array = 1;
-    long is_in_dict = 0;
-    char is_in_string = 0;
-    char is_backslashing = 0;
+    // Counts the number of arrays/dicts nesting at the current position
+    u64 is_in_array = 1;
+    u64 is_in_dict = 0;
+
+    bool is_in_string = false;
+    bool is_backslashing = false;
 
     char c = 0;
     while (SEEK_AND_GET_CHAR(pos))
@@ -826,19 +851,21 @@ unsigned long get_nb_chars_in_array(FILE *f, unsigned long pos)
     return nb_chars;
 }
 
-unsigned long get_nb_chars_in_dict(FILE *f, unsigned long pos)
+size_t get_nb_chars_in_dict(FILE *f, size_t pos)
 {
     if (!f)
     {
         return 0;
     }
 
-    unsigned long nb_chars = 0;
+    size_t nb_chars = 0;
 
-    long is_in_dict = 1;
-    long is_in_array = 0;
-    char is_in_string = 0;
-    char is_backslashing = 0;
+    // Counts the number of arrays/dicts nesting at the current position
+    u64 is_in_dict = 1;
+    u64 is_in_array = 0;
+
+    bool is_in_string = false;
+    bool is_backslashing = false;
 
     char c = 0;
     while (SEEK_AND_GET_CHAR(pos))

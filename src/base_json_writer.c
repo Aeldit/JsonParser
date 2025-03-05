@@ -10,9 +10,9 @@
 /*******************************************************************************
 **                               LOCAL FUNCTIONS                              **
 *******************************************************************************/
-unsigned get_nb_char_long(long n)
+u8 get_nb_char_long(i64 n)
 {
-    unsigned nb_char = n < 0 ? 2 : 1;
+    u8 nb_char = n < 0 ? 2 : 1;
     n *= n < 0 ? -1 : 1;
     while (n /= 10)
     {
@@ -24,8 +24,8 @@ unsigned get_nb_char_long(long n)
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
-void add_link(string_linked_list_t *ll, string_t str, char str_needs_free,
-              char is_from_str)
+void add_link(string_linked_list_t *ll, string_t str, bool str_needs_free,
+              bool is_from_str)
 {
     if (!ll)
     {
@@ -81,9 +81,9 @@ void destroy_linked_list(string_linked_list_t *ll)
 /*******************************************************************************
 **                                GETS AS STR                                 **
 *******************************************************************************/
-string_t get_long_as_str(long value)
+string_t get_long_as_str(i64 value)
 {
-    unsigned nb_chars = get_nb_char_long(value);
+    u8 nb_chars = get_nb_char_long(value);
     char *str = calloc(nb_chars + 1, sizeof(char));
     if (!str)
     {
@@ -97,30 +97,28 @@ string_t get_double_as_str(double value)
 {
     // 18 : 10 int digits + '.' + 6 floating point digits + '\0'
     char double_str[18];
-    snprintf(double_str, 18, "%lf", value);
+    snprintf(double_str, 17, "%lf", value);
 
-    int nb_chars = 0;
-    int nb_decimals = 6;
-    char is_in_decimals = 1;
-    char non_zero_decimal_found = 0;
-    for (int i = 17; i >= 0; --i)
+    u8 nb_chars = 0;
+    for (i16 i = 16; i >= 0; --i)
     {
-        char s = double_str[i];
-        if (s == '.')
+        switch (double_str[i])
         {
-            is_in_decimals = 0;
-        }
-        if (is_in_decimals && '1' <= s && s <= '9')
-        {
-            non_zero_decimal_found = 1;
-        }
-        if (s == '0' && is_in_decimals && !non_zero_decimal_found)
-        {
-            --nb_decimals;
-        }
-        if (!is_in_decimals)
-        {
+        case '+':
+        case '-':
+        case '.':
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
             ++nb_chars;
+            break;
         }
     }
 
@@ -130,20 +128,19 @@ string_t get_double_as_str(double value)
         return NULL_STRING;
     }
 
-    unsigned len = nb_chars + nb_decimals - (nb_decimals ? 0 : 1);
-    memcpy(str, double_str, len);
-    return STRING_OF(str, len);
+    memcpy(str, double_str, nb_chars);
+    return STRING_OF(str, nb_chars);
 }
 
 string_t get_exp_long_as_str(exponent_long_t value)
 {
-    long number = value.number;
-    long exponent = value.exponent;
+    i64 number = value.number;
+    i64 exponent = value.exponent;
 
-    unsigned nb_chars_number = get_nb_char_long(number);
-    unsigned nb_chars_exponent = get_nb_char_long(exponent);
+    u8 nb_chars_number = get_nb_char_long(number);
+    u8 nb_chars_exponent = get_nb_char_long(exponent);
 
-    long len = nb_chars_number + 1 + nb_chars_exponent;
+    u32 len = nb_chars_number + 1 + nb_chars_exponent;
     char *str = calloc(len + 1, sizeof(char));
     if (!str)
     {
@@ -159,37 +156,13 @@ string_t get_exp_long_as_str(exponent_long_t value)
 string_t get_exp_double_as_str(exponent_double_t value)
 {
     double number = value.number;
-    long exponent = value.exponent;
+    i64 exponent = value.exponent;
 
-    // 18 : 10 int digits + '.' + 6 floating point digits + '\0'
-    char double_str[18];
-    snprintf(double_str, 18, "%lf", number);
+    string_t s = get_double_as_str(number);
+    char *double_str = s.str;
+    size_t num_len = s.len;
 
-    unsigned nb_chars = 0;
-    unsigned nb_decimals = 6;
-    char is_in_decimals = 1;
-    char non_zero_decimal_found = 0;
-    for (int i = 17; i >= 0; --i)
-    {
-        char s = double_str[i];
-        if (s == '.')
-        {
-            is_in_decimals = 0;
-        }
-        if (is_in_decimals && '1' <= s && s <= '9')
-        {
-            non_zero_decimal_found = 1;
-        }
-        if (s == '0' && is_in_decimals && !non_zero_decimal_found)
-        {
-            --nb_decimals;
-        }
-        if (!is_in_decimals)
-        {
-            ++nb_chars;
-        }
-    }
-    unsigned exp_len = get_nb_char_long(exponent);
+    u8 exp_len = get_nb_char_long(exponent);
 
     char *str = calloc(18 + 1 + exp_len, sizeof(char));
     if (!str)
@@ -197,16 +170,16 @@ string_t get_exp_double_as_str(exponent_double_t value)
         return NULL_STRING;
     }
 
-    unsigned num_len = nb_chars + nb_decimals - (nb_decimals ? 0 : 1);
+    // unsigned num_len = nb_chars + nb_decimals - (nb_decimals ? 0 : 1);
     memcpy(str, double_str, num_len);
     str[num_len] = 'e';
     snprintf(str + num_len + 1, exp_len + 1, "%ld", exponent);
     return STRING_OF(str, num_len + 1 + exp_len);
 }
 
-string_t get_bool_as_str(char value)
+string_t get_bool_as_str(u8 value)
 {
-    char nb_chars = (value ? 4 : 5);
+    u8 nb_chars = (value ? 4 : 5);
     char *str = calloc(nb_chars + 1, sizeof(char));
     memcpy(str, value ? "true" : "false", nb_chars);
     return STRING_OF(str ? str : 0, str ? nb_chars : 0);

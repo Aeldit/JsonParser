@@ -4,15 +4,16 @@
 ** \brief Called after encountering a '+' or '-' sign, or any digit.
 **        Starts from the sign or digit that started the number
 */
-char is_number_valid(char *buff, unsigned long *idx)
+bool is_number_valid(char *buff, size_t *idx)
 {
     if (!buff || !idx)
     {
-        return 0;
+        return false;
     }
 
-    unsigned long i = *idx - 1;
+    size_t i = *idx - 1;
     char nb_inc_idx = 0;
+
     char c = 0;
     char prev_c = 0;
     while ((c = buff[i++]))
@@ -21,7 +22,7 @@ char is_number_valid(char *buff, unsigned long *idx)
         if (nb_inc_idx > 0 && (c == '+' || c == '-')
             && !(prev_c == 'e' || prev_c == 'E'))
         {
-            return 0;
+            return false;
         }
 
         // Exponent not followed by a digit or a sign
@@ -29,14 +30,14 @@ char is_number_valid(char *buff, unsigned long *idx)
             && !((buff[i] >= '0' && buff[i] <= '9') || buff[i] == '+'
                  || buff[i] == '-'))
         {
-            return 0;
+            return false;
         }
 
         // Floating point dot or sign not followed by a digit
         if ((c == '.' || c == '+' || c == '-')
             && !(buff[i] >= '0' && buff[i] <= '9'))
         {
-            return 0;
+            return false;
         }
         ++nb_inc_idx;
 
@@ -47,7 +48,7 @@ char is_number_valid(char *buff, unsigned long *idx)
         prev_c = c;
     }
     *idx += nb_inc_idx - 1;
-    return 1;
+    return true;
 }
 
 /**
@@ -55,32 +56,32 @@ char is_number_valid(char *buff, unsigned long *idx)
 **        are valid, if the quotes are in even number, and brackets and curly
 **        brackets have a matching number of opening and closing
 */
-char check_bools_nulls_numbers_counts(char *buff, unsigned long buff_len,
-                                      char is_dict)
+bool check_bools_nulls_numbers_counts(char *buff, size_t buff_len, bool is_dict)
 {
     if (!buff)
     {
-        return 0;
+        return false;
     }
 
-    unsigned long nb_quotes = 0;
-    unsigned long nb_opened_curly_brackets = is_dict;
-    unsigned long nb_opened_brackets = !is_dict;
-    unsigned long nb_closed_curly_brackets = 0;
-    unsigned long nb_closed_brackets = 0;
+    size_t nb_quotes = 0;
+    size_t nb_opened_curly_brackets = is_dict ? 1 : 0;
+    size_t nb_opened_brackets = !is_dict ? 0 : 1;
+    size_t nb_closed_curly_brackets = 0;
+    size_t nb_closed_brackets = 0;
 
-    char is_in_string = 0;
+    bool is_in_string = false;
+
+    size_t i = 1; // We already read the first character of the file
 
     char c = 0;
     char prev_c = 0;
-    unsigned long i = 1; // We already read the first character of the file
     while ((c = buff[i++]))
     {
         if (is_in_string)
         {
             if (c == '"' && prev_c != '\\') // String end
             {
-                is_in_string = 0;
+                is_in_string = false;
                 ++nb_quotes;
                 prev_c = c;
             }
@@ -92,7 +93,7 @@ char check_bools_nulls_numbers_counts(char *buff, unsigned long buff_len,
         case '"':
             if (!is_in_string)
             {
-                ++is_in_string;
+                is_in_string = true;
                 ++nb_quotes;
             }
             break;
@@ -102,7 +103,7 @@ char check_bools_nulls_numbers_counts(char *buff, unsigned long buff_len,
             {
                 if (!(buff[i++] == 'r' && buff[i++] == 'u' && buff[i++] == 'e'))
                 {
-                    return 0;
+                    return false;
                 }
             }
             break;
@@ -113,7 +114,7 @@ char check_bools_nulls_numbers_counts(char *buff, unsigned long buff_len,
                 if (!(buff[i++] == 'a' && buff[i++] == 'l' && buff[i++] == 's'
                       && buff[i++] == 'e'))
                 {
-                    return 0;
+                    return false;
                 }
             }
             break;
@@ -123,7 +124,7 @@ char check_bools_nulls_numbers_counts(char *buff, unsigned long buff_len,
             {
                 if (!(buff[i++] == 'u' && buff[i++] == 'l' && buff[i++] == 'l'))
                 {
-                    return 0;
+                    return false;
                 }
             }
             break;
@@ -142,7 +143,7 @@ char check_bools_nulls_numbers_counts(char *buff, unsigned long buff_len,
         case '9':
             if (!is_number_valid(buff, &i))
             {
-                return 0;
+                return false;
             }
             break;
 
@@ -170,7 +171,7 @@ char check_bools_nulls_numbers_counts(char *buff, unsigned long buff_len,
             // The character that is not part of the json syntax, which means
             // invalid json
             printf("Found invalid character: '%c' (%d)", c, c);
-            return 0;
+            return false;
         }
         prev_c = c;
     }
@@ -179,30 +180,106 @@ char check_bools_nulls_numbers_counts(char *buff, unsigned long buff_len,
         && nb_opened_brackets == nb_closed_brackets;
 }
 
-char check_arrays_and_dicts(char *buff)
+bool is_array_valid(char *buff, size_t *pos)
 {
     if (!buff)
     {
-        return 0;
+        return false;
     }
-    return 1;
+
+    size_t i = pos ? *pos : 0;
+    size_t initial_i = i;
+
+    char c = 0;
+    while ((c = buff[i++]))
+    {
+        switch (c)
+        {
+        case '"':
+        case 't':
+        case 'f':
+        case 'n':
+        case '+':
+        case '-':
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+        case '{':
+        case '[':
+        case '}':
+        case ']':
+        case ',':
+        case '\n':
+        case '\t':
+        case ' ':
+            break;
+
+        default:
+            // The character that is not part of the json syntax, which means
+            // invalid json
+            printf("Found invalid character: '%c' (%d)", c, c);
+            return false;
+        }
+    }
+
+    if (pos)
+    {
+        pos += i - initial_i;
+    }
+    return true;
 }
 
-char is_json_valid_buff(char *buff, unsigned long buff_len, char is_dict)
+bool is_dict_valid(char *buff, size_t *pos)
 {
     if (!buff)
     {
-        return 0;
+        return false;
     }
-    return check_bools_nulls_numbers_counts(buff, buff_len, is_dict);
+
+    size_t i = pos ? *pos : 0;
+    size_t initial_i = i;
+
+    if (pos)
+    {
+        pos += i - initial_i;
+    }
+    return true;
+}
+
+bool check_arrays_and_dicts(char *buff)
+{
+    if (!buff)
+    {
+        return false;
+    }
+    return true;
+}
+
+bool is_json_valid_buff(char *buff, size_t buff_len, bool is_dict)
+{
+    return true;
+    if (!buff)
+    {
+        return false;
+    }
+    return check_bools_nulls_numbers_counts(buff, buff_len, is_dict) /*&&
+        is_dict ? is_dict_valid(buff, 0) : is_array_valid(buff, 0)*/
+        ;
 }
 
 // TODO: Implement
-char is_json_valid(FILE *f)
+bool is_json_valid(FILE *f)
 {
     if (!f)
     {
-        return 0;
+        return false;
     }
-    return 1;
+    return true;
 }

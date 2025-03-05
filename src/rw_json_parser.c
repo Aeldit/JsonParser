@@ -14,8 +14,8 @@
 /*******************************************************************************
 **                           FUNCTIONS DECLARATIONS                           **
 *******************************************************************************/
-rw_dict_t *rw_parse_dict_buff(char *b, unsigned long *pos);
-rw_dict_t *rw_parse_dict(FILE *f, unsigned long *pos);
+rw_dict_t *rw_parse_dict_buff(char *b, size_t *pos);
+rw_dict_t *rw_parse_dict(FILE *f, size_t *pos);
 
 /*******************************************************************************
 **                               LOCAL FUNCTIONS                              **
@@ -36,17 +36,18 @@ rw_dict_t *destroy_rw_dict_on_error(rw_dict_t *d, string_t key)
 /*******************************************************************************
 **                              LOCAL FUNCTIONS                               **
 *******************************************************************************/
-rw_array_t *rw_parse_array_buff(char *b, unsigned long *idx)
+rw_array_t *rw_parse_array_buff(char *b, size_t *idx)
 {
     if (!b)
     {
         return 0;
     }
 
-    unsigned long i = idx == 0 ? 0 : *idx + 1;
+    // We start at 1 because if we entered this function, it means that we
+    // already read a '['
+    size_t i = idx == 0 ? 0 : *idx + 1;
 
-    unsigned long nb_elts_parsed = 0;
-    unsigned long nb_elts = get_nb_elts_array_buff(b, i);
+    size_t nb_elts = get_nb_elts_array_buff(b, i);
 
     rw_array_t *a = calloc(1, sizeof(rw_array_t));
     if (!a || nb_elts == 0)
@@ -54,10 +55,10 @@ rw_array_t *rw_parse_array_buff(char *b, unsigned long *idx)
         return a;
     }
 
+    size_t nb_elts_parsed = 0;
+    size_t initial_i = i;
+
     char c = 0;
-    // We start at 1 because if we entered this function, it means that we
-    // already read a '['
-    unsigned long initial_i = i;
     while ((c = b[i]))
     {
         if (nb_elts_parsed >= nb_elts)
@@ -67,7 +68,7 @@ rw_array_t *rw_parse_array_buff(char *b, unsigned long *idx)
 
         string_t s = NULL_STRING;
         str_and_len_tuple_t sl = NULL_STR_AND_LEN_TUPLE;
-        unsigned long len = 0;
+        size_t len = 0;
         rw_array_t *tmp_a = 0;
         rw_dict_t *tmp_jd = 0;
         switch (c)
@@ -110,6 +111,7 @@ rw_array_t *rw_parse_array_buff(char *b, unsigned long *idx)
                     rw_array_add_exp_double(a, dwowe.double_exp_value);
                     break;
                 case 2:
+                default:
                     free(sl.str);
                     return destroy_rw_array_on_error(a);
                 }
@@ -126,6 +128,7 @@ rw_array_t *rw_parse_array_buff(char *b, unsigned long *idx)
                     rw_array_add_exp_long(a, lwowe.long_exp_value);
                     break;
                 case 2:
+                default:
                     free(sl.str);
                     return destroy_rw_array_on_error(a);
                 }
@@ -178,17 +181,18 @@ rw_array_t *rw_parse_array_buff(char *b, unsigned long *idx)
     return a;
 }
 
-rw_dict_t *rw_parse_dict_buff(char *b, unsigned long *idx)
+rw_dict_t *rw_parse_dict_buff(char *b, size_t *idx)
 {
     if (!b)
     {
         return 0;
     }
 
-    unsigned long i = idx == 0 ? 0 : *idx + 1;
+    // We start at 1 because if we entered this function, it means that we
+    // already read a '{'
+    size_t i = idx == 0 ? 0 : *idx + 1;
 
-    unsigned long nb_elts_parsed = 0;
-    unsigned long nb_elts = get_nb_elts_dict_buff(b, i);
+    size_t nb_elts = get_nb_elts_dict_buff(b, i);
 
     rw_dict_t *d = calloc(1, sizeof(rw_dict_t));
     if (!d || nb_elts == 0)
@@ -196,12 +200,13 @@ rw_dict_t *rw_parse_dict_buff(char *b, unsigned long *idx)
         return d;
     }
 
+    size_t nb_elts_parsed = 0;
+    size_t initial_i = i;
+
     string_t key = NULL_STRING;
+    bool is_waiting_key = true;
+
     char c = 0;
-    char is_waiting_key = 1;
-    // We start at 1 because if we entered this function, it means that we
-    // already read a '{'
-    unsigned long initial_i = i;
     while ((c = b[i]))
     {
         if (nb_elts_parsed >= nb_elts)
@@ -211,7 +216,7 @@ rw_dict_t *rw_parse_dict_buff(char *b, unsigned long *idx)
 
         string_t s = NULL_STRING;
         str_and_len_tuple_t sl = NULL_STR_AND_LEN_TUPLE;
-        unsigned long len = 0;
+        size_t len = 0;
         rw_array_t *tmp_ja = 0;
         rw_dict_t *tmp_jd = 0;
         switch (c)
@@ -223,7 +228,7 @@ rw_dict_t *rw_parse_dict_buff(char *b, unsigned long *idx)
                 {
                     return destroy_rw_dict_on_error(d, key);
                 }
-                is_waiting_key = 0;
+                is_waiting_key = false;
             }
             else
             {
@@ -265,6 +270,7 @@ rw_dict_t *rw_parse_dict_buff(char *b, unsigned long *idx)
                     rw_dict_add_exp_double(d, key, dwowe.double_exp_value);
                     break;
                 case 2:
+                default:
                     free(sl.str);
                     return destroy_rw_dict_on_error(d, key);
                 }
@@ -281,6 +287,7 @@ rw_dict_t *rw_parse_dict_buff(char *b, unsigned long *idx)
                     rw_dict_add_exp_long(d, key, lwowe.long_exp_value);
                     break;
                 case 2:
+                default:
                     free(sl.str);
                     return destroy_rw_dict_on_error(d, key);
                 }
@@ -325,7 +332,7 @@ rw_dict_t *rw_parse_dict_buff(char *b, unsigned long *idx)
             break;
 
         case ',':
-            is_waiting_key = 1;
+            is_waiting_key = true;
             break;
         }
         ++i;
@@ -337,17 +344,16 @@ rw_dict_t *rw_parse_dict_buff(char *b, unsigned long *idx)
     return d;
 }
 
-rw_array_t *rw_parse_array(FILE *f, unsigned long *pos)
+rw_array_t *rw_parse_array(FILE *f, size_t *pos)
 {
     if (!f || !pos)
     {
         return 0;
     }
 
-    unsigned long i = *pos;
+    size_t i = *pos;
 
-    unsigned long nb_elts_parsed = 0;
-    unsigned long nb_elts = get_nb_elts_array(f, i);
+    size_t nb_elts = get_nb_elts_array(f, i);
 
     rw_array_t *a = calloc(1, sizeof(rw_array_t));
     if (!a || nb_elts == 0)
@@ -356,13 +362,15 @@ rw_array_t *rw_parse_array(FILE *f, unsigned long *pos)
         return a;
     }
 
+    size_t nb_elts_parsed = 0;
+
     char c = 0;
     while (SEEK_AND_GET_CHAR(i) && nb_elts_parsed < nb_elts && c != 0)
     {
         string_t s = NULL_STRING;
         str_and_len_tuple_t sl = NULL_STR_AND_LEN_TUPLE;
-        unsigned long len = 0;
-        unsigned long nb_chars = 0;
+        size_t len = 0;
+        size_t nb_chars = 0;
         switch (c)
         {
         case '"':
@@ -403,6 +411,7 @@ rw_array_t *rw_parse_array(FILE *f, unsigned long *pos)
                     rw_array_add_exp_double(a, dwowe.double_exp_value);
                     break;
                 case 2:
+                default:
                     free(sl.str);
                     return destroy_rw_array_on_error(a);
                 }
@@ -419,6 +428,7 @@ rw_array_t *rw_parse_array(FILE *f, unsigned long *pos)
                     rw_array_add_exp_long(a, lwowe.long_exp_value);
                     break;
                 case 2:
+                default:
                     free(sl.str);
                     return destroy_rw_array_on_error(a);
                 }
@@ -511,17 +521,16 @@ rw_array_t *rw_parse_array(FILE *f, unsigned long *pos)
     return a;
 }
 
-rw_dict_t *rw_parse_dict(FILE *f, unsigned long *pos)
+rw_dict_t *rw_parse_dict(FILE *f, size_t *pos)
 {
     if (!f || !pos)
     {
         return 0;
     }
 
-    unsigned long i = *pos;
+    size_t i = *pos;
 
-    unsigned long nb_elts_parsed = 0;
-    unsigned long nb_elts = get_nb_elts_dict(f, i);
+    size_t nb_elts = get_nb_elts_dict(f, i);
 
     rw_dict_t *d = calloc(1, sizeof(rw_dict_t));
     if (!d || nb_elts == 0)
@@ -530,17 +539,18 @@ rw_dict_t *rw_parse_dict(FILE *f, unsigned long *pos)
         return d;
     }
 
+    size_t nb_elts_parsed = 0;
+
     string_t key = NULL_STRING;
+    bool is_waiting_key = true;
+
     char c = 0;
-    char is_waiting_key = 1;
-    // We start at 1 because if we entered this function, it means that we
-    // already read a '['
     while (SEEK_AND_GET_CHAR(i) && nb_elts_parsed < nb_elts && c != 0)
     {
         string_t s = NULL_STRING;
         str_and_len_tuple_t sl = NULL_STR_AND_LEN_TUPLE;
-        unsigned long len = 0;
-        unsigned long nb_chars = 0;
+        size_t len = 0;
+        size_t nb_chars = 0;
         switch (c)
         {
         case '"':
@@ -550,7 +560,7 @@ rw_dict_t *rw_parse_dict(FILE *f, unsigned long *pos)
                 {
                     return destroy_rw_dict_on_error(d, key);
                 }
-                is_waiting_key = 0;
+                is_waiting_key = false;
             }
             else
             {
@@ -592,6 +602,7 @@ rw_dict_t *rw_parse_dict(FILE *f, unsigned long *pos)
                     rw_dict_add_exp_double(d, key, dwowe.double_exp_value);
                     break;
                 case 2:
+                default:
                     free(sl.str);
                     return destroy_rw_dict_on_error(d, key);
                 }
@@ -608,6 +619,7 @@ rw_dict_t *rw_parse_dict(FILE *f, unsigned long *pos)
                     rw_dict_add_exp_long(d, key, lwowe.long_exp_value);
                     break;
                 case 2:
+                default:
                     free(sl.str);
                     return destroy_rw_dict_on_error(d, key);
                 }
@@ -696,7 +708,7 @@ rw_dict_t *rw_parse_dict(FILE *f, unsigned long *pos)
             break;
 
         case ',':
-            is_waiting_key = 1;
+            is_waiting_key = true;
             break;
         }
     }
@@ -715,7 +727,7 @@ rw_json_t *rw_parse(char *file)
         return 0;
     }
 
-    unsigned long offset = 0;
+    size_t offset = 0;
     if (fseek(f, offset++, SEEK_SET) != 0)
     {
         fclose(f);
@@ -725,7 +737,7 @@ rw_json_t *rw_parse(char *file)
     // Obtains the number of characters in the file
     struct stat st;
     stat(file, &st);
-    unsigned long nb_chars = st.st_size;
+    size_t nb_chars = st.st_size;
 
     char c = fgetc(f);
     if (c == '{')

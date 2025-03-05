@@ -9,8 +9,8 @@
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
-char rw_arrays_equal(rw_array_t *a, rw_array_t *b);
-char rw_dicts_equal(rw_dict_t *a, rw_dict_t *b);
-char rw_json_equal(rw_json_t *a, rw_json_t *b);
+bool rw_arrays_equal(rw_array_t *a, rw_array_t *b);
+bool rw_dicts_equal(rw_dict_t *a, rw_dict_t *b);
+bool rw_json_equal(rw_json_t *a, rw_json_t *b);
 
 #endif // !RW_JSON_EQUALITY_H
