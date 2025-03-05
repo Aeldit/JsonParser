@@ -96,10 +96,10 @@ double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t *sl)
     double decimals = 0; // Decimal part
     i64 exponent = 0; // Only used if sl->has_exponent is true
 
+    i64 nb_digits_decimals = 1;
     size_t exp_idx = 0;
 
     char has_exponent = sl->has_exponent;
-    char nb_digits_decimals = 1;
 
     // If the number is negative, this is set to -1 and the final res is
     // multiplied by it

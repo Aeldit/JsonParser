@@ -95,7 +95,7 @@ Test(base_json_parser, str_to_long_negative_exp_upper_negative)
 *******************************************************************************/
 void test_str_to_double(char *str, char is_float, char has_exponent,
                         char expected_has_exponent, double expected_value,
-                        double expected_number, long expected_exponent)
+                        double expected_number, i64 expected_exponent)
 {
     str_and_len_tuple_t *sl = calloc(1, sizeof(str_and_len_tuple_t));
     if (!sl)
@@ -109,19 +109,19 @@ void test_str_to_double(char *str, char is_float, char has_exponent,
 
     double_with_or_without_exponent_t dwowe = str_to_double(sl);
 
-    cr_expect(dwowe.has_exponent == expected_has_exponent,
-              "Expected 'has_exponent' to be '%s' but it was '%s'",
-              has_exponent ? "true" : "false",
-              sl->has_exponent ? "true" : "false");
-    cr_expect(dwowe.double_value == expected_value,
-              "Expected 'double_value' to be '%lf' but got '%lf'",
-              expected_value, dwowe.double_value);
     cr_expect(dwowe.double_exp_value.number == expected_number,
               "Expected 'number' to be '%lf' but got '%lf'", expected_number,
               dwowe.double_exp_value.number);
     cr_expect(dwowe.double_exp_value.exponent == expected_exponent,
               "Expected 'exponent' to be '%ld' but got '%ld'",
               expected_exponent, dwowe.double_exp_value.exponent);
+    cr_expect(dwowe.double_value == expected_value,
+              "Expected 'double_value' to be '%lf' but got '%lf'",
+              expected_value, dwowe.double_value);
+    cr_expect(dwowe.has_exponent == expected_has_exponent,
+              "Expected 'has_exponent' to be '%s' but it was '%s'",
+              has_exponent ? "true" : "false",
+              sl->has_exponent ? "true" : "false");
     free(sl);
 }
 
