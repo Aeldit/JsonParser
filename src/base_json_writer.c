@@ -10,9 +10,9 @@
 /*******************************************************************************
 **                               LOCAL FUNCTIONS                              **
 *******************************************************************************/
-unsigned get_nb_char_long(long n)
+u8 get_nb_char_long(i64 n)
 {
-    unsigned nb_char = n < 0 ? 2 : 1;
+    u8 nb_char = n < 0 ? 2 : 1;
     n *= n < 0 ? -1 : 1;
     while (n /= 10)
     {
@@ -81,9 +81,9 @@ void destroy_linked_list(string_linked_list_t *ll)
 /*******************************************************************************
 **                                GETS AS STR                                 **
 *******************************************************************************/
-string_t get_long_as_str(long value)
+string_t get_long_as_str(i64 value)
 {
-    unsigned nb_chars = get_nb_char_long(value);
+    u8 nb_chars = get_nb_char_long(value);
     char *str = calloc(nb_chars + 1, sizeof(char));
     if (!str)
     {
@@ -97,30 +97,28 @@ string_t get_double_as_str(double value)
 {
     // 18 : 10 int digits + '.' + 6 floating point digits + '\0'
     char double_str[18];
-    snprintf(double_str, 18, "%lf", value);
+    snprintf(double_str, 17, "%lf", value);
 
-    int nb_chars = 0;
-    int nb_decimals = 6;
-    char is_in_decimals = 1;
-    char non_zero_decimal_found = 0;
-    for (int i = 17; i >= 0; --i)
+    u8 nb_chars = 0;
+    for (i16 i = 16; i >= 0; --i)
     {
-        char s = double_str[i];
-        if (s == '.')
+        switch (double_str[i])
         {
-            is_in_decimals = 0;
-        }
-        if (is_in_decimals && '1' <= s && s <= '9')
-        {
-            non_zero_decimal_found = 1;
-        }
-        if (s == '0' && is_in_decimals && !non_zero_decimal_found)
-        {
-            --nb_decimals;
-        }
-        if (!is_in_decimals)
-        {
+        case '+':
+        case '-':
+        case '.':
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
             ++nb_chars;
+            break;
         }
     }
 
@@ -130,9 +128,8 @@ string_t get_double_as_str(double value)
         return NULL_STRING;
     }
 
-    unsigned len = nb_chars + nb_decimals - (nb_decimals ? 0 : 1);
-    memcpy(str, double_str, len);
-    return STRING_OF(str, len);
+    memcpy(str, double_str, nb_chars);
+    return STRING_OF(str, nb_chars);
 }
 
 string_t get_exp_long_as_str(exponent_long_t value)

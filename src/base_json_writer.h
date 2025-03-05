@@ -326,9 +326,9 @@ typedef struct
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
-unsigned get_nb_char_long(long n);
+u8 get_nb_char_long(i64 n);
 
-string_t get_long_as_str(long value);
+string_t get_long_as_str(i64 value);
 string_t get_double_as_str(double value);
 string_t get_exp_long_as_str(exponent_long_t value);
 string_t get_exp_double_as_str(exponent_double_t value);

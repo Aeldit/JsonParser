@@ -9,7 +9,7 @@
 
 int main(int argc, char *argv[])
 {
-    if (argc < 2)
+    if (argc < 2 || !argv)
     {
         return 1;
     }
@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
     if (IS_ARRAY(j))
     {
         printf("\n");
-        // write_ro_json_to_file(j, "out.json");
+        write_ro_json_to_file(j, "out.json");
         ro_array_print(j->array);
     }
     else if (IS_DICT(j))
@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
         ro_dict_print(j->dict);
     }
 
-    // thrd_sleep(&(struct timespec){ .tv_sec = 10 }, NULL);
+    thrd_sleep(&(struct timespec){ .tv_sec = 10 }, NULL);
 
     destroy_ro_json(j);
     return 0;
