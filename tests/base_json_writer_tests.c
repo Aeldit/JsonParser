@@ -85,7 +85,7 @@ void test_get_long_as_str(long n, unsigned len, char *nstr)
     string_t s = get_long_as_str(n);
     cr_expect(strings_equals(s, STRING_OF(nstr, len)),
               "Expected get_long_as_str(%lu) to return the string { .str = "
-              "\"%lu\", .len = %u }, but got { .str = \"%s\", .len = %u }",
+              "\"%lu\", .len = %u }, but got { .str = \"%s\", .len = %lu }",
               n, n, len, s.str, s.len);
     destroy_string(s);
 }
@@ -113,24 +113,24 @@ void test_get_double_as_str(double n, unsigned len, char *nstr)
     string_t s = get_double_as_str(n);
     cr_expect(strings_equals(s, STRING_OF(nstr, len)),
               "Expected get_double_as_str(%s) to return the string { .str = "
-              "\"%s\", .len = %u }, but got { .str = \"%s\", .len = %u }",
+              "\"%s\", .len = %u }, but got { .str = \"%s\", .len = %lu }",
               nstr, nstr, len, s.str, s.len);
     destroy_string(s);
 }
 
 Test(base_json_writer, get_double_as_str_zero_zero)
 {
-    test_get_double_as_str(0.0, 1, "0");
+    test_get_double_as_str(0.0, 8, "0.000000");
 }
 
 Test(base_json_writer, get_double_as_str_positive)
 {
-    test_get_double_as_str(1234.56789, 10, "1234.56789");
+    test_get_double_as_str(1234.56789, 11, "1234.567890");
 }
 
 Test(base_json_writer, get_double_as_str_negative)
 {
-    test_get_double_as_str(-123456.789, 11, "-123456.789");
+    test_get_double_as_str(-123456.789, 14, "-123456.789000");
 }
 
 /*******************************************************************************
@@ -143,7 +143,7 @@ void test_get_long_exp_as_str(long n, long e, unsigned len, char *nstr)
     cr_expect(
         strings_equals(s, STRING_OF(nstr, len)),
         "Expected get_exp_long_as_str(%lde%ld) to return the string { .str = "
-        "\"%lde%ld\", .len = %u }, but got { .str = \"%s\", .len = %u }",
+        "\"%lde%ld\", .len = %u }, but got { .str = \"%s\", .len = %lu }",
         el.number, el.exponent, el.number, el.exponent, len, s.str, s.len);
     destroy_string(s);
 }
@@ -173,14 +173,14 @@ void test_get_double_exp_as_str(double n, long e, unsigned len, char *nstr)
     cr_expect(
         strings_equals(s, STRING_OF(nstr, len)),
         "Expected get_double_exp_as_str(%lfe%ld) to return the string { .str = "
-        "\"%lfe%ld\", .len = %u }, but got { .str = \"%s\", .len = %u }",
+        "\"%lfe%ld\", .len = %u }, but got { .str = \"%s\", .len = %lu }",
         ed.number, ed.exponent, ed.number, ed.exponent, len, s.str, s.len);
     destroy_string(s);
 }
 
 Test(base_json_writer, get_double_exp_as_str_small)
 {
-    test_get_double_exp_as_str(2.5, 3, 5, "2.5e3");
+    test_get_double_exp_as_str(2.5, 3, 10, "2.500000e3");
 }
 
 Test(base_json_writer, get_double_exp_as_str_positive)
@@ -190,7 +190,7 @@ Test(base_json_writer, get_double_exp_as_str_positive)
 
 Test(base_json_writer, get_double_exp_as_str_negative)
 {
-    test_get_double_exp_as_str(-12345.6789, 5, 13, "-12345.6789e5");
+    test_get_double_exp_as_str(-12345.6789, 5, 15, "-12345.678900e5");
 }
 
 /*******************************************************************************
@@ -201,7 +201,7 @@ void test_get_bool_as_str(char b, unsigned len, char *nstr)
     string_t s = get_bool_as_str(b);
     cr_expect(strings_equals(s, STRING_OF(nstr, len)),
               "Expected get_bool_as_str(%d) to return the string { .str = "
-              "\"%s\", .len = %u }, but got { .str = \"%s\", .len = %u }",
+              "\"%s\", .len = %u }, but got { .str = \"%s\", .len = %lu }",
               b, b == 4 ? "true" : "false", len, s.str, s.len);
     destroy_string(s);
 }
@@ -224,7 +224,7 @@ Test(base_json_writer, get_null_as_str)
     string_t s = get_null_as_str();
     cr_expect(strings_equals(s, STRING_OF("null", 4)),
               "Expected get_null_as_str() to return the string { .str = "
-              "\"null\", .len = 4 }, but got { .str = \"%s\", .len = %u }",
+              "\"null\", .len = 4 }, but got { .str = \"%s\", .len = %lu }",
               s.str, s.len);
     free(s.str);
 }

@@ -5,32 +5,32 @@
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
-char ro_arrays_equal(ro_array_t *a, ro_array_t *b)
+bool ro_arrays_equal(ro_array_t *a, ro_array_t *b)
 {
     if (!a || !b)
     {
-        return 0;
+        return false;
     }
 
-    unsigned a_size = a->size;
-    unsigned b_size = b->size;
+    size_t a_size = a->size;
+    size_t b_size = b->size;
     if (a_size != b_size)
     {
-        return 0;
+        return false;
     }
 
     ro_value_t *a_values = a->values;
     ro_value_t *b_values = b->values;
-    for (unsigned i = 0; i < a_size; ++i)
+    for (size_t i = 0; i < a_size; ++i)
     {
         ro_value_t a_val = a_values[i];
         ro_value_t b_val = b_values[i];
         if (a_val.type != b_val.type)
         {
-            return 0;
+            return false;
         }
 
-        char is_equal = 0;
+        bool is_equal = false;
         switch (a_val.type)
         {
         case T_ERROR:
@@ -66,28 +66,28 @@ char ro_arrays_equal(ro_array_t *a, ro_array_t *b)
 
         if (!is_equal)
         {
-            return 0;
+            return false;
         }
     }
-    return 1;
+    return true;
 }
 
-char ro_dicts_equal(ro_dict_t *a, ro_dict_t *b)
+bool ro_dicts_equal(ro_dict_t *a, ro_dict_t *b)
 {
     if (!a || !b)
     {
-        return 0;
+        return false;
     }
 
-    unsigned a_size = a->size;
-    unsigned b_size = b->size;
+    size_t a_size = a->size;
+    size_t b_size = b->size;
     if (a_size != b_size)
     {
-        return 0;
+        return false;
     }
 
     ro_item_t *a_items = a->items;
-    for (unsigned i = 0; i < a_size; ++i)
+    for (size_t i = 0; i < a_size; ++i)
     {
         ro_item_t a_it = a_items[i];
         ro_item_t b_it = ro_dict_get(b, a_it.key);
@@ -95,17 +95,17 @@ char ro_dicts_equal(ro_dict_t *a, ro_dict_t *b)
         // If the second dict doesn't contain the current key
         if (b_it.type == T_ERROR)
         {
-            return 0;
+            return false;
         }
 
         // If the second dict contains the key but the associated element is not
         // of the same type
         if (a_it.type != b_it.type)
         {
-            return 0;
+            return false;
         }
 
-        char is_equal = 0;
+        bool is_equal = false;
         switch (a_it.type)
         {
         case T_ERROR:
@@ -141,17 +141,17 @@ char ro_dicts_equal(ro_dict_t *a, ro_dict_t *b)
 
         if (!is_equal)
         {
-            return 0;
+            return false;
         }
     }
-    return 1;
+    return true;
 }
 
-char ro_json_equal(ro_json_t *a, ro_json_t *b)
+bool ro_json_equal(ro_json_t *a, ro_json_t *b)
 {
     if (!a || !b || a->is_array != b->is_array)
     {
-        return 0;
+        return false;
     }
     return a->is_array ? ro_arrays_equal(a->array, b->array)
                        : ro_dicts_equal(a->dict, b->dict);

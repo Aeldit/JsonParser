@@ -63,8 +63,8 @@ typedef struct
 {
     char *str;
     size_t len;
-    char is_float;
-    char has_exponent;
+    bool is_float;
+    bool has_exponent;
 } str_and_len_tuple_t;
 
 typedef struct
@@ -104,11 +104,11 @@ long_with_or_without_exponent_t str_to_long(str_and_len_tuple_t *sl);
 */
 double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t *sl);
 
-char is_float(char *str, size_t len);
-char has_exponent(char *str, size_t len);
+bool is_float(char *str, size_t len);
+bool has_exponent(char *str, size_t len);
 
-char max_nested_arrays_reached(u64 is_in_array);
-char max_nested_dicts_reached(u64 is_in_dict);
+bool max_nested_arrays_reached(u64 is_in_array);
+bool max_nested_dicts_reached(u64 is_in_dict);
 
 /***************************************
 **              FUNCTIONS             **

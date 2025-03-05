@@ -25,7 +25,8 @@ long_with_or_without_exponent_t str_to_long(str_and_len_tuple_t *sl)
         return ERROR_LWOWE;
     }
 
-    char has_exponent = sl->has_exponent;
+    bool has_exponent = sl->has_exponent;
+    bool is_in_exponent = false;
 
     i64 number = 0;
     i64 exponent = 0;
@@ -34,7 +35,6 @@ long_with_or_without_exponent_t str_to_long(str_and_len_tuple_t *sl)
 
     char is_negative = str[0] == '-' ? -1 : 1;
     char is_exp_negative = 1;
-    char is_in_exponent = 0;
 
     char c = 0;
     for (size_t i = 0; i < len; ++i)
@@ -43,7 +43,7 @@ long_with_or_without_exponent_t str_to_long(str_and_len_tuple_t *sl)
         if (has_exponent && (c == 'e' || c == 'E'))
         {
             exp_idx = i;
-            is_in_exponent = 1;
+            is_in_exponent = true;
         }
         else if ('0' <= c && c <= '9')
         {
@@ -99,14 +99,14 @@ double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t *sl)
     i64 nb_digits_decimals = 1;
     size_t exp_idx = 0;
 
-    char has_exponent = sl->has_exponent;
+    bool has_exponent = sl->has_exponent;
+    bool dot_reached = false;
+    bool is_in_exponent = false;
 
     // If the number is negative, this is set to -1 and the final res is
     // multiplied by it
     char is_negative = str[0] == '-' ? -1 : 1;
     char is_exp_negative = 1;
-    char dot_reached = 0;
-    char is_in_exponent = 0;
 
     char c = 0;
     for (size_t i = 0; i < len; ++i)
@@ -114,12 +114,12 @@ double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t *sl)
         c = str[i];
         if (c == '.')
         {
-            dot_reached = 1;
+            dot_reached = true;
         }
         else if (has_exponent && (c == 'e' || c == 'E'))
         {
             exp_idx = i;
-            is_in_exponent = 1;
+            is_in_exponent = true;
         }
         else if ('0' <= c && c <= '9')
         {
@@ -162,41 +162,41 @@ double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t *sl)
     };
 }
 
-char is_float(char *str, size_t len)
+bool is_float(char *str, size_t len)
 {
     if (!str)
     {
-        return 0;
+        return false;
     }
 
     for (size_t i = 0; i < len; ++i)
     {
         if (str[i] == '.')
         {
-            return 1;
+            return true;
         }
     }
-    return 0;
+    return false;
 }
 
-char has_exponent(char *str, size_t len)
+bool has_exponent(char *str, size_t len)
 {
     if (!str)
     {
-        return 0;
+        return false;
     }
 
     for (size_t i = 0; i < len; ++i)
     {
         if (str[i] == 'e' || str[i] == 'E')
         {
-            return 1;
+            return true;
         }
     }
-    return 0;
+    return false;
 }
 
-char max_nested_arrays_reached(u64 is_in_array)
+bool max_nested_arrays_reached(u64 is_in_array)
 {
     if (is_in_array == MAX_NESTED_ARRAYS)
     {
@@ -204,12 +204,12 @@ char max_nested_arrays_reached(u64 is_in_array)
         printf("Max number of nested arrays reached, aborting "
                "parsing\n");
 #endif
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 
-char max_nested_dicts_reached(u64 is_in_dict)
+bool max_nested_dicts_reached(u64 is_in_dict)
 {
     if (is_in_dict == MAX_NESTED_DICTS)
     {
@@ -217,9 +217,9 @@ char max_nested_dicts_reached(u64 is_in_dict)
         printf("Max number of nested dicts reached, aborting "
                "parsing\n");
 #endif
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 
 /***************************************
