@@ -159,28 +159,28 @@ str_and_len_tuple_t parse_number(FILE *f, size_t *pos);
 **            started the boolean
 ** \returns 5 if false, 4 if true, 0 otherwise
 */
-unsigned long parse_boolean_buff(char *buff, size_t *idx);
+size_t parse_boolean_buff(char *buff, size_t *idx);
 /**
 ** \param f The file stream
 ** \param pos A pointer to the value containing the index of the 't' or 'f' that
 **            started the boolean
 ** \returns 5 if false, 4 if true, 0 otherwise
 */
-unsigned long parse_boolean(FILE *f, size_t *pos);
+size_t parse_boolean(FILE *f, size_t *pos);
 
 /**
 ** \param idx The index of the character just after the '[' that begins the
 **            current array
 ** \returns The number of elements of the current array
 */
-unsigned long get_nb_elts_array_buff(char *buff, size_t idx);
+size_t get_nb_elts_array_buff(char *buff, size_t idx);
 /**
 ** \param f The file stream
 ** \param pos The position in the file of the character just after the '['
 **            that begins the current array
 ** \returns The number of elements of the current array
 */
-unsigned long get_nb_elts_array(FILE *f, size_t pos);
+size_t get_nb_elts_array(FILE *f, size_t pos);
 
 /**
 ** \param buff The buffer containing the object currently being parsed
@@ -188,14 +188,14 @@ unsigned long get_nb_elts_array(FILE *f, size_t pos);
 **            current dict
 ** \returns The number of elements of the current dict
 */
-unsigned long get_nb_elts_dict_buff(char *buff, size_t idx);
+size_t get_nb_elts_dict_buff(char *buff, size_t idx);
 /**
 ** \param f The file stream
 ** \param pos The position in the file of the character just after the '{'
 **            that begins the current dict
 ** \returns The number of elements of the current dict
 */
-unsigned long get_nb_elts_dict(FILE *f, size_t pos);
+size_t get_nb_elts_dict(FILE *f, size_t pos);
 
 /**
 ** \param f The file stream
@@ -204,7 +204,7 @@ unsigned long get_nb_elts_dict(FILE *f, size_t pos);
 ** \returns The total number of characters in the current array - 1 (the
 **          first '[' is not counted)
 */
-unsigned long get_nb_chars_in_array(FILE *f, size_t pos);
+size_t get_nb_chars_in_array(FILE *f, size_t pos);
 
 /**
 ** \param f The file stream
@@ -213,6 +213,6 @@ unsigned long get_nb_chars_in_array(FILE *f, size_t pos);
 ** \returns The total number of characters in the current dict - 1 (the
 **          first '{' is not counted)
 */
-unsigned long get_nb_chars_in_dict(FILE *f, size_t pos);
+size_t get_nb_chars_in_dict(FILE *f, size_t pos);
 
 #endif // !BASE_JSON_PARSER_H

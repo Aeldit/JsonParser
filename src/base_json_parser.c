@@ -446,9 +446,9 @@ size_t get_nb_elts_array_buff(char *buff, size_t idx)
     u64 is_in_array = 1;
     u64 is_in_dict = 0;
 
-    char is_in_string = 0;
-    char is_backslashing = 0;
-    char comma_encountered = 0;
+    bool is_in_string = false;
+    bool is_backslashing = false;
+    bool comma_encountered = false;
 
     char c = 0;
     char prev_c = 0;
@@ -465,7 +465,7 @@ size_t get_nb_elts_array_buff(char *buff, size_t idx)
         }
         else if (!comma_encountered && c == ',' && is_in_array == 1)
         {
-            comma_encountered = 1;
+            comma_encountered = true;
         }
 
         // If we are not in a string or if the string just ended
@@ -540,9 +540,9 @@ size_t get_nb_elts_array(FILE *f, size_t pos)
     u64 is_in_array = 1;
     u64 is_in_dict = 0;
 
-    char is_in_string = 0;
-    char is_backslashing = 0;
-    char comma_encountered = 0;
+    bool is_in_string = false;
+    bool is_backslashing = false;
+    bool comma_encountered = false;
 
     char c = 0;
     char prev_c = 0;
@@ -559,7 +559,7 @@ size_t get_nb_elts_array(FILE *f, size_t pos)
         }
         else if (!comma_encountered && c == ',' && is_in_array == 1)
         {
-            comma_encountered = 1;
+            comma_encountered = true;
         }
 
         // If we are not in a string or if the string just ended
@@ -639,8 +639,8 @@ size_t get_nb_elts_dict_buff(char *buff, size_t idx)
     u64 is_in_dict = 1;
     u64 is_in_array = 0;
 
-    char is_in_string = 0;
-    char is_backslashing = 0;
+    bool is_in_string = false;
+    bool is_backslashing = false;
 
     char c = 0;
     while ((c = buff[idx]))
@@ -721,8 +721,8 @@ size_t get_nb_elts_dict(FILE *f, size_t pos)
     u64 is_in_dict = 1;
     u64 is_in_array = 0;
 
-    char is_in_string = 0;
-    char is_backslashing = 0;
+    bool is_in_string = false;
+    bool is_backslashing = false;
 
     char c = 0;
     while (SEEK_AND_GET_CHAR(pos))
@@ -796,8 +796,8 @@ size_t get_nb_chars_in_array(FILE *f, size_t pos)
     u64 is_in_array = 1;
     u64 is_in_dict = 0;
 
-    char is_in_string = 0;
-    char is_backslashing = 0;
+    bool is_in_string = false;
+    bool is_backslashing = false;
 
     char c = 0;
     while (SEEK_AND_GET_CHAR(pos))
@@ -864,8 +864,8 @@ size_t get_nb_chars_in_dict(FILE *f, size_t pos)
     u64 is_in_dict = 1;
     u64 is_in_array = 0;
 
-    char is_in_string = 0;
-    char is_backslashing = 0;
+    bool is_in_string = false;
+    bool is_backslashing = false;
 
     char c = 0;
     while (SEEK_AND_GET_CHAR(pos))
