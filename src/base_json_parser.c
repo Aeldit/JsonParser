@@ -27,12 +27,15 @@ long_with_or_without_exponent_t str_to_long(str_and_len_tuple_t *sl)
 
     char has_exponent = sl->has_exponent;
 
-    long number = 0;
-    long exponent = 0;
-    unsigned char exp_idx = 0;
+    i64 number = 0;
+    i64 exponent = 0;
+
+    size_t exp_idx = 0;
+
     char is_negative = str[0] == '-' ? -1 : 1;
     char is_exp_negative = 1;
     char is_in_exponent = 0;
+
     char c = 0;
     for (size_t i = 0; i < len; ++i)
     {
@@ -89,19 +92,22 @@ double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t *sl)
         return ERROR_DWOWE;
     }
 
-    char has_exponent = sl->has_exponent;
-
     double number = 0; // Integer part
     double decimals = 0; // Decimal part
-    long exponent = 0; // Only used if sl->has_exponent is true
-    unsigned long nb_digits_decimals = 1;
-    unsigned char exp_idx = 0;
+    i64 exponent = 0; // Only used if sl->has_exponent is true
+
+    size_t exp_idx = 0;
+
+    char has_exponent = sl->has_exponent;
+    char nb_digits_decimals = 1;
+
     // If the number is negative, this is set to -1 and the final res is
     // multiplied by it
     char is_negative = str[0] == '-' ? -1 : 1;
     char is_exp_negative = 1;
     char dot_reached = 0;
     char is_in_exponent = 0;
+
     char c = 0;
     for (size_t i = 0; i < len; ++i)
     {
@@ -190,7 +196,7 @@ char has_exponent(char *str, size_t len)
     return 0;
 }
 
-char max_nested_arrays_reached(long is_in_array)
+char max_nested_arrays_reached(u64 is_in_array)
 {
     if (is_in_array == MAX_NESTED_ARRAYS)
     {
@@ -203,7 +209,7 @@ char max_nested_arrays_reached(long is_in_array)
     return 0;
 }
 
-char max_nested_dicts_reached(long is_in_dict)
+char max_nested_dicts_reached(u64 is_in_dict)
 {
     if (is_in_dict == MAX_NESTED_DICTS)
     {
@@ -435,14 +441,17 @@ size_t get_nb_elts_array_buff(char *buff, size_t idx)
     }
 
     size_t nb_elts = 0;
-    // TODO: Check if we can put as unsigned
-    long is_in_array = 1;
-    long is_in_dict = 0;
-    char c = 0;
-    char prev_c = 0;
+
+    // Counts the number of arrays/dicts nesting at the current position
+    u64 is_in_array = 1;
+    u64 is_in_dict = 0;
+
     char is_in_string = 0;
     char is_backslashing = 0;
     char comma_encountered = 0;
+
+    char c = 0;
+    char prev_c = 0;
     while ((c = buff[idx]))
     {
         if (!is_in_array)
@@ -520,15 +529,17 @@ size_t get_nb_elts_array_buff(char *buff, size_t idx)
 
 size_t get_nb_elts_array(FILE *f, size_t pos)
 {
-    if (!f)
+    if (!f || (!fseek(f, pos++, SEEK_SET) && fgetc(f) == ']'))
     {
         return 0;
     }
 
     size_t nb_elts = 0;
 
-    long is_in_array = 1;
-    long is_in_dict = 0;
+    // Counts the number of arrays/dicts nesting at the current position
+    u64 is_in_array = 1;
+    u64 is_in_dict = 0;
+
     char is_in_string = 0;
     char is_backslashing = 0;
     char comma_encountered = 0;
@@ -620,10 +631,14 @@ size_t get_nb_elts_dict_buff(char *buff, size_t idx)
 
     // Used for the case where the dict contains only one element, and so
     // does not contain a ','
-    unsigned long single_elt_found = 0;
+    // It can only be 0 or 1 but is stored as a size_t because it is compared to
+    // another size_t, so it will be cast to this size anyway
+    size_t single_elt_found = 0;
 
-    long is_in_dict = 1;
-    long is_in_array = 0;
+    // Counts the number of arrays/dicts nesting at the current position
+    u64 is_in_dict = 1;
+    u64 is_in_array = 0;
+
     char is_in_string = 0;
     char is_backslashing = 0;
 
@@ -689,7 +704,7 @@ size_t get_nb_elts_dict_buff(char *buff, size_t idx)
 
 size_t get_nb_elts_dict(FILE *f, size_t pos)
 {
-    if (!f)
+    if (!f || (!fseek(f, pos++, SEEK_SET) && fgetc(f) == '}'))
     {
         return 0;
     }
@@ -698,10 +713,14 @@ size_t get_nb_elts_dict(FILE *f, size_t pos)
 
     // Used for the case where the dict contains only one element, and so
     // does not contain a ','
-    unsigned long single_elt_found = 0;
+    // It can only be 0 or 1 but is stored as a size_t because it is compared to
+    // another size_t, so it will be cast to this size anyway
+    size_t single_elt_found = 0;
 
-    long is_in_dict = 1;
-    long is_in_array = 0;
+    // Counts the number of arrays/dicts nesting at the current position
+    u64 is_in_dict = 1;
+    u64 is_in_array = 0;
+
     char is_in_string = 0;
     char is_backslashing = 0;
 
@@ -773,8 +792,10 @@ size_t get_nb_chars_in_array(FILE *f, size_t pos)
 
     size_t nb_chars = 0;
 
-    long is_in_array = 1;
-    long is_in_dict = 0;
+    // Counts the number of arrays/dicts nesting at the current position
+    u64 is_in_array = 1;
+    u64 is_in_dict = 0;
+
     char is_in_string = 0;
     char is_backslashing = 0;
 
@@ -839,8 +860,10 @@ size_t get_nb_chars_in_dict(FILE *f, size_t pos)
 
     size_t nb_chars = 0;
 
-    long is_in_dict = 1;
-    long is_in_array = 0;
+    // Counts the number of arrays/dicts nesting at the current position
+    u64 is_in_dict = 1;
+    u64 is_in_array = 0;
+
     char is_in_string = 0;
     char is_backslashing = 0;
 

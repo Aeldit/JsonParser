@@ -39,6 +39,13 @@
 /*******************************************************************************
 **                                  TYPEDEFS                                  **
 *******************************************************************************/
+#ifdef DLEAST
+typedef int_least64_t i64;
+typedef uint_least64_t u64;
+#else
+typedef int_fast64_t i64;
+typedef uint_fast64_t u64;
+#endif // !DLEAST
 
 /*******************************************************************************
 **                                 STRUCTURES                                 **
@@ -52,14 +59,14 @@ typedef struct
 
 typedef struct
 {
-    long number;
-    long exponent;
+    i64 number;
+    i64 exponent;
 } exponent_long_t;
 
 typedef struct
 {
     double number;
-    long exponent;
+    i64 exponent;
 } exponent_double_t;
 
 /*******************************************************************************

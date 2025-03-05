@@ -325,7 +325,7 @@ void test_parse_string(unsigned long *idx, char *expected_str, char is_buff)
     if ((is_buff && buff) && idx)
     {
         cr_expect(*idx - initial_idx - !is_buff == s.len + 1,
-                  "Expected '*idx' to be incremented by '%u' but it got "
+                  "Expected '*idx' to be incremented by '%lu' but it got "
                   "incremented by '%lu'",
                   s.len + 1, *idx - initial_idx - !is_buff);
     }
@@ -427,12 +427,12 @@ void test_parse_number(unsigned long *idx,
                       s.len < expected_len ? expected_len : s.len)
                   == 0,
               "Expected 'str' to be '%s' but got '%s'", expected_str, s.str);
-    cr_expect(s.len == expected_len, "Expected 'len' to be '%lu' but got '%u'",
+    cr_expect(s.len == expected_len, "Expected 'len' to be '%lu' but got '%lu'",
               expected_len, s.len);
     if (f && idx)
     {
         cr_expect(*idx - initial_idx - !is_buff == s.len - 1,
-                  "Expected '*idx' to be incremented by '%u' but it got "
+                  "Expected '*idx' to be incremented by '%lu' but it got "
                   "incremented by '%lu'",
                   s.len - 1, *idx - initial_idx - !is_buff);
         cr_expect(s.is_float == expected_str_and_len.is_float,
@@ -787,8 +787,7 @@ Test(base_json_parser, parse_boolean_false)
 /*******************************************************************************
 **                              GET_NB_ELTS_ARRAY                             **
 *******************************************************************************/
-void test_get_nb_elts_array(unsigned long idx, unsigned long expected_len,
-                            char is_buff)
+void test_get_nb_elts_array(size_t idx, size_t expected_len, char is_buff)
 {
     FILE *f = fopen(JSON_TESTS_FILE, "r");
     if (!f)
@@ -796,7 +795,7 @@ void test_get_nb_elts_array(unsigned long idx, unsigned long expected_len,
         return;
     }
 
-    unsigned long len = 0;
+    size_t len = 0;
     char *buff = 0;
 
     if (is_buff)
@@ -809,7 +808,7 @@ void test_get_nb_elts_array(unsigned long idx, unsigned long expected_len,
 
         struct stat st;
         stat(JSON_TESTS_FILE, &st);
-        unsigned long nb_chars = st.st_size;
+        size_t nb_chars = st.st_size;
 
         buff = calloc(nb_chars + 1, sizeof(char));
         if (!buff)
@@ -823,11 +822,11 @@ void test_get_nb_elts_array(unsigned long idx, unsigned long expected_len,
     }
     else
     {
-        if (fseek(f, idx, SEEK_SET) != 0)
+        /*if (fseek(f, idx, SEEK_SET) != 0)
         {
             fclose(f);
             return;
-        }
+        }*/
         len = get_nb_elts_array(f, idx);
     }
 
@@ -1147,7 +1146,7 @@ Test(base_json_parser, error_parse_string_nullstream)
     string_t s = parse_string(0, &idx);
     cr_expect(!s.str,
               "Expected parse_string(0, &idx) to a NULL_STRING, but it "
-              "returned { .str = %s, .len = %u }",
+              "returned { .str = %s, .len = %lu }",
               s.str, s.len);
 }
 
@@ -1156,7 +1155,7 @@ Test(base_json_parser, error_parse_string_nullidx)
     string_t s = parse_string(stdin, 0);
     cr_expect(!s.str,
               "Expected parse_string(stdin, 0) to a NULL_STRING, but it "
-              "returned { .str = %s, .len = %u }",
+              "returned { .str = %s, .len = %lu }",
               s.str, s.len);
 }
 
@@ -1165,21 +1164,23 @@ Test(base_json_parser, error_parse_number_buff_nullstr)
 {
     unsigned long idx = 5;
     str_and_len_tuple_t s = parse_number_buff(0, &idx);
-    cr_expect(!s.str,
-              "Expected parse_number_buff(0, &idx) to a "
-              "NULL_STR_AND_LEN_TUPLE, but it returned { .str = %s, .len = %u, "
-              ".is_float = %d, .has_exponent = %d }",
-              s.str, s.len, s.is_float, s.has_exponent);
+    cr_expect(
+        !s.str,
+        "Expected parse_number_buff(0, &idx) to a "
+        "NULL_STR_AND_LEN_TUPLE, but it returned { .str = %s, .len = %lu, "
+        ".is_float = %d, .has_exponent = %d }",
+        s.str, s.len, s.is_float, s.has_exponent);
 }
 
 Test(base_json_parser, error_parse_number_buff_nullidx)
 {
     str_and_len_tuple_t s = parse_number_buff("", 0);
-    cr_expect(!s.str,
-              "Expected parse_number_buff(0, &idx) to a "
-              "NULL_STR_AND_LEN_TUPLE, but it returned { .str = %s, .len = %u, "
-              ".is_float = %d, .has_exponent = %d }",
-              s.str, s.len, s.is_float, s.has_exponent);
+    cr_expect(
+        !s.str,
+        "Expected parse_number_buff(0, &idx) to a "
+        "NULL_STR_AND_LEN_TUPLE, but it returned { .str = %s, .len = %lu, "
+        ".is_float = %d, .has_exponent = %d }",
+        s.str, s.len, s.is_float, s.has_exponent);
 }
 
 // parse_number
@@ -1187,21 +1188,23 @@ Test(base_json_parser, error_parse_number_nullstream)
 {
     unsigned long idx = 5;
     str_and_len_tuple_t s = parse_number(0, &idx);
-    cr_expect(!s.str,
-              "Expected parse_number(0, &idx) to a "
-              "NULL_STR_AND_LEN_TUPLE, but it returned { .str = %s, .len = %u, "
-              ".is_float = %d, .has_exponent = %d }",
-              s.str, s.len, s.is_float, s.has_exponent);
+    cr_expect(
+        !s.str,
+        "Expected parse_number(0, &idx) to a "
+        "NULL_STR_AND_LEN_TUPLE, but it returned { .str = %s, .len = %lu, "
+        ".is_float = %d, .has_exponent = %d }",
+        s.str, s.len, s.is_float, s.has_exponent);
 }
 
 Test(base_json_parser, error_parse_number_nullidx)
 {
     str_and_len_tuple_t s = parse_number(stdin, 0);
-    cr_expect(!s.str,
-              "Expected parse_number(0, &idx) to a "
-              "NULL_STR_AND_LEN_TUPLE, but it returned { .str = %s, .len = %u, "
-              ".is_float = %d, .has_exponent = %d }",
-              s.str, s.len, s.is_float, s.has_exponent);
+    cr_expect(
+        !s.str,
+        "Expected parse_number(0, &idx) to a "
+        "NULL_STR_AND_LEN_TUPLE, but it returned { .str = %s, .len = %lu, "
+        ".is_float = %d, .has_exponent = %d }",
+        s.str, s.len, s.is_float, s.has_exponent);
 }
 
 // parse_boolean_buff

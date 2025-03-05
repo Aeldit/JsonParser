@@ -16,6 +16,12 @@ rw: clean
 	$(CC) $(CFLAGS) $(CFILESBASE) $(CFILESRW) -o $(TARGET)
 	./$(TARGET) t.json
 
+# Makes the parse use stdint's 'least' types to use less memory, at the
+# potential cost of performance
+mem-least: clean
+	$(CC) $(CFLAGS) -DLEAST $(CFILESBASE) $(CFILESRO) -o $(TARGET)
+	./$(TARGET) t.json
+
 .PHONY:
 $(TARGET):
 	$(CC) $(CFLAGS) $(CFILESBASE) $(CFILESRO) -o $(TARGET)
