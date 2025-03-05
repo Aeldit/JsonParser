@@ -5,26 +5,26 @@
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
-char rw_arrays_equal(rw_array_t *a, rw_array_t *b)
+bool rw_arrays_equal(rw_array_t *a, rw_array_t *b)
 {
     if (!a || !b)
     {
-        return 0;
+        return false;
     }
 
-    unsigned a_size = a->size;
-    unsigned b_size = b->size;
+    size_t a_size = a->size;
+    size_t b_size = b->size;
     if (a_size != b_size)
     {
-        return 0;
+        return false;
     }
 
-    unsigned i = 0;
+    size_t i = 0;
     value_link_t *link = a->head;
     while (link)
     {
         rw_value_t *values = link->values;
-        for (unsigned a = 0; a < ARRAY_LEN; ++a, ++i)
+        for (size_t a = 0; a < ARRAY_LEN; ++a, ++i)
         {
             rw_value_t a_val = values[a];
             if (a_val.type == T_ERROR)
@@ -34,10 +34,10 @@ char rw_arrays_equal(rw_array_t *a, rw_array_t *b)
             rw_value_t b_val = rw_array_get(b, i);
             if (a_val.type != b_val.type)
             {
-                return 0;
+                return false;
             }
 
-            char is_equal = 0;
+            bool is_equal = false;
             switch (a_val.type)
             {
             case T_STR:
@@ -60,7 +60,7 @@ char rw_arrays_equal(rw_array_t *a, rw_array_t *b)
                 is_equal = a_val.boolv == b_val.boolv;
                 break;
             case T_NULL:
-                is_equal = 1;
+                is_equal = true;
                 break;
             case T_ARR:
                 is_equal = rw_arrays_equal(a_val.arrayv, b_val.arrayv);
@@ -72,34 +72,34 @@ char rw_arrays_equal(rw_array_t *a, rw_array_t *b)
 
             if (!is_equal)
             {
-                return 0;
+                return false;
             }
         }
         link = link->next;
     }
-    return 1;
+    return true;
 }
 
-char rw_dicts_equal(rw_dict_t *a, rw_dict_t *b)
+bool rw_dicts_equal(rw_dict_t *a, rw_dict_t *b)
 {
     if (!a || !b)
     {
-        return 0;
+        return false;
     }
 
-    unsigned a_size = a->size;
-    unsigned b_size = b->size;
+    size_t a_size = a->size;
+    size_t b_size = b->size;
     if (a_size != b_size)
     {
-        return 0;
+        return false;
     }
 
-    unsigned i = 0;
+    size_t i = 0;
     item_link_t *link = a->head;
     while (link)
     {
         rw_item_t *items = link->items;
-        for (unsigned a = 0; a < ARRAY_LEN; ++a, ++i)
+        for (size_t a = 0; a < ARRAY_LEN; ++a, ++i)
         {
             rw_item_t a_it = items[a];
             if (a_it.type == T_ERROR)
@@ -114,10 +114,10 @@ char rw_dicts_equal(rw_dict_t *a, rw_dict_t *b)
             // element is not of the same type
             if (a_it.type != b_it.type)
             {
-                return 0;
+                return false;
             }
 
-            char is_equal = 0;
+            bool is_equal = false;
             switch (a_it.type)
             {
             case T_STR:
@@ -140,7 +140,7 @@ char rw_dicts_equal(rw_dict_t *a, rw_dict_t *b)
                 is_equal = a_it.boolv == b_it.boolv;
                 break;
             case T_NULL:
-                is_equal = 1;
+                is_equal = true;
                 break;
             case T_ARR:
                 is_equal = rw_arrays_equal(a_it.arrayv, b_it.arrayv);
@@ -152,19 +152,19 @@ char rw_dicts_equal(rw_dict_t *a, rw_dict_t *b)
 
             if (!is_equal)
             {
-                return 0;
+                return false;
             }
         }
         link = link->next;
     }
-    return 1;
+    return true;
 }
 
-char rw_json_equal(rw_json_t *a, rw_json_t *b)
+bool rw_json_equal(rw_json_t *a, rw_json_t *b)
 {
     if (!a || !b || a->is_array != b->is_array)
     {
-        return 0;
+        return false;
     }
     return a->is_array ? rw_arrays_equal(a->array, b->array)
                        : rw_dicts_equal(a->dict, b->dict);

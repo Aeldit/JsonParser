@@ -40,7 +40,7 @@
 /*******************************************************************************
 **                                  TYPEDEFS                                  **
 *******************************************************************************/
-#ifdef DLEAST
+#ifdef LEAST
 typedef int_least8_t i8;
 typedef uint_least8_t u8;
 typedef int_least16_t i16;
@@ -58,7 +58,7 @@ typedef int_fast32_t i32;
 typedef uint_fast32_t u32;
 typedef int_fast64_t i64;
 typedef uint_fast64_t u64;
-#endif // !DLEAST
+#endif // !LEAST
 
 /*******************************************************************************
 **                                 STRUCTURES                                 **

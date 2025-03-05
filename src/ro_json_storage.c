@@ -63,7 +63,7 @@ ro_dict_t *init_ro_dict(size_t size)
     return d;
 }
 
-ro_json_t *init_ro_json(u8 is_array, ro_array_t *a, ro_dict_t *d)
+ro_json_t *init_ro_json(bool is_array, ro_array_t *a, ro_dict_t *d)
 {
     if ((is_array && !a) || (!is_array && !d))
     {
@@ -130,7 +130,7 @@ void ro_array_add_exp_double(ro_array_t *a, exponent_double_t value)
     }
 }
 
-void ro_array_add_bool(ro_array_t *a, u8 value)
+void ro_array_add_bool(ro_array_t *a, bool value)
 {
     if (a && a->values && a->insert_index < a->size)
     {
@@ -202,7 +202,7 @@ void ro_dict_add_exp_double(ro_dict_t *d, string_t key, exponent_double_t value)
     }
 }
 
-void ro_dict_add_bool(ro_dict_t *d, string_t key, u8 value)
+void ro_dict_add_bool(ro_dict_t *d, string_t key, bool value)
 {
     if (d && d->items && d->insert_index < d->size && key.str)
     {
@@ -270,10 +270,10 @@ ro_item_t ro_dict_get(ro_dict_t *d, string_t key)
 /*******************************************************************************
 **                                   PRINTING                                 **
 *******************************************************************************/
-void ro_dict_print_indent(ro_dict_t *d, u16 indent, u8 fromDict);
+void ro_dict_print_indent(ro_dict_t *d, u16 indent, bool fromDict);
 void ro_dict_print(ro_dict_t *d);
 
-void ro_array_print_indent(ro_array_t *a, u16 indent, u8 fromDict)
+void ro_array_print_indent(ro_array_t *a, u16 indent, bool fromDict)
 {
     if (!a)
     {
@@ -357,12 +357,12 @@ void ro_array_print(ro_array_t *a)
     if (a)
     {
 #ifndef VALGRING_DISABLE_PRINT
-        ro_array_print_indent(a, 1, 0);
+        ro_array_print_indent(a, 1, false);
 #endif
     }
 }
 
-void ro_dict_print_indent(ro_dict_t *d, u16 indent, u8 fromDict)
+void ro_dict_print_indent(ro_dict_t *d, u16 indent, bool fromDict)
 {
     // Obtains the number of tab characters that will be printed
     char *tabs = calloc(indent, sizeof(char));
@@ -444,7 +444,7 @@ void ro_dict_print(ro_dict_t *d)
     if (d)
     {
 #ifndef VALGRING_DISABLE_PRINT
-        ro_dict_print_indent(d, 1, 0);
+        ro_dict_print_indent(d, 1, false);
 #endif
     }
 }

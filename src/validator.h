@@ -1,9 +1,10 @@
 #ifndef VALIDATOR_H
 #define VALIDATOR_H
 
+#include <stdbool.h>
 #include <stdio.h>
 
-char is_json_valid_buff(char *buff, unsigned long buff_len, char is_dict);
-char is_json_valid(FILE *buff);
+bool is_json_valid_buff(char *buff, size_t buff_len, bool is_dict);
+bool is_json_valid(FILE *buff);
 
 #endif // !VALIDATOR_H

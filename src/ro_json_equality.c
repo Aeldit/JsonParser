@@ -54,7 +54,7 @@ bool ro_arrays_equal(ro_array_t *a, ro_array_t *b)
             is_equal = a_val.boolv == b_val.boolv;
             break;
         case T_NULL:
-            is_equal = 1;
+            is_equal = true;
             break;
         case T_ARR:
             is_equal = ro_arrays_equal(a_val.arrayv, b_val.arrayv);
@@ -129,7 +129,7 @@ bool ro_dicts_equal(ro_dict_t *a, ro_dict_t *b)
             is_equal = a_it.boolv == b_it.boolv;
             break;
         case T_NULL:
-            is_equal = 1;
+            is_equal = true;
             break;
         case T_ARR:
             is_equal = ro_arrays_equal(a_it.arrayv, b_it.arrayv);
