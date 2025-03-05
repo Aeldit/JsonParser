@@ -1,6 +1,5 @@
 #include "base_json_storage.h"
 
-#include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
 

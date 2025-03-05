@@ -46,10 +46,11 @@
 
 #define STR_AND_LEN_OF(s, l, f, e)                                             \
     ((str_and_len_tuple_t){                                                    \
-        .str = s, .len = l, .is_float = f, .has_exponent = e })
+        .str = (s), .len = (l), .is_float = (f), .has_exponent = (e) })
 
-#define EXP_LONG_OF(n, e) ((exponent_long_t){ .number = n, .exponent = e })
-#define EXP_DOUBLE_OF(n, e) ((exponent_double_t){ .number = n, .exponent = e })
+#define EXP_LONG_OF(n, e) ((exponent_long_t){ .number = (n), .exponent = (e) })
+#define EXP_DOUBLE_OF(n, e)                                                    \
+    ((exponent_double_t){ .number = (n), .exponent = (e) })
 
 /*******************************************************************************
 **                                 STRUCTURES **
