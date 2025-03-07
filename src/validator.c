@@ -69,9 +69,9 @@ bool check_bools_nulls_numbers_counts(char *buff, size_t buff_len, bool is_dict)
     size_t nb_closed_curly_brackets = 0;
     size_t nb_closed_brackets = 0;
 
-    bool is_in_string = false;
-
     size_t i = 1; // We already read the first character of the file
+
+    bool is_in_string = false;
 
     char c = 0;
     char prev_c = 0;
@@ -168,7 +168,7 @@ bool check_bools_nulls_numbers_counts(char *buff, size_t buff_len, bool is_dict)
             break;
 
         default:
-            // The character that is not part of the json syntax, which means
+            // The character is not part of the json syntax, which means
             // invalid json
             printf("Found invalid character: '%c' (%d)", c, c);
             return false;
@@ -178,6 +178,47 @@ bool check_bools_nulls_numbers_counts(char *buff, size_t buff_len, bool is_dict)
     return nb_quotes % 2 == 0
         && nb_opened_curly_brackets == nb_closed_curly_brackets
         && nb_opened_brackets == nb_closed_brackets;
+}
+
+size_t get_str_len(char *buff, size_t pos)
+{
+    if (!buff)
+    {
+        return 1;
+    }
+
+    size_t nb_chars = 0;
+
+    char c = 0;
+    char prev_c = 0;
+    while ((c = buff[pos++]))
+    {
+        if (c == '"' && prev_c != '\\')
+        {
+            break;
+        }
+        ++nb_chars;
+        prev_c = c;
+    }
+    return nb_chars;
+}
+
+size_t get_num_len(char *buff, size_t pos)
+{
+    if (!buff)
+    {
+        return 1;
+    }
+
+    size_t nb_chars = 0;
+
+    char c = 0;
+    char prev_c = 0;
+    while ((c = buff[pos++]))
+    {
+    }
+
+    return nb_chars;
 }
 
 bool is_array_valid(char *buff, size_t *pos)
@@ -190,15 +231,42 @@ bool is_array_valid(char *buff, size_t *pos)
     size_t i = pos ? *pos : 0;
     size_t initial_i = i;
 
+    bool has_encountered_colon = false;
+    bool has_encountered_comma = false;
+
     char c = 0;
     while ((c = buff[i++]))
     {
         switch (c)
         {
-        case '"':
+        case ':':
+            has_encountered_colon = true;
+            break;
+
+        case ',':
+            if (!has_encountered_colon)
+            {
+                return false;
+            }
+            has_encountered_comma = true;
+            break;
+
         case 't':
+            i += 3;
+            break;
+
         case 'f':
+            i += 4;
+            break;
+
         case 'n':
+            i += 3;
+            break;
+
+        case '"':
+            i += get_str_len(buff, i);
+            break;
+
         case '+':
         case '-':
         case '0':
@@ -211,11 +279,13 @@ bool is_array_valid(char *buff, size_t *pos)
         case '7':
         case '8':
         case '9':
+            i += get_num_len(buff, i);
+            break;
+
         case '{':
         case '[':
         case '}':
         case ']':
-        case ',':
         case '\n':
         case '\t':
         case ' ':
@@ -264,14 +334,13 @@ bool check_arrays_and_dicts(char *buff)
 
 bool is_json_valid_buff(char *buff, size_t buff_len, bool is_dict)
 {
-    return true;
     if (!buff)
     {
         return false;
     }
-    return check_bools_nulls_numbers_counts(buff, buff_len, is_dict) /*&&
-        is_dict ? is_dict_valid(buff, 0) : is_array_valid(buff, 0)*/
-        ;
+    return check_bools_nulls_numbers_counts(buff, buff_len, is_dict) && is_dict
+        ? is_dict_valid(buff, 0)
+        : is_array_valid(buff, 0);
 }
 
 // TODO: Implement
