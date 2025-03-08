@@ -1,5 +1,7 @@
 #include "validator.h"
 
+#include <string.h>
+
 /**
 ** \brief Called after encountering a '+' or '-' sign, or any digit.
 **        Starts from the sign or digit that started the number
@@ -200,7 +202,7 @@ size_t get_str_len(char *buff, size_t pos)
         ++nb_chars;
         prev_c = c;
     }
-    return nb_chars;
+    return nb_chars + 1;
 }
 
 size_t get_num_len(char *buff, size_t pos)
@@ -251,28 +253,18 @@ bool is_array_valid(char *buff, size_t *pos)
         return false;
     }
 
-    size_t i = pos ? *pos : 0;
+    size_t i = pos ? *pos : 1;
     size_t initial_i = i;
 
-    bool has_encountered_colon = false;
-    bool has_encountered_comma = false;
-
     char c = 0;
+    char prev_c = 0;
     while ((c = buff[i++]))
     {
         switch (c)
         {
-        case ':':
-            has_encountered_colon = true;
-            break;
-
         case ',':
-            if (!has_encountered_colon)
-            {
-                return false;
-            }
-            has_encountered_comma = true;
-            break;
+            prev_c = ',';
+            continue;
 
         case 't':
             i += 3;
@@ -306,12 +298,11 @@ bool is_array_valid(char *buff, size_t *pos)
             break;
 
         case ']':
-        case '}':
-            if (has_encountered_comma)
+            if (pos)
             {
-                return false;
+                *pos += i - initial_i;
             }
-            break;
+            return prev_c != ',';
 
         case '[':
             if (!is_array_valid(buff, &i))
@@ -327,22 +318,10 @@ bool is_array_valid(char *buff, size_t *pos)
             }
             break;
 
-        case '\n':
-        case '\t':
-        case ' ':
-            break;
-
         default:
-            // The character that is not part of the json syntax, which means
-            // invalid json
-            printf("Found invalid character: '%c' (%d)", c, c);
-            return false;
+            continue;
         }
-    }
-
-    if (pos)
-    {
-        pos += i - initial_i;
+        prev_c = 0;
     }
     return true;
 }
@@ -354,12 +333,76 @@ bool is_dict_valid(char *buff, size_t *pos)
         return false;
     }
 
-    size_t i = pos ? *pos : 0;
+    size_t i = pos ? *pos : 1;
     size_t initial_i = i;
 
-    if (pos)
+    char c = 0;
+    char prev_c = 0;
+    while ((c = buff[i++]))
     {
-        pos += i - initial_i;
+        switch (c)
+        {
+        case ',':
+            prev_c = ',';
+            continue;
+
+        case 't':
+            i += 3;
+            break;
+
+        case 'f':
+            i += 4;
+            break;
+
+        case 'n':
+            i += 3;
+            break;
+
+        case '"':
+            i += get_str_len(buff, i);
+            break;
+
+        case '+':
+        case '-':
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+            i += get_num_len(buff, i);
+            break;
+
+        case '}':
+            if (pos)
+            {
+                *pos += i - initial_i;
+                printf("%lu\n", i - initial_i);
+            }
+            return prev_c != ',';
+
+        case '[':
+            if (!is_array_valid(buff, &i))
+            {
+                return false;
+            }
+            break;
+
+        case '{':
+            if (!is_dict_valid(buff, &i))
+            {
+                return false;
+            }
+            break;
+
+        default:
+            continue;
+        }
+        prev_c = 0;
     }
     return true;
 }
@@ -380,11 +423,11 @@ bool is_json_valid_buff(char *buff, size_t buff_len, bool is_dict)
         return false;
     }
     return check_bools_nulls_numbers_counts(buff, buff_len, is_dict) && is_dict
-        ? is_dict_valid(buff, 0)
-        : is_array_valid(buff, 0);
+        ? is_dict_valid(buff, 0) && buff[buff_len - 3] == '}'
+        : is_array_valid(buff, 0) && buff[buff_len - 3] == ']';
 }
 
-// TODO: Implement
+// TODO:
 bool is_json_valid(FILE *f)
 {
     if (!f)
