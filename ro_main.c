@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
         ro_dict_print(j->dict);
     }
 
-    thrd_sleep(&(struct timespec){ .tv_sec = 10 }, NULL);
+    // thrd_sleep(&(struct timespec){ .tv_sec = 10 }, NULL);
 
     destroy_ro_json(j);
     return 0;

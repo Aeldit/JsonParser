@@ -207,19 +207,42 @@ size_t get_num_len(char *buff, size_t pos)
 {
     if (!buff)
     {
-        return 1;
+        return 0;
     }
 
     size_t nb_chars = 0;
 
     char c = 0;
-    char prev_c = 0;
     while ((c = buff[pos++]))
     {
-    }
+        switch (c)
+        {
+        case '+':
+        case '-':
+        case '.':
+        case 'e':
+        case 'E':
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+            ++nb_chars;
+            break;
 
-    return nb_chars;
+        default:
+            return nb_chars;
+        }
+    }
+    return 0;
 }
+
+bool is_dict_valid(char *buff, size_t *pos);
 
 bool is_array_valid(char *buff, size_t *pos)
 {
@@ -282,10 +305,28 @@ bool is_array_valid(char *buff, size_t *pos)
             i += get_num_len(buff, i);
             break;
 
-        case '{':
-        case '[':
-        case '}':
         case ']':
+        case '}':
+            if (has_encountered_comma)
+            {
+                return false;
+            }
+            break;
+
+        case '[':
+            if (!is_array_valid(buff, &i))
+            {
+                return false;
+            }
+            break;
+
+        case '{':
+            if (!is_dict_valid(buff, &i))
+            {
+                return false;
+            }
+            break;
+
         case '\n':
         case '\t':
         case ' ':
