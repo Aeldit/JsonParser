@@ -381,7 +381,6 @@ bool is_dict_valid(char *buff, size_t *pos)
             if (pos)
             {
                 *pos += i - initial_i;
-                printf("%lu\n", i - initial_i);
             }
             return prev_c != ',';
 
