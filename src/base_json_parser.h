@@ -69,14 +69,14 @@ typedef struct
 
 typedef struct
 {
-    exponent_long_t long_exp_value;
+    exp_long_t long_exp_value;
     i64 long_value;
     char has_exponent; // 0 => false | 1 => true | 2 => error
 } long_with_or_without_exponent_t;
 
 typedef struct
 {
-    exponent_double_t double_exp_value;
+    exp_double_t double_exp_value;
     double double_value;
     char has_exponent; // 0 => false | 1 => true | 2 => error
 } double_with_or_without_exponent_t;

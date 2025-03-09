@@ -132,7 +132,7 @@ string_t get_double_as_str(double value)
     return STRING_OF(str, nb_chars);
 }
 
-string_t get_exp_long_as_str(exponent_long_t value)
+string_t get_exp_long_as_str(exp_long_t value)
 {
     i64 number = value.number;
     i64 exponent = value.exponent;
@@ -153,7 +153,7 @@ string_t get_exp_long_as_str(exponent_long_t value)
     return STRING_OF(str, len);
 }
 
-string_t get_exp_double_as_str(exponent_double_t value)
+string_t get_exp_double_as_str(exp_double_t value)
 {
     double number = value.number;
     i64 exponent = value.exponent;

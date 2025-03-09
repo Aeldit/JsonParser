@@ -326,8 +326,8 @@ u8 get_nb_char_long(i64 n);
 
 string_t get_long_as_str(i64 value);
 string_t get_double_as_str(double value);
-string_t get_exp_long_as_str(exponent_long_t value);
-string_t get_exp_double_as_str(exponent_double_t value);
+string_t get_exp_long_as_str(exp_long_t value);
+string_t get_exp_double_as_str(exp_double_t value);
 string_t get_bool_as_str(u8 value);
 string_t get_null_as_str();
 

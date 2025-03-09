@@ -41,12 +41,12 @@ bool strings_equals(string_t s1, string_t s2)
     return true;
 }
 
-inline bool exp_long_equals(exponent_long_t a, exponent_long_t b)
+inline bool exp_long_equals(exp_long_t a, exp_long_t b)
 {
     return a.number == b.number && a.exponent == b.exponent;
 }
 
-inline bool exp_double_equals(exponent_double_t a, exponent_double_t b)
+inline bool exp_double_equals(exp_double_t a, exp_double_t b)
 {
     return a.number == b.number && a.exponent == b.exponent;
 }

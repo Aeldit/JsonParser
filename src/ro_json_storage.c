@@ -114,7 +114,7 @@ void ro_array_add_double(ro_array_t *a, double value)
     }
 }
 
-void ro_array_add_exp_long(ro_array_t *a, exponent_long_t value)
+void ro_array_add_exp_long(ro_array_t *a, exp_long_t value)
 {
     if (a && a->values && a->insert_index < a->size)
     {
@@ -122,7 +122,7 @@ void ro_array_add_exp_long(ro_array_t *a, exponent_long_t value)
     }
 }
 
-void ro_array_add_exp_double(ro_array_t *a, exponent_double_t value)
+void ro_array_add_exp_double(ro_array_t *a, exp_double_t value)
 {
     if (a && a->values && a->insert_index < a->size)
     {
@@ -186,7 +186,7 @@ void ro_dict_add_double(ro_dict_t *d, string_t key, double value)
     }
 }
 
-void ro_dict_add_exp_long(ro_dict_t *d, string_t key, exponent_long_t value)
+void ro_dict_add_exp_long(ro_dict_t *d, string_t key, exp_long_t value)
 {
     if (d && d->items && d->insert_index < d->size && key.str)
     {
@@ -194,7 +194,7 @@ void ro_dict_add_exp_long(ro_dict_t *d, string_t key, exponent_long_t value)
     }
 }
 
-void ro_dict_add_exp_double(ro_dict_t *d, string_t key, exponent_double_t value)
+void ro_dict_add_exp_double(ro_dict_t *d, string_t key, exp_double_t value)
 {
     if (d && d->items && d->insert_index < d->size && key.str)
     {

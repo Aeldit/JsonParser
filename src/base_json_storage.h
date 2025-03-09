@@ -74,13 +74,13 @@ typedef struct
 {
     i64 number;
     i64 exponent;
-} exponent_long_t;
+} exp_long_t;
 
 typedef struct
 {
     double number;
     i64 exponent;
-} exponent_double_t;
+} exp_double_t;
 
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
@@ -103,11 +103,11 @@ bool strings_equals(string_t s1, string_t s2);
 /**
 ** \returns 1 If both longs with exponents are equal, 0 otherwise
 */
-bool exp_long_equals(exponent_long_t a, exponent_long_t b);
+bool exp_long_equals(exp_long_t a, exp_long_t b);
 /**
 ** \returns 1 If both doubles with exponents are equal, 0 otherwise
 */
-bool exp_double_equals(exponent_double_t a, exponent_double_t b);
+bool exp_double_equals(exp_double_t a, exp_double_t b);
 
 /**
 ** \brief If the string is not null but its length is 0, it means that it
