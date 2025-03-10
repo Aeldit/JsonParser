@@ -423,7 +423,7 @@ void rw_array_add_double(rw_array_t *a, double value)
     }
 }
 
-void rw_array_add_exp_long(rw_array_t *a, exponent_long_t value)
+void rw_array_add_exp_long(rw_array_t *a, exp_long_t value)
 {
     if (a)
     {
@@ -433,7 +433,7 @@ void rw_array_add_exp_long(rw_array_t *a, exponent_long_t value)
     }
 }
 
-void rw_array_add_exp_double(rw_array_t *a, exponent_double_t value)
+void rw_array_add_exp_double(rw_array_t *a, exp_double_t value)
 {
     if (a)
     {
@@ -507,7 +507,7 @@ void rw_dict_add_double(rw_dict_t *d, string_t key, double value)
     }
 }
 
-void rw_dict_add_exp_long(rw_dict_t *d, string_t key, exponent_long_t value)
+void rw_dict_add_exp_long(rw_dict_t *d, string_t key, exp_long_t value)
 {
     if (d && key.str)
     {
@@ -517,7 +517,7 @@ void rw_dict_add_exp_long(rw_dict_t *d, string_t key, exponent_long_t value)
     }
 }
 
-void rw_dict_add_exp_double(rw_dict_t *d, string_t key, exponent_double_t value)
+void rw_dict_add_exp_double(rw_dict_t *d, string_t key, exp_double_t value)
 {
     if (d && key.str)
     {

@@ -6,10 +6,9 @@
 /*******************************************************************************
 **                               EXP_LONG_EQUALS                              **
 *******************************************************************************/
-void test_exp_long_equals(exponent_long_t a, exponent_long_t b,
-                          char expected_is_equal)
+void test_exp_long_equals(exp_long_t a, exp_long_t b, bool expected_is_equal)
 {
-    char is_equal = exp_long_equals(a, b);
+    bool is_equal = exp_long_equals(a, b);
 
     cr_expect(
         is_equal == expected_is_equal,
@@ -20,31 +19,31 @@ void test_exp_long_equals(exponent_long_t a, exponent_long_t b,
 
 Test(ro_equality, exp_long_equals_numtrue_exptrue)
 {
-    test_exp_long_equals(EXP_LONG_OF(2, 3), EXP_LONG_OF(2, 3), 1);
+    test_exp_long_equals(EXP_LONG_OF(2, 3), EXP_LONG_OF(2, 3), true);
 }
 
 Test(ro_equality, exp_long_equals_numtrue_expfalse)
 {
-    test_exp_long_equals(EXP_LONG_OF(2, 3), EXP_LONG_OF(2, 2), 0);
+    test_exp_long_equals(EXP_LONG_OF(2, 3), EXP_LONG_OF(2, 2), false);
 }
 
 Test(ro_equality, exp_long_equals_numfalse_exptrue)
 {
-    test_exp_long_equals(EXP_LONG_OF(2, 3), EXP_LONG_OF(3, 3), 0);
+    test_exp_long_equals(EXP_LONG_OF(2, 3), EXP_LONG_OF(3, 3), false);
 }
 
 Test(ro_equality, exp_long_equals_numfalse_expfalse)
 {
-    test_exp_long_equals(EXP_LONG_OF(1, 2), EXP_LONG_OF(3, 4), 0);
+    test_exp_long_equals(EXP_LONG_OF(1, 2), EXP_LONG_OF(3, 4), false);
 }
 
 /*******************************************************************************
 **                              EXP_DOUBLE_EQUALS                             **
 *******************************************************************************/
-void test_exp_double_equals(exponent_double_t a, exponent_double_t b,
-                            char expected_is_equal)
+void test_exp_double_equals(exp_double_t a, exp_double_t b,
+                            bool expected_is_equal)
 {
-    char is_equal = exp_double_equals(a, b);
+    bool is_equal = exp_double_equals(a, b);
 
     cr_expect(
         is_equal == expected_is_equal,

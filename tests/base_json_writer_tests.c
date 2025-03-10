@@ -138,7 +138,7 @@ Test(base_json_writer, get_double_as_str_negative)
 *******************************************************************************/
 void test_get_long_exp_as_str(long n, long e, unsigned len, char *nstr)
 {
-    exponent_long_t el = (exponent_long_t){ .number = n, .exponent = e };
+    exp_long_t el = (exp_long_t){ .number = n, .exponent = e };
     string_t s = get_exp_long_as_str(el);
     cr_expect(
         strings_equals(s, STRING_OF(nstr, len)),
@@ -168,7 +168,7 @@ Test(base_json_writer, get_long_exp_as_str_negative)
 *******************************************************************************/
 void test_get_double_exp_as_str(double n, long e, unsigned len, char *nstr)
 {
-    exponent_double_t ed = (exponent_double_t){ .number = n, .exponent = e };
+    exp_double_t ed = (exp_double_t){ .number = n, .exponent = e };
     string_t s = get_exp_double_as_str(ed);
     cr_expect(
         strings_equals(s, STRING_OF(nstr, len)),

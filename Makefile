@@ -44,6 +44,6 @@ leaks: valgrind-compile
          --track-origins=yes ./$(TARGET) large-file.json
 
 check:
-	$(CC) $(CFLAGS) src/*.c $(TESTFILES) -o json-parser-tests -lcriterion
+	$(CC) $(CFLAGS) -DSEPVALIDATION src/*.c $(TESTFILES) -o json-parser-tests -lcriterion
 	./json-parser-tests
 

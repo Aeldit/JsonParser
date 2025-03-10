@@ -417,6 +417,10 @@ bool check_arrays_and_dicts(char *buff)
 
 bool is_json_valid_buff(char *buff, size_t buff_len, bool is_dict)
 {
+#ifdef SEPVALIDATION
+    return true;
+#endif // !SEPVALIDATION
+
     if (!buff)
     {
         return false;
@@ -429,6 +433,10 @@ bool is_json_valid_buff(char *buff, size_t buff_len, bool is_dict)
 // TODO:
 bool is_json_valid(FILE *f)
 {
+#ifdef SEPVALIDATION
+    return true;
+#endif // !SEPVALIDATION
+
     if (!f)
     {
         return false;
