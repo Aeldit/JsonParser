@@ -12,7 +12,7 @@
 /*******************************************************************************
 **                              RO_PARSE_ARRAY_BUFF                           **
 *******************************************************************************/
-ro_array_t *get_ro_array_from_file(unsigned long *idx, char is_buff)
+ro_array_t *get_ro_array_from_file(size_t *idx, bool is_buff)
 {
     if (!idx)
     {
@@ -38,7 +38,7 @@ ro_array_t *get_ro_array_from_file(unsigned long *idx, char is_buff)
 
         struct stat st;
         stat(JSON_TESTS_FILE, &st);
-        unsigned long nb_chars = st.st_size;
+        size_t nb_chars = st.st_size;
 
         buff = calloc(nb_chars + 1, sizeof(char));
         if (!buff)
@@ -70,11 +70,11 @@ ro_array_t *get_ro_array_from_file(unsigned long *idx, char is_buff)
 
 Test(ro_json_parser, ro_parse_array_buff_empty)
 {
-    unsigned long idx = 518;
-    ro_array_t *a = get_ro_array_from_file(&idx, 1);
+    size_t idx = 518;
+    ro_array_t *a = get_ro_array_from_file(&idx, true);
 
     ro_array_t *b = init_ro_array(0);
-    char is_equal = ro_arrays_equal(a, b);
+    bool is_equal = ro_arrays_equal(a, b);
 
     cr_expect(is_equal, "Expected the 2 arrays to be equal, but they were not");
     destroy_ro_array(a);
@@ -83,8 +83,8 @@ Test(ro_json_parser, ro_parse_array_buff_empty)
 
 Test(ro_json_parser, ro_parse_array_buff_long_numbers)
 {
-    unsigned long idx = 85;
-    ro_array_t *a = get_ro_array_from_file(&idx, 1);
+    size_t idx = 85;
+    ro_array_t *a = get_ro_array_from_file(&idx, true);
 
     ro_array_t *b = init_ro_array(20);
 
@@ -114,7 +114,7 @@ Test(ro_json_parser, ro_parse_array_buff_long_numbers)
     ro_array_add_exp_double(b, EXP_DOUBLE_OF(200.5, -10));
     ro_array_add_exp_double(b, EXP_DOUBLE_OF(-200.5, -10));
 
-    char is_equal = ro_arrays_equal(a, b);
+    bool is_equal = ro_arrays_equal(a, b);
 
     cr_expect(is_equal, "Expected the 2 arrays to be equal, but they were not");
     destroy_ro_array(a);
@@ -123,8 +123,8 @@ Test(ro_json_parser, ro_parse_array_buff_long_numbers)
 
 Test(ro_json_parser, ro_parse_array_buff_nested_multi_type)
 {
-    unsigned long idx = 508;
-    ro_array_t *a = get_ro_array_from_file(&idx, 1);
+    size_t idx = 508;
+    ro_array_t *a = get_ro_array_from_file(&idx, true);
 
     ro_array_t *b = init_ro_array(8);
 
@@ -140,7 +140,7 @@ Test(ro_json_parser, ro_parse_array_buff_nested_multi_type)
 
     ro_array_t *a3 = init_ro_array(3);
     ro_array_add_str(a3, string_nofree_of("dd"));
-    ro_array_add_bool(a3, 1);
+    ro_array_add_bool(a3, true);
     ro_array_add_long(a3, 5);
 
     ro_array_add_array(a2, a3);
@@ -155,7 +155,7 @@ Test(ro_json_parser, ro_parse_array_buff_nested_multi_type)
     ro_array_add_dict(b, d);
     ro_array_add_dict(b, init_ro_dict(0));
 
-    char is_equal = ro_arrays_equal(a, b);
+    bool is_equal = ro_arrays_equal(a, b);
 
     cr_expect(is_equal, "Expected the 2 arrays to be equal, but they were not");
     destroy_ro_array(a);
@@ -164,11 +164,11 @@ Test(ro_json_parser, ro_parse_array_buff_nested_multi_type)
 
 Test(ro_json_parser, ro_parse_array_empty)
 {
-    unsigned long idx = 519;
-    ro_array_t *a = get_ro_array_from_file(&idx, 0);
+    size_t idx = 519;
+    ro_array_t *a = get_ro_array_from_file(&idx, false);
 
     ro_array_t *b = init_ro_array(0);
-    char is_equal = ro_arrays_equal(a, b);
+    bool is_equal = ro_arrays_equal(a, b);
 
     cr_expect(is_equal, "Expected the 2 arrays to be equal, but they were not");
     destroy_ro_array(a);
@@ -177,8 +177,8 @@ Test(ro_json_parser, ro_parse_array_empty)
 
 Test(ro_json_parser, ro_parse_array_long_numbers)
 {
-    unsigned long idx = 86;
-    ro_array_t *a = get_ro_array_from_file(&idx, 0);
+    size_t idx = 86;
+    ro_array_t *a = get_ro_array_from_file(&idx, false);
 
     ro_array_t *b = init_ro_array(20);
 
@@ -217,8 +217,8 @@ Test(ro_json_parser, ro_parse_array_long_numbers)
 
 Test(ro_json_parser, ro_parse_array_nested_multi_type)
 {
-    unsigned long idx = 509;
-    ro_array_t *a = get_ro_array_from_file(&idx, 0);
+    size_t idx = 509;
+    ro_array_t *a = get_ro_array_from_file(&idx, false);
 
     ro_array_t *b = init_ro_array(8);
 
@@ -234,7 +234,7 @@ Test(ro_json_parser, ro_parse_array_nested_multi_type)
 
     ro_array_t *a3 = init_ro_array(3);
     ro_array_add_str(a3, string_nofree_of("dd"));
-    ro_array_add_bool(a3, 1);
+    ro_array_add_bool(a3, true);
     ro_array_add_long(a3, 5);
 
     ro_array_add_array(a2, a3);
@@ -249,7 +249,7 @@ Test(ro_json_parser, ro_parse_array_nested_multi_type)
     ro_array_add_dict(b, d);
     ro_array_add_dict(b, init_ro_dict(0));
 
-    char is_equal = ro_arrays_equal(a, b);
+    bool is_equal = ro_arrays_equal(a, b);
 
     cr_expect(is_equal, "Expected the 2 arrays to be equal, but they were not");
     destroy_ro_array(a);
@@ -259,7 +259,7 @@ Test(ro_json_parser, ro_parse_array_nested_multi_type)
 /*******************************************************************************
 **                               RO_PARSE_DICT_BUFF                           **
 *******************************************************************************/
-ro_dict_t *get_ro_dict_from_fileile(unsigned long *idx, char is_buff)
+ro_dict_t *get_ro_dict_from_fileile(size_t *idx, bool is_buff)
 {
     if (!idx)
     {
@@ -285,7 +285,7 @@ ro_dict_t *get_ro_dict_from_fileile(unsigned long *idx, char is_buff)
 
         struct stat st;
         stat(JSON_TESTS_FILE, &st);
-        unsigned long nb_chars = st.st_size;
+        size_t nb_chars = st.st_size;
 
         buff = calloc(nb_chars + 1, sizeof(char));
         if (!buff)
@@ -317,11 +317,11 @@ ro_dict_t *get_ro_dict_from_fileile(unsigned long *idx, char is_buff)
 
 Test(ro_json_parser, ro_parse_dict_buff_empty)
 {
-    unsigned long idx = 812;
-    ro_dict_t *a = get_ro_dict_from_fileile(&idx, 1);
+    size_t idx = 812;
+    ro_dict_t *a = get_ro_dict_from_fileile(&idx, true);
 
     ro_dict_t *b = init_ro_dict(0);
-    char is_equal = ro_dicts_equal(a, b);
+    bool is_equal = ro_dicts_equal(a, b);
 
     cr_expect(is_equal, "Expected the 2 dicts to be equal, but they were not");
     destroy_ro_dict(a);
@@ -330,8 +330,8 @@ Test(ro_json_parser, ro_parse_dict_buff_empty)
 
 Test(ro_json_parser, ro_parse_dict_buff_numbers)
 {
-    unsigned long idx = 824;
-    ro_dict_t *a = get_ro_dict_from_fileile(&idx, 1);
+    size_t idx = 824;
+    ro_dict_t *a = get_ro_dict_from_fileile(&idx, true);
 
     ro_dict_t *b = init_ro_dict(3);
 
@@ -339,7 +339,7 @@ Test(ro_json_parser, ro_parse_dict_buff_numbers)
     ro_dict_add_long(b, string_nofree_of("2"), 2);
     ro_dict_add_long(b, string_nofree_of("3"), 3);
 
-    char is_equal = ro_dicts_equal(a, b);
+    bool is_equal = ro_dicts_equal(a, b);
 
     cr_expect(is_equal, "Expected the 2 dicts to be equal, but they were not");
     destroy_ro_dict(a);
@@ -348,8 +348,8 @@ Test(ro_json_parser, ro_parse_dict_buff_numbers)
 
 Test(ro_json_parser, ro_parse_dict_buff_nested_multi_type)
 {
-    unsigned long idx = 905;
-    ro_dict_t *a = get_ro_dict_from_fileile(&idx, 1);
+    size_t idx = 905;
+    ro_dict_t *a = get_ro_dict_from_fileile(&idx, true);
 
     ro_array_t *a3 = init_ro_array(3);
     ro_array_add_str(a3, string_nofree_of("dd"));
@@ -364,7 +364,7 @@ Test(ro_json_parser, ro_parse_dict_buff_nested_multi_type)
     ro_dict_t *b = init_ro_dict(1);
     ro_dict_add_dict(b, string_nofree_of("array"), a2);
 
-    char is_equal = ro_dicts_equal(a, b);
+    bool is_equal = ro_dicts_equal(a, b);
 
     cr_expect(is_equal, "Expected the 2 dicts to be equal, but they were not");
     destroy_ro_dict(a);
@@ -373,11 +373,11 @@ Test(ro_json_parser, ro_parse_dict_buff_nested_multi_type)
 
 Test(ro_json_parser, ro_parse_dict_empty)
 {
-    unsigned long idx = 813;
-    ro_dict_t *a = get_ro_dict_from_fileile(&idx, 0);
+    size_t idx = 813;
+    ro_dict_t *a = get_ro_dict_from_fileile(&idx, false);
 
     ro_dict_t *b = init_ro_dict(0);
-    char is_equal = ro_dicts_equal(a, b);
+    bool is_equal = ro_dicts_equal(a, b);
 
     cr_expect(is_equal, "Expected the 2 dicts to be equal, but they were not");
     destroy_ro_dict(a);
@@ -386,8 +386,8 @@ Test(ro_json_parser, ro_parse_dict_empty)
 
 Test(ro_json_parser, ro_parse_dict_numbers)
 {
-    unsigned long idx = 825;
-    ro_dict_t *a = get_ro_dict_from_fileile(&idx, 0);
+    size_t idx = 825;
+    ro_dict_t *a = get_ro_dict_from_fileile(&idx, false);
 
     ro_dict_t *b = init_ro_dict(3);
 
@@ -395,7 +395,7 @@ Test(ro_json_parser, ro_parse_dict_numbers)
     ro_dict_add_long(b, string_nofree_of("2"), 2);
     ro_dict_add_long(b, string_nofree_of("3"), 3);
 
-    char is_equal = ro_dicts_equal(a, b);
+    bool is_equal = ro_dicts_equal(a, b);
 
     cr_expect(is_equal, "Expected the 2 dicts to be equal, but they were not");
     destroy_ro_dict(a);
@@ -404,12 +404,12 @@ Test(ro_json_parser, ro_parse_dict_numbers)
 
 Test(ro_json_parser, ro_parse_dict_nested_multi_type)
 {
-    unsigned long idx = 906;
-    ro_dict_t *a = get_ro_dict_from_fileile(&idx, 0);
+    size_t idx = 906;
+    ro_dict_t *a = get_ro_dict_from_fileile(&idx, false);
 
     ro_array_t *a3 = init_ro_array(3);
     ro_array_add_str(a3, string_nofree_of("dd"));
-    ro_array_add_bool(a3, 1);
+    ro_array_add_bool(a3, true);
     ro_array_add_long(a3, 5);
 
     ro_dict_t *a2 = init_ro_dict(3);
@@ -420,7 +420,7 @@ Test(ro_json_parser, ro_parse_dict_nested_multi_type)
     ro_dict_t *b = init_ro_dict(1);
     ro_dict_add_dict(b, string_nofree_of("array"), a2);
 
-    char is_equal = ro_dicts_equal(a, b);
+    bool is_equal = ro_dicts_equal(a, b);
 
     cr_expect(is_equal, "Expected the 2 dicts to be equal, but they were not");
     destroy_ro_dict(a);
@@ -430,7 +430,7 @@ Test(ro_json_parser, ro_parse_dict_nested_multi_type)
 /*******************************************************************************
 **                                   RO_PARSE                                 **
 *******************************************************************************/
-Test(ro_json_parser, ro_parse)
+Test(ro_json_parser, ro_parse_array)
 {
     ro_json_t *ro_json = ro_parse(JSON_TESTS_FILE);
     if (!ro_json)
@@ -465,8 +465,8 @@ Test(ro_json_parser, ro_parse)
     ro_array_add_exp_double(numbers, EXP_DOUBLE_OF(-200.5, -10));
 
     ro_array_t *booleans = init_ro_array(2);
-    ro_array_add_bool(booleans, 1);
-    ro_array_add_bool(booleans, 0);
+    ro_array_add_bool(booleans, true);
+    ro_array_add_bool(booleans, false);
 
     ro_array_t *arrays = init_ro_array(8);
     ro_array_add_array(arrays, init_ro_array(0));
@@ -478,7 +478,7 @@ Test(ro_json_parser, ro_parse)
     ro_array_add_long(arrays_a2, 5);
     ro_array_t *arrays_a3 = init_ro_array(3);
     ro_array_add_str(arrays_a3, string_nofree_of("dd"));
-    ro_array_add_bool(arrays_a3, 1);
+    ro_array_add_bool(arrays_a3, true);
     ro_array_add_long(arrays_a3, 5);
     ro_array_add_array(arrays_a2, arrays_a3);
     ro_array_add_dict(arrays_a2, init_ro_dict(0));
@@ -501,7 +501,7 @@ Test(ro_json_parser, ro_parse)
     ro_dict_add_long(dicts_d2_array, string_nofree_of(""), 1);
     ro_array_t *dicts_d2_array_arr = init_ro_array(3);
     ro_array_add_str(dicts_d2_array_arr, string_nofree_of("dd"));
-    ro_array_add_bool(dicts_d2_array_arr, 1);
+    ro_array_add_bool(dicts_d2_array_arr, true);
     ro_array_add_long(dicts_d2_array_arr, 5);
     ro_dict_add_array(dicts_d2_array, string_nofree_of("arr"),
                       dicts_d2_array_arr);
@@ -516,7 +516,7 @@ Test(ro_json_parser, ro_parse)
     ro_dict_add_array(file_dict, string_nofree_of("arrays"), arrays);
     ro_dict_add_array(file_dict, string_nofree_of("dicts"), dicts);
 
-    ro_json_t *ro_json_manual = init_ro_json(0, 0, file_dict);
+    ro_json_t *ro_json_manual = init_ro_json(false, 0, file_dict);
 
     cr_expect(ro_json_equal(ro_json, ro_json_manual),
               "Expected the 2 dicts to be equal, but they were not");

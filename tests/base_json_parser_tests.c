@@ -320,13 +320,13 @@ void test_parse_string(size_t *idx, char *expected_str, bool is_buff)
                       s.len < expected_len ? expected_len : s.len)
                   == 0,
               "Expected 'str' to be '%s' but got '%s'", expected_str, s.str);
-    cr_expect(s.len == expected_len, "Expected 'len' to be '%lu' but got '%u'",
+    cr_expect(s.len == expected_len, "Expected 'len' to be '%zu' but got '%u'",
               expected_len, f && s.len);
     if ((is_buff && buff) && idx)
     {
         cr_expect(*idx - initial_idx - !is_buff == s.len + 1,
-                  "Expected '*idx' to be incremented by '%lu' but it got "
-                  "incremented by '%lu'",
+                  "Expected '*idx' to be incremented by '%zu' but it got "
+                  "incremented by '%zu'",
                   s.len + 1, *idx - initial_idx - !is_buff);
     }
     destroy_string(s);
@@ -427,13 +427,13 @@ void test_parse_number(size_t *idx, str_and_len_tuple_t expected_str_and_len,
                       s.len < expected_len ? expected_len : s.len)
                   == 0,
               "Expected 'str' to be '%s' but got '%s'", expected_str, s.str);
-    cr_expect(s.len == expected_len, "Expected 'len' to be '%lu' but got '%lu'",
+    cr_expect(s.len == expected_len, "Expected 'len' to be '%zu' but got '%zu'",
               expected_len, s.len);
     if (f && idx)
     {
         cr_expect(*idx - initial_idx - !is_buff == s.len - 1,
-                  "Expected '*idx' to be incremented by '%lu' but it got "
-                  "incremented by '%lu'",
+                  "Expected '*idx' to be incremented by '%zu' but it got "
+                  "incremented by '%zu'",
                   s.len - 1, *idx - initial_idx - !is_buff);
         cr_expect(s.is_float == expected_str_and_len.is_float,
                   "Expected '%s' to %s a float but it %s", s.str,
@@ -455,49 +455,49 @@ void test_parse_number(size_t *idx, str_and_len_tuple_t expected_str_and_len,
 Test(base_json_parser, parse_number_buff_positive_nofloat_noexp)
 {
     size_t pos = 95;
-    test_parse_number(&pos, STR_AND_LEN_OF("64220", 5, 0, 0), true);
+    test_parse_number(&pos, STR_AND_LEN("64220", 5), true);
 }
 
 Test(base_json_parser, parse_number_buff_negative_nofloat_noexp)
 {
     size_t pos = 110;
-    test_parse_number(&pos, STR_AND_LEN_OF("-512", 4, 0, 0), true);
+    test_parse_number(&pos, STR_AND_LEN("-512", 4), true);
 }
 
 Test(base_json_parser, parse_number_buff_positive_float_noexp)
 {
     size_t pos = 124;
-    test_parse_number(&pos, STR_AND_LEN_OF("642.25", 6, 1, 0), true);
+    test_parse_number(&pos, STR_AND_LEN_F_OF("642.25", 6), true);
 }
 
 Test(base_json_parser, parse_number_buff_negative_float_noexp)
 {
     size_t pos = 140;
-    test_parse_number(&pos, STR_AND_LEN_OF("-642.25", 7, 1, 0), true);
+    test_parse_number(&pos, STR_AND_LEN_F_OF("-642.25", 7), true);
 }
 
 Test(base_json_parser, parse_number_buff_positive_nofloat_exp)
 {
     size_t pos = 157;
-    test_parse_number(&pos, STR_AND_LEN_OF("2e8", 3, 0, 1), true);
+    test_parse_number(&pos, STR_AND_LEN_E_OF("2e8", 3), true);
 }
 
 Test(base_json_parser, parse_number_buff_negative_nofloat_exp)
 {
     size_t pos = 170;
-    test_parse_number(&pos, STR_AND_LEN_OF("-53e4", 5, 0, 1), true);
+    test_parse_number(&pos, STR_AND_LEN_E_OF("-53e4", 5), true);
 }
 
 Test(base_json_parser, parse_number_buff_positive_nofloat_negativeexp)
 {
     size_t pos = 185;
-    test_parse_number(&pos, STR_AND_LEN_OF("200e-10", 7, 0, 1), true);
+    test_parse_number(&pos, STR_AND_LEN_E_OF("200e-10", 7), true);
 }
 
 Test(base_json_parser, parse_number_buff_negative_nofloat_negativeexp)
 {
     size_t pos = 202;
-    test_parse_number(&pos, STR_AND_LEN_OF("-251e-10", 8, 0, 1), true);
+    test_parse_number(&pos, STR_AND_LEN_E_OF("-251e-10", 8), true);
 }
 
 Test(base_json_parser, parse_number_buff_positive_float_exp)
@@ -696,7 +696,7 @@ Test(base_json_parser, parse_number_negative_float_uppernegativeexp)
 /*******************************************************************************
 **                              PARSE_BOOLEAN_BUFF                            **
 *******************************************************************************/
-void test_parse_boolean(size_t *idx, unsigned long expected_len, char is_buff)
+void test_parse_boolean(size_t *idx, size_t expected_len, bool is_buff)
 {
     FILE *f = fopen(JSON_TESTS_FILE, "r");
     if (!f)
@@ -742,13 +742,13 @@ void test_parse_boolean(size_t *idx, unsigned long expected_len, char is_buff)
     }
 
     cr_expect(len == expected_len,
-              "Expected the boolean len to be '%lu' but got '%lu'",
+              "Expected the boolean len to be '%zu' but got '%zu'",
               expected_len, len);
     if (buff && idx)
     {
         cr_expect(*idx - initial_idx - !is_buff == len - 1,
-                  "Expected '*idx' to be incremented by '%lu' but it got "
-                  "incremented by '%lu'",
+                  "Expected '*idx' to be incremented by '%zu' but it got "
+                  "incremented by '%zu'",
                   len - 1, *idx - initial_idx - !is_buff);
     }
     if (buff)
@@ -761,32 +761,32 @@ void test_parse_boolean(size_t *idx, unsigned long expected_len, char is_buff)
 Test(base_json_parser, parse_boolean_buff_true)
 {
     size_t idx = 467;
-    test_parse_boolean(&idx, 4, 1);
+    test_parse_boolean(&idx, 4, true);
 }
 
 Test(base_json_parser, parse_boolean_buff_false)
 {
     size_t idx = 481;
-    test_parse_boolean(&idx, 5, 1);
+    test_parse_boolean(&idx, 5, true);
 }
 
 // Files
 Test(base_json_parser, parse_boolean_true)
 {
     size_t idx = 467;
-    test_parse_boolean(&idx, 4, 0);
+    test_parse_boolean(&idx, 4, false);
 }
 
 Test(base_json_parser, parse_boolean_false)
 {
     size_t idx = 481;
-    test_parse_boolean(&idx, 5, 0);
+    test_parse_boolean(&idx, 5, false);
 }
 
 /*******************************************************************************
 **                              GET_NB_ELTS_ARRAY                             **
 *******************************************************************************/
-void test_get_nb_elts_array(size_t idx, size_t expected_len, char is_buff)
+void test_get_nb_elts_array(size_t idx, size_t expected_len, bool is_buff)
 {
     FILE *f = fopen(JSON_TESTS_FILE, "r");
     if (!f)
@@ -830,7 +830,7 @@ void test_get_nb_elts_array(size_t idx, size_t expected_len, char is_buff)
     }
 
     cr_expect(len == expected_len,
-              "Expected the length of the array to be '%lu' but got '%lu'",
+              "Expected the length of the array to be '%zu' but got '%zu'",
               expected_len, len);
     if (buff)
     {
@@ -841,39 +841,39 @@ void test_get_nb_elts_array(size_t idx, size_t expected_len, char is_buff)
 
 Test(base_json_parser, get_nb_elts_array_buff_empty)
 {
-    test_get_nb_elts_array(519, 0, 1);
+    test_get_nb_elts_array(519, 0, true);
 }
 
 Test(base_json_parser, get_nb_elts_array_buff_normal)
 {
-    test_get_nb_elts_array(18, 2, 1);
+    test_get_nb_elts_array(18, 2, false);
 }
 
 Test(base_json_parser, get_nb_elts_array_buff_nested)
 {
-    test_get_nb_elts_array(509, 8, 1);
+    test_get_nb_elts_array(509, 8, true);
 }
 
 // Files
 Test(base_json_parser, get_nb_elts_array_empty)
 {
-    test_get_nb_elts_array(519, 0, 0);
+    test_get_nb_elts_array(519, 0, false);
 }
 
 Test(base_json_parser, get_nb_elts_array_normal)
 {
-    test_get_nb_elts_array(18, 2, 0);
+    test_get_nb_elts_array(18, 2, false);
 }
 
 Test(base_json_parser, get_nb_elts_array_nested)
 {
-    test_get_nb_elts_array(509, 8, 0);
+    test_get_nb_elts_array(509, 8, false);
 }
 
 /*******************************************************************************
 **                              GET_NB_ELTS_DICT                              **
 *******************************************************************************/
-void test_get_nb_elts_dict(size_t idx, unsigned long expected_len, char is_buff)
+void test_get_nb_elts_dict(size_t idx, size_t expected_len, bool is_buff)
 {
     FILE *f = fopen(JSON_TESTS_FILE, "r");
     if (!f)
@@ -917,7 +917,7 @@ void test_get_nb_elts_dict(size_t idx, unsigned long expected_len, char is_buff)
     }
 
     cr_expect(len == expected_len,
-              "Expected the length of the dict to be '%lu' but got '%lu'",
+              "Expected the length of the dict to be '%zu' but got '%zu'",
               expected_len, len);
     if (buff)
     {
@@ -928,39 +928,39 @@ void test_get_nb_elts_dict(size_t idx, unsigned long expected_len, char is_buff)
 
 Test(base_json_parser, get_nb_elts_dict_buff_empty)
 {
-    test_get_nb_elts_dict(813, 0, 1);
+    test_get_nb_elts_dict(813, 0, true);
 }
 
 Test(base_json_parser, get_nb_elts_dict_buff_normal)
 {
-    test_get_nb_elts_dict(825, 3, 1);
+    test_get_nb_elts_dict(825, 3, true);
 }
 
 Test(base_json_parser, get_nb_elts_dict_buff_nested)
 {
-    test_get_nb_elts_dict(906, 1, 1);
+    test_get_nb_elts_dict(906, 1, true);
 }
 
 // Files
 Test(base_json_parser, get_nb_elts_dict_empty)
 {
-    test_get_nb_elts_dict(813, 0, 0);
+    test_get_nb_elts_dict(813, 0, false);
 }
 
 Test(base_json_parser, get_nb_elts_dict_normal)
 {
-    test_get_nb_elts_dict(825, 3, 0);
+    test_get_nb_elts_dict(825, 3, false);
 }
 
 Test(base_json_parser, get_nb_elts_dict_nested)
 {
-    test_get_nb_elts_dict(906, 1, 0);
+    test_get_nb_elts_dict(906, 1, false);
 }
 
 /*******************************************************************************
 **                            GET_NB_CHARS_IN_ARRAY                           **
 *******************************************************************************/
-void test_get_nb_chars_in_array(size_t idx, unsigned long expected_len)
+void test_get_nb_chars_in_array(size_t idx, size_t expected_len)
 {
     FILE *f = fopen(JSON_TESTS_FILE, "r");
     if (!f)
@@ -976,8 +976,8 @@ void test_get_nb_chars_in_array(size_t idx, unsigned long expected_len)
     size_t len = get_nb_chars_in_array(f, idx);
 
     cr_expect(len == expected_len,
-              "Expected the number of characters of the array to be '%lu' but "
-              "got '%lu'",
+              "Expected the number of characters of the array to be '%zu' but "
+              "got '%zu'",
               expected_len, len);
     fclose(f);
 }
@@ -1000,7 +1000,7 @@ Test(base_json_parser, get_nb_chars_in_array_nested)
 /*******************************************************************************
 **                             GET_NB_CHARS_IN_DICT                           **
 *******************************************************************************/
-void test_get_nb_chars_in_dict(size_t idx, unsigned long expected_len)
+void test_get_nb_chars_in_dict(size_t idx, size_t expected_len)
 {
     FILE *f = fopen(JSON_TESTS_FILE, "r");
     if (!f)
@@ -1016,8 +1016,8 @@ void test_get_nb_chars_in_dict(size_t idx, unsigned long expected_len)
     size_t len = get_nb_chars_in_dict(f, idx);
 
     cr_expect(len == expected_len,
-              "Expected the number of characters of the array to be '%lu' but "
-              "got '%lu'",
+              "Expected the number of characters of the array to be '%zu' but "
+              "got '%zu'",
               expected_len, len);
     fclose(f);
 }
@@ -1091,7 +1091,7 @@ Test(base_json_parser, error_str_to_double_nullstr)
 
 Test(base_json_parser, error_str_to_double_zerolen)
 {
-    str_and_len_tuple_t sl = STR_AND_LEN_OF("", 0, 0, 0);
+    str_and_len_tuple_t sl = STR_AND_LEN("", 0);
     double_with_or_without_exponent_t dwowe = str_to_double(&sl);
     cr_expect(dwowe.has_exponent == 2,
               "Expected str_to_long(sl) ; with 'sl' having a null string ; to "
@@ -1102,7 +1102,7 @@ Test(base_json_parser, error_str_to_double_zerolen)
 // is_float
 Test(base_json_parser, error_is_float_null_str)
 {
-    char res = is_float(0, 0);
+    bool res = is_float(0, 0);
     cr_expect(!res,
               "Expected is_float(0, len) to return 0, but it returned '%d'",
               res);
@@ -1111,7 +1111,7 @@ Test(base_json_parser, error_is_float_null_str)
 // has_exponent
 Test(base_json_parser, error_has_exponent_null_str)
 {
-    char res = has_exponent(0, 0);
+    bool res = has_exponent(0, 0);
     cr_expect(!res,
               "Expected has_exponent(0, len) to return 0, but it returned '%d'",
               res);
@@ -1144,7 +1144,7 @@ Test(base_json_parser, error_parse_string_nullstream)
     string_t s = parse_string(0, &idx);
     cr_expect(!s.str,
               "Expected parse_string(0, &idx) to a NULL_STRING, but it "
-              "returned { .str = %s, .len = %lu }",
+              "returned { .str = %s, .len = %zu }",
               s.str, s.len);
 }
 
@@ -1153,7 +1153,7 @@ Test(base_json_parser, error_parse_string_nullidx)
     string_t s = parse_string(stdin, 0);
     cr_expect(!s.str,
               "Expected parse_string(stdin, 0) to a NULL_STRING, but it "
-              "returned { .str = %s, .len = %lu }",
+              "returned { .str = %s, .len = %zu }",
               s.str, s.len);
 }
 
@@ -1165,7 +1165,7 @@ Test(base_json_parser, error_parse_number_buff_nullstr)
     cr_expect(
         !s.str,
         "Expected parse_number_buff(0, &idx) to a "
-        "NULL_STR_AND_LEN_TUPLE, but it returned { .str = %s, .len = %lu, "
+        "NULL_STR_AND_LEN_TUPLE, but it returned { .str = %s, .len = %zu, "
         ".is_float = %d, .has_exponent = %d }",
         s.str, s.len, s.is_float, s.has_exponent);
 }
@@ -1176,7 +1176,7 @@ Test(base_json_parser, error_parse_number_buff_nullidx)
     cr_expect(
         !s.str,
         "Expected parse_number_buff(0, &idx) to a "
-        "NULL_STR_AND_LEN_TUPLE, but it returned { .str = %s, .len = %lu, "
+        "NULL_STR_AND_LEN_TUPLE, but it returned { .str = %s, .len = %zu, "
         ".is_float = %d, .has_exponent = %d }",
         s.str, s.len, s.is_float, s.has_exponent);
 }
@@ -1189,7 +1189,7 @@ Test(base_json_parser, error_parse_number_nullstream)
     cr_expect(
         !s.str,
         "Expected parse_number(0, &idx) to a "
-        "NULL_STR_AND_LEN_TUPLE, but it returned { .str = %s, .len = %lu, "
+        "NULL_STR_AND_LEN_TUPLE, but it returned { .str = %s, .len = %zu, "
         ".is_float = %d, .has_exponent = %d }",
         s.str, s.len, s.is_float, s.has_exponent);
 }
@@ -1200,7 +1200,7 @@ Test(base_json_parser, error_parse_number_nullidx)
     cr_expect(
         !s.str,
         "Expected parse_number(0, &idx) to a "
-        "NULL_STR_AND_LEN_TUPLE, but it returned { .str = %s, .len = %lu, "
+        "NULL_STR_AND_LEN_TUPLE, but it returned { .str = %s, .len = %zu, "
         ".is_float = %d, .has_exponent = %d }",
         s.str, s.len, s.is_float, s.has_exponent);
 }
@@ -1212,7 +1212,7 @@ Test(base_json_parser, error_parse_boolean_buff_nullstr)
     size_t len = parse_boolean_buff(0, &idx);
     cr_expect(!len,
               "Expected parse_boolean_buff(0, &idx) to return 0, but it "
-              "returned '%lu'",
+              "returned '%zu'",
               len);
 }
 
@@ -1221,7 +1221,7 @@ Test(base_json_parser, error_parse_boolean_buff_nullidx)
     size_t len = parse_boolean_buff("", 0);
     cr_expect(!len,
               "Expected parse_boolean_buff(0, &idx) to return 0, but it "
-              "returned '%lu'",
+              "returned '%zu'",
               len);
 }
 
@@ -1232,7 +1232,7 @@ Test(base_json_parser, error_parse_boolean_nullstream)
     size_t len = parse_boolean(0, &idx);
     cr_expect(!len,
               "Expected parse_boolean(0, &idx) to return 0, but it "
-              "returned '%lu'",
+              "returned '%zu'",
               len);
 }
 
@@ -1241,7 +1241,7 @@ Test(base_json_parser, error_parse_boolean_nullidx)
     size_t len = parse_boolean(stdin, 0);
     cr_expect(!len,
               "Expected parse_boolean(0, &idx) to return 0, but it "
-              "returned '%lu'",
+              "returned '%zu'",
               len);
 }
 
@@ -1251,7 +1251,7 @@ Test(base_json_parser, error_get_nb_elts_array_buff_nullbuff)
     size_t len = get_nb_elts_array_buff(0, 5);
     cr_expect(!len,
               "Expected get_nb_elts_array_buff(0, 5) to return 0, but it "
-              "returned '%lu'",
+              "returned '%zu'",
               len);
 }
 
@@ -1261,7 +1261,7 @@ Test(base_json_parser, error_get_nb_elts_array_nullstream)
     size_t len = get_nb_elts_array(0, 5);
     cr_expect(!len,
               "Expected get_nb_elts_array(0, 5) to return 0, but it "
-              "returned '%lu'",
+              "returned '%zu'",
               len);
 }
 
@@ -1271,7 +1271,7 @@ Test(base_json_parser, error_get_nb_elts_dict_buff_nullbuff)
     size_t len = get_nb_elts_dict_buff(0, 5);
     cr_expect(!len,
               "Expected get_nb_elts_dict_buff(0, 5) to return 0, but it "
-              "returned '%lu'",
+              "returned '%zu'",
               len);
 }
 
@@ -1281,7 +1281,7 @@ Test(base_json_parser, error_get_nb_elts_dict_nullstream)
     size_t len = get_nb_elts_dict(0, 5);
     cr_expect(!len,
               "Expected get_nb_elts_dict(0, 5) to return 0, but it "
-              "returned '%lu'",
+              "returned '%zu'",
               len);
 }
 
@@ -1291,7 +1291,7 @@ Test(base_json_parser, error_get_nb_chars_in_array_nullstream)
     size_t len = get_nb_chars_in_array(0, 5);
     cr_expect(!len,
               "Expected get_nb_chars_in_array(0, 5) to return 0, but it "
-              "returned '%lu'",
+              "returned '%zu'",
               len);
 }
 
@@ -1301,6 +1301,6 @@ Test(base_json_parser, error_get_nb_chars_in_dict_nullstream)
     size_t len = get_nb_chars_in_dict(0, 5);
     cr_expect(!len,
               "Expected get_nb_chars_in_dict(0, 5) to return 0, but it "
-              "returned '%lu'",
+              "returned '%zu'",
               len);
 }
