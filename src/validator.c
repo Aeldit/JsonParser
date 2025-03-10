@@ -172,7 +172,8 @@ bool check_bools_nulls_numbers_counts(char *buff, size_t buff_len, bool is_dict)
         default:
             // The character is not part of the json syntax, which means
             // invalid json
-            printf("Found invalid character: '%c' (%d)", c, c);
+            printf("Found invalid character: '%c' (%d) at index : %zu", c, c,
+                   i);
             return false;
         }
         prev_c = c;
