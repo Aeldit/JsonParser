@@ -1,7 +1,5 @@
 #include "validator.h"
 
-#include <string.h>
-
 /**
 ** \brief Called after encountering a '+' or '-' sign, or any digit.
 **        Starts from the sign or digit that started the number
@@ -183,6 +181,9 @@ bool check_bools_nulls_numbers_counts(char *buff, size_t buff_len, bool is_dict)
         && nb_opened_brackets == nb_closed_brackets;
 }
 
+/**
+** \returns The number of character in the string + 1 (for the last quote '"')
+*/
 size_t get_str_len(char *buff, size_t pos)
 {
     if (!buff)
@@ -196,14 +197,14 @@ size_t get_str_len(char *buff, size_t pos)
     char prev_c = 0;
     while ((c = buff[pos++]))
     {
+        ++nb_chars;
         if (c == '"' && prev_c != '\\')
         {
             break;
         }
-        ++nb_chars;
         prev_c = c;
     }
-    return nb_chars + 1;
+    return nb_chars;
 }
 
 size_t get_num_len(char *buff, size_t pos)
@@ -245,9 +246,9 @@ size_t get_num_len(char *buff, size_t pos)
     return 0;
 }
 
-bool is_dict_valid(char *buff, size_t *pos);
+bool check_dict_trailing_commas(char *buff, size_t *pos);
 
-bool is_array_valid(char *buff, size_t *pos)
+bool check_array_trailing_commas(char *buff, size_t *pos)
 {
     if (!buff)
     {
@@ -306,14 +307,14 @@ bool is_array_valid(char *buff, size_t *pos)
             return prev_c != ',';
 
         case '[':
-            if (!is_array_valid(buff, &i))
+            if (!check_array_trailing_commas(buff, &i))
             {
                 return false;
             }
             break;
 
         case '{':
-            if (!is_dict_valid(buff, &i))
+            if (!check_dict_trailing_commas(buff, &i))
             {
                 return false;
             }
@@ -327,7 +328,7 @@ bool is_array_valid(char *buff, size_t *pos)
     return true;
 }
 
-bool is_dict_valid(char *buff, size_t *pos)
+bool check_dict_trailing_commas(char *buff, size_t *pos)
 {
     if (!buff)
     {
@@ -386,14 +387,14 @@ bool is_dict_valid(char *buff, size_t *pos)
             return prev_c != ',';
 
         case '[':
-            if (!is_array_valid(buff, &i))
+            if (!check_array_trailing_commas(buff, &i))
             {
                 return false;
             }
             break;
 
         case '{':
-            if (!is_dict_valid(buff, &i))
+            if (!check_dict_trailing_commas(buff, &i))
             {
                 return false;
             }
@@ -405,6 +406,359 @@ bool is_dict_valid(char *buff, size_t *pos)
         prev_c = 0;
     }
     return true;
+}
+
+bool check_dict_missing_colons_commas(char *buff, size_t *pos);
+
+bool check_array_missing_commas(char *buff, size_t *pos)
+{
+    if (!buff)
+    {
+        return false;
+    }
+
+    size_t i = pos ? *pos : 1;
+    size_t initial_i = i;
+
+    bool value_encountered = false;
+    bool is_first_val = true;
+    bool comma_encountered = false;
+    bool prev_was_value = false;
+
+    char c = 0;
+    while ((c = buff[i++]))
+    {
+        if (!value_encountered)
+        {
+            switch (c)
+            {
+            case ']':
+                if (pos)
+                {
+                    *pos += i - initial_i;
+                }
+                return true;
+
+            case 't':
+            case 'f':
+            case 'n':
+            case '"':
+            case '+':
+            case '-':
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+            case '[':
+            case '{':
+                value_encountered = true;
+                break;
+
+            default:
+                continue;
+            }
+        }
+
+        switch (c)
+        {
+        case 't':
+        case 'f':
+        case 'n':
+        case '"':
+        case '+':
+        case '-':
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+        case '[':
+        case '{':
+            if (prev_was_value)
+            {
+                return false;
+            }
+            prev_was_value = true;
+            break;
+        }
+
+        switch (c)
+        {
+        case ',':
+            comma_encountered = true;
+            prev_was_value = false;
+            continue;
+
+        case 't':
+            i += 3;
+            break;
+
+        case 'f':
+            i += 4;
+            break;
+
+        case 'n':
+            i += 3;
+            break;
+
+        case '"':
+            i += get_str_len(buff, i);
+            break;
+
+        case '+':
+        case '-':
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+            i += get_num_len(buff, i);
+            break;
+
+        case ']':
+            if (pos)
+            {
+                *pos += i - initial_i;
+            }
+            return true;
+
+        case '[':
+            if (!check_array_missing_commas(buff, &i))
+            {
+                return false;
+            }
+            break;
+
+        case '{':
+            if (!check_dict_missing_colons_commas(buff, &i))
+            {
+                return false;
+            }
+            break;
+
+        default:
+            continue;
+        }
+
+        switch (c)
+        {
+        case 't':
+        case 'f':
+        case 'n':
+        case '"':
+        case '+':
+        case '-':
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+        case '[':
+        case '{':
+            if (!comma_encountered && !is_first_val)
+            {
+                return false;
+            }
+            comma_encountered = false;
+            break;
+
+        default:
+            continue;
+        }
+
+        if (is_first_val)
+        {
+            is_first_val = false;
+        }
+    }
+    return false;
+}
+
+bool check_dict_missing_colons_commas(char *buff, size_t *pos)
+{
+    if (!buff)
+    {
+        return false;
+    }
+
+    size_t i = pos ? *pos : 1;
+    size_t initial_i = i;
+
+    size_t nb_colon = 0;
+    size_t nb_comma = 0;
+
+    bool colon_encountered = false;
+    bool comma_encountered = true;
+    bool value_encountered = false;
+    bool prev_was_value = false;
+
+    char c = 0;
+    while ((c = buff[i++]))
+    {
+        if (!value_encountered)
+        {
+            switch (c)
+            {
+            case '}':
+                if (pos)
+                {
+                    *pos += i - initial_i;
+                }
+                return true;
+
+            case 't':
+            case 'f':
+            case 'n':
+            case '"':
+            case '+':
+            case '-':
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+            case '[':
+            case '{':
+                value_encountered = true;
+                break;
+
+            default:
+                continue;
+            }
+        }
+
+        switch (c)
+        {
+        case 't':
+        case 'f':
+        case 'n':
+        case '"':
+        case '+':
+        case '-':
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+        case '[':
+        case '{':
+            if (prev_was_value)
+            {
+                return false;
+            }
+            prev_was_value = true;
+            break;
+        }
+
+        switch (c)
+        {
+        case ':':
+            if (!comma_encountered)
+            {
+                return false;
+            }
+            ++nb_colon;
+            colon_encountered = true;
+            comma_encountered = false;
+            prev_was_value = false;
+            break;
+
+        case ',':
+            if (!colon_encountered)
+            {
+                return false;
+            }
+            ++nb_comma;
+            comma_encountered = true;
+            colon_encountered = false;
+            prev_was_value = false;
+            break;
+
+        case 't':
+            i += 3;
+            break;
+
+        case 'f':
+            i += 4;
+            break;
+
+        case 'n':
+            i += 3;
+            break;
+
+        case '"':
+            i += get_str_len(buff, i);
+            break;
+
+        case '+':
+        case '-':
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+            i += get_num_len(buff, i);
+            break;
+
+        case '}':
+            if (pos)
+            {
+                *pos += i - initial_i;
+            }
+            return nb_comma == nb_colon - 1;
+
+        case '[':
+            if (!check_array_missing_commas(buff, &i))
+            {
+                return false;
+            }
+            break;
+
+        case '{':
+            if (!check_dict_missing_colons_commas(buff, &i))
+            {
+                return false;
+            }
+            break;
+        }
+    }
+    return false;
 }
 
 bool check_arrays_and_dicts(char *buff)
@@ -427,8 +781,10 @@ bool is_json_valid_buff(char *buff, size_t buff_len, bool is_dict)
         return false;
     }
     return check_bools_nulls_numbers_counts(buff, buff_len, is_dict) && is_dict
-        ? is_dict_valid(buff, 0) && buff[buff_len - 3] == '}'
-        : is_array_valid(buff, 0) && buff[buff_len - 3] == ']';
+        ? (check_dict_trailing_commas(buff, 0) && buff[buff_len - 3] == '}'
+           && check_dict_missing_colons_commas(buff, 0))
+        : (check_array_trailing_commas(buff, 0) && buff[buff_len - 3] == ']'
+           && check_array_missing_commas(buff, 0));
 }
 
 // TODO:
