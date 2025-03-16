@@ -212,8 +212,6 @@ ro_dict_t *ro_parse_dict_buff(char *b, size_t *idx)
         size_t len = 0;
         ro_array_t *tmp_ja = 0;
         ro_dict_t *tmp_jd = 0;
-        char test = 0;
-        size_t testi = 0;
         switch (c)
         {
         case '"':
