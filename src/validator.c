@@ -73,7 +73,6 @@ bool is_number_valid_buff(char *buff, size_t *idx)
     return false;
 }
 
-// TODO: Backport changes from buffered version
 bool is_number_valid_file(FILE *f, size_t *pos)
 {
     if (!f || !pos)
@@ -82,22 +81,36 @@ bool is_number_valid_file(FILE *f, size_t *pos)
     }
 
     size_t i = *pos - 1;
-    char nb_inc_idx = 0;
+    u8 nb_inc_idx = 0;
 
     char c = 0;
     char prev_c = 0;
     while (SEEK_AND_GET_CHAR(i))
     {
-        // Sign not preceded by an exponent
-        if (nb_inc_idx > 0 && (c == '+' || c == '-')
-            && !(prev_c == 'e' || prev_c == 'E'))
+        switch (c)
         {
-            return false;
-        }
+        case '+':
+        case '-':
+            // Sign not preceded by an exponent
+            if ((nb_inc_idx > 0 && !(prev_c == 'e' || prev_c == 'E')))
+            {
+                return false;
+            }
 
-        // Exponent not followed by a digit or a sign
-        if ((c == 'e' || c == 'E'))
-        {
+            // Sign not followed by a digit
+            if (!fseek(f, i, SEEK_SET))
+            {
+                char tmp_c = fgetc(f);
+                if (!(tmp_c >= '0' && tmp_c <= '9'))
+                {
+                    return false;
+                }
+            }
+            break;
+
+        case 'e':
+        case 'E':
+            // Exponent not followed by a digit or a sign
             if (!fseek(f, i, SEEK_SET))
             {
                 char tmp_c = fgetc(f);
@@ -107,11 +120,10 @@ bool is_number_valid_file(FILE *f, size_t *pos)
                     return false;
                 }
             }
-        }
+            break;
 
-        // Floating point dot or sign not followed by a digit
-        if ((c == '.' || c == '+' || c == '-'))
-        {
+        case '.':
+            // Floating point dot not followed by a digit
             if (!fseek(f, i, SEEK_SET))
             {
                 char tmp_c = fgetc(f);
@@ -120,17 +132,28 @@ bool is_number_valid_file(FILE *f, size_t *pos)
                     return false;
                 }
             }
+            break;
+
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+            break;
+
+        default:
+            *pos += nb_inc_idx - 1;
+            return true;
         }
         ++nb_inc_idx;
-
-        if (c == ',' || c == '\n')
-        {
-            break;
-        }
         prev_c = c;
     }
-    *pos += nb_inc_idx - 1;
-    return true;
+    return false;
 }
 
 /**

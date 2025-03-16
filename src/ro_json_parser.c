@@ -293,18 +293,9 @@ ro_dict_t *ro_parse_dict_buff(char *b, size_t *idx)
 
         case 't':
         case 'f':
-            test = b[i + 1];
-            testi = i;
             len = parse_boolean_buff(b, &i);
             if (IS_NOT_BOOLEAN(c, len))
             {
-                // FIX: Memory leak / double free (the quotes count seems to be
-                // messed up, the 't' for true is taken from a string
-                // "distinct")
-                printf("%lu %lu | %c %lu\n", len, i, test, testi);
-                i -= len;
-                printf("%c%c%c%c%c%c%c%c\n", b[i], b[i + 1], b[i + 2], b[i + 3],
-                       b[i + 4], b[i + 5], b[i + 6], b[i + 7]);
                 return destroy_ro_dict_on_error(d, key);
             }
             ro_dict_add_bool(d, key, len == 4 ? 1 : 0);

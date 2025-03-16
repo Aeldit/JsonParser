@@ -237,10 +237,9 @@ string_t parse_string_buff(char *buff, size_t *idx)
     char c = 0;
     char prev_c = 0;
     // Counts the number of characters until the first one that is an 'end char'
-    while (1)
+    while ((c = buff[start_idx + len]))
     {
-        c = buff[start_idx + len];
-        if (IS_STRING_END(c))
+        if (c == '"' && prev_c != '\\')
         {
             break;
         }
@@ -370,7 +369,6 @@ str_and_len_tuple_t parse_number_buff(char *buff, size_t *idx)
     return STR_AND_LEN_OF(str, len, is_float(str, len), has_exponent(str, len));
 }
 
-// TODO: Backport from buffered version
 str_and_len_tuple_t parse_number(FILE *f, size_t *pos)
 {
     if (!f || !pos)
@@ -382,11 +380,41 @@ str_and_len_tuple_t parse_number(FILE *f, size_t *pos)
     // -1 because we already read the first digit (or sign)
     size_t end_pos = *pos - 1;
 
+    bool out = false;
+
     char c = 0;
     // end_pos is incremented for each character found to be part of a
     // number
-    while (SEEK_AND_GET_CHAR(end_pos) && !IS_END_CHAR(c))
+    while (SEEK_AND_GET_CHAR(end_pos))
     {
+        switch (c)
+        {
+        case '+':
+        case '-':
+        case 'e':
+        case 'E':
+        case '.':
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+            break;
+
+        default:
+            out = true;
+            break;
+        }
+
+        if (out)
+        {
+            break;
+        }
     }
 
     size_t len = end_pos - *pos;
