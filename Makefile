@@ -41,7 +41,7 @@ valgrind: valgrind-compile
 
 leaks: valgrind-compile
 	valgrind --leak-check=full --show-leak-kinds=all \
-         --track-origins=yes ./$(TARGET) large-file.json
+         --track-origins=yes ./$(TARGET) big.json
 
 check:
 	$(CC) $(CFLAGS) -DSEPVALIDATION src/*.c $(TESTFILES) -o json-parser-tests -lcriterion
