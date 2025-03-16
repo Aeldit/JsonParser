@@ -25,16 +25,16 @@ long_with_or_without_exponent_t str_to_long(str_and_len_tuple_t *sl)
         return ERROR_LWOWE;
     }
 
-    bool has_exponent = sl->has_exponent;
-    bool is_in_exponent = false;
+    size_t exp_idx = 0;
 
     i64 number = 0;
     i64 exponent = 0;
 
-    size_t exp_idx = 0;
+    bool is_in_exponent = false;
 
-    char is_negative = str[0] == '-' ? -1 : 1;
-    char is_exp_negative = 1;
+    u8 has_exponent = sl->has_exponent;
+    i8 is_negative = str[0] == '-' ? -1 : 1;
+    i8 is_exp_negative = 1;
 
     char c = 0;
     for (size_t i = 0; i < len; ++i)
@@ -99,14 +99,14 @@ double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t *sl)
     i64 nb_digits_decimals = 1;
     size_t exp_idx = 0;
 
-    bool has_exponent = sl->has_exponent;
     bool dot_reached = false;
     bool is_in_exponent = false;
+    u8 has_exponent = sl->has_exponent;
 
     // If the number is negative, this is set to -1 and the final res is
     // multiplied by it
-    char is_negative = str[0] == '-' ? -1 : 1;
-    char is_exp_negative = 1;
+    i8 is_negative = str[0] == '-' ? -1 : 1;
+    i8 is_exp_negative = 1;
 
     char c = 0;
     for (size_t i = 0; i < len; ++i)
@@ -294,7 +294,7 @@ string_t parse_string(FILE *f, size_t *pos)
         return NULL_STRING;
     }
 
-    if (fseek(f, *pos, SEEK_SET) != 0)
+    if (fseek(f, *pos, SEEK_SET))
     {
         free(str);
         return NULL_STRING;
@@ -378,7 +378,7 @@ str_and_len_tuple_t parse_number(FILE *f, size_t *pos)
     }
 
     // If we couldn't set the pos in the file
-    if (fseek(f, *pos - 1, SEEK_SET) != 0)
+    if (fseek(f, *pos - 1, SEEK_SET))
     {
         free(str);
         return NULL_STR_AND_LEN_TUPLE;
