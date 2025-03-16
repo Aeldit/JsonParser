@@ -992,9 +992,9 @@ bool is_json_valid_file(FILE *f, bool is_dict)
     return true;
 #endif // !SEPVALIDATION
 
-    if (!f)
+    if (!f || is_dict)
     {
         return false;
     }
-    return true;
+    return false;
 }

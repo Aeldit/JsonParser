@@ -728,7 +728,7 @@ rw_json_t *rw_parse(char *file)
     }
 
     size_t offset = 0;
-    if (fseek(f, offset++, SEEK_SET) != 0)
+    if (fseek(f, offset++, SEEK_SET))
     {
         fclose(f);
         return 0;
@@ -746,7 +746,7 @@ rw_json_t *rw_parse(char *file)
         if (nb_chars < MAX_READ_BUFF_SIZE)
         {
             char *b = calloc(nb_chars + 1, sizeof(char));
-            if (!b || fseek(f, offset, SEEK_SET) != 0)
+            if (!b || fseek(f, offset, SEEK_SET))
             {
                 fclose(f);
                 free(b);
@@ -754,9 +754,9 @@ rw_json_t *rw_parse(char *file)
             }
             fread(b, sizeof(char), nb_chars, f);
 
-            if (!is_json_valid(f))
+            if (!is_json_valid_buff(b, nb_chars, true))
             {
-                printf("Invalid json file");
+                printf("Invalid json file\n");
                 free(b);
                 fclose(f);
                 return 0;
@@ -767,9 +767,9 @@ rw_json_t *rw_parse(char *file)
         }
         else
         {
-            if (!is_json_valid(f))
+            if (!is_json_valid_file(f, true))
             {
-                printf("Invalid json file");
+                printf("Invalid json file\n");
                 fclose(f);
                 return 0;
             }
@@ -784,7 +784,7 @@ rw_json_t *rw_parse(char *file)
         if (nb_chars < MAX_READ_BUFF_SIZE)
         {
             char *b = calloc(nb_chars + 1, sizeof(char));
-            if (!b || fseek(f, offset, SEEK_SET) != 0)
+            if (!b || fseek(f, offset, SEEK_SET))
             {
                 fclose(f);
                 free(b);
@@ -792,9 +792,9 @@ rw_json_t *rw_parse(char *file)
             }
             fread(b, sizeof(char), nb_chars, f);
 
-            if (!is_json_valid(f))
+            if (!is_json_valid_buff(b, nb_chars, false))
             {
-                printf("Invalid json file");
+                printf("Invalid json file\n");
                 fclose(f);
                 free(b);
                 return 0;
@@ -805,9 +805,9 @@ rw_json_t *rw_parse(char *file)
         }
         else
         {
-            if (!is_json_valid(f))
+            if (!is_json_valid_file(f, false))
             {
-                printf("Invalid json file");
+                printf("Invalid json file\n");
                 fclose(f);
                 return 0;
             }
