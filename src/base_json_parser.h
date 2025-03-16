@@ -14,54 +14,55 @@
 *******************************************************************************/
 // The following MACROS are used int the parsing functions
 #define IS_END_CHAR(c)                                                         \
-    (!(c) || (c) == ',' || (c) == '\n' || (c) == ']' || (c) == '}')
+  (!(c) || (c) == ',' || (c) == '\n' || (c) == ']' || (c) == '}')
 
 #define IS_STRING_END(c) (!(c) || ((c) == '"' && prev_c != '\\'))
 
 #define IS_NOT_BOOLEAN(c, l)                                                   \
-    (!(l) || ((c) == 'f' && (l) != 5) || ((c) == 't' && (l) != 4))
+  (!(l) || ((c) == 'f' && (l) != 5) || ((c) == 't' && (l) != 4))
 
 /**
 ** \def Used by the functions that read the file using fseef() and fgetc()
 **      inside while loops, it sets the cursor on the 'p' position,
 **      increments 'p' and puts in 'c' the current character
 */
-#define SEEK_AND_GET_CHAR(p) (!fseek(f, p++, SEEK_SET) && (c = fgetc(f)) != EOF)
+#define SEEK_AND_GET_CHAR(p)                                                   \
+  (!fseek(f, (p)++, SEEK_SET) && (c = fgetc(f)) != EOF)
 
 #ifndef MAX_READ_BUFF_SIZE
-#    define MAX_READ_BUFF_SIZE (1 << 30) // ~= 1 GB
+#define MAX_READ_BUFF_SIZE (1 << 30) // ~= 1 GB
 #endif
 
 #ifndef MAX_NESTED_ARRAYS
-#    define MAX_NESTED_ARRAYS 255
+#define MAX_NESTED_ARRAYS 255
 #endif
 
 #ifndef MAX_NESTED_DICTS
-#    define MAX_NESTED_DICTS 255
+#define MAX_NESTED_DICTS 255
 #endif
 
-#define NULL_STR_AND_LEN_TUPLE ((str_and_len_tuple_t){ .str = 0, .len = 0 })
-#define ERROR_LWOWE ((long_with_or_without_exponent_t){ .has_exponent = 2 })
-#define ERROR_DWOWE ((double_with_or_without_exponent_t){ .has_exponent = 2 })
+#define NULL_STR_AND_LEN_TUPLE ((str_and_len_tuple_t){.str = 0, .len = 0})
+#define ERROR_LWOWE ((long_with_or_without_exponent_t){.has_exponent = 2})
+#define ERROR_DWOWE ((double_with_or_without_exponent_t){.has_exponent = 2})
 
 #define STR_AND_LEN_OF(s, l, f, e)                                             \
-    ((str_and_len_tuple_t){                                                    \
-        .str = (s), .len = (l), .is_float = (f), .has_exponent = (e) })
+  ((str_and_len_tuple_t){                                                      \
+      .str = (s), .len = (l), .is_float = (f), .has_exponent = (e)})
 #define STR_AND_LEN(s, l)                                                      \
-    ((str_and_len_tuple_t){                                                    \
-        .str = (s), .len = (l), .is_float = false, .has_exponent = false })
+  ((str_and_len_tuple_t){                                                      \
+      .str = (s), .len = (l), .is_float = false, .has_exponent = false})
 #define STR_AND_LEN_F_OF(s, l)                                                 \
-    ((str_and_len_tuple_t){                                                    \
-        .str = (s), .len = (l), .is_float = true, .has_exponent = false })
+  ((str_and_len_tuple_t){                                                      \
+      .str = (s), .len = (l), .is_float = true, .has_exponent = false})
 #define STR_AND_LEN_E_OF(s, l)                                                 \
-    ((str_and_len_tuple_t){                                                    \
-        .str = (s), .len = (l), .is_float = false, .has_exponent = true })
+  ((str_and_len_tuple_t){                                                      \
+      .str = (s), .len = (l), .is_float = false, .has_exponent = true})
 #define STR_AND_LEN_FE_OF(s, l)                                                \
-    ((str_and_len_tuple_t){                                                    \
-        .str = (s), .len = (l), .is_float = true, .has_exponent = true })
+  ((str_and_len_tuple_t){                                                      \
+      .str = (s), .len = (l), .is_float = true, .has_exponent = true})
 
-#define EXP_LONG_OF(n, e) ((exp_long_t){ .number = (n), .exponent = (e) })
-#define EXP_DOUBLE_OF(n, e) ((exp_double_t){ .number = (n), .exponent = (e) })
+#define EXP_LONG_OF(n, e) ((exp_long_t){.number = (n), .exponent = (e)})
+#define EXP_DOUBLE_OF(n, e) ((exp_double_t){.number = (n), .exponent = (e)})
 
 /*******************************************************************************
 **                                 STRUCTURES **
@@ -70,26 +71,23 @@
 ** \typedef str_and_len_tuple_t
 ** \brief Used by the parse_number() function to return multiple informations
 */
-typedef struct
-{
-    char *str;
-    size_t len;
-    bool is_float;
-    bool has_exponent;
+typedef struct {
+  char *str;
+  size_t len;
+  bool is_float;
+  bool has_exponent;
 } str_and_len_tuple_t;
 
-typedef struct
-{
-    exp_long_t long_exp_value;
-    i64 long_value;
-    char has_exponent; // 0 => false | 1 => true | 2 => error
+typedef struct {
+  exp_long_t long_exp_value;
+  i64 long_value;
+  char has_exponent; // 0 => false | 1 => true | 2 => error
 } long_with_or_without_exponent_t;
 
-typedef struct
-{
-    exp_double_t double_exp_value;
-    double double_value;
-    char has_exponent; // 0 => false | 1 => true | 2 => error
+typedef struct {
+  exp_double_t double_exp_value;
+  double double_value;
+  char has_exponent; // 0 => false | 1 => true | 2 => error
 } double_with_or_without_exponent_t;
 
 /*******************************************************************************
