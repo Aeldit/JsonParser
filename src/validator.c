@@ -14,7 +14,7 @@ bool is_number_valid_buff(char *buff, size_t *idx)
     }
 
     size_t i = *idx - 1;
-    char nb_inc_idx = 0;
+    u8 nb_inc_idx = 0;
 
     char c = 0;
     char prev_c = 0;
@@ -848,7 +848,7 @@ bool check_array_missing_commas_buff(char *buff, size_t *pos)
         return false;
     }
 
-    size_t i = pos ? *pos : 1;
+    size_t i = pos ? *pos : 0;
     size_t initial_i = i;
 
     bool value_encountered = false;
@@ -1033,7 +1033,7 @@ bool check_array_missing_commas_file(FILE *f, size_t *pos)
         return false;
     }
 
-    size_t i = pos ? *pos : 1;
+    size_t i = pos ? *pos : 0;
     size_t initial_i = i;
 
     bool value_encountered = false;
@@ -1218,7 +1218,7 @@ bool check_dict_missing_colons_commas_buff(char *buff, size_t *pos)
         return false;
     }
 
-    size_t i = pos ? *pos : 1;
+    size_t i = pos ? *pos : 0;
     size_t initial_i = i;
 
     size_t nb_colon = 0;
@@ -1553,8 +1553,7 @@ bool is_json_valid_buff(char *buff, size_t buff_len, bool is_dict)
     {
         return false;
     }
-    printf("%d\n",
-           check_bools_nulls_numbers_counts_buff(buff, buff_len, is_dict));
+    printf("%d\n", check_array_missing_commas_buff(buff, 0));
     return check_bools_nulls_numbers_counts_buff(buff, buff_len, is_dict)
             && is_dict
         ? (check_dict_trailing_commas_buff(buff, 0) && buff[buff_len - 3] == '}'

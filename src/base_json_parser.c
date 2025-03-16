@@ -316,11 +316,35 @@ str_and_len_tuple_t parse_number_buff(char *buff, size_t *idx)
     // Counts the number of characters until the first one that is an 'end char'
     size_t end_idx = *idx;
     size_t initial_i = end_idx;
+    bool out = false;
     char c = 0;
-    while (1)
+    while ((c = buff[end_idx]))
     {
-        c = buff[end_idx];
-        if (IS_END_CHAR(c))
+        switch (c)
+        {
+        case '+':
+        case '-':
+        case 'e':
+        case 'E':
+        case '.':
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+            break;
+
+        default:
+            out = true;
+            break;
+        }
+
+        if (out)
         {
             break;
         }
@@ -346,6 +370,7 @@ str_and_len_tuple_t parse_number_buff(char *buff, size_t *idx)
     return STR_AND_LEN_OF(str, len, is_float(str, len), has_exponent(str, len));
 }
 
+// TODO: Backport from buffered version
 str_and_len_tuple_t parse_number(FILE *f, size_t *pos)
 {
     if (!f || !pos)
