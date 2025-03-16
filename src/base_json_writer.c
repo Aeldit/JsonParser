@@ -96,7 +96,7 @@ string_t get_long_as_str(i64 value)
 string_t get_double_as_str(double value)
 {
     // 18 : 10 int digits + '.' + 6 floating point digits + '\0'
-    char double_str[18];
+    char double_str[18] = { 0 };
     snprintf(double_str, 17, "%lf", value);
 
     u8 nb_chars = 0;
