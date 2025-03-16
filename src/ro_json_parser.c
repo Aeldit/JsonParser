@@ -768,6 +768,7 @@ ro_json_t *ro_parse(char *file)
         }
         else
         {
+            printf("FILE reading mode");
             if (!is_json_valid_file(f, true))
             {
                 printf("Invalid json file\n");
@@ -784,7 +785,6 @@ ro_json_t *ro_parse(char *file)
         ro_array_t *a = 0;
         if (nb_chars < MAX_READ_BUFF_SIZE)
         {
-            printf("FILE reading mode");
             char *b = calloc(nb_chars + 1, sizeof(char));
             if (!b || fseek(f, offset, SEEK_SET))
             {
@@ -807,6 +807,7 @@ ro_json_t *ro_parse(char *file)
         }
         else
         {
+            printf("FILE reading mode");
             if (!is_json_valid_file(f, false))
             {
                 printf("Invalid json file\n");

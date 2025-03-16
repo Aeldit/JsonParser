@@ -20,39 +20,60 @@ bool is_number_valid_buff(char *buff, size_t *idx)
     char prev_c = 0;
     while ((c = buff[i++]))
     {
-        // Sign not preceded by an exponent
-        if (nb_inc_idx > 0 && (c == '+' || c == '-')
-            && !(prev_c == 'e' || prev_c == 'E'))
+        switch (c)
         {
-            return false;
-        }
+        case '+':
+        case '-':
+            // Sign not preceded by an exponent
+            if ((nb_inc_idx > 0 && !(prev_c == 'e' || prev_c == 'E'))
+                // Sign not followed by a digit
+                || !(buff[i] >= '0' && buff[i] <= '9'))
+            {
+                return false;
+            }
+            break;
 
-        // Exponent not followed by a digit or a sign
-        if ((c == 'e' || c == 'E')
-            && !((buff[i] >= '0' && buff[i] <= '9') || buff[i] == '+'
-                 || buff[i] == '-'))
-        {
-            return false;
-        }
+        case 'e':
+        case 'E':
+            // Exponent not followed by a digit or a sign
+            if (!((buff[i] >= '0' && buff[i] <= '9') || buff[i] == '+'
+                  || buff[i] == '-'))
+            {
+                return false;
+            }
+            break;
 
-        // Floating point dot or sign not followed by a digit
-        if ((c == '.' || c == '+' || c == '-')
-            && !(buff[i] >= '0' && buff[i] <= '9'))
-        {
-            return false;
+        case '.':
+            // Floating point dot not followed by a digit
+            if (!(buff[i] >= '0' && buff[i] <= '9'))
+            {
+                return false;
+            }
+            break;
+
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+            break;
+
+        default:
+            *idx += nb_inc_idx - 1;
+            return true;
         }
         ++nb_inc_idx;
-
-        if (c == ',' || c == '\n')
-        {
-            break;
-        }
         prev_c = c;
     }
-    *idx += nb_inc_idx - 1;
-    return true;
+    return false;
 }
 
+// TODO: Backport changes from buffered version
 bool is_number_valid_file(FILE *f, size_t *pos)
 {
     if (!f || !pos)
@@ -127,11 +148,11 @@ bool check_bools_nulls_numbers_counts_buff(char *buff, size_t buff_len,
 
     size_t nb_quotes = 0;
     size_t nb_opened_curly_brackets = is_dict ? 1 : 0;
-    size_t nb_opened_brackets = !is_dict ? 0 : 1;
+    size_t nb_opened_brackets = is_dict ? 0 : 1;
     size_t nb_closed_curly_brackets = 0;
     size_t nb_closed_brackets = 0;
 
-    size_t i = 1; // We already read the first character of the file
+    size_t i = 0;
 
     bool is_in_string = false;
 
@@ -1532,6 +1553,8 @@ bool is_json_valid_buff(char *buff, size_t buff_len, bool is_dict)
     {
         return false;
     }
+    printf("%d\n",
+           check_bools_nulls_numbers_counts_buff(buff, buff_len, is_dict));
     return check_bools_nulls_numbers_counts_buff(buff, buff_len, is_dict)
             && is_dict
         ? (check_dict_trailing_commas_buff(buff, 0) && buff[buff_len - 3] == '}'
