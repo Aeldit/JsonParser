@@ -761,69 +761,103 @@ size_t get_nb_elts_dict_buff(char *buff, size_t idx)
 
     size_t nb_elts = 0;
 
-    // Used for the case where the dict contains only one element, and so
-    // does not contain a ','
-    // It can only be 0 or 1 but is stored as a size_t because it is compared to
-    // another size_t, so it will be cast to this size anyway
-    size_t single_elt_found = 0;
-
     // Counts the number of arrays/dicts nesting at the current position
-    u64 is_in_dict = 1;
-    u64 is_in_array = 0;
+    u64 dict_count = 1;
+    u64 array_count = 0;
 
-    bool is_in_string = false;
-    bool is_backslashing = false;
+    bool is_in_key = true;
 
     char c = 0;
-    while ((c = buff[idx]))
+    while ((c = buff[idx++]) && dict_count)
     {
-        if (!is_in_dict)
-        {
-            break;
-        }
-
-        if (c == '\\')
-        {
-            is_backslashing = !is_backslashing;
-        }
-
-        // If we are not in a string or if the string just ended
-        if (!is_in_string || (is_in_string && c == '"' && !is_backslashing))
+        if (!is_in_key)
         {
             switch (c)
             {
             case '"':
-                is_in_string = !is_in_string;
-                single_elt_found = 1;
-                break;
-
+            case '+':
+            case '-':
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+            case 't':
+            case 'f':
+            case 'n':
             case '[':
-                ++is_in_array;
-                break;
-
-            case ']':
-                --is_in_array;
-                break;
-
             case '{':
-                ++is_in_dict;
-                break;
-
-            case '}':
-                --is_in_dict;
-                break;
-
-            case ',':
-                if (!is_in_array && is_in_dict == 1)
+                if (!array_count && dict_count == 1)
                 {
                     ++nb_elts;
                 }
-                break;
             }
         }
-        ++idx;
+
+        switch (c)
+        {
+        case ':':
+            is_in_key = false;
+            break;
+
+        case ',':
+            is_in_key = true;
+            break;
+
+        case '"':
+            idx += get_str_len_buff(buff, idx);
+            break;
+
+        case 't':
+            idx += 3;
+            break;
+
+        case 'f':
+            idx += 4;
+            break;
+
+        case 'n':
+            idx += 3;
+            break;
+
+        case '+':
+        case '-':
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+            idx += get_num_len_buff(buff, idx);
+            break;
+
+        case '[':
+            ++array_count;
+            break;
+
+        case ']':
+            --array_count;
+            break;
+
+        case '{':
+            ++dict_count;
+            break;
+
+        case '}':
+            --dict_count;
+            break;
+        }
     }
-    return nb_elts == 0 ? single_elt_found : nb_elts + 1;
+    return nb_elts;
 }
 
 size_t get_nb_elts_dict(FILE *f, size_t pos)
