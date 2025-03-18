@@ -1576,7 +1576,6 @@ bool is_json_valid_buff(char *buff, size_t buff_len, bool is_dict)
     {
         return false;
     }
-    printf("%d\n", check_array_missing_commas_buff(buff, 0));
     return check_bools_nulls_numbers_counts_buff(buff, buff_len, is_dict)
             && is_dict
         ? (check_dict_trailing_commas_buff(buff, 0) && buff[buff_len - 3] == '}'
