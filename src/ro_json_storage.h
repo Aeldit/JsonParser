@@ -12,14 +12,9 @@
 #define ERROR_RO_VALUE ((ro_value_t){.type = T_ERROR})
 #define ERROR_RO_ITEM ((ro_item_t){.type = T_ERROR})
 
-#define RO_VALUE_OF(T_TYPE, type_field)                                        \
+#define RO_VALUE_OF(T_TYPE, type_field, value)                                 \
   ((ro_value_t){.type = (T_TYPE), .type_field = (value)})
-#define RO_ITEM_OF(T_TYPE, type_field)                                         \
-  ((ro_item_t){.type = (T_TYPE), .key = (key), .type_field = (value)})
-
-#define RO_VALUE_OF_2(T_TYPE, type_field, value)                               \
-  ((ro_value_t){.type = (T_TYPE), .type_field = (value)})
-#define RO_ITEM_OF_2(T_TYPE, type_field, value)                                \
+#define RO_ITEM_OF(T_TYPE, type_field, value)                                  \
   ((ro_item_t){.type = (T_TYPE), .key = key, .type_field = (value)})
 
 /*******************************************************************************
@@ -61,13 +56,11 @@ typedef struct {
 
 struct ro_array {
   size_t size;
-  size_t insert_index; // TODO: See if we can delete this field
   ro_value_t *values;
 };
 
 struct ro_dict {
   size_t size;
-  size_t insert_index;
   ro_item_t *items;
 };
 
@@ -85,26 +78,6 @@ typedef struct {
 ro_array_t *init_ro_array(size_t size);
 ro_dict_t *init_ro_dict(size_t size);
 ro_json_t *init_ro_json(bool is_array, ro_array_t *a, ro_dict_t *d);
-
-void ro_array_add_str(ro_array_t *a, string_t value);
-void ro_array_add_long(ro_array_t *a, i64 value);
-void ro_array_add_double(ro_array_t *a, double value);
-void ro_array_add_exp_long(ro_array_t *a, exp_long_t value);
-void ro_array_add_exp_double(ro_array_t *a, exp_double_t value);
-void ro_array_add_bool(ro_array_t *a, bool value);
-void ro_array_add_null(ro_array_t *a);
-void ro_array_add_array(ro_array_t *a, ro_array_t *value);
-void ro_array_add_dict(ro_array_t *a, ro_dict_t *value);
-
-void ro_dict_add_str(ro_dict_t *d, string_t key, string_t value);
-void ro_dict_add_long(ro_dict_t *d, string_t key, i64 value);
-void ro_dict_add_double(ro_dict_t *d, string_t key, double value);
-void ro_dict_add_exp_long(ro_dict_t *d, string_t key, exp_long_t value);
-void ro_dict_add_exp_double(ro_dict_t *d, string_t key, exp_double_t value);
-void ro_dict_add_bool(ro_dict_t *d, string_t key, bool value);
-void ro_dict_add_null(ro_dict_t *d, string_t key);
-void ro_dict_add_array(ro_dict_t *d, string_t key, ro_array_t *value);
-void ro_dict_add_dict(ro_dict_t *d, string_t key, ro_dict_t *value);
 
 ro_value_t ro_array_get(ro_array_t *a, size_t index);
 ro_item_t ro_dict_get(ro_dict_t *d, string_t key);

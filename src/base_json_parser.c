@@ -35,52 +35,6 @@ size_t get_str_len_buff(char *buff, size_t pos)
     return 1;
 }
 
-size_t get_str_len_file(FILE *f, size_t pos)
-{
-    if (!f)
-    {
-        return 1;
-    }
-
-    size_t nb_chars = 0;
-
-    char c = 0;
-    char prev_c = 0;
-    while (SEEK_AND_GET_CHAR(pos))
-    {
-        ++nb_chars;
-        if (c == '"' && prev_c != '\\')
-        {
-            break;
-        }
-    }
-    return nb_chars;
-}
-
-#define CHECK_NUM_LEN                                                          \
-    switch (c)                                                                 \
-    {                                                                          \
-    case '+':                                                                  \
-    case '-':                                                                  \
-    case '.':                                                                  \
-    case 'e':                                                                  \
-    case 'E':                                                                  \
-    case '0':                                                                  \
-    case '1':                                                                  \
-    case '2':                                                                  \
-    case '3':                                                                  \
-    case '4':                                                                  \
-    case '5':                                                                  \
-    case '6':                                                                  \
-    case '7':                                                                  \
-    case '8':                                                                  \
-    case '9':                                                                  \
-        ++nb_chars;                                                            \
-        break;                                                                 \
-    default:                                                                   \
-        return nb_chars;                                                       \
-    }
-
 size_t get_num_len_buff(char *buff, size_t pos)
 {
     if (!buff)
@@ -93,24 +47,28 @@ size_t get_num_len_buff(char *buff, size_t pos)
     char c = 0;
     while ((c = buff[pos++]))
     {
-        CHECK_NUM_LEN
-    }
-    return 0;
-}
-
-size_t get_num_len_file(FILE *f, size_t pos)
-{
-    if (!f)
-    {
-        return 0;
-    }
-
-    size_t nb_chars = 0;
-
-    char c = 0;
-    while (SEEK_AND_GET_CHAR(pos))
-    {
-        CHECK_NUM_LEN
+        switch (c)
+        {
+        case '+':
+        case '-':
+        case '.':
+        case 'e':
+        case 'E':
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+            ++nb_chars;
+            break;
+        default:
+            return nb_chars;
+        }
     }
     return 0;
 }
@@ -432,47 +390,6 @@ string_t parse_string_buff(char *buff, size_t *idx)
     return STRING_OF(str, len);
 }
 
-string_t parse_string(FILE *f, size_t *pos)
-{
-    if (!f || !pos)
-    {
-        return NULL_STRING;
-    }
-
-    size_t i = *pos;
-    char c = 0;
-    char prev_c = 0;
-    while (SEEK_AND_GET_CHAR(i) && !IS_STRING_END(c))
-    {
-        prev_c = c;
-    }
-
-    size_t len = i - *pos - 1;
-    if (!len)
-    {
-        ++(*pos);
-        return STRING_NOFREE_OF("", 0);
-    }
-
-    char *str = malloc((len + 1) * sizeof(char));
-    if (!str)
-    {
-        return NULL_STRING;
-    }
-    str[len] = 0;
-
-    if (fseek(f, *pos, SEEK_SET))
-    {
-        free(str);
-        return NULL_STRING;
-    }
-    fread(str, sizeof(char), len, f);
-
-    // +1 to not read the last '"' when returning in the calling function
-    *pos += len + 1;
-    return STRING_OF(str, len);
-}
-
 str_and_len_tuple_t parse_number_buff(char *buff, size_t *idx)
 {
     if (!buff || !idx)
@@ -530,79 +447,6 @@ str_and_len_tuple_t parse_number_buff(char *buff, size_t *idx)
     return NULL_STR_AND_LEN_TUPLE;
 }
 
-str_and_len_tuple_t parse_number(FILE *f, size_t *pos)
-{
-    if (!f || !pos)
-    {
-        return NULL_STR_AND_LEN_TUPLE;
-    }
-
-    // Obtains the length of the value
-    // -1 because we already read the first digit (or sign)
-    size_t end_pos = *pos - 1;
-
-    bool out = false;
-
-    char c = 0;
-    // end_pos is incremented for each character found to be part of a
-    // number
-    while (SEEK_AND_GET_CHAR(end_pos))
-    {
-        switch (c)
-        {
-        case '+':
-        case '-':
-        case 'e':
-        case 'E':
-        case '.':
-        case '0':
-        case '1':
-        case '2':
-        case '3':
-        case '4':
-        case '5':
-        case '6':
-        case '7':
-        case '8':
-        case '9':
-            break;
-
-        default:
-            out = true;
-            break;
-        }
-
-        if (out)
-        {
-            break;
-        }
-    }
-
-    size_t len = end_pos - *pos;
-    if (len == 0)
-    {
-        return NULL_STR_AND_LEN_TUPLE;
-    }
-
-    // Puts the value in the form of a char ro_array_t
-    char *str = calloc(len + 1, sizeof(char));
-    if (!str)
-    {
-        return NULL_STR_AND_LEN_TUPLE;
-    }
-
-    // If we couldn't set the pos in the file
-    if (fseek(f, *pos - 1, SEEK_SET))
-    {
-        free(str);
-        return NULL_STR_AND_LEN_TUPLE;
-    }
-    fread(str, sizeof(char), len, f);
-
-    *pos += len - 1;
-    return STR_AND_LEN_OF(str, len, is_float(str, len), has_exponent(str, len));
-}
-
 size_t parse_boolean_buff(char *buff, size_t *idx)
 {
     if (!buff || !idx)
@@ -634,27 +478,6 @@ size_t parse_boolean_buff(char *buff, size_t *idx)
         ++size;
     }
     return 0;
-}
-
-size_t parse_boolean(FILE *f, size_t *pos)
-{
-    if (!f || !pos)
-    {
-        return 0;
-    }
-
-    // -1 because we already read the first character
-    size_t end_pos = *pos - 1;
-
-    char c = 0;
-    // end_pos is incremented for each character found to be part of a
-    // boolean
-    while (SEEK_AND_GET_CHAR(end_pos) && !IS_END_CHAR(c))
-    {
-    }
-    size_t len = end_pos - *pos;
-    *pos += len - 1;
-    return len;
 }
 
 size_t get_nb_elts_array_buff(char *buff, size_t idx)
@@ -748,91 +571,6 @@ size_t get_nb_elts_array_buff(char *buff, size_t idx)
             --dict_count;
             break;
         }
-    }
-    return nb_elts;
-}
-
-size_t get_nb_elts_array(FILE *f, size_t pos)
-{
-    if (!f || (!fseek(f, pos++, SEEK_SET) && fgetc(f) == ']'))
-    {
-        return 0;
-    }
-
-    size_t nb_elts = 0;
-
-    // Counts the number of arrays/dicts nesting at the current position
-    u64 is_in_array = 1;
-    u64 is_in_dict = 0;
-
-    bool is_in_string = false;
-    bool is_backslashing = false;
-    bool comma_encountered = false;
-
-    char c = 0;
-    char prev_c = 0;
-    while (SEEK_AND_GET_CHAR(pos))
-    {
-        if (!is_in_array)
-        {
-            break;
-        }
-
-        if (c == '\\')
-        {
-            is_backslashing = !is_backslashing;
-        }
-        else if (!comma_encountered && c == ',' && is_in_array == 1)
-        {
-            comma_encountered = true;
-        }
-
-        // If we are not in a string or if the string just ended
-        if (!is_in_string || (is_in_string && c == '"' && !is_backslashing))
-        {
-            switch (c)
-            {
-            case '"':
-                is_in_string = !is_in_string;
-                break;
-
-            case '[':
-                ++is_in_array;
-                break;
-
-            case ']':
-                --is_in_array;
-                break;
-
-            case '{':
-                ++is_in_dict;
-                break;
-
-            case '}':
-                --is_in_dict;
-                break;
-
-            case ',':
-                if (!is_in_dict && is_in_array == 1)
-                {
-                    ++nb_elts;
-                }
-                break;
-            }
-        }
-
-        if (c != ' ' && c != '\t' && c != '\n')
-        {
-            prev_c = c;
-        }
-    }
-
-    // If there was only one value, there was no ',', so the element wasn't
-    // detected or if at least one element was found, it means that a ','
-    // was found
-    if ((nb_elts == 0 && prev_c != 0) || (nb_elts >= 1 && comma_encountered))
-    {
-        ++nb_elts;
     }
     return nb_elts;
 }
@@ -943,197 +681,4 @@ size_t get_nb_elts_dict_buff(char *buff, size_t idx)
         }
     }
     return nb_elts;
-}
-
-size_t get_nb_elts_dict(FILE *f, size_t pos)
-{
-    if (!f || (!fseek(f, pos++, SEEK_SET) && fgetc(f) == '}'))
-    {
-        return 0;
-    }
-
-    size_t nb_elts = 0;
-
-    // Used for the case where the dict contains only one element, and so
-    // does not contain a ','
-    // It can only be 0 or 1 but is stored as a size_t because it is compared to
-    // another size_t, so it will be cast to this size anyway
-    size_t single_elt_found = 0;
-
-    // Counts the number of arrays/dicts nesting at the current position
-    u64 is_in_dict = 1;
-    u64 is_in_array = 0;
-
-    bool is_in_string = false;
-    bool is_backslashing = false;
-
-    char c = 0;
-    while (SEEK_AND_GET_CHAR(pos))
-    {
-        if (c == '\\')
-        {
-            is_backslashing = !is_backslashing;
-        }
-
-        // If we are not in a string or if the string just ended
-        if (!is_in_string || (is_in_string && c == '"' && !is_backslashing))
-        {
-            switch (c)
-            {
-            case '"':
-                is_in_string = !is_in_string;
-                single_elt_found = 1;
-                break;
-
-            case '[':
-                ++is_in_array;
-                break;
-
-            case ']':
-                --is_in_array;
-                break;
-
-            case '{':
-                ++is_in_dict;
-                break;
-
-            case '}':
-                --is_in_dict;
-                break;
-
-            case ',':
-                if (!is_in_array && is_in_dict == 1)
-                {
-                    ++nb_elts;
-                }
-                break;
-            }
-        }
-
-        if (!is_in_dict)
-        {
-            break;
-        }
-    }
-    return nb_elts == 0 ? single_elt_found : nb_elts + 1;
-}
-
-size_t get_nb_chars_in_array(FILE *f, size_t pos)
-{
-    if (!f)
-    {
-        return 0;
-    }
-
-    size_t nb_chars = 0;
-
-    // Counts the number of arrays/dicts nesting at the current position
-    u64 is_in_array = 1;
-    u64 is_in_dict = 0;
-
-    bool is_in_string = false;
-    bool is_backslashing = false;
-
-    char c = 0;
-    while (SEEK_AND_GET_CHAR(pos))
-    {
-        if (c == '\\')
-        {
-            is_backslashing = !is_backslashing;
-        }
-
-        // If we are not in a string or if the string just ended
-        if (!is_in_string || (is_in_string && c == '"' && !is_backslashing))
-        {
-            switch (c)
-            {
-            case '"':
-                is_in_string = !is_in_string;
-                break;
-
-            case '[':
-                ++is_in_array;
-                break;
-
-            case ']':
-                --is_in_array;
-                break;
-
-            case '{':
-                ++is_in_dict;
-                break;
-
-            case '}':
-                --is_in_dict;
-                break;
-            }
-        }
-
-        if (!is_in_array)
-        {
-            break;
-        }
-        ++nb_chars;
-    }
-    return nb_chars;
-}
-
-size_t get_nb_chars_in_dict(FILE *f, size_t pos)
-{
-    if (!f)
-    {
-        return 0;
-    }
-
-    size_t nb_chars = 0;
-
-    // Counts the number of arrays/dicts nesting at the current position
-    u64 is_in_dict = 1;
-    u64 is_in_array = 0;
-
-    bool is_in_string = false;
-    bool is_backslashing = false;
-
-    char c = 0;
-    while (SEEK_AND_GET_CHAR(pos))
-    {
-        if (c == '\\')
-        {
-            is_backslashing = !is_backslashing;
-        }
-
-        // If we are not in a string or if the string just ended
-        if (!is_in_string || (is_in_string && c == '"' && !is_backslashing))
-        {
-            switch (c)
-            {
-            case '"':
-                is_in_string = !is_in_string;
-                break;
-
-            case '[':
-                ++is_in_array;
-                break;
-
-            case ']':
-                --is_in_array;
-                break;
-
-            case '{':
-                ++is_in_dict;
-                break;
-
-            case '}':
-                --is_in_dict;
-                break;
-            }
-        }
-
-        if (!is_in_dict)
-        {
-            break;
-        }
-        ++nb_chars;
-    }
-    return nb_chars;
 }

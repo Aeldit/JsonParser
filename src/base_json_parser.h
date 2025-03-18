@@ -86,10 +86,8 @@ typedef struct {
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
 size_t get_str_len_buff(char *buff, size_t pos);
-size_t get_str_len_file(FILE *f, size_t pos);
 
 size_t get_num_len_buff(char *buff, size_t pos);
-size_t get_num_len_file(FILE *f, size_t pos);
 
 /**
 ** \brief Takes sl's char array and transforms it into a long.
@@ -125,14 +123,6 @@ bool has_exponent(char *str, size_t len);
 ** \returns A NULL_STRING in case of error, the parsed string otherwise
 */
 string_t parse_string_buff(char *buff, size_t *idx);
-/**
-** \brief Parses the string starting at 'pos + 1' (first char after the '"')
-** \param f The file stream
-** \param pos A pointer to the unsigned long containing the position of the
-**            '"' that started the string we want to parse
-** \returns A NULL_STRING in case of error, the parsed string otherwise
-*/
-string_t parse_string(FILE *f, size_t *pos);
 
 /**
 ** \brief Reads the buffer from the given pos - 1
@@ -145,17 +135,6 @@ string_t parse_string(FILE *f, size_t *pos);
 **          was an error
 */
 str_and_len_tuple_t parse_number_buff(char *buff, size_t *idx);
-/**
-** \brief Reads the file from the given pos
-** \param f The file stream
-** \param pos The pos of the start of the number of which we are currently
-**            acquiring the length
-** \returns a pointer to the str_and_len_tuple_t struct containing the number as
-**          a char array, the length of the char array and whether the number is
-**          a float and has an exponent, or NULL_STR_AND_LEN_TUPLE if there
-**          was an error
-*/
-str_and_len_tuple_t parse_number(FILE *f, size_t *pos);
 
 /**
 ** \param buff The current json file's contents
@@ -164,13 +143,6 @@ str_and_len_tuple_t parse_number(FILE *f, size_t *pos);
 ** \returns 5 if false, 4 if true, 0 otherwise
 */
 size_t parse_boolean_buff(char *buff, size_t *idx);
-/**
-** \param f The file stream
-** \param pos A pointer to the value containing the index of the 't' or 'f' that
-**            started the boolean
-** \returns 5 if false, 4 if true, 0 otherwise
-*/
-size_t parse_boolean(FILE *f, size_t *pos);
 
 /**
 ** \param idx The index of the character just after the '[' that begins the
@@ -178,13 +150,6 @@ size_t parse_boolean(FILE *f, size_t *pos);
 ** \returns The number of elements of the current array
 */
 size_t get_nb_elts_array_buff(char *buff, size_t idx);
-/**
-** \param f The file stream
-** \param pos The position in the file of the character just after the '['
-**            that begins the current array
-** \returns The number of elements of the current array
-*/
-size_t get_nb_elts_array(FILE *f, size_t pos);
 
 /**
 ** \param buff The buffer containing the object currently being parsed
@@ -193,30 +158,5 @@ size_t get_nb_elts_array(FILE *f, size_t pos);
 ** \returns The number of elements of the current dict
 */
 size_t get_nb_elts_dict_buff(char *buff, size_t idx);
-/**
-** \param f The file stream
-** \param pos The position in the file of the character just after the '{'
-**            that begins the current dict
-** \returns The number of elements of the current dict
-*/
-size_t get_nb_elts_dict(FILE *f, size_t pos);
-
-/**
-** \param f The file stream
-** \param pos The position in the file of the character after the '[' that
-**            begins the current array
-** \returns The total number of characters in the current array - 1 (the
-**          first '[' is not counted)
-*/
-size_t get_nb_chars_in_array(FILE *f, size_t pos);
-
-/**
-** \param f The file stream
-** \param pos The position in the file of the character after the '{' that
-**            begins the current dict
-** \returns The total number of characters in the current dict - 1 (the
-**          first '{' is not counted)
-*/
-size_t get_nb_chars_in_dict(FILE *f, size_t pos);
 
 #endif // !BASE_JSON_PARSER_H
