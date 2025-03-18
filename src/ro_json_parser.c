@@ -53,13 +53,8 @@ ro_array_t *ro_parse_array_buff(char *b, size_t *idx)
 
     size_t nb_elts_parsed = 0;
     char c = 0;
-    while ((c = b[i]))
+    while ((c = b[i]) && nb_elts_parsed < nb_elts)
     {
-        if (nb_elts_parsed >= nb_elts)
-        {
-            break;
-        }
-
         string_t s = NULL_STRING;
         str_and_len_tuple_t sl = NULL_STR_AND_LEN_TUPLE;
         size_t len = 0;

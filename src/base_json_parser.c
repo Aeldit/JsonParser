@@ -307,12 +307,36 @@ bool is_float(char *str, size_t len)
         return false;
     }
 
-    for (size_t i = 0; i < len; ++i)
+    switch (len)
     {
-        if (str[i] == '.')
+    case 1:
+    case 2:
+        return false;
+
+    case 3:
+        return str[1] == '.';
+    case 4:
+        return str[1] == '.' || str[2] == '.';
+    case 5:
+        return str[1] == '.' || str[2] == '.' || str[3] == '.';
+    case 6:
+        return str[1] == '.' || str[2] == '.' || str[3] == '.' || str[4] == '.';
+    case 7:
+        return str[1] == '.' || str[2] == '.' || str[3] == '.' || str[4] == '.'
+            || str[5] == '.';
+    case 8:
+        return str[1] == '.' || str[2] == '.' || str[3] == '.' || str[4] == '.'
+            || str[5] == '.' || str[6] == '.';
+
+    default:
+        for (size_t i = 1; i < len - 1; ++i)
         {
-            return true;
+            if (str[i] == '.')
+            {
+                return true;
+            }
         }
+        break;
     }
     return false;
 }
@@ -324,14 +348,42 @@ bool has_exponent(char *str, size_t len)
         return false;
     }
 
-    for (size_t i = 0; i < len; ++i)
+    switch (len)
     {
-        switch (str[i])
+    case 1:
+    case 2:
+        return false;
+
+    case 3:
+        return str[1] == 'e' || str[1] == 'E';
+    case 4:
+        return str[1] == 'e' || str[2] == 'e' || str[1] == 'E' || str[2] == 'E';
+    case 5:
+        return str[1] == 'e' || str[1] == 'E' || str[2] == 'e' || str[2] == 'E'
+            || str[3] == 'e' || str[3] == 'E';
+    case 6:
+        return str[1] == 'e' || str[1] == 'E' || str[2] == 'e' || str[2] == 'E'
+            || str[3] == 'e' || str[3] == 'E' || str[4] == 'e' || str[4] == 'E';
+    case 7:
+        return str[1] == 'e' || str[1] == 'E' || str[2] == 'e' || str[2] == 'E'
+            || str[3] == 'e' || str[3] == 'E' || str[4] == 'e' || str[4] == 'E'
+            || str[5] == 'e' || str[5] == 'E';
+    case 8:
+        return str[1] == 'e' || str[1] == 'E' || str[2] == 'e' || str[2] == 'E'
+            || str[3] == 'e' || str[3] == 'E' || str[4] == 'e' || str[4] == 'E'
+            || str[5] == 'e' || str[5] == 'E' || str[6] == 'e' || str[6] == 'E';
+
+    default:
+        for (size_t i = 1; i < len - 1; ++i)
         {
-        case 'e':
-        case 'E':
-            return true;
+            switch (str[i])
+            {
+            case 'e':
+            case 'E':
+                return true;
+            }
         }
+        break;
     }
     return false;
 }
