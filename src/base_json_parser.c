@@ -577,7 +577,7 @@ size_t get_nb_elts_array_buff(char *buff, size_t idx)
 
 size_t get_nb_elts_dict_buff(char *buff, size_t idx)
 {
-    if (!buff || idx >= MAX_READ_BUFF_SIZE || buff[idx] == '}')
+    if (!buff || buff[idx] == '}')
     {
         return 0;
     }
