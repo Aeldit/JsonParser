@@ -212,7 +212,7 @@ string_t parse_string_buff(char *buff, size_t *idx)
     size_t len = 0;
     char c = 0;
     char prev_c = 0;
-    // Counts the number of characters until the first one that is an 'end char'
+    // Counts the number of characters
     while ((c = buff[start_idx + len]))
     {
         if (c == '"' && prev_c != '\\')
@@ -229,12 +229,13 @@ string_t parse_string_buff(char *buff, size_t *idx)
         return STRING_NOFREE_OF("", 0);
     }
 
-    char *str = calloc(len + 1, sizeof(char));
+    char *str = malloc((len + 1) * sizeof(char));
     if (!str)
     {
         return NULL_STRING;
     }
     memcpy(str, buff + start_idx, len);
+    str[len] = 0;
 
     // + 1 to not read the last '"' when returning in the calling function
     *idx += len + 1;
@@ -263,11 +264,12 @@ string_t parse_string(FILE *f, size_t *pos)
         return STRING_NOFREE_OF("", 0);
     }
 
-    char *str = calloc(len + 1, sizeof(char));
+    char *str = malloc((len + 1) * sizeof(char));
     if (!str)
     {
         return NULL_STRING;
     }
+    str[len] = 0;
 
     if (fseek(f, *pos, SEEK_SET))
     {
@@ -290,10 +292,9 @@ str_and_len_tuple_t parse_number_buff(char *buff, size_t *idx)
 
     // Counts the number of characters until the first one that is an 'end char'
     size_t end_idx = *idx;
-    size_t initial_i = end_idx;
-    bool out = false;
+    size_t size = 0;
     char c = 0;
-    while ((c = buff[end_idx]))
+    while ((c = buff[end_idx++]))
     {
         switch (c)
         {
@@ -315,34 +316,28 @@ str_and_len_tuple_t parse_number_buff(char *buff, size_t *idx)
             break;
 
         default:
-            out = true;
-            break;
+            // Number of chars
+            if (!size)
+            {
+                return NULL_STR_AND_LEN_TUPLE;
+            }
+
+            // Puts the value in the form of a char array
+            char *str = malloc((size + 1) * sizeof(char));
+            if (!str)
+            {
+                return NULL_STR_AND_LEN_TUPLE;
+            }
+            memcpy(str, buff + *idx, size);
+            str[size] = 0;
+
+            *idx += size - 1;
+            return STR_AND_LEN_OF(str, size, is_float(str, size),
+                                  has_exponent(str, size));
         }
-
-        if (out)
-        {
-            break;
-        }
-        ++end_idx;
+        ++size;
     }
-
-    // Number of chars
-    size_t len = end_idx - initial_i;
-    if (len == 0)
-    {
-        return NULL_STR_AND_LEN_TUPLE;
-    }
-
-    // Puts the value in the form of a char ro_array_t
-    char *str = calloc(len + 1, sizeof(char));
-    if (!str)
-    {
-        return NULL_STR_AND_LEN_TUPLE;
-    }
-    memcpy(str, buff + initial_i, len);
-
-    *idx += len - 1;
-    return STR_AND_LEN_OF(str, len, is_float(str, len), has_exponent(str, len));
+    return NULL_STR_AND_LEN_TUPLE;
 }
 
 str_and_len_tuple_t parse_number(FILE *f, size_t *pos)
@@ -426,19 +421,29 @@ size_t parse_boolean_buff(char *buff, size_t *idx)
     }
 
     size_t end_idx = *idx;
+    size_t size = 0;
     char c = 0;
-    while (1)
+    while ((c = buff[end_idx++]))
     {
-        c = buff[end_idx];
-        if (IS_END_CHAR(c))
+        switch (c)
         {
+        case 't':
+        case 'r':
+        case 'u':
+        case 'e':
+        case 'f':
+        case 'a':
+        case 'l':
+        case 's':
             break;
+
+        default:
+            *idx += size - 1;
+            return size;
         }
-        ++end_idx;
+        ++size;
     }
-    size_t len = end_idx - *idx;
-    *idx += len - 1;
-    return len;
+    return 0;
 }
 
 size_t parse_boolean(FILE *f, size_t *pos)
@@ -471,9 +476,9 @@ size_t get_nb_elts_array_buff(char *buff, size_t idx)
 
     size_t nb_elts = 0;
 
-    // Counts the number of arrays/dicts nesting at the current position
-    u64 is_in_array = 1;
-    u64 is_in_dict = 0;
+    // Counts the number of nested arrays/dicts
+    u64 array_count = 1;
+    u64 dict_count = 0;
 
     bool is_in_string = false;
     bool is_backslashing = false;
@@ -481,18 +486,13 @@ size_t get_nb_elts_array_buff(char *buff, size_t idx)
 
     char c = 0;
     char prev_c = 0;
-    while ((c = buff[idx]))
+    while ((c = buff[idx]) && array_count)
     {
-        if (!is_in_array)
-        {
-            break;
-        }
-
         if (c == '\\')
         {
             is_backslashing = !is_backslashing;
         }
-        else if (!comma_encountered && c == ',' && is_in_array == 1)
+        else if (!comma_encountered && c == ',' && array_count == 1)
         {
             comma_encountered = true;
         }
@@ -507,31 +507,23 @@ size_t get_nb_elts_array_buff(char *buff, size_t idx)
                 break;
 
             case '[':
-                if (is_in_array == MAX_NESTED_ARRAYS)
-                {
-                    return 0;
-                }
-                ++is_in_array;
+                ++array_count;
                 break;
 
             case ']':
-                --is_in_array;
+                --array_count;
                 break;
 
             case '{':
-                if (is_in_dict == MAX_NESTED_DICTS)
-                {
-                    return 0;
-                }
-                ++is_in_dict;
+                ++dict_count;
                 break;
 
             case '}':
-                --is_in_dict;
+                --dict_count;
                 break;
 
             case ',':
-                if (!is_in_dict && is_in_array == 1)
+                if (!dict_count && array_count == 1)
                 {
                     ++nb_elts;
                 }
@@ -601,10 +593,6 @@ size_t get_nb_elts_array(FILE *f, size_t pos)
                 break;
 
             case '[':
-                if (is_in_array == MAX_NESTED_ARRAYS)
-                {
-                    return 0;
-                }
                 ++is_in_array;
                 break;
 
@@ -613,10 +601,6 @@ size_t get_nb_elts_array(FILE *f, size_t pos)
                 break;
 
             case '{':
-                if (is_in_dict == MAX_NESTED_DICTS)
-                {
-                    return 0;
-                }
                 ++is_in_dict;
                 break;
 
@@ -695,10 +679,6 @@ size_t get_nb_elts_dict_buff(char *buff, size_t idx)
                 break;
 
             case '[':
-                if (is_in_array == MAX_NESTED_ARRAYS)
-                {
-                    return 0;
-                }
                 ++is_in_array;
                 break;
 
@@ -707,10 +687,6 @@ size_t get_nb_elts_dict_buff(char *buff, size_t idx)
                 break;
 
             case '{':
-                if (is_in_dict == MAX_NESTED_DICTS)
-                {
-                    return 0;
-                }
                 ++is_in_dict;
                 break;
 
@@ -772,10 +748,6 @@ size_t get_nb_elts_dict(FILE *f, size_t pos)
                 break;
 
             case '[':
-                if (is_in_array == MAX_NESTED_ARRAYS)
-                {
-                    return 0;
-                }
                 ++is_in_array;
                 break;
 
@@ -784,10 +756,6 @@ size_t get_nb_elts_dict(FILE *f, size_t pos)
                 break;
 
             case '{':
-                if (is_in_dict == MAX_NESTED_DICTS)
-                {
-                    return 0;
-                }
                 ++is_in_dict;
                 break;
 
@@ -846,10 +814,6 @@ size_t get_nb_chars_in_array(FILE *f, size_t pos)
                 break;
 
             case '[':
-                if (is_in_array == MAX_NESTED_ARRAYS)
-                {
-                    return 0;
-                }
                 ++is_in_array;
                 break;
 
@@ -858,10 +822,6 @@ size_t get_nb_chars_in_array(FILE *f, size_t pos)
                 break;
 
             case '{':
-                if (is_in_dict == MAX_NESTED_DICTS)
-                {
-                    return 0;
-                }
                 ++is_in_dict;
                 break;
 
@@ -914,10 +874,6 @@ size_t get_nb_chars_in_dict(FILE *f, size_t pos)
                 break;
 
             case '[':
-                if (is_in_array == MAX_NESTED_ARRAYS)
-                {
-                    return 0;
-                }
                 ++is_in_array;
                 break;
 
@@ -926,10 +882,6 @@ size_t get_nb_chars_in_dict(FILE *f, size_t pos)
                 break;
 
             case '{':
-                if (is_in_dict == MAX_NESTED_DICTS)
-                {
-                    return 0;
-                }
                 ++is_in_dict;
                 break;
 

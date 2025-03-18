@@ -10,7 +10,12 @@ TESTFILES=tests/*.c
 TARGET=json-parser
 
 all: clean $(TARGET)
-	./$(TARGET) err.json
+	./$(TARGET) t.json
+
+noprint: clean
+	$(CC) $(CFLAGS) -pg -DVALGRING_DISABLE_PRINT \
+			$(CFILESBASE) $(CFILESRO) -o $(TARGET)
+	./$(TARGET) flights-1m.json
 
 rw: clean
 	$(CC) $(CFLAGS) $(CFILESBASE) $(CFILESRW) -o $(TARGET)
@@ -28,7 +33,9 @@ profile: clean
 
 .PHONY:
 $(TARGET):
-	$(CC) $(CFLAGS) $(CFILESBASE) $(CFILESRO) -o $(TARGET)
+	$(CC) $(CFLAGS) \
+		$(CFILESBASE) $(CFILESRO) -o $(TARGET)
+		#-DVALGRING_DISABLE_PRINT \
 
 clean:
 	if [ -f "$(TARGET)" ]; then rm $(TARGET); fi
@@ -41,7 +48,7 @@ valgrind-compile: clean
 
 valgrind: valgrind-compile
 	valgrind --tool=callgrind --dump-instr=yes --simulate-cache=yes \
-		--collect-jumps=yes ./$(TARGET) big.json
+		--collect-jumps=yes ./$(TARGET) flights-1m.json
 
 leaks: valgrind-compile
 	valgrind --leak-check=full --show-leak-kinds=all \

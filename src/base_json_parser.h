@@ -33,14 +33,6 @@
 #define MAX_READ_BUFF_SIZE (1 << 30) // ~= 1 GB
 #endif
 
-#ifndef MAX_NESTED_ARRAYS
-#define MAX_NESTED_ARRAYS 255
-#endif
-
-#ifndef MAX_NESTED_DICTS
-#define MAX_NESTED_DICTS 255
-#endif
-
 #define NULL_STR_AND_LEN_TUPLE ((str_and_len_tuple_t){.str = 0, .len = 0})
 #define ERROR_LWOWE ((long_with_or_without_exponent_t){.has_exponent = 2})
 #define ERROR_DWOWE ((double_with_or_without_exponent_t){.has_exponent = 2})
