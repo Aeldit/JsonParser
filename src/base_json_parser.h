@@ -116,9 +116,6 @@ double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t *sl);
 bool is_float(char *str, size_t len);
 bool has_exponent(char *str, size_t len);
 
-bool max_nested_arrays_reached(u64 is_in_array);
-bool max_nested_dicts_reached(u64 is_in_dict);
-
 /***************************************
 **              FUNCTIONS             **
 ***************************************/

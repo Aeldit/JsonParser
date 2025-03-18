@@ -188,36 +188,12 @@ bool has_exponent(char *str, size_t len)
 
     for (size_t i = 0; i < len; ++i)
     {
-        if (str[i] == 'e' || str[i] == 'E')
+        switch (str[i])
         {
+        case 'e':
+        case 'E':
             return true;
         }
-    }
-    return false;
-}
-
-bool max_nested_arrays_reached(u64 is_in_array)
-{
-    if (is_in_array == MAX_NESTED_ARRAYS)
-    {
-#ifdef DEBUG
-        printf("Max number of nested arrays reached, aborting "
-               "parsing\n");
-#endif
-        return true;
-    }
-    return false;
-}
-
-bool max_nested_dicts_reached(u64 is_in_dict)
-{
-    if (is_in_dict == MAX_NESTED_DICTS)
-    {
-#ifdef DEBUG
-        printf("Max number of nested dicts reached, aborting "
-               "parsing\n");
-#endif
-        return true;
     }
     return false;
 }
@@ -531,7 +507,7 @@ size_t get_nb_elts_array_buff(char *buff, size_t idx)
                 break;
 
             case '[':
-                if (max_nested_arrays_reached(is_in_array))
+                if (is_in_array == MAX_NESTED_ARRAYS)
                 {
                     return 0;
                 }
@@ -543,7 +519,7 @@ size_t get_nb_elts_array_buff(char *buff, size_t idx)
                 break;
 
             case '{':
-                if (max_nested_dicts_reached(is_in_dict))
+                if (is_in_dict == MAX_NESTED_DICTS)
                 {
                     return 0;
                 }
@@ -625,7 +601,7 @@ size_t get_nb_elts_array(FILE *f, size_t pos)
                 break;
 
             case '[':
-                if (max_nested_arrays_reached(is_in_array))
+                if (is_in_array == MAX_NESTED_ARRAYS)
                 {
                     return 0;
                 }
@@ -637,7 +613,7 @@ size_t get_nb_elts_array(FILE *f, size_t pos)
                 break;
 
             case '{':
-                if (max_nested_dicts_reached(is_in_dict))
+                if (is_in_dict == MAX_NESTED_DICTS)
                 {
                     return 0;
                 }
@@ -719,7 +695,7 @@ size_t get_nb_elts_dict_buff(char *buff, size_t idx)
                 break;
 
             case '[':
-                if (max_nested_arrays_reached(is_in_array))
+                if (is_in_array == MAX_NESTED_ARRAYS)
                 {
                     return 0;
                 }
@@ -731,7 +707,7 @@ size_t get_nb_elts_dict_buff(char *buff, size_t idx)
                 break;
 
             case '{':
-                if (max_nested_dicts_reached(is_in_dict))
+                if (is_in_dict == MAX_NESTED_DICTS)
                 {
                     return 0;
                 }
@@ -796,7 +772,7 @@ size_t get_nb_elts_dict(FILE *f, size_t pos)
                 break;
 
             case '[':
-                if (max_nested_arrays_reached(is_in_array))
+                if (is_in_array == MAX_NESTED_ARRAYS)
                 {
                     return 0;
                 }
@@ -808,7 +784,7 @@ size_t get_nb_elts_dict(FILE *f, size_t pos)
                 break;
 
             case '{':
-                if (max_nested_dicts_reached(is_in_dict))
+                if (is_in_dict == MAX_NESTED_DICTS)
                 {
                     return 0;
                 }
@@ -870,7 +846,7 @@ size_t get_nb_chars_in_array(FILE *f, size_t pos)
                 break;
 
             case '[':
-                if (max_nested_arrays_reached(is_in_array))
+                if (is_in_array == MAX_NESTED_ARRAYS)
                 {
                     return 0;
                 }
@@ -882,7 +858,7 @@ size_t get_nb_chars_in_array(FILE *f, size_t pos)
                 break;
 
             case '{':
-                if (max_nested_dicts_reached(is_in_dict))
+                if (is_in_dict == MAX_NESTED_DICTS)
                 {
                     return 0;
                 }
@@ -938,7 +914,7 @@ size_t get_nb_chars_in_dict(FILE *f, size_t pos)
                 break;
 
             case '[':
-                if (max_nested_arrays_reached(is_in_array))
+                if (is_in_array == MAX_NESTED_ARRAYS)
                 {
                     return 0;
                 }
@@ -950,7 +926,7 @@ size_t get_nb_chars_in_dict(FILE *f, size_t pos)
                 break;
 
             case '{':
-                if (max_nested_dicts_reached(is_in_dict))
+                if (is_in_dict == MAX_NESTED_DICTS)
                 {
                     return 0;
                 }

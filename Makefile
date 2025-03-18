@@ -22,6 +22,10 @@ mem-least: clean
 	$(CC) $(CFLAGS) -DLEAST $(CFILESBASE) $(CFILESRO) -o $(TARGET)
 	./$(TARGET) t.json
 
+profile: clean
+	 	$(CC) $(CFLAGS) -pg -DVALGRING_DISABLE_PRINT \
+			$(CFILESBASE) $(CFILESRO) -o $(TARGET)
+
 .PHONY:
 $(TARGET):
 	$(CC) $(CFLAGS) $(CFILESBASE) $(CFILESRO) -o $(TARGET)
