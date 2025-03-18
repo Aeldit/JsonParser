@@ -30,6 +30,8 @@ mem-least: clean
 profile: clean
 	 	$(CC) $(CFLAGS) -pg -DVALGRING_DISABLE_PRINT \
 			$(CFILESBASE) $(CFILESRO) -o $(TARGET)
+		./$(TARGET) flights-1m.json
+		gprof -z $(TARGET)
 
 .PHONY:
 $(TARGET):
