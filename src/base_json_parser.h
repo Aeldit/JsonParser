@@ -85,6 +85,12 @@ typedef struct {
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
+size_t get_str_len_buff(char *buff, size_t pos);
+size_t get_str_len_file(FILE *f, size_t pos);
+
+size_t get_num_len_buff(char *buff, size_t pos);
+size_t get_num_len_file(FILE *f, size_t pos);
+
 /**
 ** \brief Takes sl's char array and transforms it into a long.
 **        If the number has an exponent, the exponent is parsed and stored

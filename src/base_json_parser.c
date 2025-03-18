@@ -11,6 +11,111 @@
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
+#define CHECK_STR_LEN                                                          \
+    ++nb_chars;                                                                \
+    if (c == '"' && prev_c != '\\')                                            \
+    {                                                                          \
+        break;                                                                 \
+    }                                                                          \
+    prev_c = c;
+
+/**
+** \returns The number of character in the string + 1 (for the last quote '"')
+*/
+size_t get_str_len_buff(char *buff, size_t pos)
+{
+    if (!buff)
+    {
+        return 1;
+    }
+
+    size_t nb_chars = 0;
+
+    char c = 0;
+    char prev_c = 0;
+    while ((c = buff[pos++]))
+    {
+        CHECK_STR_LEN
+    }
+    return nb_chars;
+}
+
+size_t get_str_len_file(FILE *f, size_t pos)
+{
+    if (!f)
+    {
+        return 1;
+    }
+
+    size_t nb_chars = 0;
+
+    char c = 0;
+    char prev_c = 0;
+    while (SEEK_AND_GET_CHAR(pos))
+    {
+        CHECK_STR_LEN
+    }
+    return nb_chars;
+}
+
+#define CHECK_NUM_LEN                                                          \
+    switch (c)                                                                 \
+    {                                                                          \
+    case '+':                                                                  \
+    case '-':                                                                  \
+    case '.':                                                                  \
+    case 'e':                                                                  \
+    case 'E':                                                                  \
+    case '0':                                                                  \
+    case '1':                                                                  \
+    case '2':                                                                  \
+    case '3':                                                                  \
+    case '4':                                                                  \
+    case '5':                                                                  \
+    case '6':                                                                  \
+    case '7':                                                                  \
+    case '8':                                                                  \
+    case '9':                                                                  \
+        ++nb_chars;                                                            \
+        break;                                                                 \
+    default:                                                                   \
+        return nb_chars;                                                       \
+    }
+
+size_t get_num_len_buff(char *buff, size_t pos)
+{
+    if (!buff)
+    {
+        return 0;
+    }
+
+    size_t nb_chars = 0;
+
+    char c = 0;
+    while ((c = buff[pos++]))
+    {
+        CHECK_NUM_LEN
+    }
+    return 0;
+}
+
+size_t get_num_len_file(FILE *f, size_t pos)
+{
+    if (!f)
+    {
+        return 0;
+    }
+
+    size_t nb_chars = 0;
+
+    char c = 0;
+    while (SEEK_AND_GET_CHAR(pos))
+    {
+        CHECK_NUM_LEN
+    }
+    return 0;
+}
+
 long_with_or_without_exponent_t str_to_long(str_and_len_tuple_t *sl)
 {
     if (!sl)
@@ -480,71 +585,171 @@ size_t get_nb_elts_array_buff(char *buff, size_t idx)
     u64 array_count = 1;
     u64 dict_count = 0;
 
-    bool is_in_string = false;
-    bool is_backslashing = false;
-    bool comma_encountered = false;
-
     char c = 0;
-    char prev_c = 0;
-    while ((c = buff[idx]) && array_count)
+    while ((c = buff[idx++]) && array_count)
     {
-        if (c == '\\')
+        switch (c)
         {
-            is_backslashing = !is_backslashing;
-        }
-        else if (!comma_encountered && c == ',' && array_count == 1)
-        {
-            comma_encountered = true;
-        }
-
-        // If we are not in a string or if the string just ended
-        if (!is_in_string || (is_in_string && c == '"' && !is_backslashing))
-        {
-            switch (c)
+        case '"':
+        case '+':
+        case '-':
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+        case 't':
+        case 'f':
+        case 'n':
+        case '[':
+        case '{':
+            if (!dict_count && array_count == 1)
             {
-            case '"':
-                is_in_string = !is_in_string;
-                break;
-
-            case '[':
-                ++array_count;
-                break;
-
-            case ']':
-                --array_count;
-                break;
-
-            case '{':
-                ++dict_count;
-                break;
-
-            case '}':
-                --dict_count;
-                break;
-
-            case ',':
-                if (!dict_count && array_count == 1)
-                {
-                    ++nb_elts;
-                }
-                break;
+                ++nb_elts;
             }
         }
-        ++idx;
 
-        if (c != ' ' && c != '\t' && c != '\n')
+        switch (c)
         {
-            prev_c = c;
+        case '"':
+            idx += get_str_len_buff(buff, idx);
+            break;
+
+        case 't':
+            idx += 3;
+            break;
+
+        case 'f':
+            idx += 4;
+            break;
+
+        case 'n':
+            idx += 3;
+            break;
+
+        case '+':
+        case '-':
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+            idx += get_num_len_buff(buff, idx);
+            break;
+
+        case '[':
+            ++array_count;
+            break;
+
+        case ']':
+            --array_count;
+            break;
+
+        case '{':
+            ++dict_count;
+            break;
+
+        case '}':
+            --dict_count;
+            break;
         }
+
+        // if (c == '\\')
+        // {
+        //     is_backslashing = !is_backslashing;
+        // }
+        //
+        // if (is_in_string && (c != '"' || (c == '"') && !is_backslashing))
+        // {
+        //     continue;
+        // }
+        // else if (!comma_encountered && c == ',' && array_count == 1)
+        // {
+        //     comma_encountered = true;
+        // }
+
+        // If we are not in a string or if the string just ended
+        // if (!is_in_string || (is_in_string && c == '"' && !is_backslashing))
+        // {
+        //     if (!value_encountered)
+        //     {
+        //         switch (c)
+        //         {
+        //         case '+':
+        //         case '-':
+        //         case '0':
+        //         case '1':
+        //         case '2':
+        //         case '3':
+        //         case '4':
+        //         case '5':
+        //         case '6':
+        //         case '7':
+        //         case '8':
+        //         case '9':
+        //         case 't':
+        //         case 'f':
+        //         case 'n':
+        //         case '[':
+        //         case '{':
+        //             value_encountered = true;
+        //         }
+        //     }
+        //     switch (c)
+        //     {
+        //     case '"':
+        //         is_in_string = !is_in_string;
+        //         break;
+        //
+        //     case '[':
+        //         ++array_count;
+        //         break;
+        //
+        //     case ']':
+        //         --array_count;
+        //         break;
+        //
+        //     case '{':
+        //         ++dict_count;
+        //         break;
+        //
+        //     case '}':
+        //         --dict_count;
+        //         break;
+        //
+        //     case ',':
+        //         if (!dict_count && array_count == 1)
+        //         {
+        //             ++nb_elts;
+        //         }
+        //         break;
+        //     }
+        // }
+        // ++idx;
+        //
+        // if (c != ' ' && c != '\t' && c != '\n')
+        // {
+        //     prev_c = c;
+        // }
     }
 
     // If there was only one value, there was no ',', so the element wasn't
     // detected or if at least one element was found, it means that a ','
     // was found
-    if ((nb_elts == 0 && prev_c != 0) || (nb_elts >= 1 && comma_encountered))
-    {
-        ++nb_elts;
-    }
+    // if ((nb_elts == 0 && prev_c != 0) || (nb_elts >= 1 && comma_encountered))
+    // {
+    //     ++nb_elts;
+    // }
     return nb_elts;
 }
 
