@@ -143,14 +143,27 @@ long_with_or_without_exponent_t str_to_long(str_and_len_tuple_t *sl)
     char c = 0;
     for (size_t i = 0; i < len; ++i)
     {
-        c = str[i];
-        if (has_exponent && (c == 'e' || c == 'E'))
+        switch ((c = str[i]))
         {
-            exp_idx = i;
-            is_in_exponent = true;
-        }
-        else if ('0' <= c && c <= '9')
-        {
+        case 'e':
+        case 'E':
+            if (has_exponent)
+            {
+                exp_idx = i;
+                is_in_exponent = true;
+            }
+            break;
+
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
             if (is_in_exponent)
             {
                 exponent = exponent * 10 + c - '0';
@@ -159,10 +172,14 @@ long_with_or_without_exponent_t str_to_long(str_and_len_tuple_t *sl)
             {
                 number = number * 10 + c - '0';
             }
-        }
-        else if (c == '-' && exp_idx && i - 1 == exp_idx)
-        {
-            is_exp_negative = -1;
+            break;
+
+        case '-':
+            if (exp_idx && i - 1 == exp_idx)
+            {
+                is_exp_negative = -1;
+            }
+            break;
         }
     }
     if (has_exponent)
@@ -215,18 +232,31 @@ double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t *sl)
     char c = 0;
     for (size_t i = 0; i < len; ++i)
     {
-        c = str[i];
-        if (c == '.')
+        switch (c = str[i])
         {
+        case '.':
             dot_reached = true;
-        }
-        else if (has_exponent && (c == 'e' || c == 'E'))
-        {
-            exp_idx = i;
-            is_in_exponent = true;
-        }
-        else if ('0' <= c && c <= '9')
-        {
+            break;
+
+        case 'e':
+        case 'E':
+            if (has_exponent)
+            {
+                exp_idx = i;
+                is_in_exponent = true;
+            }
+            break;
+
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
             if (is_in_exponent)
             {
                 exponent = exponent * 10 + c - '0';
@@ -240,10 +270,14 @@ double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t *sl)
             {
                 number = number * 10 + c - '0';
             }
-        }
-        else if (c == '-' && exp_idx && i - 1 == exp_idx)
-        {
-            is_exp_negative = -1;
+            break;
+
+        case '-':
+            if (exp_idx && i - 1 == exp_idx)
+            {
+                is_exp_negative = -1;
+            }
+            break;
         }
     }
     if (has_exponent)

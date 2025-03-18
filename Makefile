@@ -33,9 +33,7 @@ profile: clean
 
 .PHONY:
 $(TARGET):
-	$(CC) $(CFLAGS) \
-		$(CFILESBASE) $(CFILESRO) -o $(TARGET)
-		#-DVALGRING_DISABLE_PRINT \
+	$(CC) $(CFLAGS) $(CFILESBASE) $(CFILESRO) -o $(TARGET)
 
 clean:
 	if [ -f "$(TARGET)" ]; then rm $(TARGET); fi
