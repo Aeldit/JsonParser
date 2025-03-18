@@ -11,14 +11,6 @@
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
-#define CHECK_STR_LEN                                                          \
-    ++nb_chars;                                                                \
-    if (c == '"' && prev_c != '\\')                                            \
-    {                                                                          \
-        break;                                                                 \
-    }                                                                          \
-    prev_c = c;
-
 /**
 ** \returns The number of character in the string + 1 (for the last quote '"')
 */
@@ -32,12 +24,15 @@ size_t get_str_len_buff(char *buff, size_t pos)
     size_t nb_chars = 0;
 
     char c = 0;
-    char prev_c = 0;
     while ((c = buff[pos++]))
     {
-        CHECK_STR_LEN
+        ++nb_chars;
+        if (c == '"' && pos > 1 && buff[pos - 2])
+        {
+            return nb_chars;
+        }
     }
-    return nb_chars;
+    return 1;
 }
 
 size_t get_str_len_file(FILE *f, size_t pos)
@@ -53,7 +48,11 @@ size_t get_str_len_file(FILE *f, size_t pos)
     char prev_c = 0;
     while (SEEK_AND_GET_CHAR(pos))
     {
-        CHECK_STR_LEN
+        ++nb_chars;
+        if (c == '"' && prev_c != '\\')
+        {
+            break;
+        }
     }
     return nb_chars;
 }
