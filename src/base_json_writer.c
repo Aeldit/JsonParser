@@ -172,6 +172,7 @@ string_t get_exp_double_as_str(exp_double_t value)
 
     // unsigned num_len = nb_chars + nb_decimals - (nb_decimals ? 0 : 1);
     memcpy(str, double_str, num_len);
+    destroy_string(s);
     str[num_len] = 'e';
     snprintf(str + num_len + 1, exp_len + 1, "%ld", exponent);
     return STRING_OF(str, num_len + 1 + exp_len);
