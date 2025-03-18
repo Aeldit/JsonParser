@@ -7,14 +7,6 @@
 #include <stdlib.h>
 
 /*******************************************************************************
-**                              DEFINES / MACROS                              **
-*******************************************************************************/
-#define RO_VALUE_OF(T_TYPE, type_field)                                        \
-    ((ro_value_t){ .type = (T_TYPE), .type_field = (value) })
-#define RO_ITEM_OF(T_TYPE, type_field)                                         \
-    ((ro_item_t){ .type = (T_TYPE), .key = (key), .type_field = (value) })
-
-/*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
 ro_array_t *init_ro_array(size_t size)

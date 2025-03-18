@@ -46,10 +46,12 @@ ro_array_t *ro_parse_array_buff(char *b, size_t *idx)
     size_t nb_elts = get_nb_elts_array_buff(b, i);
 
     ro_array_t *a = init_ro_array(nb_elts);
-    if (!a || nb_elts == 0)
+    ro_value_t *values = a->values;
+    if (!a || !nb_elts || !values)
     {
         return a;
     }
+    size_t insert_idx = 0;
 
     size_t nb_elts_parsed = 0;
     char c = 0;
@@ -67,7 +69,11 @@ ro_array_t *ro_parse_array_buff(char *b, size_t *idx)
             {
                 return destroy_ro_array_on_error(a);
             }
-            ro_array_add_str(a, s);
+            // ro_array_add_str(a, s);
+            if (insert_idx < nb_elts)
+            {
+                values[insert_idx++] = RO_VALUE_OF_2(T_STR, strv, s);
+            }
             ++nb_elts_parsed;
             break;
 
@@ -133,7 +139,7 @@ ro_array_t *ro_parse_array_buff(char *b, size_t *idx)
             {
                 return destroy_ro_array_on_error(a);
             }
-            ro_array_add_bool(a, len == 4 ? 1 : 0);
+            ro_array_add_bool(a, len == 4 ? true : false);
             ++nb_elts_parsed;
             break;
 
@@ -184,10 +190,12 @@ ro_dict_t *ro_parse_dict_buff(char *b, size_t *idx)
     size_t nb_elts = get_nb_elts_dict_buff(b, i);
 
     ro_dict_t *d = init_ro_dict(nb_elts);
-    if (!d || nb_elts == 0)
+    ro_item_t *items = d->items;
+    if (!d || !nb_elts || !items)
     {
         return d;
     }
+    size_t insert_idx = 0;
 
     size_t nb_elts_parsed = 0;
     size_t initial_i = i;
@@ -195,13 +203,8 @@ ro_dict_t *ro_parse_dict_buff(char *b, size_t *idx)
     string_t key = NULL_STRING;
     bool is_waiting_key = true;
     char c = 0;
-    while ((c = b[i]))
+    while ((c = b[i]) && nb_elts_parsed < nb_elts)
     {
-        if (nb_elts_parsed >= nb_elts)
-        {
-            break;
-        }
-
         string_t s = NULL_STRING;
         str_and_len_tuple_t sl = NULL_STR_AND_LEN_TUPLE;
         size_t len = 0;
@@ -224,7 +227,10 @@ ro_dict_t *ro_parse_dict_buff(char *b, size_t *idx)
                 {
                     return destroy_ro_dict_on_error(d, key);
                 }
-                ro_dict_add_str(d, key, s);
+                if (insert_idx < nb_elts && key.str)
+                {
+                    items[insert_idx++] = RO_ITEM_OF_2(T_STR, strv, s);
+                }
                 ++nb_elts_parsed;
             }
             break;
@@ -252,10 +258,18 @@ ro_dict_t *ro_parse_dict_buff(char *b, size_t *idx)
                 switch (dwowe.has_exponent)
                 {
                 case 0:
-                    ro_dict_add_double(d, key, dwowe.double_value);
+                    if (insert_idx < nb_elts && key.str)
+                    {
+                        items[insert_idx++] =
+                            RO_ITEM_OF_2(T_DOUBLE, doublev, dwowe.double_value);
+                    }
                     break;
                 case 1:
-                    ro_dict_add_exp_double(d, key, dwowe.double_exp_value);
+                    if (insert_idx < nb_elts && key.str)
+                    {
+                        items[insert_idx++] = RO_ITEM_OF_2(
+                            T_EXP_DOUBLE, exp_doublev, dwowe.double_exp_value);
+                    }
                     break;
                 case 2:
                 default:
@@ -269,10 +283,18 @@ ro_dict_t *ro_parse_dict_buff(char *b, size_t *idx)
                 switch (lwowe.has_exponent)
                 {
                 case 0:
-                    ro_dict_add_long(d, key, lwowe.long_value);
+                    if (insert_idx < nb_elts && key.str)
+                    {
+                        items[insert_idx++] =
+                            RO_ITEM_OF_2(T_LONG, longv, lwowe.long_value);
+                    }
                     break;
                 case 1:
-                    ro_dict_add_exp_long(d, key, lwowe.long_exp_value);
+                    if (insert_idx < nb_elts && key.str)
+                    {
+                        items[insert_idx++] = RO_ITEM_OF_2(
+                            T_EXP_LONG, exp_longv, lwowe.long_exp_value);
+                    }
                     break;
                 case 2:
                 default:
@@ -291,12 +313,19 @@ ro_dict_t *ro_parse_dict_buff(char *b, size_t *idx)
             {
                 return destroy_ro_dict_on_error(d, key);
             }
-            ro_dict_add_bool(d, key, len == 4 ? 1 : 0);
+            if (insert_idx < nb_elts && key.str)
+            {
+                items[insert_idx++] =
+                    RO_ITEM_OF_2(T_BOOL, boolv, len == 4 ? true : false);
+            }
             ++nb_elts_parsed;
             break;
 
         case 'n':
-            ro_dict_add_null(d, key);
+            if (insert_idx < nb_elts && key.str)
+            {
+                items[insert_idx++] = (ro_item_t){ .type = T_NULL, .key = key };
+            }
             i += 3;
             ++nb_elts_parsed;
             break;
@@ -306,7 +335,10 @@ ro_dict_t *ro_parse_dict_buff(char *b, size_t *idx)
             {
                 return destroy_ro_dict_on_error(d, key);
             }
-            ro_dict_add_array(d, key, tmp_ja);
+            if (insert_idx < nb_elts && key.str)
+            {
+                items[insert_idx++] = RO_ITEM_OF_2(T_ARR, arrayv, tmp_ja);
+            }
             ++nb_elts_parsed;
             break;
 
@@ -315,7 +347,10 @@ ro_dict_t *ro_parse_dict_buff(char *b, size_t *idx)
             {
                 return destroy_ro_dict_on_error(d, key);
             }
-            ro_dict_add_dict(d, key, tmp_jd);
+            if (insert_idx < nb_elts && key.str)
+            {
+                items[insert_idx++] = RO_ITEM_OF_2(T_DICT, dictv, tmp_jd);
+            }
             ++nb_elts_parsed;
             break;
 
@@ -344,11 +379,13 @@ ro_array_t *ro_parse_array(FILE *f, size_t *pos)
     size_t nb_elts = get_nb_elts_array(f, i);
 
     ro_array_t *a = init_ro_array(nb_elts);
-    if (!a || nb_elts == 0)
+    ro_value_t *values = a->values;
+    if (!a || nb_elts == 0 || !values)
     {
         ++(*pos);
         return a;
     }
+    size_t insert_idx = 0;
 
     size_t nb_elts_parsed = 0;
 
@@ -366,7 +403,11 @@ ro_array_t *ro_parse_array(FILE *f, size_t *pos)
             {
                 return destroy_ro_array_on_error(a);
             }
-            ro_array_add_str(a, s);
+            // ro_array_add_str(a, s);
+            if (insert_idx < nb_elts)
+            {
+                values[insert_idx++] = RO_VALUE_OF_2(T_STR, strv, s);
+            }
             ++nb_elts_parsed;
             break;
 
@@ -730,13 +771,14 @@ ro_json_t *ro_parse(char *file)
         ro_dict_t *d = 0;
         if (nb_chars < MAX_READ_BUFF_SIZE)
         {
-            char *b = calloc(nb_chars + 1, sizeof(char));
+            char *b = malloc((nb_chars + 1) * sizeof(char));
             if (!b || fseek(f, offset, SEEK_SET))
             {
                 fclose(f);
                 free(b);
                 return 0;
             }
+            b[nb_chars] = 0;
             fread(b, sizeof(char), nb_chars, f);
 
             if (!is_json_valid_buff(b, nb_chars, true))
@@ -769,13 +811,14 @@ ro_json_t *ro_parse(char *file)
         ro_array_t *a = 0;
         if (nb_chars < MAX_READ_BUFF_SIZE)
         {
-            char *b = calloc(nb_chars + 1, sizeof(char));
+            char *b = malloc((nb_chars + 1) * sizeof(char));
             if (!b || fseek(f, offset, SEEK_SET))
             {
                 fclose(f);
                 free(b);
                 return 0;
             }
+            b[nb_chars] = 0;
             fread(b, sizeof(char), nb_chars, f);
 
             if (!is_json_valid_buff(b, nb_chars, false))
