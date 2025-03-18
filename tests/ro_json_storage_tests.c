@@ -11,12 +11,12 @@
 *******************************************************************************/
 Test(ro_json_storage, init_ro_array_zero_size)
 {
-    unsigned size = 0;
+    size_t size = 0;
     ro_array_t *a = init_ro_array(size);
 
-    cr_expect(a->size == size, "Expected the array size to be %u, but got %u",
+    cr_expect(a->size == size, "Expected the array size to be %zu, but got %zu",
               size, a->size);
-    cr_expect(!a->insert_index, "Expected the array size to be %u, but got %u",
+    cr_expect(!a->insert_index, "Expected the array size to be %u, but got %zu",
               0, a->insert_index);
     cr_expect(!a->values,
               "Expected a->values to be a null pointer, but got '%p'",
@@ -27,12 +27,12 @@ Test(ro_json_storage, init_ro_array_zero_size)
 
 Test(ro_json_storage, init_ro_array_normal_size)
 {
-    unsigned size = 5;
+    size_t size = 5;
     ro_array_t *a = init_ro_array(size);
 
-    cr_expect(a->size == size, "Expected the array size to be %u, but got %u",
+    cr_expect(a->size == size, "Expected the array size to be %zu, but got %zu",
               size, a->size);
-    cr_expect(!a->insert_index, "Expected the array size to be %u, but got %u",
+    cr_expect(!a->insert_index, "Expected the array size to be %u, but got %zu",
               0, a->insert_index);
     cr_expect(a->values,
               "Expected a->values to not be a null pointer, but it was");
@@ -45,13 +45,13 @@ Test(ro_json_storage, init_ro_array_normal_size)
 *******************************************************************************/
 Test(ro_json_storage, init_ro_dict_zero_size)
 {
-    unsigned size = 0;
+    size_t size = 0;
     ro_dict_t *d = init_ro_dict(size);
 
-    cr_expect(d->size == size, "Expected the dict size to be %u, but got %u",
+    cr_expect(d->size == size, "Expected the dict size to be %zu, but got %zu",
               size, d->size);
     cr_expect(!d->insert_index,
-              "Expected the dict 'insert_index' to be %u, but got %u", 0,
+              "Expected the dict 'insert_index' to be %u, but got %zu", 0,
               d->insert_index);
     cr_expect(!d->items, "Expected d->items to be a null pointer, but got '%p'",
               d->items);
@@ -61,13 +61,13 @@ Test(ro_json_storage, init_ro_dict_zero_size)
 
 Test(ro_json_storage, init_ro_dict_normal_size)
 {
-    unsigned size = 5;
+    size_t size = 5;
     ro_dict_t *d = init_ro_dict(size);
 
-    cr_expect(d->size == size, "Expected the dict size to be %u, but got %u",
+    cr_expect(d->size == size, "Expected the dict size to be %zu, but got %zu",
               size, d->size);
     cr_expect(!d->insert_index,
-              "Expected the dict 'insert_index' to be %u, but got %u", 0,
+              "Expected the dict 'insert_index' to be %u, but got %zu", 0,
               d->insert_index);
     cr_expect(d->items,
               "Expected d->items to not be a null pointer, but it was");
@@ -164,19 +164,19 @@ Test(ro_json_storage, init_ro_json_dict_nonnull)
     cr_expect(                                                                 \
         !a->insert_index,                                                      \
         "Expected the insert_index of the array to be 0 after the addition, "  \
-        "because the values field of the array is null (got '%u')",            \
+        "because the values field of the array is null (got '%zu')",           \
         a->insert_index);                                                      \
     destroy_ro_array(a)
 
 #define RO_ARRAY_ADD_TYPE_TEST_ADD_3_TYPE(ro_array_add_type, v1, v2, v3)       \
-    unsigned len = 3;                                                          \
+    size_t len = 3;                                                            \
     ro_array_t *a = init_ro_array(len);                                        \
     ro_array_add_type(a, v1);                                                  \
     ro_array_add_type(a, v2);                                                  \
     ro_array_add_type(a, v3);                                                  \
     cr_expect(a->insert_index == len,                                          \
-              "Expected the insert_index of the array to be %u after the "     \
-              "additions, but got '%u'",                                       \
+              "Expected the insert_index of the array to be %zu after the "    \
+              "additions, but got '%zu'",                                      \
               len, a->insert_index);                                           \
     destroy_ro_array(a)
 
@@ -255,22 +255,22 @@ Test(ro_json_storage, ro_array_add_null_array_null_values)
     cr_expect(
         !a->insert_index,
         "Expected the insert_index of the array to be 0 after the addition, "
-        "because the values field of the array is null (got '%u')",
+        "because the values field of the array is null (got '%zu')",
         a->insert_index);
     destroy_ro_array(a);
 }
 
 Test(ro_json_storage, ro_array_add_null_array_add_3)
 {
-    unsigned len = 3;
+    size_t len = 3;
     ro_array_t *a = init_ro_array(len);
     ro_array_add_null(a);
     ro_array_add_null(a);
     ro_array_add_null(a);
     cr_expect(a->insert_index == len,
-              "Expected the insert_index of the array to be %u after the "
+              "Expected the insert_index of the array to be %zu after the "
               "additions, "
-              "but got '%u'",
+              "but got '%zu'",
               len, a->insert_index);
     destroy_ro_array(a);
 }
@@ -284,20 +284,20 @@ Test(ro_json_storage, ro_array_add_null_array_add_3)
     cr_expect(                                                                 \
         !d->insert_index,                                                      \
         "Expected the insert_index of the dict to be 0 after the addition, "   \
-        "because the items field of the dict is null (got '%u')",              \
+        "because the items field of the dict is null (got '%zu')",             \
         d->insert_index);                                                      \
     destroy_ro_dict(d)
 
 #define RO_DICT_ADD_TYPE_TEST_ADD_3_TYPE(ro_dict_add_type, k1, k2, k3, v1, v2, \
                                          v3)                                   \
-    unsigned len = 3;                                                          \
+    size_t len = 3;                                                            \
     ro_dict_t *d = init_ro_dict(len);                                          \
     ro_dict_add_type(d, k1, v1);                                               \
     ro_dict_add_type(d, k2, v2);                                               \
     ro_dict_add_type(d, k3, v3);                                               \
     cr_expect(d->insert_index == len,                                          \
-              "Expected the insert_index of the dict to be %u after the "      \
-              "additions, but got '%u'",                                       \
+              "Expected the insert_index of the dict to be %zu after the "     \
+              "additions, but got '%zu'",                                      \
               len, d->insert_index);                                           \
     destroy_ro_dict(d)
 
@@ -390,21 +390,21 @@ Test(ro_json_storage, ro_dict_add_null_array_null_items)
     cr_expect(
         !d->insert_index,
         "Expected the insert_index of the dict to be 0 after the addition, "
-        "because the items field of the dict is null (got '%u')",
+        "because the items field of the dict is null (got '%zu')",
         d->insert_index);
     destroy_ro_dict(d);
 }
 
 Test(ro_json_storage, ro_dict_add_null_array_add_3)
 {
-    unsigned len = 3;
+    size_t len = 3;
     ro_dict_t *d = init_ro_dict(len);
     ro_dict_add_null(d, string_nofree_of("k1"));
     ro_dict_add_null(d, string_nofree_of("k2"));
     ro_dict_add_null(d, string_nofree_of("k3"));
     cr_expect(d->insert_index == len,
-              "Expected the insert_index of the dict to be %u after the "
-              "additions, but got '%u'",
+              "Expected the insert_index of the dict to be %zu after the "
+              "additions, but got '%zu'",
               len, d->insert_index);
     destroy_ro_dict(d);
 }
@@ -414,7 +414,7 @@ Test(ro_json_storage, ro_dict_add_null_array_add_3)
 *******************************************************************************/
 Test(ro_json_storage, ro_array_get_null_array)
 {
-    unsigned i = 5;
+    size_t i = 5;
     ro_value_t v = ro_array_get(0, i);
 
     cr_expect(v.type == T_ERROR,
@@ -424,7 +424,7 @@ Test(ro_json_storage, ro_array_get_null_array)
 
 Test(ro_json_storage, ro_array_get_empty)
 {
-    unsigned long idx = 0;
+    size_t idx = 0;
     char buff[] = "[]";
     ro_array_t *a = ro_parse_array_buff(buff, &idx);
     if (!a)
@@ -432,13 +432,13 @@ Test(ro_json_storage, ro_array_get_empty)
         return;
     }
 
-    unsigned i = 5;
+    size_t i = 5;
     ro_value_t v = ro_array_get(a, i);
 
     cr_expect(
         v.type == T_ERROR,
         "Expected the value to be of type T_ERROR because we tried to "
-        "get the value of index %u from an array of size 0, but it wasn't",
+        "get the value of index %zu from an array of size 0, but it wasn't",
         i);
 
     destroy_ro_array(a);
@@ -455,7 +455,7 @@ Test(ro_json_storage, ro_dict_get_null_dict)
 
 Test(ro_json_storage, ro_dict_get_empty)
 {
-    unsigned long idx = 0;
+    size_t idx = 0;
     char buff[] = "{}";
     ro_dict_t *d = ro_parse_dict_buff(buff, &idx);
     if (!d)
@@ -474,10 +474,12 @@ Test(ro_json_storage, ro_dict_get_empty)
     destroy_ro_dict(d);
 }
 
-char *ro_get_type_as_str(char type)
+char *ro_get_type_as_str(u8 type)
 {
     switch (type)
     {
+    case T_ERROR:
+        return "T_ERROR";
     case T_STR:
         return "T_STR";
     case T_LONG:
@@ -500,9 +502,9 @@ char *ro_get_type_as_str(char type)
     return "\0";
 }
 
-void ro_array_get_type(char *buff, char expected_type)
+void ro_array_get_type(char *buff, u8 expected_type)
 {
-    unsigned long idx = 0;
+    size_t idx = 0;
     ro_array_t *a = ro_parse_array_buff(buff, &idx);
     if (!a)
     {
@@ -573,9 +575,9 @@ Test(ro_json_storage, ro_array_get_dict)
     ro_array_get_type("[{\"key\":1}]", T_DICT);
 }
 
-void ro_dict_get_type(char *buff, char expected_type)
+void ro_dict_get_type(char *buff, u8 expected_type)
 {
-    unsigned long idx = 0;
+    size_t idx = 0;
     ro_dict_t *d = ro_parse_dict_buff(buff, &idx);
     if (!d)
     {

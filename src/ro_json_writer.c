@@ -8,14 +8,14 @@
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
-string_t get_ro_array_as_str(ro_array_t *a, unsigned indent);
-string_t get_ro_dict_as_str(ro_dict_t *d, unsigned indent);
+string_t get_ro_array_as_str(ro_array_t *a, u16 indent);
+string_t get_ro_dict_as_str(ro_dict_t *d, u16 indent);
 
 /**
 ** \returns The number of additional characters
 */
-unsigned fill_ro_string_ll_with_values(string_linked_list_t *ll, ro_array_t *a,
-                                       unsigned indent)
+size_t fill_ro_string_ll_with_values(string_linked_list_t *ll, ro_array_t *a,
+                                     u16 indent)
 {
     if (!ll || !a)
     {
@@ -25,8 +25,8 @@ unsigned fill_ro_string_ll_with_values(string_linked_list_t *ll, ro_array_t *a,
     // Iterates over each value of the array and converts them to
     // 'String's + counts the number of chars required for each value
     ro_value_t *values = a->values;
-    unsigned size = a->size;
-    unsigned total_size = size;
+    size_t size = a->size;
+    size_t total_size = size;
     ADD_VALUES_FOR_MODE(ro_value_t, get_ro_array_as_str, get_ro_dict_as_str);
     return nb;
 }
@@ -35,7 +35,7 @@ unsigned fill_ro_string_ll_with_values(string_linked_list_t *ll, ro_array_t *a,
 ** \returns The number of additional characters
 */
 unsigned fill_ro_string_ll_with_items(string_linked_list_t *ll, ro_dict_t *d,
-                                      unsigned indent)
+                                      u16 indent)
 {
     if (!ll || !d)
     {
@@ -45,8 +45,8 @@ unsigned fill_ro_string_ll_with_items(string_linked_list_t *ll, ro_dict_t *d,
     // Iterates over each value of the array and converts them to
     // 'String's + counts the number of chars required for each value
     ro_item_t *items = d->items;
-    unsigned size = d->size;
-    unsigned total_size = size;
+    size_t size = d->size;
+    size_t total_size = size;
     ADD_ITEMS_FOR_MODE(ro_item_t, get_ro_array_as_str, get_ro_dict_as_str);
     return nb;
 }
@@ -54,12 +54,12 @@ unsigned fill_ro_string_ll_with_items(string_linked_list_t *ll, ro_dict_t *d,
 /*******************************************************************************
 **                                GETS AS STR                                 **
 *******************************************************************************/
-string_t get_ro_array_as_str(ro_array_t *a, unsigned indent)
+string_t get_ro_array_as_str(ro_array_t *a, u16 indent)
 {
     GET_ARRAY_AS_STR(fill_ro_string_ll_with_values);
 }
 
-string_t get_ro_dict_as_str(ro_dict_t *d, unsigned indent)
+string_t get_ro_dict_as_str(ro_dict_t *d, u16 indent)
 {
     GET_DICT_AS_STR(fill_ro_string_ll_with_items);
 }

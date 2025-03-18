@@ -1,22 +1,30 @@
 -include Makefile.rules
 
 CC=gcc
-CFILES=src/*.c
+CFILESBASE=src/base_*.c src/validator.c
+CFILESRO=src/ro_*.c ro_main.c
+CFILESRW=src/rw_*.c rw_main.c
 
 TESTFILES=tests/*.c
 
 TARGET=json-parser
 
 all: clean $(TARGET)
-	./$(TARGET) t.json
+	./$(TARGET) err.json
 
 rw: clean
-	$(CC) $(CFLAGS) $(CFILES) rw_main.c -o $(TARGET)
+	$(CC) $(CFLAGS) $(CFILESBASE) $(CFILESRW) -o $(TARGET)
+	./$(TARGET) t.json
+
+# Makes the parse use stdint's 'least' types to use less memory, at the
+# potential cost of performance
+mem-least: clean
+	$(CC) $(CFLAGS) -DLEAST $(CFILESBASE) $(CFILESRO) -o $(TARGET)
 	./$(TARGET) t.json
 
 .PHONY:
 $(TARGET):
-	$(CC) $(CFLAGS) $(CFILES) ro_main.c -o $(TARGET)
+	$(CC) $(CFLAGS) $(CFILESBASE) $(CFILESRO) -o $(TARGET)
 
 clean:
 	if [ -f "$(TARGET)" ]; then rm $(TARGET); fi
@@ -25,7 +33,7 @@ clean:
 valgrind-compile: clean
 	$(CC) $(CFLAGS) \
 		-DVALGRING_DISABLE_PRINT \
-		$(CFILES) ro_main.c -o $(TARGET)
+		$(CFILESBASE) $(CFILESRO) -o $(TARGET) -g
 
 valgrind: valgrind-compile
 	valgrind --tool=callgrind --dump-instr=yes --simulate-cache=yes \
@@ -33,9 +41,9 @@ valgrind: valgrind-compile
 
 leaks: valgrind-compile
 	valgrind --leak-check=full --show-leak-kinds=all \
-         --track-origins=yes ./$(TARGET) t.json
+         --track-origins=yes ./$(TARGET) big.json
 
 check:
-	$(CC) $(CFLAGS) $(CFILES) $(TESTFILES) -o json-parser-tests -lcriterion
+	$(CC) $(CFLAGS) -DSEPVALIDATION src/*.c $(TESTFILES) -o json-parser-tests -lcriterion
 	./json-parser-tests
 

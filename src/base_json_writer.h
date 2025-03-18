@@ -16,8 +16,8 @@
 typedef struct str_link
 {
     string_t s;
-    char s_needs_free;
-    char is_from_str;
+    bool s_needs_free;
+    bool is_from_str;
     struct str_link *next;
 } string_link_t;
 
@@ -35,17 +35,15 @@ typedef struct
 // exactly the same thing, so this macros prevents duplicated code
 #define ADD_VALUES_FOR_MODE(rx_value_t, get_rx_array_as_str,                   \
                             get_rx_dict_as_str)                                \
-    unsigned nb = 0;                                                           \
-    for (unsigned i = 0; i < size; ++i)                                        \
+    size_t nb = 0;                                                             \
+    for (size_t i = 0; i < size; ++i)                                          \
     {                                                                          \
         rx_value_t v = values[i];                                              \
-        if (v.type == T_ERROR)                                                 \
-        {                                                                      \
-            continue;                                                          \
-        }                                                                      \
         string_t tmp_str;                                                      \
         switch (v.type)                                                        \
         {                                                                      \
+        case T_ERROR:                                                          \
+            continue;                                                          \
         case T_STR:                                                            \
             tmp_str = v.strv;                                                  \
             nb += 2; /* Strings are encased by 2 double-quotes (\"\") */       \
@@ -83,18 +81,16 @@ typedef struct
     }
 
 #define ADD_ITEMS_FOR_MODE(rx_item_t, get_rx_array_as_str, get_rx_dict_as_str) \
-    unsigned nb = 0;                                                           \
-    char is_key = 1;                                                           \
-    for (unsigned i = 0; i < size; ++i)                                        \
+    size_t nb = 0;                                                             \
+    u8 is_key = 1;                                                             \
+    for (size_t i = 0; i < size; ++i)                                          \
     {                                                                          \
         rx_item_t it = items[i];                                               \
-        if (it.type == T_ERROR)                                                \
-        {                                                                      \
-            continue;                                                          \
-        }                                                                      \
         string_t tmp_str;                                                      \
         switch (it.type)                                                       \
         {                                                                      \
+        case T_ERROR:                                                          \
+            continue;                                                          \
         case T_STR:                                                            \
             tmp_str = it.strv;                                                 \
             nb += 2; /* Strings are encased by 2 double-quotes (\"\") */       \
@@ -159,9 +155,9 @@ typedef struct
     /* indents are 4 spaces */                                                 \
     /* indent == 1 -> if we are in the 'root' array, we add a '\n' at the */   \
     /* end */                                                                  \
-    unsigned nb_chars = 2 + (indent - 1) * 4 + (indent == 1)                   \
+    size_t nb_chars = 2 + (indent - 1) * 4 + (indent == 1)                     \
         + fill_rx_string_ll_with_values(ll, a, indent);                        \
-    unsigned nb_chars_indent = indent * 4;                                     \
+    u32 nb_chars_indent = indent * 4;                                          \
     char *str = calloc(nb_chars + 1, sizeof(char));                            \
     if (!str)                                                                  \
     {                                                                          \
@@ -171,7 +167,7 @@ typedef struct
     /* |-> Start building the string */                                        \
     str[0] = '[';                                                              \
     str[1] = '\n';                                                             \
-    unsigned insert_idx = 2;                                                   \
+    size_t insert_idx = 2;                                                     \
     string_link_t *link = ll->head;                                            \
     while (link)                                                               \
     {                                                                          \
@@ -235,9 +231,9 @@ typedef struct
     }                                                                          \
     /* '{' + '\n' + (indent - 1) * '\t' + '}' + '\n'*/                         \
     /* indent == 1 -> if we are in the 'root' dict, we add a \n at the end */  \
-    unsigned nb_chars = 2 + (indent - 1) * 4 + (indent == 1)                   \
+    size_t nb_chars = 2 + (indent - 1) * 4 + (indent == 1)                     \
         + fill_rx_string_ll_with_items(ll, d, indent);                         \
-    unsigned nb_chars_indent = indent * 4;                                     \
+    u32 nb_chars_indent = indent * 4;                                          \
     char *str = calloc(nb_chars + 1, sizeof(char));                            \
     if (!str)                                                                  \
     {                                                                          \
@@ -247,8 +243,8 @@ typedef struct
     /* |-> Start building the string */                                        \
     str[0] = '{';                                                              \
     str[1] = '\n';                                                             \
-    unsigned insert_idx = 2;                                                   \
-    char is_key = 1;                                                           \
+    size_t insert_idx = 2;                                                     \
+    u8 is_key = 1;                                                             \
     string_link_t *link = ll->head;                                            \
     while (link)                                                               \
     {                                                                          \
@@ -326,17 +322,17 @@ typedef struct
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
-unsigned get_nb_char_long(long n);
+u8 get_nb_char_long(i64 n);
 
-string_t get_long_as_str(long value);
+string_t get_long_as_str(i64 value);
 string_t get_double_as_str(double value);
-string_t get_exp_long_as_str(exponent_long_t value);
-string_t get_exp_double_as_str(exponent_double_t value);
-string_t get_bool_as_str(char value);
+string_t get_exp_long_as_str(exp_long_t value);
+string_t get_exp_double_as_str(exp_double_t value);
+string_t get_bool_as_str(u8 value);
 string_t get_null_as_str();
 
-void add_link(string_linked_list_t *ll, string_t str, char str_needs_free,
-              char is_from_str);
+void add_link(string_linked_list_t *ll, string_t str, bool str_needs_free,
+              bool is_from_str);
 void destroy_linked_list(string_linked_list_t *ll);
 
 #endif // !BASE_JSON_WRITER_H

@@ -6,9 +6,9 @@
 /*******************************************************************************
 **                                ARRAYS_EQUAL                                **
 *******************************************************************************/
-void rw_test_arrays_equal(rw_array_t *a, rw_array_t *b, char expected_is_equal)
+void rw_test_arrays_equal(rw_array_t *a, rw_array_t *b, bool expected_is_equal)
 {
-    char is_equal = rw_arrays_equal(a, b);
+    bool is_equal = rw_arrays_equal(a, b);
 
     cr_expect(is_equal == expected_is_equal,
               "Expected arrays_equal(a, b) to be %s, but it was %s",
@@ -36,8 +36,8 @@ Test(rw_equality, arrays_equal_true)
     rw_array_add_exp_double(a, EXP_DOUBLE_OF(1.25563, 5));
     rw_array_add_exp_double(b, EXP_DOUBLE_OF(1.25563, 5));
 
-    rw_array_add_bool(a, 0);
-    rw_array_add_bool(b, 0);
+    rw_array_add_bool(a, false);
+    rw_array_add_bool(b, false);
 
     rw_array_add_null(a);
     rw_array_add_null(b);
@@ -48,7 +48,7 @@ Test(rw_equality, arrays_equal_true)
     rw_array_add_dict(a, init_rw_dict());
     rw_array_add_dict(b, init_rw_dict());
 
-    rw_test_arrays_equal(a, b, 1);
+    rw_test_arrays_equal(a, b, true);
 
     destroy_rw_array(a);
     destroy_rw_array(b);
@@ -74,8 +74,8 @@ Test(rw_equality, arrays_equal_diff_size_returns_false)
     rw_array_add_exp_double(a, EXP_DOUBLE_OF(1.25563, 5));
     rw_array_add_exp_double(b, EXP_DOUBLE_OF(1.25563, 5));
 
-    rw_array_add_bool(a, 0);
-    rw_array_add_bool(b, 0);
+    rw_array_add_bool(a, false);
+    rw_array_add_bool(b, false);
 
     rw_array_add_null(a);
     rw_array_add_null(b);
@@ -85,7 +85,7 @@ Test(rw_equality, arrays_equal_diff_size_returns_false)
 
     rw_array_add_dict(a, init_rw_dict());
 
-    rw_test_arrays_equal(a, b, 0);
+    rw_test_arrays_equal(a, b, false);
 
     destroy_rw_array(a);
     destroy_rw_array(b);
@@ -111,8 +111,8 @@ Test(rw_equality, arrays_equal_diff_strings_returns_false)
     rw_array_add_exp_double(a, EXP_DOUBLE_OF(1.25563, 5));
     rw_array_add_exp_double(b, EXP_DOUBLE_OF(1.25563, 5));
 
-    rw_array_add_bool(a, 0);
-    rw_array_add_bool(b, 0);
+    rw_array_add_bool(a, false);
+    rw_array_add_bool(b, false);
 
     rw_array_add_null(a);
     rw_array_add_null(b);
@@ -123,7 +123,7 @@ Test(rw_equality, arrays_equal_diff_strings_returns_false)
     rw_array_add_dict(a, init_rw_dict());
     rw_array_add_dict(b, init_rw_dict());
 
-    rw_test_arrays_equal(a, b, 0);
+    rw_test_arrays_equal(a, b, false);
 
     destroy_rw_array(a);
     destroy_rw_array(b);
@@ -149,8 +149,8 @@ Test(rw_equality, arrays_equal_diff_longs_returns_false)
     rw_array_add_exp_double(a, EXP_DOUBLE_OF(1.25563, 5));
     rw_array_add_exp_double(b, EXP_DOUBLE_OF(1.25563, 5));
 
-    rw_array_add_bool(a, 0);
-    rw_array_add_bool(b, 0);
+    rw_array_add_bool(a, false);
+    rw_array_add_bool(b, false);
 
     rw_array_add_null(a);
     rw_array_add_null(b);
@@ -161,7 +161,7 @@ Test(rw_equality, arrays_equal_diff_longs_returns_false)
     rw_array_add_dict(a, init_rw_dict());
     rw_array_add_dict(b, init_rw_dict());
 
-    rw_test_arrays_equal(a, b, 0);
+    rw_test_arrays_equal(a, b, false);
 
     destroy_rw_array(a);
     destroy_rw_array(b);
@@ -187,8 +187,8 @@ Test(rw_equality, arrays_equal_diff_doubles_returns_false)
     rw_array_add_exp_double(a, EXP_DOUBLE_OF(1.25563, 5));
     rw_array_add_exp_double(b, EXP_DOUBLE_OF(1.25563, 5));
 
-    rw_array_add_bool(a, 0);
-    rw_array_add_bool(b, 0);
+    rw_array_add_bool(a, false);
+    rw_array_add_bool(b, false);
 
     rw_array_add_null(a);
     rw_array_add_null(b);
@@ -199,7 +199,7 @@ Test(rw_equality, arrays_equal_diff_doubles_returns_false)
     rw_array_add_dict(a, init_rw_dict());
     rw_array_add_dict(b, init_rw_dict());
 
-    rw_test_arrays_equal(a, b, 0);
+    rw_test_arrays_equal(a, b, false);
 
     destroy_rw_array(a);
     destroy_rw_array(b);
@@ -225,8 +225,8 @@ Test(rw_equality, arrays_equal_diff_exp_longs_returns_false)
     rw_array_add_exp_double(a, EXP_DOUBLE_OF(1.25563, 5));
     rw_array_add_exp_double(b, EXP_DOUBLE_OF(1.25563, 5));
 
-    rw_array_add_bool(a, 0);
-    rw_array_add_bool(b, 0);
+    rw_array_add_bool(a, false);
+    rw_array_add_bool(b, false);
 
     rw_array_add_null(a);
     rw_array_add_null(b);
@@ -237,7 +237,7 @@ Test(rw_equality, arrays_equal_diff_exp_longs_returns_false)
     rw_array_add_dict(a, init_rw_dict());
     rw_array_add_dict(b, init_rw_dict());
 
-    rw_test_arrays_equal(a, b, 0);
+    rw_test_arrays_equal(a, b, false);
 
     destroy_rw_array(a);
     destroy_rw_array(b);
@@ -263,8 +263,8 @@ Test(rw_equality, arrays_equal_diff_exp_doubles_returns_false)
     rw_array_add_exp_double(a, EXP_DOUBLE_OF(1.2556, 5));
     rw_array_add_exp_double(b, EXP_DOUBLE_OF(1.25563, 5));
 
-    rw_array_add_bool(a, 0);
-    rw_array_add_bool(b, 0);
+    rw_array_add_bool(a, false);
+    rw_array_add_bool(b, false);
 
     rw_array_add_null(a);
     rw_array_add_null(b);
@@ -275,7 +275,7 @@ Test(rw_equality, arrays_equal_diff_exp_doubles_returns_false)
     rw_array_add_dict(a, init_rw_dict());
     rw_array_add_dict(b, init_rw_dict());
 
-    rw_test_arrays_equal(a, b, 0);
+    rw_test_arrays_equal(a, b, false);
 
     destroy_rw_array(a);
     destroy_rw_array(b);
@@ -301,8 +301,8 @@ Test(rw_equality, arrays_equal_diff_bools_returns_false)
     rw_array_add_exp_double(a, EXP_DOUBLE_OF(1.25563, 5));
     rw_array_add_exp_double(b, EXP_DOUBLE_OF(1.25563, 5));
 
-    rw_array_add_bool(a, 0);
-    rw_array_add_bool(b, 1);
+    rw_array_add_bool(a, false);
+    rw_array_add_bool(b, true);
 
     rw_array_add_null(a);
     rw_array_add_null(b);
@@ -313,7 +313,7 @@ Test(rw_equality, arrays_equal_diff_bools_returns_false)
     rw_array_add_dict(a, init_rw_dict());
     rw_array_add_dict(b, init_rw_dict());
 
-    rw_test_arrays_equal(a, b, 0);
+    rw_test_arrays_equal(a, b, false);
 
     destroy_rw_array(a);
     destroy_rw_array(b);
@@ -339,8 +339,8 @@ Test(rw_equality, arrays_equal_diff_arrays_returns_false)
     rw_array_add_exp_double(a, EXP_DOUBLE_OF(1.25563, 5));
     rw_array_add_exp_double(b, EXP_DOUBLE_OF(1.25563, 5));
 
-    rw_array_add_bool(a, 0);
-    rw_array_add_bool(b, 0);
+    rw_array_add_bool(a, false);
+    rw_array_add_bool(b, false);
 
     rw_array_add_null(a);
     rw_array_add_null(b);
@@ -350,7 +350,7 @@ Test(rw_equality, arrays_equal_diff_arrays_returns_false)
     rw_array_add_dict(a, init_rw_dict());
     rw_array_add_dict(b, init_rw_dict());
 
-    rw_test_arrays_equal(a, b, 0);
+    rw_test_arrays_equal(a, b, false);
 
     destroy_rw_array(a);
     destroy_rw_array(b);
@@ -376,8 +376,8 @@ Test(rw_equality, arrays_equal_diff_dicts_returns_false)
     rw_array_add_exp_double(a, EXP_DOUBLE_OF(1.25563, 5));
     rw_array_add_exp_double(b, EXP_DOUBLE_OF(1.25563, 5));
 
-    rw_array_add_bool(a, 0);
-    rw_array_add_bool(b, 0);
+    rw_array_add_bool(a, false);
+    rw_array_add_bool(b, false);
 
     rw_array_add_null(a);
     rw_array_add_null(b);
@@ -387,7 +387,7 @@ Test(rw_equality, arrays_equal_diff_dicts_returns_false)
 
     rw_array_add_dict(b, init_rw_dict());
 
-    rw_test_arrays_equal(a, b, 0);
+    rw_test_arrays_equal(a, b, false);
 
     destroy_rw_array(a);
     destroy_rw_array(b);
@@ -396,9 +396,9 @@ Test(rw_equality, arrays_equal_diff_dicts_returns_false)
 /*******************************************************************************
 **                                 DICTS_EQUAL **
 *******************************************************************************/
-void rw_test_dicts_equal(rw_dict_t *a, rw_dict_t *b, char expected_is_equal)
+void rw_test_dicts_equal(rw_dict_t *a, rw_dict_t *b, bool expected_is_equal)
 {
-    char is_equal = rw_dicts_equal(a, b);
+    bool is_equal = rw_dicts_equal(a, b);
 
     cr_expect(is_equal == expected_is_equal,
               "Expected dicts_equal(a, b) to be %s, but it was %s",
@@ -428,8 +428,8 @@ Test(rw_equality, dicts_equal_true)
     rw_dict_add_exp_double(b, string_nofree_of("expd"),
                            EXP_DOUBLE_OF(1.25563, 5));
 
-    rw_dict_add_bool(a, string_nofree_of("bool"), 0);
-    rw_dict_add_bool(b, string_nofree_of("bool"), 0);
+    rw_dict_add_bool(a, string_nofree_of("bool"), false);
+    rw_dict_add_bool(b, string_nofree_of("bool"), false);
 
     rw_dict_add_null(a, string_nofree_of(""));
     rw_dict_add_null(b, string_nofree_of(""));
@@ -440,7 +440,7 @@ Test(rw_equality, dicts_equal_true)
     rw_dict_add_dict(a, string_nofree_of("dict"), init_rw_dict());
     rw_dict_add_dict(b, string_nofree_of("dict"), init_rw_dict());
 
-    rw_test_dicts_equal(a, b, 1);
+    rw_test_dicts_equal(a, b, true);
 
     destroy_rw_dict(a);
     destroy_rw_dict(b);
@@ -468,8 +468,8 @@ Test(rw_equality, dicts_equal_diff_strings)
     rw_dict_add_exp_double(b, string_nofree_of("expd"),
                            EXP_DOUBLE_OF(1.25563, 5));
 
-    rw_dict_add_bool(a, string_nofree_of("bool"), 0);
-    rw_dict_add_bool(b, string_nofree_of("bool"), 0);
+    rw_dict_add_bool(a, string_nofree_of("bool"), false);
+    rw_dict_add_bool(b, string_nofree_of("bool"), false);
 
     rw_dict_add_null(a, string_nofree_of(""));
     rw_dict_add_null(b, string_nofree_of(""));
@@ -480,7 +480,7 @@ Test(rw_equality, dicts_equal_diff_strings)
     rw_dict_add_dict(a, string_nofree_of("dict"), init_rw_dict());
     rw_dict_add_dict(b, string_nofree_of("dict"), init_rw_dict());
 
-    rw_test_dicts_equal(a, b, 0);
+    rw_test_dicts_equal(a, b, false);
 
     destroy_rw_dict(a);
     destroy_rw_dict(b);
@@ -508,8 +508,8 @@ Test(rw_equality, dicts_equal_diff_longs)
     rw_dict_add_exp_double(b, string_nofree_of("expd"),
                            EXP_DOUBLE_OF(1.25563, 5));
 
-    rw_dict_add_bool(a, string_nofree_of("bool"), 0);
-    rw_dict_add_bool(b, string_nofree_of("bool"), 0);
+    rw_dict_add_bool(a, string_nofree_of("bool"), false);
+    rw_dict_add_bool(b, string_nofree_of("bool"), false);
 
     rw_dict_add_null(a, string_nofree_of(""));
     rw_dict_add_null(b, string_nofree_of(""));
@@ -520,7 +520,7 @@ Test(rw_equality, dicts_equal_diff_longs)
     rw_dict_add_dict(a, string_nofree_of("dict"), init_rw_dict());
     rw_dict_add_dict(b, string_nofree_of("dict"), init_rw_dict());
 
-    rw_test_dicts_equal(a, b, 0);
+    rw_test_dicts_equal(a, b, false);
 
     destroy_rw_dict(a);
     destroy_rw_dict(b);
@@ -548,8 +548,8 @@ Test(rw_equality, dicts_equal_diff_doubles)
     rw_dict_add_exp_double(b, string_nofree_of("expd"),
                            EXP_DOUBLE_OF(1.25563, 5));
 
-    rw_dict_add_bool(a, string_nofree_of("bool"), 0);
-    rw_dict_add_bool(b, string_nofree_of("bool"), 0);
+    rw_dict_add_bool(a, string_nofree_of("bool"), false);
+    rw_dict_add_bool(b, string_nofree_of("bool"), false);
 
     rw_dict_add_null(a, string_nofree_of(""));
     rw_dict_add_null(b, string_nofree_of(""));
@@ -560,7 +560,7 @@ Test(rw_equality, dicts_equal_diff_doubles)
     rw_dict_add_dict(a, string_nofree_of("dict"), init_rw_dict());
     rw_dict_add_dict(b, string_nofree_of("dict"), init_rw_dict());
 
-    rw_test_dicts_equal(a, b, 0);
+    rw_test_dicts_equal(a, b, false);
 
     destroy_rw_dict(a);
     destroy_rw_dict(b);
@@ -588,8 +588,8 @@ Test(rw_equality, dicts_equal_diff_exp_longs)
     rw_dict_add_exp_double(b, string_nofree_of("expd"),
                            EXP_DOUBLE_OF(1.25563, 5));
 
-    rw_dict_add_bool(a, string_nofree_of("bool"), 0);
-    rw_dict_add_bool(b, string_nofree_of("bool"), 0);
+    rw_dict_add_bool(a, string_nofree_of("bool"), false);
+    rw_dict_add_bool(b, string_nofree_of("bool"), false);
 
     rw_dict_add_null(a, string_nofree_of(""));
     rw_dict_add_null(b, string_nofree_of(""));
@@ -600,7 +600,7 @@ Test(rw_equality, dicts_equal_diff_exp_longs)
     rw_dict_add_dict(a, string_nofree_of("dict"), init_rw_dict());
     rw_dict_add_dict(b, string_nofree_of("dict"), init_rw_dict());
 
-    rw_test_dicts_equal(a, b, 0);
+    rw_test_dicts_equal(a, b, false);
 
     destroy_rw_dict(a);
     destroy_rw_dict(b);
@@ -628,8 +628,8 @@ Test(rw_equality, dicts_equal_diff_exp_doubles)
     rw_dict_add_exp_double(b, string_nofree_of("expd"),
                            EXP_DOUBLE_OF(0.25563, 5));
 
-    rw_dict_add_bool(a, string_nofree_of("bool"), 0);
-    rw_dict_add_bool(b, string_nofree_of("bool"), 0);
+    rw_dict_add_bool(a, string_nofree_of("bool"), false);
+    rw_dict_add_bool(b, string_nofree_of("bool"), false);
 
     rw_dict_add_null(a, string_nofree_of(""));
     rw_dict_add_null(b, string_nofree_of(""));
@@ -640,7 +640,7 @@ Test(rw_equality, dicts_equal_diff_exp_doubles)
     rw_dict_add_dict(a, string_nofree_of("dict"), init_rw_dict());
     rw_dict_add_dict(b, string_nofree_of("dict"), init_rw_dict());
 
-    rw_test_dicts_equal(a, b, 0);
+    rw_test_dicts_equal(a, b, false);
 
     destroy_rw_dict(a);
     destroy_rw_dict(b);
@@ -668,8 +668,8 @@ Test(rw_equality, dicts_equal_diff_bools)
     rw_dict_add_exp_double(b, string_nofree_of("expd"),
                            EXP_DOUBLE_OF(1.25563, 5));
 
-    rw_dict_add_bool(a, string_nofree_of("bool"), 1);
-    rw_dict_add_bool(b, string_nofree_of("bool"), 0);
+    rw_dict_add_bool(a, string_nofree_of("bool"), true);
+    rw_dict_add_bool(b, string_nofree_of("bool"), false);
 
     rw_dict_add_null(a, string_nofree_of(""));
     rw_dict_add_null(b, string_nofree_of(""));
@@ -680,7 +680,7 @@ Test(rw_equality, dicts_equal_diff_bools)
     rw_dict_add_dict(a, string_nofree_of("dict"), init_rw_dict());
     rw_dict_add_dict(b, string_nofree_of("dict"), init_rw_dict());
 
-    rw_test_dicts_equal(a, b, 0);
+    rw_test_dicts_equal(a, b, false);
 
     destroy_rw_dict(a);
     destroy_rw_dict(b);
@@ -708,8 +708,8 @@ Test(rw_equality, dicts_equal_diff_arrays)
     rw_dict_add_exp_double(b, string_nofree_of("expd"),
                            EXP_DOUBLE_OF(1.25563, 5));
 
-    rw_dict_add_bool(a, string_nofree_of("bool"), 0);
-    rw_dict_add_bool(b, string_nofree_of("bool"), 0);
+    rw_dict_add_bool(a, string_nofree_of("bool"), false);
+    rw_dict_add_bool(b, string_nofree_of("bool"), false);
 
     rw_dict_add_null(a, string_nofree_of(""));
     rw_dict_add_null(b, string_nofree_of(""));
@@ -719,7 +719,7 @@ Test(rw_equality, dicts_equal_diff_arrays)
     rw_dict_add_dict(a, string_nofree_of("dict"), init_rw_dict());
     rw_dict_add_dict(b, string_nofree_of("dict"), init_rw_dict());
 
-    rw_test_dicts_equal(a, b, 0);
+    rw_test_dicts_equal(a, b, false);
 
     destroy_rw_dict(a);
     destroy_rw_dict(b);
@@ -747,8 +747,8 @@ Test(rw_equality, dicts_equal_diff_dicts)
     rw_dict_add_exp_double(b, string_nofree_of("expd"),
                            EXP_DOUBLE_OF(1.25563, 5));
 
-    rw_dict_add_bool(a, string_nofree_of("bool"), 0);
-    rw_dict_add_bool(b, string_nofree_of("bool"), 0);
+    rw_dict_add_bool(a, string_nofree_of("bool"), false);
+    rw_dict_add_bool(b, string_nofree_of("bool"), false);
 
     rw_dict_add_null(a, string_nofree_of(""));
     rw_dict_add_null(b, string_nofree_of(""));
@@ -758,7 +758,7 @@ Test(rw_equality, dicts_equal_diff_dicts)
 
     rw_dict_add_dict(a, string_nofree_of("dict"), init_rw_dict());
 
-    rw_test_dicts_equal(a, b, 0);
+    rw_test_dicts_equal(a, b, false);
 
     destroy_rw_dict(a);
     destroy_rw_dict(b);

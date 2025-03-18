@@ -8,6 +8,152 @@ This parser has 2 modes: **read-only** and **read-write**, which will be refered
 > [!WARNING]\
 > This parser does not sanitize the content it reads (for now, at least). Use at your own risk.
 
+
+## Usage
+
+If you want to use this parser in your C code, put the source and header files of this project in yours :
+
+> The third line is to rename the directory
+
+```shell
+cp -r JsonParser/src/ <your_code_directory>
+cd <your_code_directory>
+mv src/ json-parser/
+```
+
+
+> Notice how each struct (json, array, dict, value, item) or the parse function is prefixed with `ro`. For read-write mode, they will be prefixed by `rw`
+
+To read a json file in `ro` mode, call the `ro_parse()` function :
+```c
+ro_json_t *j = ro_parse(file_path);
+// Once you have this ro_json_t struct pointer, you first have to check whether it is an array or a dict :
+if (IS_ARRAY(j))
+{
+    ro_array_ *a = j->array;
+    // Do stuff with the array
+}
+else if (IS_DICT(j))
+{
+    ro_dict_t *d = j->dict;
+    // Do stuff with the dict
+}
+```
+
+The arrays contains `ro_value_t` elements, while the dicts contain `ro_item_t` elements :
+
+> Also note the usage of `string_t`, it is a simple typedef struct
+
+<center>
+<table>
+<tr>
+<th>ro_value_t</th>
+<th>ro_item_t</th>
+<th>string_t</th>
+</tr>
+<tr>
+<td>
+
+```c
+typedef struct
+{
+    u8 type;
+    union
+    {
+        string_t strv;
+        i64 longv;
+        double doublev;
+        exp_long_t exp_longv;
+        exp_double_t exp_doublev;
+        bool boolv;
+        ro_array_t *arrayv;
+        ro_dict_t *dictv;
+    };
+} ro_value_t;
+```
+
+</td>
+<td>
+
+```c
+typedef struct
+{
+    u8 type;
+    string_t key;
+    union
+    {
+        string_t strv;
+        i64 longv;
+        double doublev;
+        exp_long_t exp_longv;
+        exp_double_t exp_doublev;
+        bool boolv;
+        ro_array_t *arrayv;
+        ro_dict_t *dictv;
+    };
+} ro_item_t;
+```
+
+</td>
+<td>
+
+```c
+typedef struct
+{
+    char *str;
+    size_t len;
+    bool needs_freeing;
+} string_t;
+```
+
+</td>
+</tr>
+</table>
+</center>
+
+To access the elements of the array or dict :
+
+```c
+ro_value_t v = ro_array_get(a, index); // For arrays
+ro_item_t it = ro_dict_get(d, key); // For dicts
+
+// Next we have to check what the type of the value is :
+switch (v.type)
+{
+case T_ERROR:
+    // Handle error
+    break;
+case T_STR:
+    // Do stuff with string
+    break;
+case T_LONG:
+    // Do stuff with number
+    break;
+case T_DOUBLE:
+    // Do stuff with double
+    break;
+case T_EXP_LONG:
+    // Do stuff with exponent number
+    break;
+case T_EXP_DOUBLE:
+    // Do stuff with exponent double
+    break;
+case T_BOOL:
+    // Do stuff with boolean
+    break;
+case T_NULL:
+    // Do stuff with null
+    break;
+case T_ARR:
+    // Do stuff with array
+    break;
+case T_DICT:
+    // Do stuff with dict
+    break;
+}
+```
+
+
 ## Build
 
 To build the program, first clone it from GitHub :
@@ -64,143 +210,3 @@ Defines the maximum number of nested dict objects (defaults to `UINT_FAST8_MAX`)
 
 If you want to change this, you can use the following additional flags
 `-DMAX_NESTED_DICTS=<your_value>`
-
-
-## Usage
-
-If you want to use this parser in your C code, put the source and header files of this project in yours :
-
-> The third line is to rename the directory
-
-```shell
-cp -r JsonParser/src/ <your_code_directory>
-cd <your_code_directory>
-mv src/ json-parser/
-```
-
-
-> Notice how each struct (json, array, dict, value, item) or the parse function is prefixed with `ro`. For read-write mode, they will be prefixed by `rw`
-
-To read a json file in `ro` mode, call the `ro_parse()` function :
-```c
-ro_json_t *j = ro_parse(file_path);
-// Once you have this ro_json_t struct pointer, you first have to check whether it is an array or a dict :
-if (IS_ARRAY(j))
-{
-    ro_array_ *a = j->array;
-    // Do stuff with the array
-}
-else if (IS_DICT(j))
-{
-    ro_dict_t *d = j->dict;
-    // Do stuff with the dict
-}
-```
-
-The arrays contains `ro_value_t` elements, while the dicts contain `ro_item_t` elements :
-
-> Also note the usage of `string_t`, it is a simple typedef struct
-
-<center>
-<table>
-<tr>
-<th>ro_value_t</th>
-<th>ro_item_t</th>
-<th>string_t</th>
-</tr>
-<tr>
-<td>
-
-```c
-typedef struct
-{
-    char type;
-    union
-    {
-        string_t strv;
-        int intv;
-        double doublev;
-        char boolv;
-        ro_array_t *arrayv;
-        ro_dict_t *dictv;
-    };
-} ro_value_t;
-```
-
-</td>
-<td>
-
-```c
-typedef struct
-{
-    char type;
-    string_t key;
-    union
-    {
-        string_t strv;
-        int intv;
-        double doublev;
-        char boolv;
-        ro_array_t *arrayv;
-        ro_dict_t *dictv;
-    };
-} ro_item_t;
-```
-
-</td>
-<td>
-
-```c
-typedef struct
-{
-    char *str;
-    unsigned length;
-} string_t;
-```
-
-</td>
-</tr>
-</table>
-</center>
-
-To access the elements of the array or dict :
-
-```c
-// For arrays
-ro_value_t v = array_get(a, index);
-
-// For dicts
-ro_item_t it = dict_get(d, key);
-
-// The rest is the same for both, except that the arrays don't have keys
-if (v.type == T_ERROR)
-{
-    // Handle error
-}
-// Next we have to check what the type of the value is :
-switch (v.type)
-{
-case T_STR:
-    // Do stuff with string
-    break;
-case T_INT:
-    // Do stuff with integer
-    break;
-case T_DOUBLE:
-    // Do stuff with double
-    break;
-case T_BOOL:
-    // Do stuff with boolean
-    break;
-case T_NULL:
-    // Do stuff with null
-    break;
-case T_ARR:
-    // Do stuff with array
-    break;
-case T_DICT:
-    // Do stuff with dict
-    break;
-}
-```
-

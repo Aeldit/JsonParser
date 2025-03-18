@@ -7,7 +7,7 @@ CFLAGS="-W -Wall -Werror -std=c11 -pedantic"
 if [ $# -eq 1 ]; then
 	if [ -z "${1##*"S"*}" ]; then
 		DEBUG=1
-		CFLAGS="$CFLAGS -fsanitize=address"
+		CFLAGS="$CFLAGS -fsanitize=address -g"
 	fi
 	if [ -z "${1##*"D"*}" ]; then
 		DEBUG=1

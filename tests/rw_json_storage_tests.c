@@ -11,10 +11,10 @@
 *******************************************************************************/
 Test(rw_json_storage, init_rw_array_zero_size)
 {
-    unsigned size = 0;
+    size_t size = 0;
     rw_array_t *a = init_rw_array();
 
-    cr_expect(a->size == size, "Expected the array size to be %u, but got %u",
+    cr_expect(a->size == size, "Expected the array size to be %zu, but got %zu",
               size, a->size);
     cr_expect(!a->head, "Expected a->head to be a null pointer, but got '%p'",
               a->head);
@@ -24,7 +24,7 @@ Test(rw_json_storage, init_rw_array_zero_size)
 
 Test(rw_json_storage, init_rw_array_normal_size)
 {
-    unsigned size = 5;
+    size_t size = 5;
     rw_array_t *a = init_rw_array();
     rw_array_add_bool(a, 1);
     rw_array_add_bool(a, 1);
@@ -32,7 +32,7 @@ Test(rw_json_storage, init_rw_array_normal_size)
     rw_array_add_bool(a, 1);
     rw_array_add_bool(a, 1);
 
-    cr_expect(a->size == size, "Expected the array size to be %u, but got %u",
+    cr_expect(a->size == size, "Expected the array size to be %zu, but got %zu",
               size, a->size);
     cr_expect(a->head,
               "Expected a->values to be a valid pointer, but it was null");
@@ -45,10 +45,10 @@ Test(rw_json_storage, init_rw_array_normal_size)
 *******************************************************************************/
 Test(rw_json_storage, init_rw_dict_zero_size)
 {
-    unsigned size = 0;
+    size_t size = 0;
     rw_dict_t *d = init_rw_dict();
 
-    cr_expect(d->size == size, "Expected the dict size to be %u, but got %u",
+    cr_expect(d->size == size, "Expected the dict size to be %zu, but got %zu",
               size, d->size);
     cr_expect(!d->head, "Expected d->head to be a null pointer, but got '%p'",
               d->head);
@@ -58,15 +58,15 @@ Test(rw_json_storage, init_rw_dict_zero_size)
 
 Test(rw_json_storage, init_rw_dict_normal_size)
 {
-    unsigned size = 5;
+    size_t size = 5;
     rw_dict_t *d = init_rw_dict();
-    rw_dict_add_bool(d, string_nofree_of("1"), 1);
-    rw_dict_add_bool(d, string_nofree_of("2"), 1);
-    rw_dict_add_bool(d, string_nofree_of("3"), 1);
-    rw_dict_add_bool(d, string_nofree_of("4"), 1);
-    rw_dict_add_bool(d, string_nofree_of("5"), 1);
+    rw_dict_add_bool(d, string_nofree_of("1"), true);
+    rw_dict_add_bool(d, string_nofree_of("2"), true);
+    rw_dict_add_bool(d, string_nofree_of("3"), true);
+    rw_dict_add_bool(d, string_nofree_of("4"), true);
+    rw_dict_add_bool(d, string_nofree_of("5"), true);
 
-    cr_expect(d->size == size, "Expected the dict size to be %u, but got %u",
+    cr_expect(d->size == size, "Expected the dict size to be %zu, but got %zu",
               size, d->size);
     cr_expect(d->head,
               "Expected d->items to be a valid pointer, but it was null");
@@ -158,14 +158,14 @@ Test(rw_json_storage, init_rw_json_dict_nonnull)
 **                                  ARRAY ADDS                                **
 *******************************************************************************/
 #define RW_ARRAY_ADD_TYPE_TEST_ADD_3_TYPE(rw_array_add_type, v1, v2, v3)       \
-    unsigned len = 3;                                                          \
+    size_t len = 3;                                                            \
     rw_array_t *a = init_rw_array();                                           \
     rw_array_add_type(a, v1);                                                  \
     rw_array_add_type(a, v2);                                                  \
     rw_array_add_type(a, v3);                                                  \
     cr_expect(a->size == len,                                                  \
-              "Expected the insert_index of the array to be %u after the "     \
-              "additions, but got '%u'",                                       \
+              "Expected the insert_index of the array to be %zu after the "    \
+              "additions, but got '%zu'",                                      \
               len, a->size);                                                   \
     destroy_rw_array(a)
 
@@ -206,15 +206,15 @@ Test(rw_json_storage, rw_array_add_bool_array_add_3)
 
 Test(rw_json_storage, rw_array_add_null_array_add_3)
 {
-    unsigned len = 3;
+    size_t len = 3;
     rw_array_t *a = init_rw_array();
     rw_array_add_null(a);
     rw_array_add_null(a);
     rw_array_add_null(a);
     cr_expect(a->size == len,
-              "Expected the insert_index of the array to be %u after the "
+              "Expected the insert_index of the array to be %zu after the "
               "additions, "
-              "but got '%u'",
+              "but got '%zu'",
               len, a->size);
     destroy_rw_array(a);
 }
@@ -224,14 +224,14 @@ Test(rw_json_storage, rw_array_add_null_array_add_3)
 *******************************************************************************/
 #define RW_DICT_ADD_TYPE_TEST_ADD_3_TYPE(rw_dict_add_type, k1, k2, k3, v1, v2, \
                                          v3)                                   \
-    unsigned len = 3;                                                          \
+    size_t len = 3;                                                            \
     rw_dict_t *d = init_rw_dict();                                             \
     rw_dict_add_type(d, k1, v1);                                               \
     rw_dict_add_type(d, k2, v2);                                               \
     rw_dict_add_type(d, k3, v3);                                               \
     cr_expect(d->size == len,                                                  \
-              "Expected the insert_index of the dict to be %u after the "      \
-              "additions, but got '%u'",                                       \
+              "Expected the insert_index of the dict to be %zu after the "     \
+              "additions, but got '%zu'",                                      \
               len, d->size);                                                   \
     destroy_rw_dict(d)
 
@@ -282,14 +282,14 @@ Test(rw_json_storage, ro_dict_add_bool_array_add_3)
 
 Test(rw_json_storage, ro_dict_add_null_array_add_3)
 {
-    unsigned len = 3;
+    size_t len = 3;
     rw_dict_t *d = init_rw_dict();
     rw_dict_add_null(d, string_nofree_of("k1"));
     rw_dict_add_null(d, string_nofree_of("k2"));
     rw_dict_add_null(d, string_nofree_of("k3"));
     cr_expect(d->size == len,
-              "Expected the insert_index of the dict to be %u after the "
-              "additions, but got '%u'",
+              "Expected the insert_index of the dict to be %zu after the "
+              "additions, but got '%zu'",
               len, d->size);
     destroy_rw_dict(d);
 }
@@ -299,7 +299,7 @@ Test(rw_json_storage, ro_dict_add_null_array_add_3)
 *******************************************************************************/
 Test(rw_json_storage, rw_array_get_null_array)
 {
-    unsigned i = 5;
+    size_t i = 5;
     rw_value_t v = rw_array_get(0, i);
 
     cr_expect(v.type == T_ERROR,
@@ -309,7 +309,7 @@ Test(rw_json_storage, rw_array_get_null_array)
 
 Test(rw_json_storage, rw_array_get_empty)
 {
-    unsigned long idx = 0;
+    size_t idx = 0;
     char buff[] = "[]";
     rw_array_t *a = rw_parse_array_buff(buff, &idx);
     if (!a)
@@ -317,13 +317,13 @@ Test(rw_json_storage, rw_array_get_empty)
         return;
     }
 
-    unsigned i = 5;
+    size_t i = 5;
     rw_value_t v = rw_array_get(a, i);
 
     cr_expect(
         v.type == T_ERROR,
         "Expected the value to be of type T_ERROR because we tried to "
-        "get the value of index %u from an array of size 0, but it wasn't",
+        "get the value of index %zu from an array of size 0, but it wasn't",
         i);
 
     destroy_rw_array(a);
@@ -340,7 +340,7 @@ Test(rw_json_storage, rw_dict_get_null_dict)
 
 Test(rw_json_storage, rw_dict_get_empty)
 {
-    unsigned long idx = 0;
+    size_t idx = 0;
     char buff[] = "{}";
     rw_dict_t *d = rw_parse_dict_buff(buff, &idx);
     if (!d)
@@ -359,10 +359,12 @@ Test(rw_json_storage, rw_dict_get_empty)
     destroy_rw_dict(d);
 }
 
-char *rw_get_type_as_str(char type)
+char *rw_get_type_as_str(u8 type)
 {
     switch (type)
     {
+    case T_ERROR:
+        return "T_ERROR";
     case T_STR:
         return "T_STR";
     case T_LONG:
@@ -385,9 +387,9 @@ char *rw_get_type_as_str(char type)
     return "\0";
 }
 
-void rw_array_get_type(char *buff, char expected_type)
+void rw_array_get_type(char *buff, u8 expected_type)
 {
-    unsigned long idx = 0;
+    size_t idx = 0;
     rw_array_t *a = rw_parse_array_buff(buff, &idx);
     if (!a)
     {
@@ -458,9 +460,9 @@ Test(rw_json_storage, rw_array_get_dict)
     rw_array_get_type("[{\"key\":1}]", T_DICT);
 }
 
-void rw_dict_get_type(char *buff, char expected_type)
+void rw_dict_get_type(char *buff, u8 expected_type)
 {
-    unsigned long idx = 0;
+    size_t idx = 0;
     rw_dict_t *d = rw_parse_dict_buff(buff, &idx);
     if (!d)
     {

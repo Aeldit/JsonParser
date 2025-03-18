@@ -12,7 +12,7 @@
 /*******************************************************************************
 **                              rw_PARSE_ARRAY_BUFF                           **
 *******************************************************************************/
-rw_array_t *get_rw_array_from_fileile(unsigned long *idx, char is_buff)
+rw_array_t *get_rw_array_from_fileile(size_t *idx, bool is_buff)
 {
     if (!idx)
     {
@@ -38,7 +38,7 @@ rw_array_t *get_rw_array_from_fileile(unsigned long *idx, char is_buff)
 
         struct stat st;
         stat(JSON_TESTS_FILE, &st);
-        unsigned long nb_chars = st.st_size;
+        size_t nb_chars = st.st_size;
 
         buff = calloc(nb_chars + 1, sizeof(char));
         if (!buff)
@@ -70,11 +70,11 @@ rw_array_t *get_rw_array_from_fileile(unsigned long *idx, char is_buff)
 
 Test(rw_json_parser, rw_parse_array_buff_empty)
 {
-    unsigned long idx = 518;
-    rw_array_t *a = get_rw_array_from_fileile(&idx, 1);
+    size_t idx = 518;
+    rw_array_t *a = get_rw_array_from_fileile(&idx, true);
 
     rw_array_t *b = init_rw_array();
-    char is_equal = rw_arrays_equal(a, b);
+    bool is_equal = rw_arrays_equal(a, b);
 
     cr_expect(is_equal, "Expected the 2 arrays to be equal, but they were not");
     destroy_rw_array(a);
@@ -83,8 +83,8 @@ Test(rw_json_parser, rw_parse_array_buff_empty)
 
 Test(rw_json_parser, rw_parse_array_buff_long_numbers)
 {
-    unsigned long idx = 85;
-    rw_array_t *a = get_rw_array_from_fileile(&idx, 1);
+    size_t idx = 85;
+    rw_array_t *a = get_rw_array_from_fileile(&idx, true);
 
     rw_array_t *b = init_rw_array();
 
@@ -114,7 +114,7 @@ Test(rw_json_parser, rw_parse_array_buff_long_numbers)
     rw_array_add_exp_double(b, EXP_DOUBLE_OF(200.5, -10));
     rw_array_add_exp_double(b, EXP_DOUBLE_OF(-200.5, -10));
 
-    char is_equal = rw_arrays_equal(a, b);
+    bool is_equal = rw_arrays_equal(a, b);
 
     cr_expect(is_equal, "Expected the 2 arrays to be equal, but they were not");
     destroy_rw_array(a);
@@ -123,8 +123,8 @@ Test(rw_json_parser, rw_parse_array_buff_long_numbers)
 
 Test(rw_json_parser, rw_parse_array_buff_nested_multi_type)
 {
-    unsigned long idx = 508;
-    rw_array_t *a = get_rw_array_from_fileile(&idx, 1);
+    size_t idx = 508;
+    rw_array_t *a = get_rw_array_from_fileile(&idx, true);
 
     rw_array_t *b = init_rw_array();
 
@@ -140,7 +140,7 @@ Test(rw_json_parser, rw_parse_array_buff_nested_multi_type)
 
     rw_array_t *a3 = init_rw_array();
     rw_array_add_str(a3, string_nofree_of("dd"));
-    rw_array_add_bool(a3, 1);
+    rw_array_add_bool(a3, true);
     rw_array_add_long(a3, 5);
 
     rw_array_add_array(a2, a3);
@@ -155,7 +155,7 @@ Test(rw_json_parser, rw_parse_array_buff_nested_multi_type)
     rw_array_add_dict(b, d);
     rw_array_add_dict(b, init_rw_dict());
 
-    char is_equal = rw_arrays_equal(a, b);
+    bool is_equal = rw_arrays_equal(a, b);
 
     cr_expect(is_equal, "Expected the 2 arrays to be equal, but they were not");
     destroy_rw_array(a);
@@ -164,11 +164,11 @@ Test(rw_json_parser, rw_parse_array_buff_nested_multi_type)
 
 Test(rw_json_parser, rw_parse_array_empty)
 {
-    unsigned long idx = 519;
-    rw_array_t *a = get_rw_array_from_fileile(&idx, 0);
+    size_t idx = 519;
+    rw_array_t *a = get_rw_array_from_fileile(&idx, false);
 
     rw_array_t *b = init_rw_array();
-    char is_equal = rw_arrays_equal(a, b);
+    bool is_equal = rw_arrays_equal(a, b);
 
     cr_expect(is_equal, "Expected the 2 arrays to be equal, but they were not");
     destroy_rw_array(a);
@@ -177,8 +177,8 @@ Test(rw_json_parser, rw_parse_array_empty)
 
 Test(rw_json_parser, rw_parse_array_long_numbers)
 {
-    unsigned long idx = 86;
-    rw_array_t *a = get_rw_array_from_fileile(&idx, 0);
+    size_t idx = 86;
+    rw_array_t *a = get_rw_array_from_fileile(&idx, false);
 
     rw_array_t *b = init_rw_array();
 
@@ -208,7 +208,7 @@ Test(rw_json_parser, rw_parse_array_long_numbers)
     rw_array_add_exp_double(b, EXP_DOUBLE_OF(200.5, -10));
     rw_array_add_exp_double(b, EXP_DOUBLE_OF(-200.5, -10));
 
-    char is_equal = rw_arrays_equal(a, b);
+    bool is_equal = rw_arrays_equal(a, b);
 
     cr_expect(is_equal, "Expected the 2 arrays to be equal, but they were not");
     destroy_rw_array(a);
@@ -217,8 +217,8 @@ Test(rw_json_parser, rw_parse_array_long_numbers)
 
 Test(rw_json_parser, rw_parse_array_nested_multi_type)
 {
-    unsigned long idx = 509;
-    rw_array_t *a = get_rw_array_from_fileile(&idx, 0);
+    size_t idx = 509;
+    rw_array_t *a = get_rw_array_from_fileile(&idx, false);
 
     rw_array_t *b = init_rw_array();
 
@@ -234,7 +234,7 @@ Test(rw_json_parser, rw_parse_array_nested_multi_type)
 
     rw_array_t *a3 = init_rw_array();
     rw_array_add_str(a3, string_nofree_of("dd"));
-    rw_array_add_bool(a3, 1);
+    rw_array_add_bool(a3, true);
     rw_array_add_long(a3, 5);
 
     rw_array_add_array(a2, a3);
@@ -249,7 +249,7 @@ Test(rw_json_parser, rw_parse_array_nested_multi_type)
     rw_array_add_dict(b, d);
     rw_array_add_dict(b, init_rw_dict());
 
-    char is_equal = rw_arrays_equal(a, b);
+    bool is_equal = rw_arrays_equal(a, b);
 
     cr_expect(is_equal, "Expected the 2 arrays to be equal, but they were not");
     destroy_rw_array(a);
@@ -259,7 +259,7 @@ Test(rw_json_parser, rw_parse_array_nested_multi_type)
 /*******************************************************************************
 **                               rw_PARSE_DICT_BUFF                           **
 *******************************************************************************/
-rw_dict_t *get_rw_dict_from_fileile(unsigned long *idx, char is_buff)
+rw_dict_t *get_rw_dict_from_fileile(size_t *idx, bool is_buff)
 {
     if (!idx)
     {
@@ -285,7 +285,7 @@ rw_dict_t *get_rw_dict_from_fileile(unsigned long *idx, char is_buff)
 
         struct stat st;
         stat(JSON_TESTS_FILE, &st);
-        unsigned long nb_chars = st.st_size;
+        size_t nb_chars = st.st_size;
 
         buff = calloc(nb_chars + 1, sizeof(char));
         if (!buff)
@@ -317,11 +317,11 @@ rw_dict_t *get_rw_dict_from_fileile(unsigned long *idx, char is_buff)
 
 Test(rw_json_parser, rw_parse_dict_buff_empty)
 {
-    unsigned long idx = 812;
-    rw_dict_t *a = get_rw_dict_from_fileile(&idx, 1);
+    size_t idx = 812;
+    rw_dict_t *a = get_rw_dict_from_fileile(&idx, true);
 
     rw_dict_t *b = init_rw_dict();
-    char is_equal = rw_dicts_equal(a, b);
+    bool is_equal = rw_dicts_equal(a, b);
 
     cr_expect(is_equal, "Expected the 2 dicts to be equal, but they were not");
     destroy_rw_dict(a);
@@ -330,8 +330,8 @@ Test(rw_json_parser, rw_parse_dict_buff_empty)
 
 Test(rw_json_parser, rw_parse_dict_buff_numbers)
 {
-    unsigned long idx = 824;
-    rw_dict_t *a = get_rw_dict_from_fileile(&idx, 1);
+    size_t idx = 824;
+    rw_dict_t *a = get_rw_dict_from_fileile(&idx, true);
 
     rw_dict_t *b = init_rw_dict();
 
@@ -339,7 +339,7 @@ Test(rw_json_parser, rw_parse_dict_buff_numbers)
     rw_dict_add_long(b, string_nofree_of("2"), 2);
     rw_dict_add_long(b, string_nofree_of("3"), 3);
 
-    char is_equal = rw_dicts_equal(a, b);
+    bool is_equal = rw_dicts_equal(a, b);
 
     cr_expect(is_equal, "Expected the 2 dicts to be equal, but they were not");
     destroy_rw_dict(a);
@@ -348,12 +348,12 @@ Test(rw_json_parser, rw_parse_dict_buff_numbers)
 
 Test(rw_json_parser, rw_parse_dict_buff_nested_multi_type)
 {
-    unsigned long idx = 905;
-    rw_dict_t *a = get_rw_dict_from_fileile(&idx, 1);
+    size_t idx = 905;
+    rw_dict_t *a = get_rw_dict_from_fileile(&idx, true);
 
     rw_array_t *a3 = init_rw_array();
     rw_array_add_str(a3, string_nofree_of("dd"));
-    rw_array_add_bool(a3, 1);
+    rw_array_add_bool(a3, true);
     rw_array_add_long(a3, 5);
 
     rw_dict_t *a2 = init_rw_dict();
@@ -364,7 +364,7 @@ Test(rw_json_parser, rw_parse_dict_buff_nested_multi_type)
     rw_dict_t *b = init_rw_dict();
     rw_dict_add_dict(b, string_nofree_of("array"), a2);
 
-    char is_equal = rw_dicts_equal(a, b);
+    bool is_equal = rw_dicts_equal(a, b);
 
     cr_expect(is_equal, "Expected the 2 dicts to be equal, but they were not");
     destroy_rw_dict(a);
@@ -373,11 +373,11 @@ Test(rw_json_parser, rw_parse_dict_buff_nested_multi_type)
 
 Test(rw_json_parser, rw_parse_dict_empty)
 {
-    unsigned long idx = 813;
-    rw_dict_t *a = get_rw_dict_from_fileile(&idx, 0);
+    size_t idx = 813;
+    rw_dict_t *a = get_rw_dict_from_fileile(&idx, false);
 
     rw_dict_t *b = init_rw_dict();
-    char is_equal = rw_dicts_equal(a, b);
+    bool is_equal = rw_dicts_equal(a, b);
 
     cr_expect(is_equal, "Expected the 2 dicts to be equal, but they were not");
     destroy_rw_dict(a);
@@ -386,8 +386,8 @@ Test(rw_json_parser, rw_parse_dict_empty)
 
 Test(rw_json_parser, rw_parse_dict_numbers)
 {
-    unsigned long idx = 825;
-    rw_dict_t *a = get_rw_dict_from_fileile(&idx, 0);
+    size_t idx = 825;
+    rw_dict_t *a = get_rw_dict_from_fileile(&idx, false);
 
     rw_dict_t *b = init_rw_dict();
 
@@ -395,7 +395,7 @@ Test(rw_json_parser, rw_parse_dict_numbers)
     rw_dict_add_long(b, string_nofree_of("2"), 2);
     rw_dict_add_long(b, string_nofree_of("3"), 3);
 
-    char is_equal = rw_dicts_equal(a, b);
+    bool is_equal = rw_dicts_equal(a, b);
 
     cr_expect(is_equal, "Expected the 2 dicts to be equal, but they were not");
     destroy_rw_dict(a);
@@ -404,12 +404,12 @@ Test(rw_json_parser, rw_parse_dict_numbers)
 
 Test(rw_json_parser, rw_parse_dict_nested_multi_type)
 {
-    unsigned long idx = 906;
-    rw_dict_t *a = get_rw_dict_from_fileile(&idx, 0);
+    size_t idx = 906;
+    rw_dict_t *a = get_rw_dict_from_fileile(&idx, false);
 
     rw_array_t *a3 = init_rw_array();
     rw_array_add_str(a3, string_nofree_of("dd"));
-    rw_array_add_bool(a3, 1);
+    rw_array_add_bool(a3, true);
     rw_array_add_long(a3, 5);
 
     rw_dict_t *a2 = init_rw_dict();
@@ -420,7 +420,7 @@ Test(rw_json_parser, rw_parse_dict_nested_multi_type)
     rw_dict_t *b = init_rw_dict();
     rw_dict_add_dict(b, string_nofree_of("array"), a2);
 
-    char is_equal = rw_dicts_equal(a, b);
+    bool is_equal = rw_dicts_equal(a, b);
 
     cr_expect(is_equal, "Expected the 2 dicts to be equal, but they were not");
     destroy_rw_dict(a);
@@ -430,7 +430,7 @@ Test(rw_json_parser, rw_parse_dict_nested_multi_type)
 /*******************************************************************************
 **                                   rw_PARSE                                 **
 *******************************************************************************/
-Test(rw_json_parser, rw_parse)
+Test(rw_json_parser, rw_parse_array)
 {
     rw_json_t *rw_json = rw_parse(JSON_TESTS_FILE);
     if (!rw_json)
@@ -465,8 +465,8 @@ Test(rw_json_parser, rw_parse)
     rw_array_add_exp_double(numbers, EXP_DOUBLE_OF(-200.5, -10));
 
     rw_array_t *booleans = init_rw_array();
-    rw_array_add_bool(booleans, 1);
-    rw_array_add_bool(booleans, 0);
+    rw_array_add_bool(booleans, true);
+    rw_array_add_bool(booleans, false);
 
     rw_array_t *arrays = init_rw_array();
     rw_array_add_array(arrays, init_rw_array());
@@ -478,7 +478,7 @@ Test(rw_json_parser, rw_parse)
     rw_array_add_long(arrays_a2, 5);
     rw_array_t *arrays_a3 = init_rw_array();
     rw_array_add_str(arrays_a3, string_nofree_of("dd"));
-    rw_array_add_bool(arrays_a3, 1);
+    rw_array_add_bool(arrays_a3, true);
     rw_array_add_long(arrays_a3, 5);
     rw_array_add_array(arrays_a2, arrays_a3);
     rw_array_add_dict(arrays_a2, init_rw_dict());
@@ -501,7 +501,7 @@ Test(rw_json_parser, rw_parse)
     rw_dict_add_long(dicts_d2_array, string_nofree_of(""), 1);
     rw_array_t *dicts_d2_array_arr = init_rw_array();
     rw_array_add_str(dicts_d2_array_arr, string_nofree_of("dd"));
-    rw_array_add_bool(dicts_d2_array_arr, 1);
+    rw_array_add_bool(dicts_d2_array_arr, true);
     rw_array_add_long(dicts_d2_array_arr, 5);
     rw_dict_add_array(dicts_d2_array, string_nofree_of("arr"),
                       dicts_d2_array_arr);
@@ -516,7 +516,7 @@ Test(rw_json_parser, rw_parse)
     rw_dict_add_array(file_dict, string_nofree_of("arrays"), arrays);
     rw_dict_add_array(file_dict, string_nofree_of("dicts"), dicts);
 
-    rw_json_t *rw_json_manual = init_rw_json(0, 0, file_dict);
+    rw_json_t *rw_json_manual = init_rw_json(false, 0, file_dict);
 
     cr_expect(rw_json_equal(rw_json, rw_json_manual),
               "Expected the 2 dicts to be equal, but they were not");

@@ -3,31 +3,51 @@
 /*******************************************************************************
 **                                  INCLUDES                                  **
 *******************************************************************************/
+#include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
 
 #include "base_json_parser.h"
+#include "base_json_storage.h"
+#include "validator.h"
 
 /*******************************************************************************
 **                           FUNCTIONS DECLARATIONS                           **
 *******************************************************************************/
-rw_dict_t *rw_parse_dict_buff(char *b, unsigned long *pos);
-rw_dict_t *rw_parse_dict(FILE *f, unsigned long *pos);
+rw_dict_t *rw_parse_dict_buff(char *b, size_t *pos);
+rw_dict_t *rw_parse_dict(FILE *f, size_t *pos);
+
+/*******************************************************************************
+**                               LOCAL FUNCTIONS                              **
+*******************************************************************************/
+rw_array_t *destroy_rw_array_on_error(rw_array_t *a)
+{
+    destroy_rw_array(a);
+    return 0;
+}
+
+rw_dict_t *destroy_rw_dict_on_error(rw_dict_t *d, string_t key)
+{
+    destroy_string(key);
+    destroy_rw_dict(d);
+    return 0;
+}
 
 /*******************************************************************************
 **                              LOCAL FUNCTIONS                               **
 *******************************************************************************/
-rw_array_t *rw_parse_array_buff(char *b, unsigned long *idx)
+rw_array_t *rw_parse_array_buff(char *b, size_t *idx)
 {
     if (!b)
     {
         return 0;
     }
 
-    unsigned long i = idx == 0 ? 0 : *idx + 1;
+    // We start at 1 because if we entered this function, it means that we
+    // already read a '['
+    size_t i = idx == 0 ? 0 : *idx + 1;
 
-    unsigned long nb_elts_parsed = 0;
-    unsigned long nb_elts = get_nb_elts_array_buff(b, i);
+    size_t nb_elts = get_nb_elts_array_buff(b, i);
 
     rw_array_t *a = calloc(1, sizeof(rw_array_t));
     if (!a || nb_elts == 0)
@@ -35,101 +55,122 @@ rw_array_t *rw_parse_array_buff(char *b, unsigned long *idx)
         return a;
     }
 
+    size_t nb_elts_parsed = 0;
+    size_t initial_i = i;
+
     char c = 0;
-    // We start at 1 because if we entered this function, it means that we
-    // already read a '['
-    unsigned long initial_i = i;
-    while (1)
+    while ((c = b[i]))
     {
-        c = b[i];
-        if (c == 0 || nb_elts_parsed >= nb_elts)
+        if (nb_elts_parsed >= nb_elts)
         {
             break;
         }
 
-        if (c == '"')
+        string_t s = NULL_STRING;
+        str_and_len_tuple_t sl = NULL_STR_AND_LEN_TUPLE;
+        size_t len = 0;
+        rw_array_t *tmp_a = 0;
+        rw_dict_t *tmp_jd = 0;
+        switch (c)
         {
-            rw_array_add_str(a, parse_string_buff(b, &i));
-            ++nb_elts_parsed;
-        }
-        else if (IS_NUMBER_START(c))
-        {
-            str_and_len_tuple_t sl = parse_number_buff(b, &i);
-            if (!sl.str)
+        case '"':
+            if (!(s = parse_string_buff(b, &i)).str)
             {
-                continue;
+                return destroy_rw_array_on_error(a);
+            }
+            rw_array_add_str(a, s);
+            ++nb_elts_parsed;
+            break;
+
+        case '+':
+        case '-':
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+            if (!(sl = parse_number_buff(b, &i)).str)
+            {
+                return destroy_rw_array_on_error(a);
             }
 
             if (sl.is_float)
             {
                 double_with_or_without_exponent_t dwowe = str_to_double(&sl);
-                if (dwowe.has_exponent == 2)
+                switch (dwowe.has_exponent)
                 {
-                    continue;
-                }
-                if (dwowe.has_exponent)
-                {
-                    rw_array_add_exp_double(a, dwowe.double_exp_value);
-                }
-                else
-                {
+                case 0:
                     rw_array_add_double(a, dwowe.double_value);
+                    break;
+                case 1:
+                    rw_array_add_exp_double(a, dwowe.double_exp_value);
+                    break;
+                case 2:
+                default:
+                    free(sl.str);
+                    return destroy_rw_array_on_error(a);
                 }
             }
             else
             {
                 long_with_or_without_exponent_t lwowe = str_to_long(&sl);
-                if (lwowe.has_exponent == 2)
+                switch (lwowe.has_exponent)
                 {
-                    continue;
-                }
-                if (lwowe.has_exponent)
-                {
-                    rw_array_add_exp_long(a, lwowe.long_exp_value);
-                }
-                else
-                {
+                case 0:
                     rw_array_add_long(a, lwowe.long_value);
+                    break;
+                case 1:
+                    rw_array_add_exp_long(a, lwowe.long_exp_value);
+                    break;
+                case 2:
+                default:
+                    free(sl.str);
+                    return destroy_rw_array_on_error(a);
                 }
             }
             free(sl.str);
             ++nb_elts_parsed;
-        }
-        else if (IS_BOOL_START(c))
-        {
-            unsigned long len = parse_boolean_buff(b, &i);
+            break;
+
+        case 't':
+        case 'f':
+            len = parse_boolean_buff(b, &i);
             if (IS_NOT_BOOLEAN(c, len))
             {
-                continue;
+                return destroy_rw_array_on_error(a);
             }
             rw_array_add_bool(a, len == 4 ? 1 : 0);
             ++nb_elts_parsed;
-        }
-        else if (c == 'n')
-        {
+            break;
+
+        case 'n':
             rw_array_add_null(a);
             i += 3;
             ++nb_elts_parsed;
-        }
-        else if (c == '[')
-        {
-            rw_array_t *tmp_a = rw_parse_array_buff(b, &i);
-            if (!tmp_a)
+            break;
+
+        case '[':
+            if (!(tmp_a = rw_parse_array_buff(b, &i)))
             {
-                break;
+                return destroy_rw_array_on_error(a);
             }
             rw_array_add_array(a, tmp_a);
             ++nb_elts_parsed;
-        }
-        else if (c == '{')
-        {
-            rw_dict_t *tmp_jd = rw_parse_dict_buff(b, &i);
-            if (!tmp_jd)
+            break;
+
+        case '{':
+            if (!(tmp_jd = rw_parse_dict_buff(b, &i)))
             {
-                break;
+                return destroy_rw_array_on_error(a);
             }
             rw_array_add_dict(a, tmp_jd);
             ++nb_elts_parsed;
+            break;
         }
         ++i;
     }
@@ -140,17 +181,18 @@ rw_array_t *rw_parse_array_buff(char *b, unsigned long *idx)
     return a;
 }
 
-rw_dict_t *rw_parse_dict_buff(char *b, unsigned long *idx)
+rw_dict_t *rw_parse_dict_buff(char *b, size_t *idx)
 {
     if (!b)
     {
         return 0;
     }
 
-    unsigned long i = idx == 0 ? 0 : *idx + 1;
+    // We start at 1 because if we entered this function, it means that we
+    // already read a '{'
+    size_t i = idx == 0 ? 0 : *idx + 1;
 
-    unsigned long nb_elts_parsed = 0;
-    unsigned long nb_elts = get_nb_elts_dict_buff(b, i);
+    size_t nb_elts = get_nb_elts_dict_buff(b, i);
 
     rw_dict_t *d = calloc(1, sizeof(rw_dict_t));
     if (!d || nb_elts == 0)
@@ -158,115 +200,140 @@ rw_dict_t *rw_parse_dict_buff(char *b, unsigned long *idx)
         return d;
     }
 
+    size_t nb_elts_parsed = 0;
+    size_t initial_i = i;
+
     string_t key = NULL_STRING;
+    bool is_waiting_key = true;
+
     char c = 0;
-    char is_waiting_key = 1;
-    // We start at 1 because if we entered this function, it means that we
-    // already read a '{'
-    unsigned long initial_i = i;
-    while (1)
+    while ((c = b[i]))
     {
-        c = b[i];
-        if (c == 0 || nb_elts_parsed >= nb_elts)
+        if (nb_elts_parsed >= nb_elts)
         {
             break;
         }
 
-        if (c == '"')
+        string_t s = NULL_STRING;
+        str_and_len_tuple_t sl = NULL_STR_AND_LEN_TUPLE;
+        size_t len = 0;
+        rw_array_t *tmp_ja = 0;
+        rw_dict_t *tmp_jd = 0;
+        switch (c)
         {
+        case '"':
             if (is_waiting_key)
             {
-                key = parse_string_buff(b, &i);
-                is_waiting_key = 0;
+                if (!(key = parse_string_buff(b, &i)).str)
+                {
+                    return destroy_rw_dict_on_error(d, key);
+                }
+                is_waiting_key = false;
             }
             else
             {
-                rw_dict_add_str(d, key, parse_string_buff(b, &i));
+                if (!(s = parse_string_buff(b, &i)).str)
+                {
+                    return destroy_rw_dict_on_error(d, key);
+                }
+                rw_dict_add_str(d, key, s);
                 ++nb_elts_parsed;
             }
-        }
-        else if (IS_NUMBER_START(c))
-        {
-            str_and_len_tuple_t sl = parse_number_buff(b, &i);
-            if (!sl.str)
+            break;
+
+        case '+':
+        case '-':
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+            if (!(sl = parse_number_buff(b, &i)).str)
             {
-                continue;
+                return destroy_rw_dict_on_error(d, key);
             }
 
             if (sl.is_float)
             {
                 double_with_or_without_exponent_t dwowe = str_to_double(&sl);
-                if (dwowe.has_exponent == 2)
+                switch (dwowe.has_exponent)
                 {
-                    continue;
-                }
-                if (dwowe.has_exponent)
-                {
-                    rw_dict_add_exp_double(d, key, dwowe.double_exp_value);
-                }
-                else
-                {
+                case 0:
                     rw_dict_add_double(d, key, dwowe.double_value);
+                    break;
+                case 1:
+                    rw_dict_add_exp_double(d, key, dwowe.double_exp_value);
+                    break;
+                case 2:
+                default:
+                    free(sl.str);
+                    return destroy_rw_dict_on_error(d, key);
                 }
             }
             else
             {
                 long_with_or_without_exponent_t lwowe = str_to_long(&sl);
-                if (lwowe.has_exponent == 2)
+                switch (lwowe.has_exponent)
                 {
-                    continue;
-                }
-                if (lwowe.has_exponent)
-                {
-                    rw_dict_add_exp_long(d, key, lwowe.long_exp_value);
-                }
-                else
-                {
+                case 0:
                     rw_dict_add_long(d, key, lwowe.long_value);
+                    break;
+                case 1:
+                    rw_dict_add_exp_long(d, key, lwowe.long_exp_value);
+                    break;
+                case 2:
+                default:
+                    free(sl.str);
+                    return destroy_rw_dict_on_error(d, key);
                 }
             }
             free(sl.str);
             ++nb_elts_parsed;
-        }
-        else if (IS_BOOL_START(c))
-        {
-            unsigned long len = parse_boolean_buff(b, &i);
+            break;
+
+        case 't':
+        case 'f':
+            len = parse_boolean_buff(b, &i);
             if (IS_NOT_BOOLEAN(c, len))
             {
-                continue;
+                return destroy_rw_dict_on_error(d, key);
             }
             rw_dict_add_bool(d, key, len == 4 ? 1 : 0);
             ++nb_elts_parsed;
-        }
-        else if (c == 'n')
-        {
+            break;
+
+        case 'n':
             rw_dict_add_null(d, key);
             i += 3;
             ++nb_elts_parsed;
-        }
-        else if (c == '[')
-        {
-            rw_array_t *tmp_ja = rw_parse_array_buff(b, &i);
-            if (!tmp_ja)
+            break;
+
+        case '[':
+            if (!(tmp_ja = rw_parse_array_buff(b, &i)))
             {
-                break;
+                return destroy_rw_dict_on_error(d, key);
             }
             rw_dict_add_array(d, key, tmp_ja);
             ++nb_elts_parsed;
-        }
-        else if (c == '{')
-        {
-            rw_dict_t *tmp_jd = rw_parse_dict_buff(b, &i);
-            if (!tmp_jd)
+            break;
+
+        case '{':
+            if (!(tmp_jd = rw_parse_dict_buff(b, &i)))
             {
-                break;
+                return destroy_rw_dict_on_error(d, key);
             }
             rw_dict_add_dict(d, key, tmp_jd);
             ++nb_elts_parsed;
-        }
-        else if (c == ',')
-        {
-            is_waiting_key = 1;
+            break;
+
+        case ',':
+            is_waiting_key = true;
+            break;
         }
         ++i;
     }
@@ -277,17 +344,16 @@ rw_dict_t *rw_parse_dict_buff(char *b, unsigned long *idx)
     return d;
 }
 
-rw_array_t *rw_parse_array(FILE *f, unsigned long *pos)
+rw_array_t *rw_parse_array(FILE *f, size_t *pos)
 {
     if (!f || !pos)
     {
         return 0;
     }
 
-    unsigned long i = *pos;
+    size_t i = *pos;
 
-    unsigned long nb_elts_parsed = 0;
-    unsigned long nb_elts = get_nb_elts_array(f, i);
+    size_t nb_elts = get_nb_elts_array(f, i);
 
     rw_array_t *a = calloc(1, sizeof(rw_array_t));
     if (!a || nb_elts == 0)
@@ -296,78 +362,100 @@ rw_array_t *rw_parse_array(FILE *f, unsigned long *pos)
         return a;
     }
 
+    size_t nb_elts_parsed = 0;
+
     char c = 0;
     while (SEEK_AND_GET_CHAR(i) && nb_elts_parsed < nb_elts && c != 0)
     {
-        // If we are not in a string or if the string just ended
-        if (c == '"')
+        string_t s = NULL_STRING;
+        str_and_len_tuple_t sl = NULL_STR_AND_LEN_TUPLE;
+        size_t len = 0;
+        size_t nb_chars = 0;
+        switch (c)
         {
-            rw_array_add_str(a, parse_string(f, &i));
-            ++nb_elts_parsed;
-        }
-        else if (IS_NUMBER_START(c))
-        {
-            str_and_len_tuple_t sl = parse_number(f, &i);
-            if (!sl.str)
+        case '"':
+            if (!(s = parse_string(f, &i)).str)
             {
-                continue;
+                return destroy_rw_array_on_error(a);
+            }
+            rw_array_add_str(a, s);
+            ++nb_elts_parsed;
+            break;
+
+        case '+':
+        case '-':
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+            if (!(sl = parse_number(f, &i)).str)
+            {
+                return destroy_rw_array_on_error(a);
             }
 
             if (sl.is_float)
             {
                 double_with_or_without_exponent_t dwowe = str_to_double(&sl);
-                if (dwowe.has_exponent == 2)
+                switch (dwowe.has_exponent)
                 {
-                    continue;
-                }
-                if (dwowe.has_exponent)
-                {
-                    rw_array_add_exp_double(a, dwowe.double_exp_value);
-                }
-                else
-                {
+                case 0:
                     rw_array_add_double(a, dwowe.double_value);
+                    break;
+                case 1:
+                    rw_array_add_exp_double(a, dwowe.double_exp_value);
+                    break;
+                case 2:
+                default:
+                    free(sl.str);
+                    return destroy_rw_array_on_error(a);
                 }
             }
             else
             {
                 long_with_or_without_exponent_t lwowe = str_to_long(&sl);
-                if (lwowe.has_exponent == 2)
+                switch (lwowe.has_exponent)
                 {
-                    continue;
-                }
-                if (lwowe.has_exponent)
-                {
-                    rw_array_add_exp_long(a, lwowe.long_exp_value);
-                }
-                else
-                {
+                case 0:
                     rw_array_add_long(a, lwowe.long_value);
+                    break;
+                case 1:
+                    rw_array_add_exp_long(a, lwowe.long_exp_value);
+                    break;
+                case 2:
+                default:
+                    free(sl.str);
+                    return destroy_rw_array_on_error(a);
                 }
             }
             free(sl.str);
             ++nb_elts_parsed;
-        }
-        else if (IS_BOOL_START(c))
-        {
-            unsigned long len = parse_boolean(f, &i);
+            break;
+
+        case 't':
+        case 'f':
+            len = parse_boolean(f, &i);
             if (IS_NOT_BOOLEAN(c, len))
             {
-                continue;
+                return destroy_rw_array_on_error(a);
             }
             rw_array_add_bool(a, len == 4 ? 1 : 0);
             ++nb_elts_parsed;
-        }
-        else if (c == 'n')
-        {
+            break;
+
+        case 'n':
             rw_array_add_null(a);
             i += 3;
             ++nb_elts_parsed;
-        }
-        else if (c == '[')
-        {
-            unsigned long nb_chars = get_nb_chars_in_array(f, i);
+            break;
 
+        case '[':
+            nb_chars = get_nb_chars_in_array(f, i);
             rw_array_t *tmp_ja = 0;
             // If there is enough space, we fill a buffer to read from it
             if (nb_chars < MAX_READ_BUFF_SIZE)
@@ -379,22 +467,26 @@ rw_array_t *rw_parse_array(FILE *f, unsigned long *pos)
                     break;
                 }
                 fread(b, sizeof(char), nb_chars, f);
-                tmp_ja = rw_parse_array_buff(b, 0);
+                if (!(tmp_ja = rw_parse_array_buff(b, 0)))
+                {
+                    return destroy_rw_array_on_error(a);
+                }
                 free(b);
                 i += nb_chars;
             }
             else
             {
-                tmp_ja = rw_parse_array(f, &i);
+                if (!(tmp_ja = rw_parse_array(f, &i)))
+                {
+                    return destroy_rw_array_on_error(a);
+                }
             }
-
             rw_array_add_array(a, tmp_ja);
             ++nb_elts_parsed;
-        }
-        else if (c == '{')
-        {
-            unsigned long nb_chars = get_nb_chars_in_dict(f, i);
+            break;
 
+        case '{':
+            nb_chars = get_nb_chars_in_dict(f, i);
             rw_dict_t *tmp_jd = 0;
             // If there is enough space, we fill a buffer to read from it
             if (nb_chars < MAX_READ_BUFF_SIZE)
@@ -406,34 +498,39 @@ rw_array_t *rw_parse_array(FILE *f, unsigned long *pos)
                     break;
                 }
                 fread(b, sizeof(char), nb_chars, f);
-                tmp_jd = rw_parse_dict_buff(b, 0);
+                if (!(tmp_jd = rw_parse_dict_buff(b, 0)))
+                {
+                    return destroy_rw_array_on_error(a);
+                }
                 free(b);
                 i += nb_chars;
             }
             else
             {
-                tmp_jd = rw_parse_dict(f, &i);
+                if (!(tmp_jd = rw_parse_dict(f, &i)))
+                {
+                    return destroy_rw_array_on_error(a);
+                }
             }
-
             rw_array_add_dict(a, tmp_jd);
             ++nb_elts_parsed;
+            break;
         }
     }
     *pos = i - 1;
     return a;
 }
 
-rw_dict_t *rw_parse_dict(FILE *f, unsigned long *pos)
+rw_dict_t *rw_parse_dict(FILE *f, size_t *pos)
 {
     if (!f || !pos)
     {
         return 0;
     }
 
-    unsigned long i = *pos;
+    size_t i = *pos;
 
-    unsigned long nb_elts_parsed = 0;
-    unsigned long nb_elts = get_nb_elts_dict(f, i);
+    size_t nb_elts = get_nb_elts_dict(f, i);
 
     rw_dict_t *d = calloc(1, sizeof(rw_dict_t));
     if (!d || nb_elts == 0)
@@ -442,89 +539,114 @@ rw_dict_t *rw_parse_dict(FILE *f, unsigned long *pos)
         return d;
     }
 
+    size_t nb_elts_parsed = 0;
+
     string_t key = NULL_STRING;
+    bool is_waiting_key = true;
+
     char c = 0;
-    char is_waiting_key = 1;
-    // We start at 1 because if we entered this function, it means that we
-    // already read a '['
     while (SEEK_AND_GET_CHAR(i) && nb_elts_parsed < nb_elts && c != 0)
     {
-        if (c == '"')
+        string_t s = NULL_STRING;
+        str_and_len_tuple_t sl = NULL_STR_AND_LEN_TUPLE;
+        size_t len = 0;
+        size_t nb_chars = 0;
+        switch (c)
         {
+        case '"':
             if (is_waiting_key)
             {
-                key = parse_string(f, &i);
-                is_waiting_key = 0;
+                if (!(key = parse_string(f, &i)).str)
+                {
+                    return destroy_rw_dict_on_error(d, key);
+                }
+                is_waiting_key = false;
             }
             else
             {
-                rw_dict_add_str(d, key, parse_string(f, &i));
+                if (!(s = parse_string(f, &i)).str)
+                {
+                    return destroy_rw_dict_on_error(d, key);
+                }
+                rw_dict_add_str(d, key, s);
                 ++nb_elts_parsed;
             }
-        }
-        else if (IS_NUMBER_START(c))
-        {
-            str_and_len_tuple_t sl = parse_number(f, &i);
-            if (!sl.str)
+            break;
+
+        case '+':
+        case '-':
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+            if (!(sl = parse_number(f, &i)).str)
             {
-                continue;
+                return destroy_rw_dict_on_error(d, key);
             }
 
             if (sl.is_float)
             {
                 double_with_or_without_exponent_t dwowe = str_to_double(&sl);
-                if (dwowe.has_exponent == 2)
+                switch (dwowe.has_exponent)
                 {
-                    continue;
-                }
-                if (dwowe.has_exponent)
-                {
-                    rw_dict_add_exp_double(d, key, dwowe.double_exp_value);
-                }
-                else
-                {
+                case 0:
                     rw_dict_add_double(d, key, dwowe.double_value);
+                    break;
+                case 1:
+                    rw_dict_add_exp_double(d, key, dwowe.double_exp_value);
+                    break;
+                case 2:
+                default:
+                    free(sl.str);
+                    return destroy_rw_dict_on_error(d, key);
                 }
             }
             else
             {
                 long_with_or_without_exponent_t lwowe = str_to_long(&sl);
-                if (lwowe.has_exponent == 2)
+                switch (lwowe.has_exponent)
                 {
-                    continue;
-                }
-                if (lwowe.has_exponent)
-                {
-                    rw_dict_add_exp_long(d, key, lwowe.long_exp_value);
-                }
-                else
-                {
+                case 0:
                     rw_dict_add_long(d, key, lwowe.long_value);
+                    break;
+                case 1:
+                    rw_dict_add_exp_long(d, key, lwowe.long_exp_value);
+                    break;
+                case 2:
+                default:
+                    free(sl.str);
+                    return destroy_rw_dict_on_error(d, key);
                 }
             }
             free(sl.str);
             ++nb_elts_parsed;
-        }
-        else if (IS_BOOL_START(c))
-        {
-            unsigned long len = parse_boolean(f, &i);
+            break;
+
+        case 't':
+        case 'f':
+            len = parse_boolean(f, &i);
             if (IS_NOT_BOOLEAN(c, len))
             {
-                continue;
+                return destroy_rw_dict_on_error(d, key);
             }
             rw_dict_add_bool(d, key, len == 4 ? 1 : 0);
             ++nb_elts_parsed;
-        }
-        else if (c == 'n')
-        {
+            break;
+
+        case 'n':
             rw_dict_add_null(d, key);
             i += 3;
             ++nb_elts_parsed;
-        }
-        else if (c == '[')
-        {
-            unsigned long nb_chars = get_nb_chars_in_array(f, i);
+            break;
 
+        case '[':
+            nb_chars = get_nb_chars_in_array(f, i);
             rw_array_t *tmp_ja = 0;
             // If there is enough space, we fill a buffer to read from it
             if (nb_chars < MAX_READ_BUFF_SIZE)
@@ -536,22 +658,26 @@ rw_dict_t *rw_parse_dict(FILE *f, unsigned long *pos)
                     break;
                 }
                 fread(b, sizeof(char), nb_chars, f);
-                tmp_ja = rw_parse_array_buff(b, 0);
+                if (!(tmp_ja = rw_parse_array_buff(b, 0)))
+                {
+                    return destroy_rw_dict_on_error(d, key);
+                }
                 free(b);
                 i += nb_chars;
             }
             else
             {
-                tmp_ja = rw_parse_array(f, &i);
+                if (!(tmp_ja = rw_parse_array(f, &i)))
+                {
+                    return destroy_rw_dict_on_error(d, key);
+                }
             }
-
             rw_dict_add_array(d, key, tmp_ja);
             ++nb_elts_parsed;
-        }
-        else if (c == '{')
-        {
-            unsigned long nb_chars = get_nb_chars_in_dict(f, i);
+            break;
 
+        case '{':
+            nb_chars = get_nb_chars_in_dict(f, i);
             rw_dict_t *tmp_jd = 0;
             // If there is enough space, we fill a buffer to read from it
             if (nb_chars < MAX_READ_BUFF_SIZE)
@@ -563,21 +689,27 @@ rw_dict_t *rw_parse_dict(FILE *f, unsigned long *pos)
                     break;
                 }
                 fread(b, sizeof(char), nb_chars, f);
-                tmp_jd = rw_parse_dict_buff(b, 0);
+                if (!(tmp_jd = rw_parse_dict_buff(b, 0)))
+                {
+                    return destroy_rw_dict_on_error(d, key);
+                }
                 free(b);
                 i += nb_chars;
             }
             else
             {
-                tmp_jd = rw_parse_dict(f, &i);
+                if (!(tmp_jd = rw_parse_dict(f, &i)))
+                {
+                    return destroy_rw_dict_on_error(d, key);
+                }
             }
-
             rw_dict_add_dict(d, key, tmp_jd);
             ++nb_elts_parsed;
-        }
-        else if (c == ',')
-        {
-            is_waiting_key = 1;
+            break;
+
+        case ',':
+            is_waiting_key = true;
+            break;
         }
     }
     *pos = i - 1;
@@ -595,8 +727,8 @@ rw_json_t *rw_parse(char *file)
         return 0;
     }
 
-    unsigned long offset = 0;
-    if (fseek(f, offset++, SEEK_SET) != 0)
+    size_t offset = 0;
+    if (fseek(f, offset++, SEEK_SET))
     {
         fclose(f);
         return 0;
@@ -605,7 +737,7 @@ rw_json_t *rw_parse(char *file)
     // Obtains the number of characters in the file
     struct stat st;
     stat(file, &st);
-    unsigned long nb_chars = st.st_size;
+    size_t nb_chars = st.st_size;
 
     char c = fgetc(f);
     if (c == '{')
@@ -614,18 +746,33 @@ rw_json_t *rw_parse(char *file)
         if (nb_chars < MAX_READ_BUFF_SIZE)
         {
             char *b = calloc(nb_chars + 1, sizeof(char));
-            if (!b || fseek(f, offset, SEEK_SET) != 0)
+            if (!b || fseek(f, offset, SEEK_SET))
             {
                 fclose(f);
                 free(b);
                 return 0;
             }
             fread(b, sizeof(char), nb_chars, f);
+
+            if (!is_json_valid_buff(b, nb_chars, true))
+            {
+                printf("Invalid json file\n");
+                free(b);
+                fclose(f);
+                return 0;
+            }
+
             d = rw_parse_dict_buff(b, 0);
             free(b);
         }
         else
         {
+            if (!is_json_valid_file(f, true))
+            {
+                printf("Invalid json file\n");
+                fclose(f);
+                return 0;
+            }
             d = rw_parse_dict(f, &offset);
         }
         fclose(f);
@@ -637,18 +784,33 @@ rw_json_t *rw_parse(char *file)
         if (nb_chars < MAX_READ_BUFF_SIZE)
         {
             char *b = calloc(nb_chars + 1, sizeof(char));
-            if (!b || fseek(f, offset, SEEK_SET) != 0)
+            if (!b || fseek(f, offset, SEEK_SET))
             {
                 fclose(f);
                 free(b);
                 return 0;
             }
             fread(b, sizeof(char), nb_chars, f);
+
+            if (!is_json_valid_buff(b, nb_chars, false))
+            {
+                printf("Invalid json file\n");
+                fclose(f);
+                free(b);
+                return 0;
+            }
+
             a = rw_parse_array_buff(b, 0);
             free(b);
         }
         else
         {
+            if (!is_json_valid_file(f, false))
+            {
+                printf("Invalid json file\n");
+                fclose(f);
+                return 0;
+            }
             a = rw_parse_array(f, &offset);
         }
         fclose(f);

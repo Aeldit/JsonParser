@@ -21,15 +21,15 @@ typedef struct ro_dict ro_dict_t;
 // Used for functions that return an element of the array
 typedef struct
 {
-    char type;
+    u8 type;
     union
     {
         string_t strv;
-        long longv;
+        i64 longv;
         double doublev;
-        exponent_long_t exp_longv;
-        exponent_double_t exp_doublev;
-        char boolv;
+        exp_long_t exp_longv;
+        exp_double_t exp_doublev;
+        bool boolv;
         ro_array_t *arrayv;
         ro_dict_t *dictv;
     };
@@ -38,16 +38,16 @@ typedef struct
 // Used for functions that return an element of the dict
 typedef struct
 {
-    char type;
+    u8 type;
     string_t key;
     union
     {
         string_t strv;
-        long longv;
+        i64 longv;
         double doublev;
-        exponent_long_t exp_longv;
-        exponent_double_t exp_doublev;
-        char boolv;
+        exp_long_t exp_longv;
+        exp_double_t exp_doublev;
+        bool boolv;
         ro_array_t *arrayv;
         ro_dict_t *dictv;
     };
@@ -55,21 +55,21 @@ typedef struct
 
 struct ro_array
 {
-    unsigned size;
-    unsigned insert_index;
+    size_t size;
+    size_t insert_index;
     ro_value_t *values;
 };
 
 struct ro_dict
 {
-    unsigned size;
-    unsigned insert_index;
+    size_t size;
+    size_t insert_index;
     ro_item_t *items;
 };
 
 typedef struct
 {
-    char is_array;
+    bool is_array;
     union
     {
         ro_array_t *array;
@@ -80,32 +80,31 @@ typedef struct
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
-ro_array_t *init_ro_array(unsigned size);
-ro_dict_t *init_ro_dict(unsigned size);
-ro_json_t *init_ro_json(char is_array, ro_array_t *a, ro_dict_t *d);
+ro_array_t *init_ro_array(size_t size);
+ro_dict_t *init_ro_dict(size_t size);
+ro_json_t *init_ro_json(bool is_array, ro_array_t *a, ro_dict_t *d);
 
 void ro_array_add_str(ro_array_t *a, string_t value);
-void ro_array_add_long(ro_array_t *a, long value);
+void ro_array_add_long(ro_array_t *a, i64 value);
 void ro_array_add_double(ro_array_t *a, double value);
-void ro_array_add_exp_long(ro_array_t *a, exponent_long_t value);
-void ro_array_add_exp_double(ro_array_t *a, exponent_double_t value);
-void ro_array_add_bool(ro_array_t *a, char value);
+void ro_array_add_exp_long(ro_array_t *a, exp_long_t value);
+void ro_array_add_exp_double(ro_array_t *a, exp_double_t value);
+void ro_array_add_bool(ro_array_t *a, bool value);
 void ro_array_add_null(ro_array_t *a);
 void ro_array_add_array(ro_array_t *a, ro_array_t *value);
 void ro_array_add_dict(ro_array_t *a, ro_dict_t *value);
 
 void ro_dict_add_str(ro_dict_t *d, string_t key, string_t value);
-void ro_dict_add_long(ro_dict_t *d, string_t key, long value);
+void ro_dict_add_long(ro_dict_t *d, string_t key, i64 value);
 void ro_dict_add_double(ro_dict_t *d, string_t key, double value);
-void ro_dict_add_exp_long(ro_dict_t *d, string_t key, exponent_long_t value);
-void ro_dict_add_exp_double(ro_dict_t *d, string_t key,
-                            exponent_double_t value);
-void ro_dict_add_bool(ro_dict_t *d, string_t key, char value);
+void ro_dict_add_exp_long(ro_dict_t *d, string_t key, exp_long_t value);
+void ro_dict_add_exp_double(ro_dict_t *d, string_t key, exp_double_t value);
+void ro_dict_add_bool(ro_dict_t *d, string_t key, bool value);
 void ro_dict_add_null(ro_dict_t *d, string_t key);
 void ro_dict_add_array(ro_dict_t *d, string_t key, ro_array_t *value);
 void ro_dict_add_dict(ro_dict_t *d, string_t key, ro_dict_t *value);
 
-ro_value_t ro_array_get(ro_array_t *a, unsigned index);
+ro_value_t ro_array_get(ro_array_t *a, size_t index);
 ro_item_t ro_dict_get(ro_dict_t *d, string_t key);
 
 void ro_array_print(ro_array_t *a);
