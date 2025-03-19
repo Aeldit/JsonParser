@@ -39,6 +39,38 @@ typedef u64 arr_size_t;
 #    endif // !ARRAY_LEN
 #endif // LEAST
 
+#define RW_VALUE_OF(T_TYPE, type_field)                                        \
+    ((rw_value_t){ .type = T_TYPE, .type_field = value })
+#define RW_ITEM_OF(T_TYPE, type_field)                                         \
+    ((rw_item_t){ .type = T_TYPE, .key = key, .type_field = value })
+
+#define RWVAL_STR(v) ((rw_value_t){ .type = T_STR, .strv = (v) })
+#define RWVAL_LONG(v) ((rw_value_t){ .type = T_LONG, .longv = (v) })
+#define RWVAL_DOUBLE(v) ((rw_value_t){ .type = T_DOUBLE, .doublev = (v) })
+#define RWVAL_EXPLONG(v) ((rw_value_t){ .type = T_EXP_LONG, .exp_longv = (v) })
+#define RWVAL_EXPDOUBLE(v)                                                     \
+    ((rw_value_t){ .type = T_EXP_DOUBLE, .exp_doublev = (v) })
+#define RWVAL_BOOL(v) ((rw_value_t){ .type = T_BOOL, .boolv = (v) })
+#define RWVAL_NULL(v) ((rw_value_t){ .type = T_NULL })
+#define RWVAL_ARR(v) ((rw_value_t){ .type = T_ARR, .arrayv = (v) })
+#define RWVAL_DICT(v) ((rw_value_t){ .type = T_DICT, .dictv = (v) })
+
+#define RWIT_STR(k, v) ((rw_item_t){ .type = T_STR, .key = (k), .strv = (v) })
+#define RWIT_LONG(k, v)                                                        \
+    ((rw_item_t){ .type = T_LONG, .key = (k), .longv = (v) })
+#define RWIT_DOUBLE(k, v)                                                      \
+    ((rw_item_t){ .type = T_DOUBLE, .key = (k), .doublev = (v) })
+#define RWIT_EXPLONG(k, v)                                                     \
+    ((rw_item_t){ .type = T_EXP_LONG, .key = (k), .exp_longv = (v) })
+#define RWIT_EXPDOUBLE(k, v)                                                   \
+    ((rw_item_t){ .type = T_EXP_DOUBLE, .key = (k), .exp_doublev = v })
+#define RWIT_BOOL(k, v)                                                        \
+    ((rw_item_t){ .type = T_BOOL, .key = (k), .boolv = (v) })
+#define RWIT_NULL(k, v) ((rw_item_t){ .type = T_NULL, .key = (k) })
+#define RWIT_ARR(k, v) ((rw_item_t){ .type = T_ARR, .key = (k), .arrayv = (v) })
+#define RWIT_DICT(k, v)                                                        \
+    ((rw_item_t){ .type = T_DICT, .key = (k), .dictv = (v) })
+
 /*******************************************************************************
 **                                 STRUCTURES                                 **
 *******************************************************************************/
