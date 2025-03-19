@@ -6,15 +6,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "base_json_storage.h"
-
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
 /**
 ** \returns The number of character in the string + 1 (for the last quote '"')
 */
-size_t get_str_len_buff(char *buff, size_t pos)
+size_t get_str_len(char *buff, size_t pos)
 {
     if (!buff)
     {
@@ -35,7 +33,7 @@ size_t get_str_len_buff(char *buff, size_t pos)
     return 1;
 }
 
-size_t get_num_len_buff(char *buff, size_t pos)
+size_t get_num_len(char *buff, size_t pos)
 {
     if (!buff)
     {
@@ -349,7 +347,7 @@ bool has_exponent(char *str, size_t len)
 /***************************************
 **              PARSING               **
 ***************************************/
-string_t parse_string_buff(char *buff, size_t *idx)
+string_t parse_string(char *buff, size_t *idx)
 {
     if (!buff || !idx)
     {
@@ -390,7 +388,7 @@ string_t parse_string_buff(char *buff, size_t *idx)
     return STRING_OF(str, len);
 }
 
-str_and_len_tuple_t parse_number_buff(char *buff, size_t *idx)
+str_and_len_tuple_t parse_number(char *buff, size_t *idx)
 {
     if (!buff || !idx)
     {
@@ -447,7 +445,7 @@ str_and_len_tuple_t parse_number_buff(char *buff, size_t *idx)
     return NULL_STR_AND_LEN_TUPLE;
 }
 
-size_t parse_boolean_buff(char *buff, size_t *idx)
+size_t parse_boolean(char *buff, size_t *idx)
 {
     if (!buff || !idx)
     {
@@ -480,7 +478,7 @@ size_t parse_boolean_buff(char *buff, size_t *idx)
     return 0;
 }
 
-size_t get_nb_elts_array_buff(char *buff, size_t idx)
+size_t get_nb_elts_array(char *buff, size_t idx)
 {
     if (!buff || buff[idx] == ']')
     {
@@ -525,7 +523,7 @@ size_t get_nb_elts_array_buff(char *buff, size_t idx)
         switch (c)
         {
         case '"':
-            idx += get_str_len_buff(buff, idx);
+            idx += get_str_len(buff, idx);
             break;
 
         case 't':
@@ -552,7 +550,7 @@ size_t get_nb_elts_array_buff(char *buff, size_t idx)
         case '7':
         case '8':
         case '9':
-            idx += get_num_len_buff(buff, idx);
+            idx += get_num_len(buff, idx);
             break;
 
         case '[':
@@ -575,7 +573,7 @@ size_t get_nb_elts_array_buff(char *buff, size_t idx)
     return nb_elts;
 }
 
-size_t get_nb_elts_dict_buff(char *buff, size_t idx)
+size_t get_nb_elts_dict(char *buff, size_t idx)
 {
     if (!buff || buff[idx] == '}')
     {
@@ -633,7 +631,7 @@ size_t get_nb_elts_dict_buff(char *buff, size_t idx)
             break;
 
         case '"':
-            idx += get_str_len_buff(buff, idx);
+            idx += get_str_len(buff, idx);
             break;
 
         case 't':
@@ -660,7 +658,7 @@ size_t get_nb_elts_dict_buff(char *buff, size_t idx)
         case '7':
         case '8':
         case '9':
-            idx += get_num_len_buff(buff, idx);
+            idx += get_num_len(buff, idx);
             break;
 
         case '[':

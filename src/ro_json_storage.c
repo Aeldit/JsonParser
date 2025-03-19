@@ -3,6 +3,7 @@
 /*******************************************************************************
 **                                  INCLUDES                                  **
 *******************************************************************************/
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -32,6 +33,40 @@ ro_array_t *init_ro_array(size_t size)
     return a;
 }
 
+ro_array_t *init_ro_array_with(size_t size, ...)
+{
+    va_list args;
+
+    ro_array_t *a = calloc(1, sizeof(ro_array_t));
+    if (!a)
+    {
+        return 0;
+    }
+
+    if (!size)
+    {
+        return a;
+    }
+
+    ro_value_t *values = malloc(size * sizeof(ro_value_t));
+    if (!values)
+    {
+        free(a);
+        return 0;
+    }
+    a->size = size;
+
+    va_start(args, size);
+    for (size_t i = 0; i < size; ++i)
+    {
+        values[i] = va_arg(args, ro_value_t);
+    }
+
+    va_end(args);
+    a->values = values;
+    return a;
+}
+
 ro_dict_t *init_ro_dict(size_t size)
 {
     ro_dict_t *d = calloc(1, sizeof(ro_dict_t));
@@ -52,6 +87,40 @@ ro_dict_t *init_ro_dict(size_t size)
         return 0;
     }
     d->size = size;
+    return d;
+}
+
+ro_dict_t *init_ro_dict_with(size_t size, ...)
+{
+    va_list args;
+
+    ro_dict_t *d = calloc(1, sizeof(ro_dict_t));
+    if (!d)
+    {
+        return 0;
+    }
+
+    if (!size)
+    {
+        return d;
+    }
+
+    ro_item_t *items = malloc(size * sizeof(ro_item_t));
+    if (!items)
+    {
+        free(d);
+        return 0;
+    }
+    d->size = size;
+
+    va_start(args, size);
+    for (size_t i = 0; i < size; ++i)
+    {
+        items[i] = va_arg(args, ro_item_t);
+    }
+
+    va_end(args);
+    d->items = items;
     return d;
 }
 

@@ -6,7 +6,7 @@
 ** \brief Called after encountering a '+' or '-' sign, or any digit.
 **        Starts from the sign or digit that started the number
 */
-bool is_number_valid_buff(char *buff, size_t *idx)
+bool is_number_valid(char *buff, size_t *idx)
 {
     if (!buff || !idx)
     {
@@ -78,8 +78,7 @@ bool is_number_valid_buff(char *buff, size_t *idx)
 **        are valid, if the quotes are in even number, and brackets and curly
 **        brackets have a matching number of opening and closing
 */
-bool check_bools_nulls_numbers_counts_buff(char *buff, size_t buff_len,
-                                           bool is_dict)
+bool check_bools_nulls_numbers_counts(char *buff, size_t buff_len, bool is_dict)
 {
     if (!buff)
     {
@@ -164,7 +163,7 @@ bool check_bools_nulls_numbers_counts_buff(char *buff, size_t buff_len,
         case '7':
         case '8':
         case '9':
-            if (!is_number_valid_buff(buff, &i))
+            if (!is_number_valid(buff, &i))
             {
                 return false;
             }
@@ -204,9 +203,9 @@ bool check_bools_nulls_numbers_counts_buff(char *buff, size_t buff_len,
         && nb_opened_brackets == nb_closed_brackets;
 }
 
-bool check_dict_trailing_commas_buff(char *buff, size_t *pos);
+bool check_dict_trailing_commas(char *buff, size_t *pos);
 
-bool check_array_trailing_commas_buff(char *buff, size_t *pos)
+bool check_array_trailing_commas(char *buff, size_t *pos)
 {
     if (!buff)
     {
@@ -239,7 +238,7 @@ bool check_array_trailing_commas_buff(char *buff, size_t *pos)
             break;
 
         case '"':
-            i += get_str_len_buff(buff, i);
+            i += get_str_len(buff, i);
             break;
 
         case '+':
@@ -254,7 +253,7 @@ bool check_array_trailing_commas_buff(char *buff, size_t *pos)
         case '7':
         case '8':
         case '9':
-            i += get_num_len_buff(buff, i);
+            i += get_num_len(buff, i);
             break;
 
         case ']':
@@ -265,14 +264,14 @@ bool check_array_trailing_commas_buff(char *buff, size_t *pos)
             return prev_c != ',';
 
         case '[':
-            if (!check_array_trailing_commas_buff(buff, &i))
+            if (!check_array_trailing_commas(buff, &i))
             {
                 return false;
             }
             break;
 
         case '{':
-            if (!check_dict_trailing_commas_buff(buff, &i))
+            if (!check_dict_trailing_commas(buff, &i))
             {
                 return false;
             }
@@ -286,7 +285,7 @@ bool check_array_trailing_commas_buff(char *buff, size_t *pos)
     return true;
 }
 
-bool check_dict_trailing_commas_buff(char *buff, size_t *pos)
+bool check_dict_trailing_commas(char *buff, size_t *pos)
 {
     if (!buff)
     {
@@ -319,7 +318,7 @@ bool check_dict_trailing_commas_buff(char *buff, size_t *pos)
             break;
 
         case '"':
-            i += get_str_len_buff(buff, i);
+            i += get_str_len(buff, i);
             break;
 
         case '+':
@@ -334,7 +333,7 @@ bool check_dict_trailing_commas_buff(char *buff, size_t *pos)
         case '7':
         case '8':
         case '9':
-            i += get_num_len_buff(buff, i);
+            i += get_num_len(buff, i);
             break;
 
         case '}':
@@ -345,14 +344,14 @@ bool check_dict_trailing_commas_buff(char *buff, size_t *pos)
             return prev_c != ',';
 
         case '[':
-            if (!check_array_trailing_commas_buff(buff, &i))
+            if (!check_array_trailing_commas(buff, &i))
             {
                 return false;
             }
             break;
 
         case '{':
-            if (!check_dict_trailing_commas_buff(buff, &i))
+            if (!check_dict_trailing_commas(buff, &i))
             {
                 return false;
             }
@@ -366,9 +365,9 @@ bool check_dict_trailing_commas_buff(char *buff, size_t *pos)
     return true;
 }
 
-bool check_dict_missing_colons_commas_buff(char *buff, size_t *pos);
+bool check_dict_missing_colons_commas(char *buff, size_t *pos);
 
-bool check_array_missing_commas_buff(char *buff, size_t *pos)
+bool check_array_missing_commas(char *buff, size_t *pos)
 {
     if (!buff)
     {
@@ -471,7 +470,7 @@ bool check_array_missing_commas_buff(char *buff, size_t *pos)
             break;
 
         case '"':
-            i += get_str_len_buff(buff, i);
+            i += get_str_len(buff, i);
             break;
 
         case '+':
@@ -486,7 +485,7 @@ bool check_array_missing_commas_buff(char *buff, size_t *pos)
         case '7':
         case '8':
         case '9':
-            i += get_num_len_buff(buff, i);
+            i += get_num_len(buff, i);
             break;
 
         case ']':
@@ -497,14 +496,14 @@ bool check_array_missing_commas_buff(char *buff, size_t *pos)
             return true;
 
         case '[':
-            if (!check_array_missing_commas_buff(buff, &i))
+            if (!check_array_missing_commas(buff, &i))
             {
                 return false;
             }
             break;
 
         case '{':
-            if (!check_dict_missing_colons_commas_buff(buff, &i))
+            if (!check_dict_missing_colons_commas(buff, &i))
             {
                 return false;
             }
@@ -553,7 +552,7 @@ bool check_array_missing_commas_buff(char *buff, size_t *pos)
     return false;
 }
 
-bool check_dict_missing_colons_commas_buff(char *buff, size_t *pos)
+bool check_dict_missing_colons_commas(char *buff, size_t *pos)
 {
     if (!buff)
     {
@@ -676,7 +675,7 @@ bool check_dict_missing_colons_commas_buff(char *buff, size_t *pos)
             break;
 
         case '"':
-            i += get_str_len_buff(buff, i);
+            i += get_str_len(buff, i);
             break;
 
         case '+':
@@ -691,7 +690,7 @@ bool check_dict_missing_colons_commas_buff(char *buff, size_t *pos)
         case '7':
         case '8':
         case '9':
-            i += get_num_len_buff(buff, i);
+            i += get_num_len(buff, i);
             break;
 
         case '}':
@@ -702,14 +701,14 @@ bool check_dict_missing_colons_commas_buff(char *buff, size_t *pos)
             return nb_comma == nb_colon - 1;
 
         case '[':
-            if (!check_array_missing_commas_buff(buff, &i))
+            if (!check_array_missing_commas(buff, &i))
             {
                 return false;
             }
             break;
 
         case '{':
-            if (!check_dict_missing_colons_commas_buff(buff, &i))
+            if (!check_dict_missing_colons_commas(buff, &i))
             {
                 return false;
             }
@@ -719,7 +718,7 @@ bool check_dict_missing_colons_commas_buff(char *buff, size_t *pos)
     return false;
 }
 
-bool is_json_valid_buff(char *buff, size_t buff_len, bool is_dict)
+bool is_json_valid(char *buff, size_t buff_len, bool is_dict)
 {
 #ifdef SEPVALIDATION
     return true;
@@ -729,11 +728,9 @@ bool is_json_valid_buff(char *buff, size_t buff_len, bool is_dict)
     {
         return false;
     }
-    return check_bools_nulls_numbers_counts_buff(buff, buff_len, is_dict)
-            && is_dict
-        ? (check_dict_trailing_commas_buff(buff, 0) && buff[buff_len - 3] == '}'
-           && check_dict_missing_colons_commas_buff(buff, 0))
-        : (check_array_trailing_commas_buff(buff, 0)
-           && buff[buff_len - 3] == ']'
-           && check_array_missing_commas_buff(buff, 0));
+    return check_bools_nulls_numbers_counts(buff, buff_len, is_dict) && is_dict
+        ? (check_dict_trailing_commas(buff, 0) && buff[buff_len - 3] == '}'
+           && check_dict_missing_colons_commas(buff, 0))
+        : (check_array_trailing_commas(buff, 0) && buff[buff_len - 3] == ']'
+           && check_array_missing_commas(buff, 0));
 }

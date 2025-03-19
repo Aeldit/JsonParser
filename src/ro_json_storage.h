@@ -17,6 +17,30 @@
 #define RO_ITEM_OF(T_TYPE, type_field, value)                                  \
   ((ro_item_t){.type = (T_TYPE), .key = key, .type_field = (value)})
 
+#define ROVAL_STR(v) ((ro_value_t){.type = T_STR, .strv = (v)})
+#define ROVAL_LONG(v) ((ro_value_t){.type = T_LONG, .longv = (v)})
+#define ROVAL_DOUBLE(v) ((ro_value_t){.type = T_DOUBLE, .doublev = (v)})
+#define ROVAL_EXPLONG(v) ((ro_value_t){.type = T_EXP_LONG, .exp_longv = (v)})
+#define ROVAL_EXPDOUBLE(v)                                                     \
+  ((ro_value_t){.type = T_EXP_DOUBLE, .exp_doublev = (v)})
+#define ROVAL_BOOL(v) ((ro_value_t){.type = T_BOOL, .boolv = (v)})
+#define ROVAL_NULL ((ro_value_t){.type = T_NULL})
+#define ROVAL_ARR(v) ((ro_value_t){.type = T_ARR, .arrayv = (v)})
+#define ROVAL_DICT(v) ((ro_value_t){.type = T_DICT, .dictv = (v)})
+
+#define ROIT_STR(k, v) ((ro_item_t){.type = T_STR, .key = (k), .strv = (v)})
+#define ROIT_LONG(k, v) ((ro_item_t){.type = T_LONG, .key = (k), .longv = (v)})
+#define ROIT_DOUBLE(k, v)                                                      \
+  ((ro_item_t){.type = T_DOUBLE, .key = (k), .doublev = (v)})
+#define ROIT_EXPLONG(k, v)                                                     \
+  ((ro_item_t){.type = T_EXP_LONG, .key = (k), .exp_longv = (v)})
+#define ROIT_EXPDOUBLE(k, v)                                                   \
+  ((ro_item_t){.type = T_EXP_DOUBLE, .key = (k), .exp_doublev = (v)})
+#define ROIT_BOOL(k, v) ((ro_item_t){.type = T_BOOL, .key = (k), .boolv = (v)})
+#define ROIT_NULL(k) ((ro_item_t){.type = T_NULL, .key = (k)})
+#define ROIT_ARR(k, v) ((ro_item_t){.type = T_ARR, .key = (k), .arrayv = (v)})
+#define ROIT_DICT(k, v) ((ro_item_t){.type = T_DICT, .key = (k), .dictv = (v)})
+
 /*******************************************************************************
 **                                 STRUCTURES                                 **
 *******************************************************************************/
@@ -76,7 +100,9 @@ typedef struct {
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
 ro_array_t *init_ro_array(size_t size);
+ro_array_t *init_ro_array_with(size_t size, ...);
 ro_dict_t *init_ro_dict(size_t size);
+ro_dict_t *init_ro_dict_with(size_t size, ...);
 ro_json_t *init_ro_json(bool is_array, ro_array_t *a, ro_dict_t *d);
 
 ro_value_t ro_array_get(ro_array_t *a, size_t index);

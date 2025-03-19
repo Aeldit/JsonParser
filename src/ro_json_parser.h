@@ -14,7 +14,7 @@
 ** \param idx The index of the character '[' that begins the current array
 ** \returns The json array parsed from the position
 */
-ro_array_t *ro_parse_array_buff(char *b, unsigned long *idx);
+ro_array_t *ro_parse_array(char *b, size_t *idx);
 /**
 ** \param b The buffer containing the json currently being parsed
 ** \param idx A pointer to the index of the character '{' that begins the
@@ -24,7 +24,7 @@ ro_array_t *ro_parse_array_buff(char *b, unsigned long *idx);
 **            index starts at 0
 ** \returns The json dict parsed from the index
 */
-ro_dict_t *ro_parse_dict_buff(char *b, unsigned long *idx);
+ro_dict_t *ro_parse_dict(char *b, size_t *idx);
 
 /**
 ** \brief Parses the given file and returns the associated ro_json_t structure

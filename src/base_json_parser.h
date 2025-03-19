@@ -4,31 +4,12 @@
 /*******************************************************************************
 **                                  INCLUDES                                  **
 *******************************************************************************/
-#include <stdio.h>
-
 #include "base_json_storage.h"
 #include "ro_json_storage.h"
 
 /*******************************************************************************
 **                                   MACROS                                   **
 *******************************************************************************/
-// The following MACROS are used int the parsing functions
-#define IS_END_CHAR(c)                                                         \
-  (!(c) || (c) == ',' || (c) == '\n' || (c) == ']' || (c) == '}')
-
-#define IS_STRING_END(c) (!(c) || ((c) == '"' && prev_c != '\\'))
-
-#define IS_NOT_BOOLEAN(c, l)                                                   \
-  (!(l) || ((c) == 'f' && (l) != 5) || ((c) == 't' && (l) != 4))
-
-/**
-** \def Used by the functions that read the file using fseef() and fgetc()
-**      inside while loops, it sets the cursor on the 'p' position,
-**      increments 'p' and puts in 'c' the current character
-*/
-#define SEEK_AND_GET_CHAR(p)                                                   \
-  (!fseek(f, (p)++, SEEK_SET) && (c = fgetc(f)) != EOF)
-
 #ifndef MAX_READ_BUFF_SIZE
 #define MAX_READ_BUFF_SIZE (1 << 30) // ~= 1 GB
 #endif
@@ -85,9 +66,9 @@ typedef struct {
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
-size_t get_str_len_buff(char *buff, size_t pos);
+size_t get_str_len(char *buff, size_t pos);
 
-size_t get_num_len_buff(char *buff, size_t pos);
+size_t get_num_len(char *buff, size_t pos);
 
 /**
 ** \brief Takes sl's char array and transforms it into a long.
@@ -122,7 +103,7 @@ bool has_exponent(char *str, size_t len);
 **            that started the string we want to parse
 ** \returns A NULL_STRING in case of error, the parsed string otherwise
 */
-string_t parse_string_buff(char *buff, size_t *idx);
+string_t parse_string(char *buff, size_t *idx);
 
 /**
 ** \brief Reads the buffer from the given pos - 1
@@ -134,7 +115,7 @@ string_t parse_string_buff(char *buff, size_t *idx);
 **          is a float and has an exponent, or NULL_STR_AND_LEN_TUPLE if there
 **          was an error
 */
-str_and_len_tuple_t parse_number_buff(char *buff, size_t *idx);
+str_and_len_tuple_t parse_number(char *buff, size_t *idx);
 
 /**
 ** \param buff The current json file's contents
@@ -142,14 +123,14 @@ str_and_len_tuple_t parse_number_buff(char *buff, size_t *idx);
 **            started the boolean
 ** \returns 5 if false, 4 if true, 0 otherwise
 */
-size_t parse_boolean_buff(char *buff, size_t *idx);
+size_t parse_boolean(char *buff, size_t *idx);
 
 /**
 ** \param idx The index of the character just after the '[' that begins the
 **            current array
 ** \returns The number of elements of the current array
 */
-size_t get_nb_elts_array_buff(char *buff, size_t idx);
+size_t get_nb_elts_array(char *buff, size_t idx);
 
 /**
 ** \param buff The buffer containing the object currently being parsed
@@ -157,6 +138,6 @@ size_t get_nb_elts_array_buff(char *buff, size_t idx);
 **            current dict
 ** \returns The number of elements of the current dict
 */
-size_t get_nb_elts_dict_buff(char *buff, size_t idx);
+size_t get_nb_elts_dict(char *buff, size_t idx);
 
 #endif // !BASE_JSON_PARSER_H
