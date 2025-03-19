@@ -20,10 +20,10 @@
 #define T_DICT 9
 
 #define STRING_OF(s, l)                                                        \
-  ((string_t){.str = (s), .len = (l), .needs_freeing = true})
+    ((string_t){ .str = (s), .len = (l), .needs_freeing = true })
 #define STRING_NOFREE_OF(s, l)                                                 \
-  ((string_t){.str = (s), .len = (l), .needs_freeing = false})
-#define NULL_STRING ((string_t){.str = 0, .len = 0, .needs_freeing = false})
+    ((string_t){ .str = (s), .len = (l), .needs_freeing = false })
+#define NULL_STRING ((string_t){ .str = 0, .len = 0, .needs_freeing = false })
 
 /*
 ** \def Checks if the JSON instance is not null, if the JSON instance is an
@@ -63,20 +63,23 @@ typedef uint_fast64_t u64;
 /*******************************************************************************
 **                                 STRUCTURES                                 **
 *******************************************************************************/
-typedef struct {
-  char *str;
-  size_t len;
-  bool needs_freeing;
+typedef struct
+{
+    char *str;
+    size_t len;
+    bool needs_freeing;
 } string_t;
 
-typedef struct {
-  i64 number;
-  i64 exponent;
+typedef struct
+{
+    i64 number;
+    i64 exponent;
 } exp_long_t;
 
-typedef struct {
-  double number;
-  i64 exponent;
+typedef struct
+{
+    double number;
+    i64 exponent;
 } exp_double_t;
 
 /*******************************************************************************
