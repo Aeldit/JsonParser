@@ -14,7 +14,7 @@
 /*******************************************************************************
 **                           FUNCTIONS DECLARATIONS                           **
 *******************************************************************************/
-rw_dict_t *rw_parse_dict_buff(char *b, size_t *pos);
+rw_dict_t *rw_parse_dict(char *b, size_t *pos);
 
 /*******************************************************************************
 **                               LOCAL FUNCTIONS                              **
@@ -35,7 +35,7 @@ rw_dict_t *destroy_rw_dict_on_error(rw_dict_t *d, string_t key)
 /*******************************************************************************
 **                              LOCAL FUNCTIONS                               **
 *******************************************************************************/
-rw_array_t *rw_parse_array_buff(char *b, size_t *idx)
+rw_array_t *rw_parse_array(char *b, size_t *idx)
 {
     if (!b)
     {
@@ -46,7 +46,7 @@ rw_array_t *rw_parse_array_buff(char *b, size_t *idx)
     // already read a '['
     size_t i = idx == 0 ? 0 : *idx + 1;
 
-    size_t nb_elts = get_nb_elts_array_buff(b, i);
+    size_t nb_elts = get_nb_elts_array(b, i);
 
     rw_array_t *a = calloc(1, sizeof(rw_array_t));
     if (!a || nb_elts == 0)
@@ -58,13 +58,8 @@ rw_array_t *rw_parse_array_buff(char *b, size_t *idx)
     size_t initial_i = i;
 
     char c = 0;
-    while ((c = b[i]))
+    while ((c = b[i]) && nb_elts_parsed < nb_elts)
     {
-        if (nb_elts_parsed >= nb_elts)
-        {
-            break;
-        }
-
         string_t s = NULL_STRING;
         str_and_len_tuple_t sl = NULL_STR_AND_LEN_TUPLE;
         size_t len = 0;
@@ -73,7 +68,7 @@ rw_array_t *rw_parse_array_buff(char *b, size_t *idx)
         switch (c)
         {
         case '"':
-            if (!(s = parse_string_buff(b, &i)).str)
+            if (!(s = parse_string(b, &i)).str)
             {
                 return destroy_rw_array_on_error(a);
             }
@@ -93,7 +88,7 @@ rw_array_t *rw_parse_array_buff(char *b, size_t *idx)
         case '7':
         case '8':
         case '9':
-            if (!(sl = parse_number_buff(b, &i)).str)
+            if (!(sl = parse_number(b, &i)).str)
             {
                 return destroy_rw_array_on_error(a);
             }
@@ -138,8 +133,8 @@ rw_array_t *rw_parse_array_buff(char *b, size_t *idx)
 
         case 't':
         case 'f':
-            len = parse_boolean_buff(b, &i);
-            if (IS_NOT_BOOLEAN(c, len))
+            len = parse_boolean(b, &i);
+            if ((c == 'f' && len != 5) || (c == 't' && len != 4))
             {
                 return destroy_rw_array_on_error(a);
             }
@@ -154,7 +149,7 @@ rw_array_t *rw_parse_array_buff(char *b, size_t *idx)
             break;
 
         case '[':
-            if (!(tmp_a = rw_parse_array_buff(b, &i)))
+            if (!(tmp_a = rw_parse_array(b, &i)))
             {
                 return destroy_rw_array_on_error(a);
             }
@@ -163,7 +158,7 @@ rw_array_t *rw_parse_array_buff(char *b, size_t *idx)
             break;
 
         case '{':
-            if (!(tmp_jd = rw_parse_dict_buff(b, &i)))
+            if (!(tmp_jd = rw_parse_dict(b, &i)))
             {
                 return destroy_rw_array_on_error(a);
             }
@@ -180,7 +175,7 @@ rw_array_t *rw_parse_array_buff(char *b, size_t *idx)
     return a;
 }
 
-rw_dict_t *rw_parse_dict_buff(char *b, size_t *idx)
+rw_dict_t *rw_parse_dict(char *b, size_t *idx)
 {
     if (!b)
     {
@@ -191,7 +186,7 @@ rw_dict_t *rw_parse_dict_buff(char *b, size_t *idx)
     // already read a '{'
     size_t i = idx == 0 ? 0 : *idx + 1;
 
-    size_t nb_elts = get_nb_elts_dict_buff(b, i);
+    size_t nb_elts = get_nb_elts_dict(b, i);
 
     rw_dict_t *d = calloc(1, sizeof(rw_dict_t));
     if (!d || nb_elts == 0)
@@ -223,7 +218,7 @@ rw_dict_t *rw_parse_dict_buff(char *b, size_t *idx)
         case '"':
             if (is_waiting_key)
             {
-                if (!(key = parse_string_buff(b, &i)).str)
+                if (!(key = parse_string(b, &i)).str)
                 {
                     return destroy_rw_dict_on_error(d, key);
                 }
@@ -231,7 +226,7 @@ rw_dict_t *rw_parse_dict_buff(char *b, size_t *idx)
             }
             else
             {
-                if (!(s = parse_string_buff(b, &i)).str)
+                if (!(s = parse_string(b, &i)).str)
                 {
                     return destroy_rw_dict_on_error(d, key);
                 }
@@ -252,7 +247,7 @@ rw_dict_t *rw_parse_dict_buff(char *b, size_t *idx)
         case '7':
         case '8':
         case '9':
-            if (!(sl = parse_number_buff(b, &i)).str)
+            if (!(sl = parse_number(b, &i)).str)
             {
                 return destroy_rw_dict_on_error(d, key);
             }
@@ -297,8 +292,8 @@ rw_dict_t *rw_parse_dict_buff(char *b, size_t *idx)
 
         case 't':
         case 'f':
-            len = parse_boolean_buff(b, &i);
-            if (IS_NOT_BOOLEAN(c, len))
+            len = parse_boolean(b, &i);
+            if ((c == 'f' && len != 5) || (c == 't' && len != 4))
             {
                 return destroy_rw_dict_on_error(d, key);
             }
@@ -313,7 +308,7 @@ rw_dict_t *rw_parse_dict_buff(char *b, size_t *idx)
             break;
 
         case '[':
-            if (!(tmp_ja = rw_parse_array_buff(b, &i)))
+            if (!(tmp_ja = rw_parse_array(b, &i)))
             {
                 return destroy_rw_dict_on_error(d, key);
             }
@@ -322,7 +317,7 @@ rw_dict_t *rw_parse_dict_buff(char *b, size_t *idx)
             break;
 
         case '{':
-            if (!(tmp_jd = rw_parse_dict_buff(b, &i)))
+            if (!(tmp_jd = rw_parse_dict(b, &i)))
             {
                 return destroy_rw_dict_on_error(d, key);
             }
@@ -367,69 +362,51 @@ rw_json_t *rw_parse(char *file)
     size_t nb_chars = st.st_size;
 
     char c = fgetc(f);
-    if (c == '{')
+    if (c == '{' && nb_chars < MAX_READ_BUFF_SIZE)
     {
-        rw_dict_t *d = 0;
-        if (nb_chars < MAX_READ_BUFF_SIZE)
+        char *b = calloc(nb_chars + 1, sizeof(char));
+        if (!b || fseek(f, offset, SEEK_SET))
         {
-            char *b = calloc(nb_chars + 1, sizeof(char));
-            if (!b || fseek(f, offset, SEEK_SET))
-            {
-                fclose(f);
-                free(b);
-                return 0;
-            }
-            fread(b, sizeof(char), nb_chars, f);
-
-            if (!is_json_valid_buff(b, nb_chars, true))
-            {
-                printf("Invalid json file\n");
-                free(b);
-                fclose(f);
-                return 0;
-            }
-
-            d = rw_parse_dict_buff(b, 0);
+            fclose(f);
             free(b);
+            return 0;
         }
-        else
+        fread(b, sizeof(char), nb_chars, f);
+
+        if (!is_json_valid(b, nb_chars, true))
         {
+            printf("Invalid json file\n");
+            free(b);
             fclose(f);
             return 0;
         }
+
+        rw_dict_t *d = rw_parse_dict(b, 0);
+        free(b);
         fclose(f);
         return init_rw_json(0, 0, d);
     }
-    else if (c == '[')
+    else if (c == '[' && nb_chars < MAX_READ_BUFF_SIZE)
     {
-        rw_array_t *a = 0;
-        if (nb_chars < MAX_READ_BUFF_SIZE)
-        {
-            char *b = calloc(nb_chars + 1, sizeof(char));
-            if (!b || fseek(f, offset, SEEK_SET))
-            {
-                fclose(f);
-                free(b);
-                return 0;
-            }
-            fread(b, sizeof(char), nb_chars, f);
-
-            if (!is_json_valid_buff(b, nb_chars, false))
-            {
-                printf("Invalid json file\n");
-                fclose(f);
-                free(b);
-                return 0;
-            }
-
-            a = rw_parse_array_buff(b, 0);
-            free(b);
-        }
-        else
+        char *b = calloc(nb_chars + 1, sizeof(char));
+        if (!b || fseek(f, offset, SEEK_SET))
         {
             fclose(f);
+            free(b);
             return 0;
         }
+        fread(b, sizeof(char), nb_chars, f);
+
+        if (!is_json_valid(b, nb_chars, false))
+        {
+            printf("Invalid json file\n");
+            fclose(f);
+            free(b);
+            return 0;
+        }
+
+        rw_array_t *a = rw_parse_array(b, 0);
+        free(b);
         fclose(f);
         return init_rw_json(1, a, 0);
     }

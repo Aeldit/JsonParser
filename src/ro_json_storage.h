@@ -41,6 +41,12 @@
 #define ROIT_ARR(k, v) ((ro_item_t){.type = T_ARR, .key = (k), .arrayv = (v)})
 #define ROIT_DICT(k, v) ((ro_item_t){.type = T_DICT, .key = (k), .dictv = (v)})
 
+// Variants used for the tests
+#define ROVAL_EXPLONG_T(v, e)                                                  \
+  ((ro_value_t){.type = T_EXP_LONG, .exp_longv = EXP_LONG_OF((v), (e))})
+#define ROVAL_EXPDOUBLE_T(v, e)                                                \
+  ((ro_value_t){.type = T_EXP_DOUBLE, .exp_doublev = EXP_DOUBLE_OF((v), (e))})
+
 /*******************************************************************************
 **                                 STRUCTURES                                 **
 *******************************************************************************/
