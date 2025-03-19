@@ -12,11 +12,6 @@ TARGET=json-parser
 all: clean $(TARGET)
 	./$(TARGET) t.json
 
-noprint: clean
-	$(CC) $(CFLAGS) -pg -DVALGRING_DISABLE_PRINT \
-			$(CFILESBASE) $(CFILESRO) -o $(TARGET)
-	./$(TARGET) flights-1m.json
-
 rw: clean
 	$(CC) $(CFLAGS) $(CFILESBASE) $(CFILESRW) -o $(TARGET)
 	./$(TARGET) t.json
@@ -27,9 +22,25 @@ mem-least: clean
 	$(CC) $(CFLAGS) -DLEAST $(CFILESBASE) $(CFILESRO) -o $(TARGET)
 	./$(TARGET) t.json
 
+noprint: clean
+	$(CC) $(CFLAGS) $(CFILESBASE) $(CFILESRO) -o $(TARGET) \
+		 -DVALGRING_DISABLE_PRINT
+	./$(TARGET) flights-1m.json
+
+noprintrw: clean
+	$(CC) $(CFLAGS) $(CFILESBASE) $(CFILESRW) -o $(TARGET) \
+		 -DVALGRING_DISABLE_PRINT
+	./$(TARGET) flights-1m.json
+
 profile: clean
 	 	$(CC) $(CFLAGS) -pg -DVALGRING_DISABLE_PRINT \
 			$(CFILESBASE) $(CFILESRO) -o $(TARGET)
+		./$(TARGET) flights-1m.json
+		gprof -z $(TARGET)
+
+profilerw: clean
+	 	$(CC) $(CFLAGS) -pg -DVALGRING_DISABLE_PRINT \
+			$(CFILESBASE) $(CFILESRW) -o $(TARGET)
 		./$(TARGET) flights-1m.json
 		gprof -z $(TARGET)
 

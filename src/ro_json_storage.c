@@ -48,7 +48,7 @@ ro_array_t *init_ro_array_with(size_t size, ...)
         return a;
     }
 
-    ro_value_t *values = malloc(size * sizeof(ro_value_t));
+    ro_value_t *values = calloc(size, sizeof(ro_value_t));
     if (!values)
     {
         free(a);
@@ -105,7 +105,7 @@ ro_dict_t *init_ro_dict_with(size_t size, ...)
         return d;
     }
 
-    ro_item_t *items = malloc(size * sizeof(ro_item_t));
+    ro_item_t *items = calloc(size, sizeof(ro_item_t));
     if (!items)
     {
         free(d);
