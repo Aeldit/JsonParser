@@ -11,43 +11,7 @@
 *******************************************************************************/
 extern inline size_t get_str_len(char *buff, size_t pos);
 
-size_t get_num_len(char *buff, size_t pos)
-{
-    if (!buff)
-    {
-        return 0;
-    }
-
-    size_t nb_chars = 0;
-
-    char c = 0;
-    while ((c = buff[pos++]))
-    {
-        switch (c)
-        {
-        case '+':
-        case '-':
-        case '.':
-        case 'e':
-        case 'E':
-        case '0':
-        case '1':
-        case '2':
-        case '3':
-        case '4':
-        case '5':
-        case '6':
-        case '7':
-        case '8':
-        case '9':
-            ++nb_chars;
-            break;
-        default:
-            return nb_chars;
-        }
-    }
-    return 0;
-}
+extern inline size_t get_num_len(char *buff, size_t pos);
 
 long_with_or_without_exponent_t str_to_long(str_and_len_tuple_t *sl)
 {
