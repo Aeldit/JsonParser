@@ -3,16 +3,9 @@
 /*******************************************************************************
 **                                  INCLUDES                                  **
 *******************************************************************************/
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-
-/*******************************************************************************
-**                              DEFINES / MACROS                              **
-*******************************************************************************/
-#define RO_VALUE_OF(T_TYPE, type_field)                                        \
-    ((ro_value_t){ .type = (T_TYPE), .type_field = (value) })
-#define RO_ITEM_OF(T_TYPE, type_field)                                         \
-    ((ro_item_t){ .type = (T_TYPE), .key = (key), .type_field = (value) })
 
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
@@ -40,6 +33,40 @@ ro_array_t *init_ro_array(size_t size)
     return a;
 }
 
+ro_array_t *init_ro_array_with(size_t size, ...)
+{
+    va_list args;
+
+    ro_array_t *a = calloc(1, sizeof(ro_array_t));
+    if (!a)
+    {
+        return 0;
+    }
+
+    if (!size)
+    {
+        return a;
+    }
+
+    ro_value_t *values = calloc(size, sizeof(ro_value_t));
+    if (!values)
+    {
+        free(a);
+        return 0;
+    }
+    a->size = size;
+
+    va_start(args, size);
+    for (size_t i = 0; i < size; ++i)
+    {
+        values[i] = va_arg(args, ro_value_t);
+    }
+
+    va_end(args);
+    a->values = values;
+    return a;
+}
+
 ro_dict_t *init_ro_dict(size_t size)
 {
     ro_dict_t *d = calloc(1, sizeof(ro_dict_t));
@@ -60,6 +87,40 @@ ro_dict_t *init_ro_dict(size_t size)
         return 0;
     }
     d->size = size;
+    return d;
+}
+
+ro_dict_t *init_ro_dict_with(size_t size, ...)
+{
+    va_list args;
+
+    ro_dict_t *d = calloc(1, sizeof(ro_dict_t));
+    if (!d)
+    {
+        return 0;
+    }
+
+    if (!size)
+    {
+        return d;
+    }
+
+    ro_item_t *items = calloc(size, sizeof(ro_item_t));
+    if (!items)
+    {
+        free(d);
+        return 0;
+    }
+    d->size = size;
+
+    va_start(args, size);
+    for (size_t i = 0; i < size; ++i)
+    {
+        items[i] = va_arg(args, ro_item_t);
+    }
+
+    va_end(args);
+    d->items = items;
     return d;
 }
 
@@ -85,153 +146,6 @@ ro_json_t *init_ro_json(bool is_array, ro_array_t *a, ro_dict_t *d)
         j->dict = d;
     }
     return j;
-}
-
-/*******************************************************************************
-**                                     ADDS                                   **
-*******************************************************************************/
-void ro_array_add_str(ro_array_t *a, string_t value)
-{
-    if (a && a->values && a->insert_index < a->size && value.str)
-    {
-        a->values[a->insert_index++] = RO_VALUE_OF(T_STR, strv);
-    }
-}
-
-void ro_array_add_long(ro_array_t *a, i64 value)
-{
-    if (a && a->values && a->insert_index < a->size)
-    {
-        a->values[a->insert_index++] = RO_VALUE_OF(T_LONG, longv);
-    }
-}
-
-void ro_array_add_double(ro_array_t *a, double value)
-{
-    if (a && a->values && a->insert_index < a->size)
-    {
-        a->values[a->insert_index++] = RO_VALUE_OF(T_DOUBLE, doublev);
-    }
-}
-
-void ro_array_add_exp_long(ro_array_t *a, exp_long_t value)
-{
-    if (a && a->values && a->insert_index < a->size)
-    {
-        a->values[a->insert_index++] = RO_VALUE_OF(T_EXP_LONG, exp_longv);
-    }
-}
-
-void ro_array_add_exp_double(ro_array_t *a, exp_double_t value)
-{
-    if (a && a->values && a->insert_index < a->size)
-    {
-        a->values[a->insert_index++] = RO_VALUE_OF(T_EXP_DOUBLE, exp_doublev);
-    }
-}
-
-void ro_array_add_bool(ro_array_t *a, bool value)
-{
-    if (a && a->values && a->insert_index < a->size)
-    {
-        a->values[a->insert_index++] = RO_VALUE_OF(T_BOOL, boolv);
-    }
-}
-
-void ro_array_add_null(ro_array_t *a)
-{
-    if (a && a->values && a->insert_index < a->size)
-    {
-        a->values[a->insert_index++] = (ro_value_t){ .type = T_NULL };
-    }
-}
-
-void ro_array_add_array(ro_array_t *a, ro_array_t *value)
-{
-    if (a && a->values && value && a->insert_index < a->size)
-    {
-        a->values[a->insert_index++] = RO_VALUE_OF(T_ARR, arrayv);
-    }
-}
-
-void ro_array_add_dict(ro_array_t *a, ro_dict_t *value)
-{
-    if (a && a->values && value && a->insert_index < a->size)
-    {
-        a->values[a->insert_index++] = RO_VALUE_OF(T_DICT, dictv);
-    }
-}
-
-void ro_dict_add_str(ro_dict_t *d, string_t key, string_t value)
-{
-    if (d && d->items && d->insert_index < d->size && key.str && value.str)
-    {
-        d->items[d->insert_index++] = RO_ITEM_OF(T_STR, strv);
-    }
-}
-
-void ro_dict_add_long(ro_dict_t *d, string_t key, i64 value)
-{
-    if (d && d->items && d->insert_index < d->size && key.str)
-    {
-        d->items[d->insert_index++] = RO_ITEM_OF(T_LONG, longv);
-    }
-}
-
-void ro_dict_add_double(ro_dict_t *d, string_t key, double value)
-{
-    if (d && d->items && d->insert_index < d->size && key.str)
-    {
-        d->items[d->insert_index++] = RO_ITEM_OF(T_DOUBLE, doublev);
-    }
-}
-
-void ro_dict_add_exp_long(ro_dict_t *d, string_t key, exp_long_t value)
-{
-    if (d && d->items && d->insert_index < d->size && key.str)
-    {
-        d->items[d->insert_index++] = RO_ITEM_OF(T_EXP_LONG, exp_longv);
-    }
-}
-
-void ro_dict_add_exp_double(ro_dict_t *d, string_t key, exp_double_t value)
-{
-    if (d && d->items && d->insert_index < d->size && key.str)
-    {
-        d->items[d->insert_index++] = RO_ITEM_OF(T_EXP_DOUBLE, exp_doublev);
-    }
-}
-
-void ro_dict_add_bool(ro_dict_t *d, string_t key, bool value)
-{
-    if (d && d->items && d->insert_index < d->size && key.str)
-    {
-        d->items[d->insert_index++] = RO_ITEM_OF(T_BOOL, boolv);
-    }
-}
-
-void ro_dict_add_null(ro_dict_t *d, string_t key)
-{
-    if (d && d->items && d->insert_index < d->size && key.str)
-    {
-        d->items[d->insert_index++] = (ro_item_t){ .type = T_NULL, .key = key };
-    }
-}
-
-void ro_dict_add_array(ro_dict_t *d, string_t key, ro_array_t *value)
-{
-    if (d && d->items && value && d->insert_index < d->size && key.str)
-    {
-        d->items[d->insert_index++] = RO_ITEM_OF(T_ARR, arrayv);
-    }
-}
-
-void ro_dict_add_dict(ro_dict_t *d, string_t key, ro_dict_t *value)
-{
-    if (d && d->items && value && d->insert_index < d->size && key.str)
-    {
-        d->items[d->insert_index++] = RO_ITEM_OF(T_DICT, dictv);
-    }
 }
 
 /*******************************************************************************

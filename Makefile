@@ -10,7 +10,7 @@ TESTFILES=tests/*.c
 TARGET=json-parser
 
 all: clean $(TARGET)
-	./$(TARGET) err.json
+	./$(TARGET) t.json
 
 rw: clean
 	$(CC) $(CFLAGS) $(CFILESBASE) $(CFILESRW) -o $(TARGET)
@@ -21,6 +21,28 @@ rw: clean
 mem-least: clean
 	$(CC) $(CFLAGS) -DLEAST $(CFILESBASE) $(CFILESRO) -o $(TARGET)
 	./$(TARGET) t.json
+
+noprint: clean
+	$(CC) $(CFLAGS) $(CFILESBASE) $(CFILESRO) -o $(TARGET) \
+		 -DVALGRING_DISABLE_PRINT
+	./$(TARGET) flights-1m.json
+
+noprintrw: clean
+	$(CC) $(CFLAGS) $(CFILESBASE) $(CFILESRW) -o $(TARGET) \
+		 -DVALGRING_DISABLE_PRINT
+	./$(TARGET) flights-1m.json
+
+profile: clean
+	 	$(CC) $(CFLAGS) -pg -DVALGRING_DISABLE_PRINT \
+			$(CFILESBASE) $(CFILESRO) -o $(TARGET)
+		./$(TARGET) flights-1m.json
+		gprof -z $(TARGET)
+
+profilerw: clean
+	 	$(CC) $(CFLAGS) -pg -DVALGRING_DISABLE_PRINT \
+			$(CFILESBASE) $(CFILESRW) -o $(TARGET)
+		./$(TARGET) flights-1m.json
+		gprof -z $(TARGET)
 
 .PHONY:
 $(TARGET):
@@ -37,7 +59,7 @@ valgrind-compile: clean
 
 valgrind: valgrind-compile
 	valgrind --tool=callgrind --dump-instr=yes --simulate-cache=yes \
-		--collect-jumps=yes ./$(TARGET) big.json
+		--collect-jumps=yes ./$(TARGET) flights-1m.json
 
 leaks: valgrind-compile
 	valgrind --leak-check=full --show-leak-kinds=all \

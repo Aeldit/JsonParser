@@ -1,3 +1,4 @@
+// clang-format Language: C
 #ifndef BASE_JSON_WRITER_H
 #define BASE_JSON_WRITER_H
 
@@ -33,8 +34,9 @@ typedef struct
 // The following MACROS are used because we have 2 'modes' (ro & rw), which
 // means we have different functions for each type. However, these functions do
 // exactly the same thing, so this macros prevents duplicated code
-#define ADD_VALUES_FOR_MODE(rx_value_t, get_rx_array_as_str,                   \
-                            get_rx_dict_as_str)                                \
+#define ADD_VALUES_FOR_MODE(                                                   \
+    rx_value_t, get_rx_array_as_str, get_rx_dict_as_str                        \
+)                                                                              \
     size_t nb = 0;                                                             \
     for (size_t i = 0; i < size; ++i)                                          \
     {                                                                          \
@@ -158,16 +160,16 @@ typedef struct
     size_t nb_chars = 2 + (indent - 1) * 4 + (indent == 1)                     \
         + fill_rx_string_ll_with_values(ll, a, indent);                        \
     u32 nb_chars_indent = indent * 4;                                          \
-    char *str = calloc(nb_chars + 1, sizeof(char));                            \
+    char *str           = calloc(nb_chars + 1, sizeof(char));                  \
     if (!str)                                                                  \
     {                                                                          \
         destroy_linked_list(ll);                                               \
         return NULL_STRING;                                                    \
     }                                                                          \
     /* |-> Start building the string */                                        \
-    str[0] = '[';                                                              \
-    str[1] = '\n';                                                             \
-    size_t insert_idx = 2;                                                     \
+    str[0]              = '[';                                                 \
+    str[1]              = '\n';                                                \
+    size_t insert_idx   = 2;                                                   \
     string_link_t *link = ll->head;                                            \
     while (link)                                                               \
     {                                                                          \
@@ -191,7 +193,7 @@ typedef struct
             str[insert_idx++] = ',';                                           \
         }                                                                      \
         str[insert_idx++] = '\n';                                              \
-        link = link->next;                                                     \
+        link              = link->next;                                        \
     }                                                                          \
     if (indent == 1)                                                           \
     {                                                                          \
@@ -234,17 +236,17 @@ typedef struct
     size_t nb_chars = 2 + (indent - 1) * 4 + (indent == 1)                     \
         + fill_rx_string_ll_with_items(ll, d, indent);                         \
     u32 nb_chars_indent = indent * 4;                                          \
-    char *str = calloc(nb_chars + 1, sizeof(char));                            \
+    char *str           = calloc(nb_chars + 1, sizeof(char));                  \
     if (!str)                                                                  \
     {                                                                          \
         destroy_linked_list(ll);                                               \
         return NULL_STRING;                                                    \
     }                                                                          \
     /* |-> Start building the string */                                        \
-    str[0] = '{';                                                              \
-    str[1] = '\n';                                                             \
-    size_t insert_idx = 2;                                                     \
-    u8 is_key = 1;                                                             \
+    str[0]              = '{';                                                 \
+    str[1]              = '\n';                                                \
+    size_t insert_idx   = 2;                                                   \
+    u8 is_key           = 1;                                                   \
     string_link_t *link = ll->head;                                            \
     while (link)                                                               \
     {                                                                          \
@@ -280,7 +282,7 @@ typedef struct
             str[insert_idx++] = '\n';                                          \
         }                                                                      \
         is_key = !is_key;                                                      \
-        link = link->next;                                                     \
+        link   = link->next;                                                   \
     }                                                                          \
     if (indent == 1)                                                           \
     {                                                                          \
@@ -331,8 +333,10 @@ string_t get_exp_double_as_str(exp_double_t value);
 string_t get_bool_as_str(u8 value);
 string_t get_null_as_str();
 
-void add_link(string_linked_list_t *ll, string_t str, bool str_needs_free,
-              bool is_from_str);
+void add_link(
+    string_linked_list_t *ll, string_t str, bool str_needs_free,
+    bool is_from_str
+);
 void destroy_linked_list(string_linked_list_t *ll);
 
 #endif // !BASE_JSON_WRITER_H
