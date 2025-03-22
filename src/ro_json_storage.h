@@ -1,3 +1,4 @@
+// clang-format Language: C
 #ifndef RO_JSON_STORAGE_H
 #define RO_JSON_STORAGE_H
 
@@ -48,7 +49,7 @@
 #define ROVAL_EXPLONG_T(v, e)                                                  \
     ((ro_value_t){ .type = T_EXP_LONG, .exp_longv = EXP_LONG_OF((v), (e)) })
 #define ROVAL_EXPDOUBLE_T(v, e)                                                \
-    ((ro_value_t){ .type = T_EXP_DOUBLE,                                       \
+    ((ro_value_t){ .type        = T_EXP_DOUBLE,                                \
                    .exp_doublev = EXP_DOUBLE_OF((v), (e)) })
 
 /*******************************************************************************

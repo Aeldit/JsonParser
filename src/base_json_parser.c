@@ -9,29 +9,7 @@
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
-/**
-** \returns The number of character in the string + 1 (for the last quote '"')
-*/
-size_t get_str_len(char *buff, size_t pos)
-{
-    if (!buff)
-    {
-        return 1;
-    }
-
-    size_t nb_chars = 0;
-
-    char c = 0;
-    while ((c = buff[pos++]))
-    {
-        ++nb_chars;
-        if (c == '"' && pos > 1 && buff[pos - 2])
-        {
-            return nb_chars;
-        }
-    }
-    return 1;
-}
+extern inline size_t get_str_len(char *buff, size_t pos);
 
 size_t get_num_len(char *buff, size_t pos)
 {
@@ -78,7 +56,7 @@ long_with_or_without_exponent_t str_to_long(str_and_len_tuple_t *sl)
         return ERROR_LWOWE;
     }
 
-    char *str = sl->str;
+    char *str  = sl->str;
     size_t len = sl->len;
     if (!str || len == 0)
     {
@@ -87,13 +65,13 @@ long_with_or_without_exponent_t str_to_long(str_and_len_tuple_t *sl)
 
     size_t exp_idx = 0;
 
-    i64 number = 0;
+    i64 number   = 0;
     i64 exponent = 0;
 
     bool is_in_exponent = false;
 
-    u8 has_exponent = sl->has_exponent;
-    i8 is_negative = str[0] == '-' ? -1 : 1;
+    u8 has_exponent    = sl->has_exponent;
+    i8 is_negative     = str[0] == '-' ? -1 : 1;
     i8 is_exp_negative = 1;
 
     char c = 0;
@@ -105,7 +83,7 @@ long_with_or_without_exponent_t str_to_long(str_and_len_tuple_t *sl)
         case 'E':
             if (has_exponent)
             {
-                exp_idx = i;
+                exp_idx        = i;
                 is_in_exponent = true;
             }
             break;
@@ -140,19 +118,17 @@ long_with_or_without_exponent_t str_to_long(str_and_len_tuple_t *sl)
     }
     if (has_exponent)
     {
-        return (long_with_or_without_exponent_t){
-            .has_exponent = 1,
-            .long_exp_value =
-                (exp_long_t){ .number = number * is_negative,
-                              .exponent = exponent * is_exp_negative },
-            .long_value = 0
-        };
+        return (long_with_or_without_exponent_t
+        ){ .has_exponent = 1,
+           .long_exp_value =
+               (exp_long_t){ .number   = number * is_negative,
+                             .exponent = exponent * is_exp_negative },
+           .long_value = 0 };
     }
-    return (long_with_or_without_exponent_t){
-        .has_exponent = 0,
-        .long_value = number * is_negative,
-        .long_exp_value = (exp_long_t){ .number = 0, .exponent = 0 }
-    };
+    return (long_with_or_without_exponent_t
+    ){ .has_exponent   = 0,
+       .long_value     = number * is_negative,
+       .long_exp_value = (exp_long_t){ .number = 0, .exponent = 0 } };
 }
 
 double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t *sl)
@@ -162,27 +138,27 @@ double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t *sl)
         return ERROR_DWOWE;
     }
 
-    char *str = sl->str;
+    char *str  = sl->str;
     size_t len = sl->len;
     if (!str || len == 0)
     {
         return ERROR_DWOWE;
     }
 
-    double number = 0; // Integer part
+    double number   = 0; // Integer part
     double decimals = 0; // Decimal part
-    i64 exponent = 0; // Only used if sl->has_exponent is true
+    i64 exponent    = 0; // Only used if sl->has_exponent is true
 
     i64 nb_digits_decimals = 1;
-    size_t exp_idx = 0;
+    size_t exp_idx         = 0;
 
-    bool dot_reached = false;
+    bool dot_reached    = false;
     bool is_in_exponent = false;
-    u8 has_exponent = sl->has_exponent;
+    u8 has_exponent     = sl->has_exponent;
 
     // If the number is negative, this is set to -1 and the final res is
     // multiplied by it
-    i8 is_negative = str[0] == '-' ? -1 : 1;
+    i8 is_negative     = str[0] == '-' ? -1 : 1;
     i8 is_exp_negative = 1;
 
     char c = 0;
@@ -198,7 +174,7 @@ double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t *sl)
         case 'E':
             if (has_exponent)
             {
-                exp_idx = i;
+                exp_idx        = i;
                 is_in_exponent = true;
             }
             break;
@@ -238,22 +214,18 @@ double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t *sl)
     }
     if (has_exponent)
     {
-        return (double_with_or_without_exponent_t){
-            .has_exponent = 1,
-            .double_exp_value =
-                (exp_double_t){ .number =
-                                    (number + (decimals / nb_digits_decimals))
-                                    * is_negative,
-                                .exponent = exponent * is_exp_negative },
-            .double_value = 0
-        };
+        return (double_with_or_without_exponent_t
+        ){ .has_exponent     = 1,
+           .double_exp_value = (exp_double_t
+           ){ .number =
+                  (number + (decimals / nb_digits_decimals)) * is_negative,
+              .exponent = exponent * is_exp_negative },
+           .double_value     = 0 };
     }
-    return (double_with_or_without_exponent_t){
-        .has_exponent = 0,
-        .double_value =
-            (number + (decimals / nb_digits_decimals)) * is_negative,
-        .double_exp_value = (exp_double_t){ .number = 0, .exponent = 0 }
-    };
+    return (double_with_or_without_exponent_t
+    ){ .has_exponent = 0,
+       .double_value = (number + (decimals / nb_digits_decimals)) * is_negative,
+       .double_exp_value = (exp_double_t){ .number = 0, .exponent = 0 } };
 }
 
 bool is_float(char *str, size_t len)
@@ -355,9 +327,9 @@ string_t parse_string(char *buff, size_t *idx)
     }
 
     size_t start_idx = *idx + 1;
-    size_t len = 0;
-    char c = 0;
-    char prev_c = 0;
+    size_t len       = 0;
+    char c           = 0;
+    char prev_c      = 0;
     // Counts the number of characters
     while ((c = buff[start_idx + len]))
     {
@@ -397,8 +369,8 @@ str_and_len_tuple_t parse_number(char *buff, size_t *idx)
 
     // Counts the number of characters until the first one that is an 'end char'
     size_t end_idx = *idx;
-    size_t size = 0;
-    char c = 0;
+    size_t size    = 0;
+    char c         = 0;
     while ((c = buff[end_idx++]))
     {
         switch (c)
@@ -437,8 +409,9 @@ str_and_len_tuple_t parse_number(char *buff, size_t *idx)
             str[size] = 0;
 
             *idx += size - 1;
-            return STR_AND_LEN_OF(str, size, is_float(str, size),
-                                  has_exponent(str, size));
+            return STR_AND_LEN_OF(
+                str, size, is_float(str, size), has_exponent(str, size)
+            );
         }
         ++size;
     }
@@ -453,8 +426,8 @@ size_t parse_boolean(char *buff, size_t *idx)
     }
 
     size_t end_idx = *idx;
-    size_t size = 0;
-    char c = 0;
+    size_t size    = 0;
+    char c         = 0;
     while ((c = buff[end_idx++]))
     {
         switch (c)
@@ -489,7 +462,7 @@ size_t get_nb_elts_array(char *buff, size_t idx)
 
     // Counts the number of nested arrays/dicts
     u64 array_count = 1;
-    u64 dict_count = 0;
+    u64 dict_count  = 0;
 
     char c = 0;
     while ((c = buff[idx++]) && array_count)
@@ -583,7 +556,7 @@ size_t get_nb_elts_dict(char *buff, size_t idx)
     size_t nb_elts = 0;
 
     // Counts the number of arrays/dicts nesting at the current position
-    u64 dict_count = 1;
+    u64 dict_count  = 1;
     u64 array_count = 0;
 
     bool is_in_key = true;

@@ -1,3 +1,4 @@
+// clang-format Language: C
 #ifndef RO_JSON_PARSER_H
 #define RO_JSON_PARSER_H
 

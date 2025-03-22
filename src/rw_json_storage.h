@@ -1,3 +1,4 @@
+// clang-format Language: C
 #ifndef RW_JSON_STORAGE_H
 #define RW_JSON_STORAGE_H
 

@@ -1,3 +1,4 @@
+// clang-format Language: C
 #ifndef BASE_JSON_PARSER_H
 #define BASE_JSON_PARSER_H
 
@@ -19,20 +20,20 @@
 #define ERROR_DWOWE ((double_with_or_without_exponent_t){ .has_exponent = 2 })
 
 #define STR_AND_LEN_OF(s, l, f, e)                                             \
-    ((str_and_len_tuple_t){                                                    \
-        .str = (s), .len = (l), .is_float = (f), .has_exponent = (e) })
+    ((str_and_len_tuple_t                                                      \
+    ){ .str = (s), .len = (l), .is_float = (f), .has_exponent = (e) })
 #define STR_AND_LEN(s, l)                                                      \
-    ((str_and_len_tuple_t){                                                    \
-        .str = (s), .len = (l), .is_float = false, .has_exponent = false })
+    ((str_and_len_tuple_t                                                      \
+    ){ .str = (s), .len = (l), .is_float = false, .has_exponent = false })
 #define STR_AND_LEN_F_OF(s, l)                                                 \
-    ((str_and_len_tuple_t){                                                    \
-        .str = (s), .len = (l), .is_float = true, .has_exponent = false })
+    ((str_and_len_tuple_t                                                      \
+    ){ .str = (s), .len = (l), .is_float = true, .has_exponent = false })
 #define STR_AND_LEN_E_OF(s, l)                                                 \
-    ((str_and_len_tuple_t){                                                    \
-        .str = (s), .len = (l), .is_float = false, .has_exponent = true })
+    ((str_and_len_tuple_t                                                      \
+    ){ .str = (s), .len = (l), .is_float = false, .has_exponent = true })
 #define STR_AND_LEN_FE_OF(s, l)                                                \
-    ((str_and_len_tuple_t){                                                    \
-        .str = (s), .len = (l), .is_float = true, .has_exponent = true })
+    ((str_and_len_tuple_t                                                      \
+    ){ .str = (s), .len = (l), .is_float = true, .has_exponent = true })
 
 #define EXP_LONG_OF(n, e) ((exp_long_t){ .number = (n), .exponent = (e) })
 #define EXP_DOUBLE_OF(n, e) ((exp_double_t){ .number = (n), .exponent = (e) })
@@ -69,7 +70,29 @@ typedef struct
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
-size_t get_str_len(char *buff, size_t pos);
+/**
+** \returns The number of character in the string + 1 (for the last quote '"')
+*/
+__attribute__((always_inline)) inline size_t get_str_len(char *buff, size_t pos)
+{
+    if (!buff)
+    {
+        return 1;
+    }
+
+    size_t nb_chars = 0;
+
+    char c = 0;
+    while ((c = buff[pos++]))
+    {
+        ++nb_chars;
+        if (c == '"' && pos > 1 && buff[pos - 2])
+        {
+            return nb_chars;
+        }
+    }
+    return 1;
+}
 
 size_t get_num_len(char *buff, size_t pos);
 

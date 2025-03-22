@@ -1,3 +1,4 @@
+// clang-format Language: C
 #ifndef VALIDATOR_H
 #define VALIDATOR_H
 
