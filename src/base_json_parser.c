@@ -415,6 +415,12 @@ size_t parse_boolean(char *buff, size_t *idx)
     return 0;
 }
 
+#define GET_NB_ELTS_ARRAY_INC                                                  \
+    if (!dict_count && array_count == 1)                                       \
+    {                                                                          \
+        ++nb_elts;                                                             \
+    }
+
 size_t get_nb_elts_array(char *buff, size_t idx)
 {
     if (!buff)
@@ -434,34 +440,22 @@ size_t get_nb_elts_array(char *buff, size_t idx)
         switch (c)
         {
         case '"':
-            if (!dict_count && array_count == 1)
-            {
-                ++nb_elts;
-            }
+            GET_NB_ELTS_ARRAY_INC;
             idx += get_str_len(buff, idx);
             break;
 
         case 't':
-            if (!dict_count && array_count == 1)
-            {
-                ++nb_elts;
-            }
+            GET_NB_ELTS_ARRAY_INC;
             idx += 3;
             break;
 
         case 'f':
-            if (!dict_count && array_count == 1)
-            {
-                ++nb_elts;
-            }
+            GET_NB_ELTS_ARRAY_INC;
             idx += 4;
             break;
 
         case 'n':
-            if (!dict_count && array_count == 1)
-            {
-                ++nb_elts;
-            }
+            GET_NB_ELTS_ARRAY_INC;
             idx += 3;
             break;
 
@@ -477,26 +471,17 @@ size_t get_nb_elts_array(char *buff, size_t idx)
         case '7':
         case '8':
         case '9':
-            if (!dict_count && array_count == 1)
-            {
-                ++nb_elts;
-            }
+            GET_NB_ELTS_ARRAY_INC;
             idx += get_num_len(buff, idx);
             break;
 
         case '[':
-            if (!dict_count && array_count == 1)
-            {
-                ++nb_elts;
-            }
+            GET_NB_ELTS_ARRAY_INC;
             ++array_count;
             break;
 
         case '{':
-            if (!dict_count && array_count == 1)
-            {
-                ++nb_elts;
-            }
+            GET_NB_ELTS_ARRAY_INC;
             ++dict_count;
             break;
 
@@ -511,6 +496,12 @@ size_t get_nb_elts_array(char *buff, size_t idx)
     }
     return nb_elts;
 }
+
+#define GET_NB_ELTS_DICT_INC                                                   \
+    if (!is_in_key && !array_count && dict_count == 1)                         \
+    {                                                                          \
+        ++nb_elts;                                                             \
+    }
 
 size_t get_nb_elts_dict(char *buff, size_t idx)
 {
@@ -541,34 +532,22 @@ size_t get_nb_elts_dict(char *buff, size_t idx)
             break;
 
         case '"':
-            if (!is_in_key && !array_count && dict_count == 1)
-            {
-                ++nb_elts;
-            }
+            GET_NB_ELTS_DICT_INC;
             idx += get_str_len(buff, idx);
             break;
 
         case 't':
-            if (!is_in_key && !array_count && dict_count == 1)
-            {
-                ++nb_elts;
-            }
+            GET_NB_ELTS_DICT_INC;
             idx += 3;
             break;
 
         case 'f':
-            if (!is_in_key && !array_count && dict_count == 1)
-            {
-                ++nb_elts;
-            }
+            GET_NB_ELTS_DICT_INC;
             idx += 4;
             break;
 
         case 'n':
-            if (!is_in_key && !array_count && dict_count == 1)
-            {
-                ++nb_elts;
-            }
+            GET_NB_ELTS_DICT_INC;
             idx += 3;
             break;
 
@@ -584,26 +563,17 @@ size_t get_nb_elts_dict(char *buff, size_t idx)
         case '7':
         case '8':
         case '9':
-            if (!is_in_key && !array_count && dict_count == 1)
-            {
-                ++nb_elts;
-            }
+            GET_NB_ELTS_DICT_INC;
             idx += get_num_len(buff, idx);
             break;
 
         case '[':
-            if (!is_in_key && !array_count && dict_count == 1)
-            {
-                ++nb_elts;
-            }
+            GET_NB_ELTS_DICT_INC;
             ++array_count;
             break;
 
         case '{':
-            if (!is_in_key && !array_count && dict_count == 1)
-            {
-                ++nb_elts;
-            }
+            GET_NB_ELTS_DICT_INC;
             ++dict_count;
             break;
 
