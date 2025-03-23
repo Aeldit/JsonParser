@@ -417,7 +417,7 @@ size_t parse_boolean(char *buff, size_t *idx)
 
 size_t get_nb_elts_array(char *buff, size_t idx)
 {
-    if (!buff || buff[idx] == ']')
+    if (!buff)
     {
         return 0;
     }
@@ -434,6 +434,37 @@ size_t get_nb_elts_array(char *buff, size_t idx)
         switch (c)
         {
         case '"':
+            if (!dict_count && array_count == 1)
+            {
+                ++nb_elts;
+            }
+            idx += get_str_len(buff, idx);
+            break;
+
+        case 't':
+            if (!dict_count && array_count == 1)
+            {
+                ++nb_elts;
+            }
+            idx += 3;
+            break;
+
+        case 'f':
+            if (!dict_count && array_count == 1)
+            {
+                ++nb_elts;
+            }
+            idx += 4;
+            break;
+
+        case 'n':
+            if (!dict_count && array_count == 1)
+            {
+                ++nb_elts;
+            }
+            idx += 3;
+            break;
+
         case '+':
         case '-':
         case '0':
@@ -446,60 +477,31 @@ size_t get_nb_elts_array(char *buff, size_t idx)
         case '7':
         case '8':
         case '9':
-        case 't':
-        case 'f':
-        case 'n':
+            if (!dict_count && array_count == 1)
+            {
+                ++nb_elts;
+            }
+            idx += get_num_len(buff, idx);
+            break;
+
         case '[':
+            if (!dict_count && array_count == 1)
+            {
+                ++nb_elts;
+            }
+            ++array_count;
+            break;
+
         case '{':
             if (!dict_count && array_count == 1)
             {
                 ++nb_elts;
             }
-        }
-
-        switch (c)
-        {
-        case '"':
-            idx += get_str_len(buff, idx);
-            break;
-
-        case 't':
-            idx += 3;
-            break;
-
-        case 'f':
-            idx += 4;
-            break;
-
-        case 'n':
-            idx += 3;
-            break;
-
-        case '+':
-        case '-':
-        case '0':
-        case '1':
-        case '2':
-        case '3':
-        case '4':
-        case '5':
-        case '6':
-        case '7':
-        case '8':
-        case '9':
-            idx += get_num_len(buff, idx);
-            break;
-
-        case '[':
-            ++array_count;
+            ++dict_count;
             break;
 
         case ']':
             --array_count;
-            break;
-
-        case '{':
-            ++dict_count;
             break;
 
         case '}':
@@ -512,7 +514,7 @@ size_t get_nb_elts_array(char *buff, size_t idx)
 
 size_t get_nb_elts_dict(char *buff, size_t idx)
 {
-    if (!buff || buff[idx] == '}')
+    if (!buff)
     {
         return 0;
     }
@@ -528,35 +530,6 @@ size_t get_nb_elts_dict(char *buff, size_t idx)
     char c = 0;
     while ((c = buff[idx++]) && dict_count)
     {
-        if (!is_in_key)
-        {
-            switch (c)
-            {
-            case '"':
-            case '+':
-            case '-':
-            case '0':
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-            case '8':
-            case '9':
-            case 't':
-            case 'f':
-            case 'n':
-            case '[':
-            case '{':
-                if (!array_count && dict_count == 1)
-                {
-                    ++nb_elts;
-                }
-            }
-        }
-
         switch (c)
         {
         case ':':
@@ -568,18 +541,34 @@ size_t get_nb_elts_dict(char *buff, size_t idx)
             break;
 
         case '"':
+            if (!is_in_key && !array_count && dict_count == 1)
+            {
+                ++nb_elts;
+            }
             idx += get_str_len(buff, idx);
             break;
 
         case 't':
+            if (!is_in_key && !array_count && dict_count == 1)
+            {
+                ++nb_elts;
+            }
             idx += 3;
             break;
 
         case 'f':
+            if (!is_in_key && !array_count && dict_count == 1)
+            {
+                ++nb_elts;
+            }
             idx += 4;
             break;
 
         case 'n':
+            if (!is_in_key && !array_count && dict_count == 1)
+            {
+                ++nb_elts;
+            }
             idx += 3;
             break;
 
@@ -595,19 +584,31 @@ size_t get_nb_elts_dict(char *buff, size_t idx)
         case '7':
         case '8':
         case '9':
+            if (!is_in_key && !array_count && dict_count == 1)
+            {
+                ++nb_elts;
+            }
             idx += get_num_len(buff, idx);
             break;
 
         case '[':
+            if (!is_in_key && !array_count && dict_count == 1)
+            {
+                ++nb_elts;
+            }
             ++array_count;
+            break;
+
+        case '{':
+            if (!is_in_key && !array_count && dict_count == 1)
+            {
+                ++nb_elts;
+            }
+            ++dict_count;
             break;
 
         case ']':
             --array_count;
-            break;
-
-        case '{':
-            ++dict_count;
             break;
 
         case '}':

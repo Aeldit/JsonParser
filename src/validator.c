@@ -13,10 +13,10 @@ bool is_number_valid(char *buff, size_t *idx)
         return false;
     }
 
-    size_t i = *idx - 1;
+    size_t i      = *idx - 1;
     u8 nb_inc_idx = 0;
 
-    char c = 0;
+    char c      = 0;
     char prev_c = 0;
     while ((c = buff[i++]))
     {
@@ -85,17 +85,17 @@ bool check_bools_nulls_numbers_counts(char *buff, size_t buff_len, bool is_dict)
         return false;
     }
 
-    size_t nb_quotes = 0;
+    size_t nb_quotes                = 0;
     size_t nb_opened_curly_brackets = is_dict ? 1 : 0;
-    size_t nb_opened_brackets = is_dict ? 0 : 1;
+    size_t nb_opened_brackets       = is_dict ? 0 : 1;
     size_t nb_closed_curly_brackets = 0;
-    size_t nb_closed_brackets = 0;
+    size_t nb_closed_brackets       = 0;
 
     size_t i = 0;
 
     bool is_in_string = false;
 
-    char c = 0;
+    char c      = 0;
     char prev_c = 0;
     while ((c = buff[i++]))
     {
@@ -192,8 +192,9 @@ bool check_bools_nulls_numbers_counts(char *buff, size_t buff_len, bool is_dict)
         default:
             // The character is not part of the json syntax, which means
             // invalid json
-            printf("Found invalid character: '%c' (%d) at index : %zu\n", c, c,
-                   i);
+            printf(
+                "Found invalid character: '%c' (%d) at index : %zu\n", c, c, i
+            );
             return false;
         }
         prev_c = c;
@@ -212,10 +213,10 @@ bool check_array_trailing_commas(char *buff, size_t *pos)
         return false;
     }
 
-    size_t i = pos ? *pos : 1;
+    size_t i         = pos ? *pos : 1;
     size_t initial_i = i;
 
-    char c = 0;
+    char c      = 0;
     char prev_c = 0;
     while ((c = buff[i++]))
     {
@@ -292,10 +293,10 @@ bool check_dict_trailing_commas(char *buff, size_t *pos)
         return false;
     }
 
-    size_t i = pos ? *pos : 1;
+    size_t i         = pos ? *pos : 1;
     size_t initial_i = i;
 
-    char c = 0;
+    char c      = 0;
     char prev_c = 0;
     while ((c = buff[i++]))
     {
@@ -374,13 +375,13 @@ bool check_array_missing_commas(char *buff, size_t *pos)
         return false;
     }
 
-    size_t i = pos ? *pos : 0;
+    size_t i         = pos ? *pos : 0;
     size_t initial_i = i;
 
     bool value_encountered = false;
-    bool is_first_val = true;
+    bool is_first_val      = true;
     bool comma_encountered = false;
-    bool prev_was_value = false;
+    bool prev_was_value    = false;
 
     char c = 0;
     while ((c = buff[i++]))
@@ -454,7 +455,7 @@ bool check_array_missing_commas(char *buff, size_t *pos)
         {
         case ',':
             comma_encountered = true;
-            prev_was_value = false;
+            prev_was_value    = false;
             continue;
 
         case 't':
@@ -559,7 +560,7 @@ bool check_dict_missing_colons_commas(char *buff, size_t *pos)
         return false;
     }
 
-    size_t i = pos ? *pos : 0;
+    size_t i         = pos ? *pos : 0;
     size_t initial_i = i;
 
     size_t nb_colon = 0;
@@ -568,7 +569,7 @@ bool check_dict_missing_colons_commas(char *buff, size_t *pos)
     bool colon_encountered = false;
     bool comma_encountered = true;
     bool value_encountered = false;
-    bool prev_was_value = false;
+    bool prev_was_value    = false;
 
     char c = 0;
     while ((c = buff[i++]))
@@ -648,7 +649,7 @@ bool check_dict_missing_colons_commas(char *buff, size_t *pos)
             ++nb_colon;
             colon_encountered = true;
             comma_encountered = false;
-            prev_was_value = false;
+            prev_was_value    = false;
             break;
 
         case ',':
@@ -659,7 +660,7 @@ bool check_dict_missing_colons_commas(char *buff, size_t *pos)
             ++nb_comma;
             comma_encountered = true;
             colon_encountered = false;
-            prev_was_value = false;
+            prev_was_value    = false;
             break;
 
         case 't':
