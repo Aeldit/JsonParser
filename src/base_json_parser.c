@@ -531,6 +531,7 @@ size_t get_nb_elts_array(char *buff, size_t idx)
             break;
 
         case 't':
+        case 'n':
             GET_NB_ELTS_ARRAY_INC;
             idx += 3;
             break;
@@ -538,11 +539,6 @@ size_t get_nb_elts_array(char *buff, size_t idx)
         case 'f':
             GET_NB_ELTS_ARRAY_INC;
             idx += 4;
-            break;
-
-        case 'n':
-            GET_NB_ELTS_ARRAY_INC;
-            idx += 3;
             break;
 
         case '+':
@@ -623,6 +619,7 @@ size_t get_nb_elts_dict(char *buff, size_t idx)
             break;
 
         case 't':
+        case 'n':
             GET_NB_ELTS_DICT_INC;
             idx += 3;
             break;
@@ -630,11 +627,6 @@ size_t get_nb_elts_dict(char *buff, size_t idx)
         case 'f':
             GET_NB_ELTS_DICT_INC;
             idx += 4;
-            break;
-
-        case 'n':
-            GET_NB_ELTS_DICT_INC;
-            idx += 3;
             break;
 
         case '+':
