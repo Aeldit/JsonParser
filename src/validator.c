@@ -239,7 +239,7 @@ bool check_array_trailing_commas(char *buff, size_t *pos)
             break;
 
         case '"':
-            i += get_str_len(buff, i);
+            GET_STR_LEN(i);
             break;
 
         case '+':
@@ -254,7 +254,7 @@ bool check_array_trailing_commas(char *buff, size_t *pos)
         case '7':
         case '8':
         case '9':
-            i += get_num_len(buff, i);
+            GET_NUM_LEN(i);
             break;
 
         case ']':
@@ -319,7 +319,7 @@ bool check_dict_trailing_commas(char *buff, size_t *pos)
             break;
 
         case '"':
-            i += get_str_len(buff, i);
+            GET_STR_LEN(i);
             break;
 
         case '+':
@@ -334,7 +334,7 @@ bool check_dict_trailing_commas(char *buff, size_t *pos)
         case '7':
         case '8':
         case '9':
-            i += get_num_len(buff, i);
+            GET_NUM_LEN(i);
             break;
 
         case '}':
@@ -471,7 +471,7 @@ bool check_array_missing_commas(char *buff, size_t *pos)
             break;
 
         case '"':
-            i += get_str_len(buff, i);
+            GET_STR_LEN(i);
             break;
 
         case '+':
@@ -486,7 +486,7 @@ bool check_array_missing_commas(char *buff, size_t *pos)
         case '7':
         case '8':
         case '9':
-            i += get_num_len(buff, i);
+            GET_NUM_LEN(i);
             break;
 
         case ']':
@@ -676,7 +676,7 @@ bool check_dict_missing_colons_commas(char *buff, size_t *pos)
             break;
 
         case '"':
-            i += get_str_len(buff, i);
+            GET_STR_LEN(i);
             break;
 
         case '+':
@@ -691,7 +691,7 @@ bool check_dict_missing_colons_commas(char *buff, size_t *pos)
         case '7':
         case '8':
         case '9':
-            i += get_num_len(buff, i);
+            GET_NUM_LEN(i);
             break;
 
         case '}':

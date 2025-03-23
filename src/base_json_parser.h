@@ -38,6 +38,41 @@
 #define EXP_LONG_OF(n, e) ((exp_long_t){ .number = (n), .exponent = (e) })
 #define EXP_DOUBLE_OF(n, e) ((exp_double_t){ .number = (n), .exponent = (e) })
 
+#define GET_STR_LEN(idx)                                                       \
+    while ((c = buff[(idx)++]))                                                \
+    {                                                                          \
+        if (c == '"' && (idx) > 1 && buff[(idx) - 2])                          \
+        {                                                                      \
+            break;                                                             \
+        }                                                                      \
+    }
+
+#define GET_NUM_LEN(idx)                                                       \
+    while ((c = buff[(idx)]))                                                  \
+    {                                                                          \
+        switch (c)                                                             \
+        {                                                                      \
+        case '+':                                                              \
+        case '-':                                                              \
+        case '.':                                                              \
+        case 'e':                                                              \
+        case 'E':                                                              \
+        case '0':                                                              \
+        case '1':                                                              \
+        case '2':                                                              \
+        case '3':                                                              \
+        case '4':                                                              \
+        case '5':                                                              \
+        case '6':                                                              \
+        case '7':                                                              \
+        case '8':                                                              \
+        case '9':                                                              \
+            ++(idx);                                                           \
+            continue;                                                          \
+        }                                                                      \
+        break;                                                                 \
+    }
+
 /*******************************************************************************
 **                                 STRUCTURES                                 **
 *******************************************************************************/
@@ -70,6 +105,9 @@ typedef struct
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
+bool is_float(char *str, size_t len);
+bool has_exponent(char *s, size_t len);
+
 /**
 ** \brief Takes sl's char array and transforms it into a long.
 **        If the number has an exponent, the exponent is parsed and stored
@@ -89,9 +127,6 @@ long_with_or_without_exponent_t str_to_long(str_and_len_tuple_t *sl);
 **          number has an exponent
 */
 double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t *sl);
-
-bool is_float(char *str, size_t len);
-bool has_exponent(char *str, size_t len);
 
 /***************************************
 **              FUNCTIONS             **
@@ -139,70 +174,5 @@ size_t get_nb_elts_array(char *buff, size_t idx);
 ** \returns The number of elements of the current dict
 */
 size_t get_nb_elts_dict(char *buff, size_t idx);
-
-/*******************************************************************************
-**                              INLINE FUNCTIONS                              **
-*******************************************************************************/
-/**
-** \returns The number of character in the string + 1 (for the last quote '"')
-*/
-__attribute__((always_inline)) inline size_t get_str_len(char *buff, size_t pos)
-{
-    if (!buff)
-    {
-        return 1;
-    }
-
-    size_t nb_chars = 0;
-
-    char c = 0;
-    while ((c = buff[pos++]))
-    {
-        ++nb_chars;
-        if (c == '"' && pos > 1 && buff[pos - 2])
-        {
-            return nb_chars;
-        }
-    }
-    return 1;
-}
-
-__attribute__((always_inline)) inline size_t get_num_len(char *buff, size_t pos)
-{
-    if (!buff)
-    {
-        return 0;
-    }
-
-    size_t nb_chars = 0;
-
-    char c = 0;
-    while ((c = buff[pos++]))
-    {
-        switch (c)
-        {
-        case '+':
-        case '-':
-        case '.':
-        case 'e':
-        case 'E':
-        case '0':
-        case '1':
-        case '2':
-        case '3':
-        case '4':
-        case '5':
-        case '6':
-        case '7':
-        case '8':
-        case '9':
-            ++nb_chars;
-            break;
-        default:
-            return nb_chars;
-        }
-    }
-    return 0;
-}
 
 #endif // !BASE_JSON_PARSER_H

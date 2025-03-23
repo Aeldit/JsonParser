@@ -9,9 +9,183 @@
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
-extern inline size_t get_str_len(char *buff, size_t pos);
+bool is_float(char *str, size_t len)
+{
+    if (!str)
+    {
+        return false;
+    }
 
-extern inline size_t get_num_len(char *buff, size_t pos);
+    switch (len)
+    {
+    case 1:
+    case 2:
+        return false;
+
+    case 3:
+        return str[1] == '.';
+    case 4:
+        return str[1] == '.' || str[2] == '.';
+    case 5:
+        return str[1] == '.' || str[2] == '.' || str[3] == '.';
+    case 6:
+        return str[1] == '.' || str[2] == '.' || str[3] == '.' || str[4] == '.';
+    case 7:
+        return str[1] == '.' || str[2] == '.' || str[3] == '.' || str[4] == '.'
+            || str[5] == '.';
+    case 8:
+        return str[1] == '.' || str[2] == '.' || str[3] == '.' || str[4] == '.'
+            || str[5] == '.' || str[6] == '.';
+
+    default:
+        for (size_t i = 1; i < len - 1; ++i)
+        {
+            if (str[i] == '.')
+            {
+                return true;
+            }
+        }
+        break;
+    }
+    return false;
+}
+
+bool has_exponent(char *s, size_t len)
+{
+    if (!s)
+    {
+        return false;
+    }
+
+    switch (len)
+    {
+    case 1:
+    case 2:
+        return false;
+
+    case 3:
+        return s[1] == 'e' || s[1] == 'E';
+    case 4:
+        return s[1] == 'e' || s[2] == 'e' || s[1] == 'E' || s[2] == 'E';
+    case 5:
+        return s[1] == 'e' || s[1] == 'E' || s[2] == 'e' || s[2] == 'E'
+            || s[3] == 'e' || s[3] == 'E';
+    case 6:
+        return s[1] == 'e' || s[1] == 'E' || s[2] == 'e' || s[2] == 'E'
+            || s[3] == 'e' || s[3] == 'E' || s[4] == 'e' || s[4] == 'E';
+    case 7:
+        return s[1] == 'e' || s[1] == 'E' || s[2] == 'e' || s[2] == 'E'
+            || s[3] == 'e' || s[3] == 'E' || s[4] == 'e' || s[4] == 'E'
+            || s[5] == 'e' || s[5] == 'E';
+    case 8:
+        return s[1] == 'e' || s[1] == 'E' || s[2] == 'e' || s[2] == 'E'
+            || s[3] == 'e' || s[3] == 'E' || s[4] == 'e' || s[4] == 'E'
+            || s[5] == 'e' || s[5] == 'E' || s[6] == 'e' || s[6] == 'E';
+    case 9:
+        return s[1] == 'e' || s[1] == 'E' || s[2] == 'e' || s[2] == 'E'
+            || s[3] == 'e' || s[3] == 'E' || s[4] == 'e' || s[4] == 'E'
+            || s[5] == 'e' || s[5] == 'E' || s[6] == 'e' || s[6] == 'E'
+            || s[7] == 'e' || s[8] == 'E';
+    case 10:
+        return s[1] == 'e' || s[1] == 'E' || s[2] == 'e' || s[2] == 'E'
+            || s[3] == 'e' || s[3] == 'E' || s[4] == 'e' || s[4] == 'E'
+            || s[5] == 'e' || s[5] == 'E' || s[6] == 'e' || s[6] == 'E'
+            || s[7] == 'e' || s[7] == 'E' || s[8] == 'e' || s[8] == 'E';
+    case 11:
+        return s[1] == 'e' || s[1] == 'E' || s[2] == 'e' || s[2] == 'E'
+            || s[3] == 'e' || s[3] == 'E' || s[4] == 'e' || s[4] == 'E'
+            || s[5] == 'e' || s[5] == 'E' || s[6] == 'e' || s[6] == 'E'
+            || s[7] == 'e' || s[7] == 'E' || s[8] == 'e' || s[8] == 'E'
+            || s[9] == 'e' || s[9] == 'E';
+    case 12:
+        return s[1] == 'e' || s[1] == 'E' || s[2] == 'e' || s[2] == 'E'
+            || s[3] == 'e' || s[3] == 'E' || s[4] == 'e' || s[4] == 'E'
+            || s[5] == 'e' || s[5] == 'E' || s[6] == 'e' || s[6] == 'E'
+            || s[7] == 'e' || s[7] == 'E' || s[8] == 'e' || s[8] == 'E'
+            || s[9] == 'e' || s[9] == 'E' || s[10] == 'e' || s[10] == 'E';
+    case 13:
+        return s[1] == 'e' || s[1] == 'E' || s[2] == 'e' || s[2] == 'E'
+            || s[3] == 'e' || s[3] == 'E' || s[4] == 'e' || s[4] == 'E'
+            || s[5] == 'e' || s[5] == 'E' || s[6] == 'e' || s[6] == 'E'
+            || s[7] == 'e' || s[7] == 'E' || s[8] == 'e' || s[8] == 'E'
+            || s[9] == 'e' || s[9] == 'E' || s[10] == 'e' || s[10] == 'E'
+            || s[11] == 'e' || s[11] == 'E';
+    case 14:
+        return s[1] == 'e' || s[1] == 'E' || s[2] == 'e' || s[2] == 'E'
+            || s[3] == 'e' || s[3] == 'E' || s[4] == 'e' || s[4] == 'E'
+            || s[5] == 'e' || s[5] == 'E' || s[6] == 'e' || s[6] == 'E'
+            || s[7] == 'e' || s[7] == 'E' || s[8] == 'e' || s[8] == 'E'
+            || s[9] == 'e' || s[9] == 'E' || s[10] == 'e' || s[10] == 'E'
+            || s[11] == 'e' || s[11] == 'E' || s[12] == 'e' || s[12] == 'E';
+    case 15:
+        return s[1] == 'e' || s[1] == 'E' || s[2] == 'e' || s[2] == 'E'
+            || s[3] == 'e' || s[3] == 'E' || s[4] == 'e' || s[4] == 'E'
+            || s[5] == 'e' || s[5] == 'E' || s[6] == 'e' || s[6] == 'E'
+            || s[7] == 'e' || s[7] == 'E' || s[8] == 'e' || s[8] == 'E'
+            || s[9] == 'e' || s[9] == 'E' || s[10] == 'e' || s[10] == 'E'
+            || s[11] == 'e' || s[11] == 'E' || s[12] == 'e' || s[12] == 'E'
+            || s[13] == 'e' || s[13] == 'E';
+    case 16:
+        return s[1] == 'e' || s[1] == 'E' || s[2] == 'e' || s[2] == 'E'
+            || s[3] == 'e' || s[3] == 'E' || s[4] == 'e' || s[4] == 'E'
+            || s[5] == 'e' || s[5] == 'E' || s[6] == 'e' || s[6] == 'E'
+            || s[7] == 'e' || s[7] == 'E' || s[8] == 'e' || s[8] == 'E'
+            || s[9] == 'e' || s[9] == 'E' || s[10] == 'e' || s[10] == 'E'
+            || s[11] == 'e' || s[11] == 'E' || s[12] == 'e' || s[12] == 'E'
+            || s[13] == 'e' || s[13] == 'E' || s[14] == 'e' || s[14] == 'E';
+    case 17:
+        return s[1] == 'e' || s[1] == 'E' || s[2] == 'e' || s[2] == 'E'
+            || s[3] == 'e' || s[3] == 'E' || s[4] == 'e' || s[4] == 'E'
+            || s[5] == 'e' || s[5] == 'E' || s[6] == 'e' || s[6] == 'E'
+            || s[7] == 'e' || s[7] == 'E' || s[8] == 'e' || s[8] == 'E'
+            || s[9] == 'e' || s[9] == 'E' || s[10] == 'e' || s[10] == 'E'
+            || s[11] == 'e' || s[11] == 'E' || s[12] == 'e' || s[12] == 'E'
+            || s[13] == 'e' || s[13] == 'E' || s[14] == 'e' || s[14] == 'E'
+            || s[15] == 'e' || s[15] == 'E';
+    case 18:
+        return s[1] == 'e' || s[1] == 'E' || s[2] == 'e' || s[2] == 'E'
+            || s[3] == 'e' || s[3] == 'E' || s[4] == 'e' || s[4] == 'E'
+            || s[5] == 'e' || s[5] == 'E' || s[6] == 'e' || s[6] == 'E'
+            || s[7] == 'e' || s[7] == 'E' || s[8] == 'e' || s[8] == 'E'
+            || s[9] == 'e' || s[9] == 'E' || s[10] == 'e' || s[10] == 'E'
+            || s[11] == 'e' || s[11] == 'E' || s[12] == 'e' || s[12] == 'E'
+            || s[13] == 'e' || s[13] == 'E' || s[14] == 'e' || s[14] == 'E'
+            || s[15] == 'e' || s[15] == 'E' || s[16] == 'e' || s[16] == 'E';
+    case 19:
+        return s[1] == 'e' || s[1] == 'E' || s[2] == 'e' || s[2] == 'E'
+            || s[3] == 'e' || s[3] == 'E' || s[4] == 'e' || s[4] == 'E'
+            || s[5] == 'e' || s[5] == 'E' || s[6] == 'e' || s[6] == 'E'
+            || s[7] == 'e' || s[7] == 'E' || s[8] == 'e' || s[8] == 'E'
+            || s[9] == 'e' || s[9] == 'E' || s[10] == 'e' || s[10] == 'E'
+            || s[11] == 'e' || s[11] == 'E' || s[12] == 'e' || s[12] == 'E'
+            || s[13] == 'e' || s[13] == 'E' || s[14] == 'e' || s[14] == 'E'
+            || s[15] == 'e' || s[15] == 'E' || s[16] == 'e' || s[16] == 'E'
+            || s[17] == 'e' || s[17] == 'E';
+    case 20:
+        return s[1] == 'e' || s[1] == 'E' || s[2] == 'e' || s[2] == 'E'
+            || s[3] == 'e' || s[3] == 'E' || s[4] == 'e' || s[4] == 'E'
+            || s[5] == 'e' || s[5] == 'E' || s[6] == 'e' || s[6] == 'E'
+            || s[7] == 'e' || s[7] == 'E' || s[8] == 'e' || s[8] == 'E'
+            || s[9] == 'e' || s[9] == 'E' || s[10] == 'e' || s[10] == 'E'
+            || s[11] == 'e' || s[11] == 'E' || s[12] == 'e' || s[12] == 'E'
+            || s[13] == 'e' || s[13] == 'E' || s[14] == 'e' || s[14] == 'E'
+            || s[15] == 'e' || s[15] == 'E' || s[16] == 'e' || s[16] == 'E'
+            || s[17] == 'e' || s[17] == 'E' || s[18] == 'e' || s[18] == 'E';
+
+    default:
+        for (size_t i = 1; i < len - 1; ++i)
+        {
+            switch (s[i])
+            {
+            case 'e':
+            case 'E':
+                return true;
+            }
+        }
+        break;
+    }
+    return false;
+}
 
 long_with_or_without_exponent_t str_to_long(str_and_len_tuple_t *sl)
 {
@@ -192,94 +366,6 @@ double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t *sl)
        .double_exp_value = (exp_double_t){ .number = 0, .exponent = 0 } };
 }
 
-bool is_float(char *str, size_t len)
-{
-    if (!str)
-    {
-        return false;
-    }
-
-    switch (len)
-    {
-    case 1:
-    case 2:
-        return false;
-
-    case 3:
-        return str[1] == '.';
-    case 4:
-        return str[1] == '.' || str[2] == '.';
-    case 5:
-        return str[1] == '.' || str[2] == '.' || str[3] == '.';
-    case 6:
-        return str[1] == '.' || str[2] == '.' || str[3] == '.' || str[4] == '.';
-    case 7:
-        return str[1] == '.' || str[2] == '.' || str[3] == '.' || str[4] == '.'
-            || str[5] == '.';
-    case 8:
-        return str[1] == '.' || str[2] == '.' || str[3] == '.' || str[4] == '.'
-            || str[5] == '.' || str[6] == '.';
-
-    default:
-        for (size_t i = 1; i < len - 1; ++i)
-        {
-            if (str[i] == '.')
-            {
-                return true;
-            }
-        }
-        break;
-    }
-    return false;
-}
-
-bool has_exponent(char *str, size_t len)
-{
-    if (!str)
-    {
-        return false;
-    }
-
-    switch (len)
-    {
-    case 1:
-    case 2:
-        return false;
-
-    case 3:
-        return str[1] == 'e' || str[1] == 'E';
-    case 4:
-        return str[1] == 'e' || str[2] == 'e' || str[1] == 'E' || str[2] == 'E';
-    case 5:
-        return str[1] == 'e' || str[1] == 'E' || str[2] == 'e' || str[2] == 'E'
-            || str[3] == 'e' || str[3] == 'E';
-    case 6:
-        return str[1] == 'e' || str[1] == 'E' || str[2] == 'e' || str[2] == 'E'
-            || str[3] == 'e' || str[3] == 'E' || str[4] == 'e' || str[4] == 'E';
-    case 7:
-        return str[1] == 'e' || str[1] == 'E' || str[2] == 'e' || str[2] == 'E'
-            || str[3] == 'e' || str[3] == 'E' || str[4] == 'e' || str[4] == 'E'
-            || str[5] == 'e' || str[5] == 'E';
-    case 8:
-        return str[1] == 'e' || str[1] == 'E' || str[2] == 'e' || str[2] == 'E'
-            || str[3] == 'e' || str[3] == 'E' || str[4] == 'e' || str[4] == 'E'
-            || str[5] == 'e' || str[5] == 'E' || str[6] == 'e' || str[6] == 'E';
-
-    default:
-        for (size_t i = 1; i < len - 1; ++i)
-        {
-            switch (str[i])
-            {
-            case 'e':
-            case 'E':
-                return true;
-            }
-        }
-        break;
-    }
-    return false;
-}
-
 /***************************************
 **              PARSING               **
 ***************************************/
@@ -441,7 +527,7 @@ size_t get_nb_elts_array(char *buff, size_t idx)
         {
         case '"':
             GET_NB_ELTS_ARRAY_INC;
-            idx += get_str_len(buff, idx);
+            GET_STR_LEN(idx);
             break;
 
         case 't':
@@ -472,7 +558,7 @@ size_t get_nb_elts_array(char *buff, size_t idx)
         case '8':
         case '9':
             GET_NB_ELTS_ARRAY_INC;
-            idx += get_num_len(buff, idx);
+            GET_NUM_LEN(idx);
             break;
 
         case '[':
@@ -533,7 +619,7 @@ size_t get_nb_elts_dict(char *buff, size_t idx)
 
         case '"':
             GET_NB_ELTS_DICT_INC;
-            idx += get_str_len(buff, idx);
+            GET_STR_LEN(idx);
             break;
 
         case 't':
@@ -564,7 +650,7 @@ size_t get_nb_elts_dict(char *buff, size_t idx)
         case '8':
         case '9':
             GET_NB_ELTS_DICT_INC;
-            idx += get_num_len(buff, idx);
+            GET_NUM_LEN(idx);
             break;
 
         case '[':
