@@ -57,7 +57,7 @@ valgrind-compile: clean
 		-DVALGRING_DISABLE_PRINT \
 		$(CFILESBASE) $(CFILESRO) -o $(TARGET) -g
 
-valgrind: valgrind-compile
+calgrind: valgrind-compile
 	valgrind --tool=callgrind --dump-instr=yes --simulate-cache=yes \
 		--collect-jumps=yes ./$(TARGET) flights-1m.json
 

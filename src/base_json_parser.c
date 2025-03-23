@@ -379,15 +379,14 @@ string_t parse_string(char *buff, size_t *idx)
     size_t start_idx = *idx + 1;
     size_t len       = 0;
     char c           = 0;
-    char prev_c      = 0;
     // Counts the number of characters
     while ((c = buff[start_idx + len]))
     {
-        if (c == '"' && prev_c != '\\')
+        if (c == '"' && start_idx + len > 1
+            && buff[start_idx + len - 2] != '\\')
         {
             break;
         }
-        prev_c = c;
         ++len;
     }
 
