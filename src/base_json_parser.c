@@ -417,9 +417,9 @@ str_and_len_tuple_t parse_number(char *buff, size_t *idx)
     }
 
     // Counts the number of characters until the first one that is an 'end char'
-    size_t end_idx = *idx;
-    size_t size    = 0;
-    char c         = 0;
+    size_t end_idx  = *idx;
+    size_t nb_chars = 0;
+    char c          = 0;
     while ((c = buff[end_idx++]))
     {
         switch (c)
@@ -439,32 +439,30 @@ str_and_len_tuple_t parse_number(char *buff, size_t *idx)
         case '7':
         case '8':
         case '9':
-            break;
-
-        default:
-            // Number of chars
-            if (!size)
-            {
-                return NULL_STR_AND_LEN_TUPLE;
-            }
-
-            // Puts the value in the form of a char array
-            char *str = malloc((size + 1) * sizeof(char));
-            if (!str)
-            {
-                return NULL_STR_AND_LEN_TUPLE;
-            }
-            memcpy(str, buff + *idx, size);
-            str[size] = 0;
-
-            *idx += size - 1;
-            return STR_AND_LEN_OF(
-                str, size, is_float(str, size), has_exponent(str, size)
-            );
+            ++nb_chars;
+            continue;
         }
-        ++size;
+        break;
     }
-    return NULL_STR_AND_LEN_TUPLE;
+
+    if (!nb_chars)
+    {
+        return NULL_STR_AND_LEN_TUPLE;
+    }
+
+    // Puts the value in the form of a char array
+    char *str = malloc((nb_chars + 1) * sizeof(char));
+    if (!str)
+    {
+        return NULL_STR_AND_LEN_TUPLE;
+    }
+    memcpy(str, buff + *idx, nb_chars);
+    str[nb_chars] = 0;
+
+    *idx += nb_chars - 1;
+    return STR_AND_LEN_OF(
+        str, nb_chars, is_float(str, nb_chars), has_exponent(str, nb_chars)
+    );
 }
 
 size_t parse_boolean(char *buff, size_t *idx)
@@ -474,9 +472,9 @@ size_t parse_boolean(char *buff, size_t *idx)
         return 0;
     }
 
-    size_t end_idx = *idx;
-    size_t size    = 0;
-    char c         = 0;
+    size_t end_idx  = *idx;
+    size_t nb_chars = 0;
+    char c          = 0;
     while ((c = buff[end_idx++]))
     {
         switch (c)
@@ -489,15 +487,13 @@ size_t parse_boolean(char *buff, size_t *idx)
         case 'a':
         case 'l':
         case 's':
-            break;
-
-        default:
-            *idx += size - 1;
-            return size;
+            ++nb_chars;
+            continue;
         }
-        ++size;
+        break;
     }
-    return 0;
+    *idx += nb_chars - 1;
+    return nb_chars;
 }
 
 #define GET_NB_ELTS_ARRAY_INC                                                  \

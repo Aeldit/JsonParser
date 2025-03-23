@@ -140,12 +140,13 @@ typedef struct
     }                                                                          \
     if (!a->size)                                                              \
     {                                                                          \
-        char *str = calloc(3, sizeof(char));                                   \
+        char *str = malloc(3 * sizeof(char));                                  \
         if (!str)                                                              \
         {                                                                      \
             return NULL_STRING;                                                \
         }                                                                      \
         memcpy(str, "[]", 2);                                                  \
+        str[2] = 0;                                                            \
         return STRING_OF(str, 2);                                              \
     }                                                                          \
     string_linked_list_t *ll = calloc(1, sizeof(string_linked_list_t));        \
@@ -218,12 +219,13 @@ typedef struct
     }                                                                          \
     if (!d->size)                                                              \
     {                                                                          \
-        char *str = calloc(3, sizeof(char));                                   \
+        char *str = malloc(3 * sizeof(char));                                  \
         if (!str)                                                              \
         {                                                                      \
             return NULL_STRING;                                                \
         }                                                                      \
         memcpy(str, "{}", 2);                                                  \
+        str[2] = 0;                                                            \
         return STRING_OF(str, 2);                                              \
     }                                                                          \
     string_linked_list_t *ll = calloc(1, sizeof(string_linked_list_t));        \

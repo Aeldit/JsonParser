@@ -58,7 +58,7 @@ valgrind-compile: clean
 		$(CFILESBASE) $(CFILESRO) -o $(TARGET) -g
 
 calgrind: valgrind-compile
-	valgrind --tool=callgrind --dump-instr=yes --simulate-cache=yes \
+	valgrind --tool=callgrind --simulate-cache=yes \
 		--collect-jumps=yes ./$(TARGET) flights-1m.json
 
 leaks: valgrind-compile
