@@ -7,24 +7,22 @@
 #include <sys/stat.h>
 
 #include "base_json_parser.h"
-#include "base_json_storage.h"
-#include "ro_json_storage.h"
 #include "validator.h"
 
 /*******************************************************************************
 **                               LOCAL FUNCTIONS                              **
 *******************************************************************************/
-ro_array_t *destroy_ro_array_on_error(ro_array_t *a)
+ro_array_t destroy_ro_array_on_error(ro_array_t a)
 {
     destroy_ro_array(a);
-    return 0;
+    return ERROR_RO_ARRAY;
 }
 
-ro_dict_t *destroy_ro_dict_on_error(ro_dict_t *d, string_t key)
+ro_dict_t destroy_ro_dict_on_error(ro_dict_t d, string_t key)
 {
     destroy_string(key);
     destroy_ro_dict(d);
-    return 0;
+    return ERROR_RO_DICT;
 }
 
 /*******************************************************************************
@@ -37,11 +35,11 @@ ro_dict_t *destroy_ro_dict_on_error(ro_dict_t *d, string_t key)
     }                                                                          \
     ++nb_elts_parsed
 
-ro_array_t *ro_parse_array(char *b, size_t *idx)
+ro_array_t ro_parse_array(char *b, size_t *idx)
 {
     if (!b)
     {
-        return 0;
+        return ERROR_RO_ARRAY;
     }
 
     // We start at idx + 1 because if we entered this function, it means that we
@@ -50,9 +48,9 @@ ro_array_t *ro_parse_array(char *b, size_t *idx)
     size_t initial_i = i;
 
     size_t nb_elts     = get_nb_elts_array(b, i);
-    ro_array_t *a      = init_ro_array(nb_elts);
-    ro_value_t *values = a->values;
-    if (!a || !nb_elts || !values)
+    ro_array_t a       = RO_ARRAY(nb_elts);
+    ro_value_t *values = a.values;
+    if (!nb_elts || !values)
     {
         return a;
     }
@@ -66,8 +64,8 @@ ro_array_t *ro_parse_array(char *b, size_t *idx)
         string_t s             = NULL_STRING;
         str_and_len_tuple_t sl = NULL_STR_AND_LEN_TUPLE;
         size_t len             = 0;
-        ro_array_t *tmp_a      = 0;
-        ro_dict_t *tmp_jd      = 0;
+        ro_array_t tmp_a       = ERROR_RO_ARRAY;
+        ro_dict_t tmp_jd       = ERROR_RO_DICT;
         switch (c)
         {
         case '"':
@@ -146,7 +144,7 @@ ro_array_t *ro_parse_array(char *b, size_t *idx)
             break;
 
         case '[':
-            if (!(tmp_a = ro_parse_array(b, &i)))
+            if (!(tmp_a = ro_parse_array(b, &i)).values)
             {
                 return destroy_ro_array_on_error(a);
             }
@@ -154,7 +152,7 @@ ro_array_t *ro_parse_array(char *b, size_t *idx)
             break;
 
         case '{':
-            if (!(tmp_jd = ro_parse_dict(b, &i)))
+            if (!(tmp_jd = ro_parse_dict(b, &i)).items)
             {
                 return destroy_ro_array_on_error(a);
             }
@@ -177,11 +175,11 @@ ro_array_t *ro_parse_array(char *b, size_t *idx)
     }                                                                          \
     ++nb_elts_parsed;
 
-ro_dict_t *ro_parse_dict(char *b, size_t *idx)
+ro_dict_t ro_parse_dict(char *b, size_t *idx)
 {
     if (!b)
     {
-        return 0;
+        return ERROR_RO_DICT;
     }
 
     // We start at 1 because if we entered this function, it means that we
@@ -189,9 +187,9 @@ ro_dict_t *ro_parse_dict(char *b, size_t *idx)
     size_t i = idx == 0 ? 0 : *idx + 1;
 
     size_t nb_elts   = get_nb_elts_dict(b, i);
-    ro_dict_t *d     = init_ro_dict(nb_elts);
-    ro_item_t *items = d->items;
-    if (!d || !nb_elts || !items)
+    ro_dict_t d      = RO_DICT(nb_elts);
+    ro_item_t *items = d.items;
+    if (!nb_elts || !items)
     {
         return d;
     }
@@ -209,8 +207,8 @@ ro_dict_t *ro_parse_dict(char *b, size_t *idx)
         string_t s             = NULL_STRING;
         str_and_len_tuple_t sl = NULL_STR_AND_LEN_TUPLE;
         size_t len             = 0;
-        ro_array_t *tmp_ja     = 0;
-        ro_dict_t *tmp_jd      = 0;
+        ro_array_t tmp_ja      = ERROR_RO_ARRAY;
+        ro_dict_t tmp_jd       = ERROR_RO_DICT;
         switch (c)
         {
         case '"':
@@ -300,7 +298,7 @@ ro_dict_t *ro_parse_dict(char *b, size_t *idx)
             break;
 
         case '[':
-            if (!(tmp_ja = ro_parse_array(b, &i)))
+            if (!(tmp_ja = ro_parse_array(b, &i)).values)
             {
                 return destroy_ro_dict_on_error(d, key);
             }
@@ -308,7 +306,7 @@ ro_dict_t *ro_parse_dict(char *b, size_t *idx)
             break;
 
         case '{':
-            if (!(tmp_jd = ro_parse_dict(b, &i)))
+            if (!(tmp_jd = ro_parse_dict(b, &i)).items)
             {
                 return destroy_ro_dict_on_error(d, key);
             }
@@ -328,19 +326,19 @@ ro_dict_t *ro_parse_dict(char *b, size_t *idx)
     return d;
 }
 
-ro_json_t *ro_parse(char *file)
+ro_json_t ro_parse(char *file)
 {
     FILE *f = fopen(file, "r");
     if (!f)
     {
-        return 0;
+        return ERROR_RO_JSON;
     }
 
     size_t offset = 0;
     if (fseek(f, offset++, SEEK_SET))
     {
         fclose(f);
-        return 0;
+        return ERROR_RO_JSON;
     }
 
     // Obtains the number of characters in the file
@@ -356,7 +354,7 @@ ro_json_t *ro_parse(char *file)
         {
             fclose(f);
             free(b);
-            return 0;
+            return ERROR_RO_JSON;
         }
         b[nb_chars] = 0;
         fread(b, sizeof(char), nb_chars, f);
@@ -366,13 +364,13 @@ ro_json_t *ro_parse(char *file)
             printf("Invalid json file\n");
             free(b);
             fclose(f);
-            return 0;
+            return ERROR_RO_JSON;
         }
 
-        ro_dict_t *d = ro_parse_dict(b, 0);
+        ro_dict_t d = ro_parse_dict(b, 0);
         free(b);
         fclose(f);
-        return init_ro_json(0, 0, d);
+        return RO_JSON(false, ERROR_RO_ARRAY, d);
     }
     else if (c == '[' && nb_chars < MAX_READ_BUFF_SIZE)
     {
@@ -381,7 +379,7 @@ ro_json_t *ro_parse(char *file)
         {
             fclose(f);
             free(b);
-            return 0;
+            return ERROR_RO_JSON;
         }
         b[nb_chars] = 0;
         fread(b, sizeof(char), nb_chars, f);
@@ -391,14 +389,14 @@ ro_json_t *ro_parse(char *file)
             printf("Invalid json file\n");
             free(b);
             fclose(f);
-            return 0;
+            return ERROR_RO_JSON;
         }
 
-        ro_array_t *a = ro_parse_array(b, 0);
+        ro_array_t a = ro_parse_array(b, 0);
         free(b);
         fclose(f);
-        return init_ro_json(1, a, 0);
+        return RO_JSON(true, a, ERROR_RO_DICT);
     }
     fclose(f);
-    return 0;
+    return ERROR_RO_JSON;
 }

@@ -134,11 +134,7 @@ typedef struct
     }
 
 #define GET_ARRAY_AS_STR(fill_rx_string_ll_with_values)                        \
-    if (!a)                                                                    \
-    {                                                                          \
-        return NULL_STRING;                                                    \
-    }                                                                          \
-    if (!a->size)                                                              \
+    if (!a.size)                                                               \
     {                                                                          \
         char *str = malloc(3 * sizeof(char));                                  \
         if (!str)                                                              \
@@ -213,11 +209,7 @@ typedef struct
     return STRING_OF(str, nb_chars)
 
 #define GET_DICT_AS_STR(fill_rx_string_ll_with_items)                          \
-    if (!d)                                                                    \
-    {                                                                          \
-        return NULL_STRING;                                                    \
-    }                                                                          \
-    if (!d->size)                                                              \
+    if (!d.size)                                                               \
     {                                                                          \
         char *str = malloc(3 * sizeof(char));                                  \
         if (!str)                                                              \
@@ -303,7 +295,7 @@ typedef struct
     return STRING_OF(str, nb_chars)
 
 #define WRITE_JSON_TO_FILE(get_rx_array_as_str, get_rx_dict_as_str)            \
-    if (!j || !file_name)                                                      \
+    if (!file_name)                                                            \
     {                                                                          \
         return;                                                                \
     }                                                                          \
@@ -312,8 +304,8 @@ typedef struct
     {                                                                          \
         return;                                                                \
     }                                                                          \
-    string_t s = IS_ARRAY(j) ? get_rx_array_as_str(j->array, 1)                \
-                             : get_rx_dict_as_str(j->dict, 1);                 \
+    string_t s = j.is_array ? get_rx_array_as_str(j.array, 1)                  \
+                            : get_rx_dict_as_str(j.dict, 1);                   \
     if (!s.str)                                                                \
     {                                                                          \
         fclose(f);                                                             \

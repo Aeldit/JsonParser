@@ -10,6 +10,6 @@
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
-void write_ro_json_to_file(ro_json_t *j, char *file_name);
+void write_ro_json_to_file(ro_json_t j, char *file_name);
 
 #endif // !RO_JSON_WRITE_H

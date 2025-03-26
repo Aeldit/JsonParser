@@ -24,7 +24,7 @@ mem-least: clean
 
 noprint: clean
 	$(CC) $(CFLAGS) $(CFILESBASE) $(CFILESRO) -o $(TARGET) \
-		 -DVALGRING_DISABLE_PRINT
+		 -DVALGRING_DISABLE_PRINT -Wno-unused-parameter
 	./$(TARGET) flights-1m.json
 
 noprintrw: clean

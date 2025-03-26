@@ -10,29 +10,6 @@
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
-ro_array_t *init_ro_array(size_t size)
-{
-    ro_array_t *a = calloc(1, sizeof(ro_array_t));
-    if (!a)
-    {
-        return 0;
-    }
-
-    if (!size)
-    {
-        return a;
-    }
-
-    a->values = calloc(size, sizeof(ro_value_t));
-    if (!a->values)
-    {
-        free(a);
-        return 0;
-    }
-    a->size = size;
-    return a;
-}
-
 ro_array_t *init_ro_array_with(size_t size, ...)
 {
     va_list args;
@@ -65,29 +42,6 @@ ro_array_t *init_ro_array_with(size_t size, ...)
     va_end(args);
     a->values = values;
     return a;
-}
-
-ro_dict_t *init_ro_dict(size_t size)
-{
-    ro_dict_t *d = calloc(1, sizeof(ro_dict_t));
-    if (!d)
-    {
-        return 0;
-    }
-
-    if (!size)
-    {
-        return d;
-    }
-
-    d->items = calloc(size, sizeof(ro_item_t));
-    if (!d->items)
-    {
-        free(d);
-        return 0;
-    }
-    d->size = size;
-    return d;
 }
 
 ro_dict_t *init_ro_dict_with(size_t size, ...)
@@ -124,52 +78,28 @@ ro_dict_t *init_ro_dict_with(size_t size, ...)
     return d;
 }
 
-ro_json_t *init_ro_json(bool is_array, ro_array_t *a, ro_dict_t *d)
-{
-    if ((is_array && !a) || (!is_array && !d))
-    {
-        return 0;
-    }
-
-    ro_json_t *j = calloc(1, sizeof(ro_json_t));
-    if (!j)
-    {
-        return 0;
-    }
-    j->is_array = is_array;
-    if (is_array)
-    {
-        j->array = a;
-    }
-    else
-    {
-        j->dict = d;
-    }
-    return j;
-}
-
 /*******************************************************************************
 **                                    GETS                                    **
 *******************************************************************************/
-ro_value_t ro_array_get(ro_array_t *a, size_t index)
+ro_value_t ro_array_get(ro_array_t a, size_t index)
 {
-    if (!a || index >= a->size)
+    if (index >= a.size)
     {
         return ERROR_RO_VALUE;
     }
 
-    return index < a->size ? a->values[index] : ERROR_RO_VALUE;
+    return index < a.size ? a.values[index] : ERROR_RO_VALUE;
 }
 
-ro_item_t ro_dict_get(ro_dict_t *d, string_t key)
+ro_item_t ro_dict_get(ro_dict_t d, string_t key)
 {
-    if (!d || !key.str)
+    if (!key.str)
     {
         return ERROR_RO_ITEM;
     }
 
-    ro_item_t *items = d->items;
-    size_t size = d->size;
+    ro_item_t *items = d.items;
+    size_t size      = d.size;
     for (size_t i = 0; i < size; ++i)
     {
         ro_item_t it = items[i];
@@ -184,16 +114,11 @@ ro_item_t ro_dict_get(ro_dict_t *d, string_t key)
 /*******************************************************************************
 **                                   PRINTING                                 **
 *******************************************************************************/
-void ro_dict_print_indent(ro_dict_t *d, u16 indent, bool fromDict);
-void ro_dict_print(ro_dict_t *d);
+void ro_dict_print_indent(ro_dict_t d, u16 indent, bool fromDict);
+void ro_dict_print(ro_dict_t d);
 
-void ro_array_print_indent(ro_array_t *a, u16 indent, bool fromDict)
+void ro_array_print_indent(ro_array_t a, u16 indent, bool fromDict)
 {
-    if (!a)
-    {
-        return;
-    }
-
     // Obtains the number of tab characters that will be printed
     char *tabs = calloc(indent, sizeof(char));
     if (!tabs)
@@ -206,7 +131,7 @@ void ro_array_print_indent(ro_array_t *a, u16 indent, bool fromDict)
     }
     tabs[indent - 1] = '\0';
 
-    size_t size = a->size;
+    size_t size = a.size;
     // Empty array
     if (!size)
     {
@@ -217,7 +142,7 @@ void ro_array_print_indent(ro_array_t *a, u16 indent, bool fromDict)
 
     printf("%s[\n", fromDict ? "" : tabs);
 
-    ro_value_t *values = a->values;
+    ro_value_t *values = a.values;
     for (size_t i = 0; i < size; ++i)
     {
         ro_value_t v = values[i];
@@ -236,12 +161,14 @@ void ro_array_print_indent(ro_array_t *a, u16 indent, bool fromDict)
             printf("\t%s%f", tabs, v.doublev);
             break;
         case T_EXP_LONG:
-            printf("\t%s%lde%ld", tabs, v.exp_longv.number,
-                   v.exp_longv.exponent);
+            printf(
+                "\t%s%lde%ld", tabs, v.exp_longv.number, v.exp_longv.exponent
+            );
             break;
         case T_EXP_DOUBLE:
-            printf("\t%s%fe%ld", tabs, v.exp_doublev.number,
-                   v.exp_doublev.exponent);
+            printf(
+                "\t%s%fe%ld", tabs, v.exp_doublev.number, v.exp_doublev.exponent
+            );
             break;
         case T_BOOL:
             printf("\t%s%s", tabs, v.boolv ? "true" : "false");
@@ -266,17 +193,14 @@ void ro_array_print_indent(ro_array_t *a, u16 indent, bool fromDict)
     free(tabs);
 }
 
-void ro_array_print(ro_array_t *a)
+void ro_array_print(ro_array_t a)
 {
-    if (a)
-    {
 #ifndef VALGRING_DISABLE_PRINT
-        ro_array_print_indent(a, 1, false);
+    ro_array_print_indent(a, 1, false);
 #endif
-    }
 }
 
-void ro_dict_print_indent(ro_dict_t *d, u16 indent, bool fromDict)
+void ro_dict_print_indent(ro_dict_t d, u16 indent, bool fromDict)
 {
     // Obtains the number of tab characters that will be printed
     char *tabs = calloc(indent, sizeof(char));
@@ -290,7 +214,7 @@ void ro_dict_print_indent(ro_dict_t *d, u16 indent, bool fromDict)
     }
     tabs[indent - 1] = '\0';
 
-    size_t size = d->size;
+    size_t size = d.size;
     if (size == 0)
     {
         printf("%s{}", fromDict ? "" : tabs);
@@ -300,19 +224,20 @@ void ro_dict_print_indent(ro_dict_t *d, u16 indent, bool fromDict)
 
     printf("%s{\n", fromDict ? "" : tabs);
 
-    ro_item_t *items = d->items;
+    ro_item_t *items = d.items;
     for (size_t i = 0; i < size; ++i)
     {
         ro_item_t it = items[i];
-        char *key = it.key.str;
+        char *key    = it.key.str;
         switch (it.type)
         {
         case T_ERROR:
             continue;
 
         case T_STR:
-            printf("\t%s\"%s\": \"%s\"", tabs, key,
-                   it.strv.str ? it.strv.str : "");
+            printf(
+                "\t%s\"%s\": \"%s\"", tabs, key, it.strv.str ? it.strv.str : ""
+            );
             break;
         case T_LONG:
             printf("\t%s\"%s\": %ld", tabs, key, it.longv);
@@ -321,12 +246,16 @@ void ro_dict_print_indent(ro_dict_t *d, u16 indent, bool fromDict)
             printf("\t%s\"%s\": %f", tabs, key, it.doublev);
             break;
         case T_EXP_LONG:
-            printf("\t%s\"%s\": %lde%ld", tabs, key, it.exp_longv.number,
-                   it.exp_longv.exponent);
+            printf(
+                "\t%s\"%s\": %lde%ld", tabs, key, it.exp_longv.number,
+                it.exp_longv.exponent
+            );
             break;
         case T_EXP_DOUBLE:
-            printf("\t%s\"%s\": %fe%ld", tabs, key, it.exp_doublev.number,
-                   it.exp_doublev.exponent);
+            printf(
+                "\t%s\"%s\": %fe%ld", tabs, key, it.exp_doublev.number,
+                it.exp_doublev.exponent
+            );
             break;
         case T_BOOL:
             printf("\t%s\"%s\": %s", tabs, key, it.boolv ? "true" : "false");
@@ -353,28 +282,20 @@ void ro_dict_print_indent(ro_dict_t *d, u16 indent, bool fromDict)
     free(tabs);
 }
 
-void ro_dict_print(ro_dict_t *d)
+void ro_dict_print(ro_dict_t d)
 {
-    if (d)
-    {
 #ifndef VALGRING_DISABLE_PRINT
-        ro_dict_print_indent(d, 1, false);
+    ro_dict_print_indent(d, 1, false);
 #endif
-    }
 }
 
 /*******************************************************************************
 **                                 DESTRUCTION                                **
 *******************************************************************************/
-void destroy_ro_array(ro_array_t *a)
+void destroy_ro_array(ro_array_t a)
 {
-    if (!a)
-    {
-        return;
-    }
-
-    ro_value_t *values = a->values;
-    size_t size = a->size;
+    ro_value_t *values = a.values;
+    size_t size        = a.size;
     for (size_t i = 0; i < size; ++i)
     {
         ro_value_t val = values[i];
@@ -392,18 +313,12 @@ void destroy_ro_array(ro_array_t *a)
         }
     }
     free(values);
-    free(a);
 }
 
-void destroy_ro_dict(ro_dict_t *d)
+void destroy_ro_dict(ro_dict_t d)
 {
-    if (!d)
-    {
-        return;
-    }
-
-    ro_item_t *items = d->items;
-    size_t size = d->size;
+    ro_item_t *items = d.items;
+    size_t size      = d.size;
     for (size_t i = 0; i < size; ++i)
     {
         ro_item_t it = items[i];
@@ -422,24 +337,16 @@ void destroy_ro_dict(ro_dict_t *d)
         }
     }
     free(items);
-    free(d);
 }
 
-void destroy_ro_json(ro_json_t *j)
+void destroy_ro_json(ro_json_t j)
 {
-    if (!j)
+    if (j.is_array)
     {
-        return;
-    }
-
-    if (j->is_array)
-    {
-        destroy_ro_array(j->array);
+        destroy_ro_array(j.array);
     }
     else
     {
-        destroy_ro_dict(j->dict);
+        destroy_ro_dict(j.dict);
     }
-
-    free(j);
 }

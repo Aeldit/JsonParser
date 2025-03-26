@@ -26,18 +26,6 @@
     ((string_t){ .str = (s), .len = (l), .needs_freeing = false })
 #define NULL_STRING ((string_t){ .str = 0, .len = 0, .needs_freeing = false })
 
-/*
-** \def Checks if the JSON instance is not null, if the JSON instance is an
-**      array and if the array is not null
-*/
-#define IS_ARRAY(j) ((j) && ((j)->is_array) && ((j)->array))
-
-/*
-** \def Checks if the JSON instance is not null, if the JSON instance is a dict
-**      and if the dict is not null
-*/
-#define IS_DICT(j) ((j) && !((j)->is_array) && ((j)->dict))
-
 /*******************************************************************************
 **                                  TYPEDEFS                                  **
 *******************************************************************************/
