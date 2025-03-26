@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
     }
 
     rw_json_t *j = rw_parse(argv[1]);
-    if (IS_ARRAY(j))
+    if (j && j->is_array)
     {
         printf("\n");
 
@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
         }
         rw_array_print(j->array);
     }
-    else if (IS_DICT(j))
+    else if (j && !j->is_array)
     {
         rw_dict_print(j->dict);
     }
