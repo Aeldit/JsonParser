@@ -1,6 +1,5 @@
 #include <stddef.h>
 #include <stdint.h>
-#include <stdio.h>
 #include <threads.h>
 
 #include "src/ro_json_parser.h"
@@ -28,15 +27,5 @@ int main(int argc, char *argv[])
     // thrd_sleep(&(struct timespec){ .tv_sec = 10 }, NULL);
 
     destroy_ro_json(j);
-    printf("%lu\n", sizeof(ro_value_t));
-    printf("%lu\n", sizeof(ro_item_t));
-    printf("%lu\n", sizeof(string_t));
-    printf("%lu\n", sizeof(i64));
-    printf("%lu\n", sizeof(double));
-    printf("%lu\n", sizeof(exp_long_t));
-    printf("%lu\n", sizeof(exp_double_t));
-    printf("%lu\n", sizeof(bool));
-    printf("%lu\n", sizeof(ro_array_t));
-    printf("%lu\n", sizeof(ro_dict_t));
     return 0;
 }
