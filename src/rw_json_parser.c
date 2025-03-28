@@ -12,11 +12,6 @@
 #include "validator.h"
 
 /*******************************************************************************
-**                           FUNCTIONS DECLARATIONS                           **
-*******************************************************************************/
-rw_dict_t *rw_parse_dict(char *b, size_t *pos);
-
-/*******************************************************************************
 **                               LOCAL FUNCTIONS                              **
 *******************************************************************************/
 rw_array_t *destroy_rw_array_on_error(rw_array_t *a)
@@ -55,16 +50,16 @@ rw_array_t *rw_parse_array(char *b, size_t *idx)
     }
 
     size_t nb_elts_parsed = 0;
-    size_t initial_i = i;
+    size_t initial_i      = i;
 
     char c = 0;
     while ((c = b[i]) && nb_elts_parsed < nb_elts)
     {
-        string_t s = NULL_STRING;
+        string_t s             = NULL_STRING;
         str_and_len_tuple_t sl = NULL_STR_AND_LEN_TUPLE;
-        size_t len = 0;
-        rw_array_t *tmp_a = 0;
-        rw_dict_t *tmp_jd = 0;
+        size_t len             = 0;
+        rw_array_t *tmp_a      = 0;
+        rw_dict_t *tmp_jd      = 0;
         switch (c)
         {
         case '"':
@@ -195,9 +190,9 @@ rw_dict_t *rw_parse_dict(char *b, size_t *idx)
     }
 
     size_t nb_elts_parsed = 0;
-    size_t initial_i = i;
+    size_t initial_i      = i;
 
-    string_t key = NULL_STRING;
+    string_t key        = NULL_STRING;
     bool is_waiting_key = true;
 
     char c = 0;
@@ -208,11 +203,11 @@ rw_dict_t *rw_parse_dict(char *b, size_t *idx)
             break;
         }
 
-        string_t s = NULL_STRING;
+        string_t s             = NULL_STRING;
         str_and_len_tuple_t sl = NULL_STR_AND_LEN_TUPLE;
-        size_t len = 0;
-        rw_array_t *tmp_ja = 0;
-        rw_dict_t *tmp_jd = 0;
+        size_t len             = 0;
+        rw_array_t *tmp_ja     = 0;
+        rw_dict_t *tmp_jd      = 0;
         switch (c)
         {
         case '"':
@@ -349,7 +344,7 @@ rw_json_t *rw_parse(char *file)
         return 0;
     }
 
-    size_t offset = 0;
+    long offset = 0;
     if (fseek(f, offset++, SEEK_SET))
     {
         fclose(f);
@@ -361,7 +356,11 @@ rw_json_t *rw_parse(char *file)
     stat(file, &st);
     size_t nb_chars = st.st_size;
 
-    char c = fgetc(f);
+    bool is_array = false;
+    rw_array_t *a = 0;
+    rw_dict_t *d  = 0;
+
+    int c = fgetc(f);
     if (c == '{' && nb_chars < MAX_READ_BUFF_SIZE)
     {
         char *b = calloc(nb_chars + 1, sizeof(char));
@@ -381,10 +380,8 @@ rw_json_t *rw_parse(char *file)
             return 0;
         }
 
-        rw_dict_t *d = rw_parse_dict(b, 0);
+        d = rw_parse_dict(b, 0);
         free(b);
-        fclose(f);
-        return init_rw_json(0, 0, d);
     }
     else if (c == '[' && nb_chars < MAX_READ_BUFF_SIZE)
     {
@@ -405,11 +402,9 @@ rw_json_t *rw_parse(char *file)
             return 0;
         }
 
-        rw_array_t *a = rw_parse_array(b, 0);
+        a = rw_parse_array(b, 0);
         free(b);
-        fclose(f);
-        return init_rw_json(1, a, 0);
     }
     fclose(f);
-    return 0;
+    return init_rw_json(is_array, a, d);
 }

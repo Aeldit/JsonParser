@@ -9,7 +9,7 @@
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
-bool is_float(char *str, size_t len)
+bool is_float(const char *str, size_t len)
 {
     if (!str)
     {
@@ -50,7 +50,7 @@ bool is_float(char *str, size_t len)
     return false;
 }
 
-bool has_exponent(char *s, size_t len)
+bool has_exponent(const char *s, size_t len)
 {
     if (!s)
     {
@@ -283,12 +283,13 @@ double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t *sl)
         return ERROR_DWOWE;
     }
 
+    double nb_digits_decimals = 1;
+
     double number   = 0; // Integer part
     double decimals = 0; // Decimal part
     i64 exponent    = 0; // Only used if sl->has_exponent is true
 
-    i64 nb_digits_decimals = 1;
-    size_t exp_idx         = 0;
+    size_t exp_idx = 0;
 
     bool dot_reached    = false;
     bool is_in_exponent = false;
@@ -465,7 +466,7 @@ str_and_len_tuple_t parse_number(char *buff, size_t *idx)
     );
 }
 
-size_t parse_boolean(char *buff, size_t *idx)
+size_t parse_boolean(const char *buff, size_t *idx)
 {
     if (!buff || !idx)
     {
@@ -502,7 +503,7 @@ size_t parse_boolean(char *buff, size_t *idx)
         ++nb_elts;                                                             \
     }
 
-size_t get_nb_elts_array(char *buff, size_t idx)
+size_t get_nb_elts_array(const char *buff, size_t idx)
 {
     if (!buff)
     {
@@ -580,7 +581,7 @@ size_t get_nb_elts_array(char *buff, size_t idx)
         ++nb_elts;                                                             \
     }
 
-size_t get_nb_elts_dict(char *buff, size_t idx)
+size_t get_nb_elts_dict(const char *buff, size_t idx)
 {
     if (!buff)
     {

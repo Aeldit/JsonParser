@@ -44,7 +44,7 @@
                 return;                                                        \
             }                                                                  \
             x->tail->next = l;                                                 \
-            x->tail = l;                                                       \
+            x->tail       = l;                                                 \
         }                                                                      \
     }                                                                          \
     ++x->size
@@ -176,9 +176,9 @@ void defragment_array(rw_array_t *a)
     rw_value_t tmps[ARRAY_LEN] = { 0 };
     arr_size_t tmps_insert_idx = 0;
 
-    value_link_t *link_to_fill = a->head;
+    value_link_t *link_to_fill      = a->head;
     value_link_t *prev_link_to_fill = a->head;
-    bool last_started_fill = false;
+    bool last_started_fill          = false;
 
     value_link_t *link = a->head;
     // We gather all the non empty values inside 'tmps', and then we copy the
@@ -195,16 +195,16 @@ void defragment_array(rw_array_t *a)
                 arr_copy_array(tmps, link_to_fill->values);
                 link_to_fill->insert_index = ARRAY_LEN;
                 arr_empty_array(tmps);
-                tmps_insert_idx = 0;
+                tmps_insert_idx   = 0;
                 prev_link_to_fill = link_to_fill;
-                link_to_fill = link_to_fill->next;
+                link_to_fill      = link_to_fill->next;
                 last_started_fill = false;
             }
 
             if (link->values[i].type != T_ERROR)
             {
                 tmps[tmps_insert_idx++] = link->values[i];
-                last_started_fill = true;
+                last_started_fill       = true;
             }
         }
         link = link->next;
@@ -216,12 +216,12 @@ void defragment_array(rw_array_t *a)
     if (tmps_insert_idx)
     {
         arr_copy_array(tmps, link_to_fill->values);
-        a->tail = link_to_fill;
+        a->tail      = link_to_fill;
         link_to_fill = link_to_fill->next;
         while (link_to_fill)
         {
             value_link_t *tmp = link_to_fill;
-            link_to_fill = link_to_fill->next;
+            link_to_fill      = link_to_fill->next;
             free(tmp);
         }
         a->tail->next = 0;
@@ -233,12 +233,12 @@ void defragment_array(rw_array_t *a)
     // and free all the remaining links starting at 'link_to_fill'
     else if (!last_started_fill)
     {
-        a->tail = prev_link_to_fill;
+        a->tail       = prev_link_to_fill;
         a->tail->next = 0;
         while (link_to_fill)
         {
             value_link_t *tmp = link_to_fill;
-            link_to_fill = link_to_fill->next;
+            link_to_fill      = link_to_fill->next;
             free(tmp);
         }
     }
@@ -265,12 +265,12 @@ void defragment_dict(rw_dict_t *d)
     // We fill this rw_array_t with each non-empty element (where the type is
     // not T_ERROR), and then we copy its contents to the previously fragmented
     // rw_array_t
-    rw_item_t tmps[ARRAY_LEN] = { 0 };
+    rw_item_t tmps[ARRAY_LEN]  = { 0 };
     arr_size_t tmps_insert_idx = 0;
 
-    item_link_t *link_to_fill = d->head;
+    item_link_t *link_to_fill      = d->head;
     item_link_t *prev_link_to_fill = d->head;
-    bool last_started_fill = false;
+    bool last_started_fill         = false;
 
     item_link_t *link = d->head;
     // We gather all the non empty items inside 'tmps', and then we copy the
@@ -287,16 +287,16 @@ void defragment_dict(rw_dict_t *d)
                 dict_copy_array(tmps, link_to_fill->items);
                 link_to_fill->insert_index = ARRAY_LEN;
                 dict_empty_array(tmps);
-                tmps_insert_idx = 0;
+                tmps_insert_idx   = 0;
                 prev_link_to_fill = link_to_fill;
-                link_to_fill = link_to_fill->next;
+                link_to_fill      = link_to_fill->next;
                 last_started_fill = 0;
             }
 
             if (link->items[i].type != T_ERROR)
             {
                 tmps[tmps_insert_idx++] = link->items[i];
-                last_started_fill = 1;
+                last_started_fill       = 1;
             }
         }
         link = link->next;
@@ -308,12 +308,12 @@ void defragment_dict(rw_dict_t *d)
     if (tmps_insert_idx)
     {
         dict_copy_array(tmps, link_to_fill->items);
-        d->tail = link_to_fill;
+        d->tail      = link_to_fill;
         link_to_fill = link_to_fill->next;
         while (link_to_fill)
         {
             item_link_t *tmp = link_to_fill;
-            link_to_fill = link_to_fill->next;
+            link_to_fill     = link_to_fill->next;
             free(tmp);
         }
         d->tail->next = 0;
@@ -325,12 +325,12 @@ void defragment_dict(rw_dict_t *d)
     // and free all the remaining links starting at 'link_to_fill'
     else if (!last_started_fill)
     {
-        d->tail = prev_link_to_fill;
+        d->tail       = prev_link_to_fill;
         d->tail->next = 0;
         while (link_to_fill)
         {
             item_link_t *tmp = link_to_fill;
-            link_to_fill = link_to_fill->next;
+            link_to_fill     = link_to_fill->next;
             free(tmp);
         }
     }
@@ -566,7 +566,7 @@ void rw_array_remove(rw_array_t *a, size_t index)
         return;
     }
 
-    value_link_t *link = a->head;
+    value_link_t *link     = a->head;
     size_t non_null_values = 0;
     while (link)
     {
@@ -642,7 +642,7 @@ void rw_dict_remove(rw_dict_t *d, string_t key)
                     break;
                 };
                 free(it.key.str);
-                it.key.str = 0;
+                it.key.str          = 0;
                 link->items[i].type = T_ERROR;
 
                 --d->size;
@@ -669,7 +669,7 @@ rw_value_t rw_array_get(rw_array_t *a, size_t index)
         return ERROR_RW_VALUE;
     }
 
-    value_link_t *link = a->head;
+    value_link_t *link     = a->head;
     size_t non_null_values = 0;
     while (link)
     {
@@ -713,7 +713,6 @@ rw_item_t rw_dict_get(rw_dict_t *d, string_t key)
 **                                   PRINTING                                 **
 *******************************************************************************/
 void rw_dict_print_indent(rw_dict_t *d, u16 indent, bool fromDict);
-void rw_dict_print(rw_dict_t *d);
 
 void rw_array_print_indent(rw_array_t *a, u16 indent, bool fromDict)
 {
@@ -742,7 +741,7 @@ void rw_array_print_indent(rw_array_t *a, u16 indent, bool fromDict)
     printf("%s[\n", fromDict ? "" : tabs);
 
     size_t nb_elts_printed = 0;
-    value_link_t *link = a->head;
+    value_link_t *link     = a->head;
     while (link)
     {
         rw_value_t *values = link->values;
@@ -763,12 +762,16 @@ void rw_array_print_indent(rw_array_t *a, u16 indent, bool fromDict)
                 printf("\t%s%f", tabs, v.doublev);
                 break;
             case T_EXP_LONG:
-                printf("\t%s%lde%ld", tabs, v.exp_longv.number,
-                       v.exp_longv.exponent);
+                printf(
+                    "\t%s%lde%ld", tabs, v.exp_longv.number,
+                    v.exp_longv.exponent
+                );
                 break;
             case T_EXP_DOUBLE:
-                printf("\t%s%fe%ld", tabs, v.exp_doublev.number,
-                       v.exp_doublev.exponent);
+                printf(
+                    "\t%s%fe%ld", tabs, v.exp_doublev.number,
+                    v.exp_doublev.exponent
+                );
                 break;
             case T_BOOL:
                 printf("\t%s%s", tabs, v.boolv ? "true" : "false");
@@ -825,7 +828,7 @@ void rw_dict_print_indent(rw_dict_t *d, u16 indent, bool fromDict)
 
     printf("%s{\n", fromDict ? "" : tabs);
 
-    size_t i = 0;
+    size_t i          = 0;
     item_link_t *link = d->head;
     while (link)
     {
@@ -833,14 +836,16 @@ void rw_dict_print_indent(rw_dict_t *d, u16 indent, bool fromDict)
         for (arr_size_t a = 0; a < ARRAY_LEN; ++a, ++i)
         {
             rw_item_t it = items[a];
-            char *key = it.key.str;
+            char *key    = it.key.str;
             switch (it.type)
             {
             case T_ERROR:
                 continue;
             case T_STR:
-                printf("\t%s\"%s\": \"%s\"", tabs, key,
-                       it.strv.str ? it.strv.str : "");
+                printf(
+                    "\t%s\"%s\": \"%s\"", tabs, key,
+                    it.strv.str ? it.strv.str : ""
+                );
                 break;
             case T_LONG:
                 printf("\t%s\"%s\": %ld", tabs, key, it.longv);
@@ -849,16 +854,21 @@ void rw_dict_print_indent(rw_dict_t *d, u16 indent, bool fromDict)
                 printf("\t%s\"%s\": %f", tabs, key, it.doublev);
                 break;
             case T_EXP_LONG:
-                printf("\t%s\"%s\": %lde%ld", tabs, key, it.exp_longv.number,
-                       it.exp_longv.exponent);
+                printf(
+                    "\t%s\"%s\": %lde%ld", tabs, key, it.exp_longv.number,
+                    it.exp_longv.exponent
+                );
                 break;
             case T_EXP_DOUBLE:
-                printf("\t%s\"%s\": %fe%ld", tabs, key, it.exp_doublev.number,
-                       it.exp_doublev.exponent);
+                printf(
+                    "\t%s\"%s\": %fe%ld", tabs, key, it.exp_doublev.number,
+                    it.exp_doublev.exponent
+                );
                 break;
             case T_BOOL:
-                printf("\t%s\"%s\": %s", tabs, key,
-                       it.boolv ? "true" : "false");
+                printf(
+                    "\t%s\"%s\": %s", tabs, key, it.boolv ? "true" : "false"
+                );
                 break;
             case T_NULL:
                 printf("\t%s\"%s\": null", tabs, key);
@@ -907,9 +917,9 @@ void destroy_rw_array(rw_array_t *a)
     value_link_t *link = a->head;
     while (link)
     {
-        value_link_t *tmp = link;
+        value_link_t *tmp  = link;
         rw_value_t *values = link->values;
-        link = link->next;
+        link               = link->next;
         for (arr_size_t i = 0; i < ARRAY_LEN; ++i)
         {
             switch (values[i].type)
@@ -942,7 +952,7 @@ void destroy_rw_dict(rw_dict_t *d)
     {
         item_link_t *tmp = link;
         rw_item_t *items = link->items;
-        link = link->next;
+        link             = link->next;
         for (arr_size_t i = 0; i < ARRAY_LEN; ++i)
         {
             switch (items[i].type)

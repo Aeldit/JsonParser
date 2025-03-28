@@ -334,7 +334,7 @@ ro_json_t ro_parse(char *file)
         return ERROR_RO_JSON;
     }
 
-    size_t offset = 0;
+    long offset = 0;
     if (fseek(f, offset++, SEEK_SET))
     {
         fclose(f);
@@ -346,7 +346,11 @@ ro_json_t ro_parse(char *file)
     stat(file, &st);
     size_t nb_chars = st.st_size;
 
-    char c = fgetc(f);
+    bool is_array = false;
+    ro_array_t a  = ERROR_RO_ARRAY;
+    ro_dict_t d   = ERROR_RO_DICT;
+
+    int c = fgetc(f);
     if (c == '{' && nb_chars < MAX_READ_BUFF_SIZE)
     {
         char *b = malloc((nb_chars + 1) * sizeof(char));
@@ -367,10 +371,8 @@ ro_json_t ro_parse(char *file)
             return ERROR_RO_JSON;
         }
 
-        ro_dict_t d = ro_parse_dict(b, 0);
+        d = ro_parse_dict(b, 0);
         free(b);
-        fclose(f);
-        return RO_JSON(false, ERROR_RO_ARRAY, d);
     }
     else if (c == '[' && nb_chars < MAX_READ_BUFF_SIZE)
     {
@@ -392,11 +394,10 @@ ro_json_t ro_parse(char *file)
             return ERROR_RO_JSON;
         }
 
-        ro_array_t a = ro_parse_array(b, 0);
+        a        = ro_parse_array(b, 0);
+        is_array = true;
         free(b);
-        fclose(f);
-        return RO_JSON(true, a, ERROR_RO_DICT);
     }
     fclose(f);
-    return ERROR_RO_JSON;
+    return RO_JSON(is_array, a, d);
 }

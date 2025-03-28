@@ -115,7 +115,6 @@ ro_item_t ro_dict_get(ro_dict_t d, string_t key)
 **                                   PRINTING                                 **
 *******************************************************************************/
 void ro_dict_print_indent(ro_dict_t d, u16 indent, bool fromDict);
-void ro_dict_print(ro_dict_t d);
 
 void ro_array_print_indent(ro_array_t a, u16 indent, bool fromDict)
 {

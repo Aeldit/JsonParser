@@ -77,7 +77,7 @@ string_t get_ro_array_as_str(ro_array_t a, u16 indent)
     /* indents are 4 spaces */                                                 \
     /* indent == 1 -> if we are in the 'root' array, we add a '\n' at the */   \
     /* end */
-    size_t nb_chars = 2 + (indent - 1) * 4 + (indent == 1)
+    size_t nb_chars = 2 + ((indent - 1) * 4) + (indent == 1)
         + fill_ro_string_ll_with_values(ll, a, indent);
     u32 nb_chars_indent = indent * 4;
     char *str           = calloc(nb_chars + 1, sizeof(char));
@@ -147,7 +147,7 @@ string_t get_ro_dict_as_str(ro_dict_t d, u16 indent)
                                                             are in the 'root'
                                                             dict, we add a \n at
                                                             the end */
-    size_t nb_chars = 2 + (indent - 1) * 4 + (indent == 1)
+    size_t nb_chars = 2 + ((indent - 1) * 4) + (indent == 1)
         + fill_ro_string_ll_with_items(ll, d, indent);
     u32 nb_chars_indent = indent * 4;
     char *str           = calloc(nb_chars + 1, sizeof(char));

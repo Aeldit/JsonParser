@@ -41,9 +41,9 @@ typedef u64 arr_size_t;
 #endif // LEAST
 
 #define RW_VALUE_OF(T_TYPE, type_field)                                        \
-    ((rw_value_t){ .type = T_TYPE, .type_field = value })
+    ((rw_value_t){ .type = (T_TYPE), .type_field = value })
 #define RW_ITEM_OF(T_TYPE, type_field)                                         \
-    ((rw_item_t){ .type = T_TYPE, .key = key, .type_field = value })
+    ((rw_item_t){ .type = (T_TYPE), .key = key, .type_field = value })
 
 #define RWVAL_STR(v) ((rw_value_t){ .type = T_STR, .strv = (v) })
 #define RWVAL_LONG(v) ((rw_value_t){ .type = T_LONG, .longv = (v) })
@@ -64,7 +64,7 @@ typedef u64 arr_size_t;
 #define RWIT_EXPLONG(k, v)                                                     \
     ((rw_item_t){ .type = T_EXP_LONG, .key = (k), .exp_longv = (v) })
 #define RWIT_EXPDOUBLE(k, v)                                                   \
-    ((rw_item_t){ .type = T_EXP_DOUBLE, .key = (k), .exp_doublev = v })
+    ((rw_item_t){ .type = T_EXP_DOUBLE, .key = (k), .exp_doublev = (v) })
 #define RWIT_BOOL(k, v)                                                        \
     ((rw_item_t){ .type = T_BOOL, .key = (k), .boolv = (v) })
 #define RWIT_NULL(k, v) ((rw_item_t){ .type = T_NULL, .key = (k) })

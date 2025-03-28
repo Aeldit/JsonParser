@@ -105,8 +105,8 @@ typedef struct
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
-bool is_float(char *str, size_t len);
-bool has_exponent(char *s, size_t len);
+bool is_float(const char *str, size_t len);
+bool has_exponent(const char *s, size_t len);
 
 /**
 ** \brief Takes sl's char array and transforms it into a long.
@@ -158,14 +158,14 @@ str_and_len_tuple_t parse_number(char *buff, size_t *idx);
 **            started the boolean
 ** \returns 5 if false, 4 if true, 0 otherwise
 */
-size_t parse_boolean(char *buff, size_t *idx);
+size_t parse_boolean(const char *buff, size_t *idx);
 
 /**
 ** \param idx The index of the character just after the '[' that begins the
 **            current array
 ** \returns The number of elements of the current array
 */
-size_t get_nb_elts_array(char *buff, size_t idx);
+size_t get_nb_elts_array(const char *buff, size_t idx);
 
 /**
 ** \param buff The buffer containing the object currently being parsed
@@ -173,6 +173,6 @@ size_t get_nb_elts_array(char *buff, size_t idx);
 **            current dict
 ** \returns The number of elements of the current dict
 */
-size_t get_nb_elts_dict(char *buff, size_t idx);
+size_t get_nb_elts_dict(const char *buff, size_t idx);
 
 #endif // !BASE_JSON_PARSER_H

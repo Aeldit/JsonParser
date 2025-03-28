@@ -6,7 +6,7 @@
 ** \brief Called after encountering a '+' or '-' sign, or any digit.
 **        Starts from the sign or digit that started the number
 */
-bool is_number_valid(char *buff, size_t *idx)
+bool is_number_valid(const char *buff, size_t *idx)
 {
     if (!buff || !idx)
     {
