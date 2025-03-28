@@ -9,35 +9,43 @@
 /*******************************************************************************
 **                                 STR_TO_LONG                                **
 *******************************************************************************/
-void test_str_to_long(char *str, bool is_float, bool has_exponent,
-                      bool expected_has_exponent, i64 expected_value,
-                      i64 expected_number, i64 expected_exponent)
+void test_str_to_long(
+    char *str, bool is_float, bool has_exponent, bool expected_has_exponent,
+    i64 expected_value, i64 expected_number, i64 expected_exponent
+)
 {
     str_and_len_tuple_t *sl = calloc(1, sizeof(str_and_len_tuple_t));
     if (!sl)
     {
         return;
     }
-    sl->str = str;
-    sl->len = strlen(str);
-    sl->is_float = is_float;
+    sl->str          = str;
+    sl->len          = strlen(str);
+    sl->is_float     = is_float;
     sl->has_exponent = has_exponent;
 
     long_with_or_without_exponent_t lwowe = str_to_long(sl);
 
-    cr_expect(lwowe.has_exponent == expected_has_exponent,
-              "Expected 'has_exponent' to be '%s' but it was '%s'",
-              has_exponent ? "true" : "false",
-              sl->has_exponent ? "true" : "false");
-    cr_expect(lwowe.long_value == expected_value,
-              "Expected 'long_value' to be '%ld' but got '%ld'", expected_value,
-              lwowe.long_value);
-    cr_expect(lwowe.long_exp_value.number == expected_number,
-              "Expected 'number' to be '%ld' but got '%ld'", expected_number,
-              lwowe.long_exp_value.number);
-    cr_expect(lwowe.long_exp_value.exponent == expected_exponent,
-              "Expected 'exponent' to be '%ld' but got '%ld'",
-              expected_exponent, lwowe.long_exp_value.exponent);
+    cr_expect(
+        lwowe.has_exponent == expected_has_exponent,
+        "Expected 'has_exponent' to be '%s' but it was '%s'",
+        has_exponent ? "true" : "false", sl->has_exponent ? "true" : "false"
+    );
+    cr_expect(
+        lwowe.long_value == expected_value,
+        "Expected 'long_value' to be '%ld' but got '%ld'", expected_value,
+        lwowe.long_value
+    );
+    cr_expect(
+        lwowe.long_exp_value.number == expected_number,
+        "Expected 'number' to be '%ld' but got '%ld'", expected_number,
+        lwowe.long_exp_value.number
+    );
+    cr_expect(
+        lwowe.long_exp_value.exponent == expected_exponent,
+        "Expected 'exponent' to be '%ld' but got '%ld'", expected_exponent,
+        lwowe.long_exp_value.exponent
+    );
     free(sl);
 }
 
@@ -94,35 +102,43 @@ Test(base_json_parser, str_to_long_negative_exp_upper_negative)
 /*******************************************************************************
 **                                STR_TO_DOUBLE                               **
 *******************************************************************************/
-void test_str_to_double(char *str, bool is_float, bool has_exponent,
-                        bool expected_has_exponent, double expected_value,
-                        double expected_number, i64 expected_exponent)
+void test_str_to_double(
+    char *str, bool is_float, bool has_exponent, bool expected_has_exponent,
+    double expected_value, double expected_number, i64 expected_exponent
+)
 {
     str_and_len_tuple_t *sl = calloc(1, sizeof(str_and_len_tuple_t));
     if (!sl)
     {
         return;
     }
-    sl->str = str;
-    sl->len = strlen(str);
-    sl->is_float = is_float;
+    sl->str          = str;
+    sl->len          = strlen(str);
+    sl->is_float     = is_float;
     sl->has_exponent = has_exponent;
 
     double_with_or_without_exponent_t dwowe = str_to_double(sl);
 
-    cr_expect(dwowe.double_exp_value.number == expected_number,
-              "Expected 'number' to be '%lf' but got '%lf'", expected_number,
-              dwowe.double_exp_value.number);
-    cr_expect(dwowe.double_exp_value.exponent == expected_exponent,
-              "Expected 'exponent' to be '%ld' but got '%ld'",
-              expected_exponent, dwowe.double_exp_value.exponent);
-    cr_expect(dwowe.double_value == expected_value,
-              "Expected 'double_value' to be '%lf' but got '%lf'",
-              expected_value, dwowe.double_value);
-    cr_expect(dwowe.has_exponent == expected_has_exponent,
-              "Expected 'has_exponent' to be '%s' but it was '%s'",
-              has_exponent ? "true" : "false",
-              sl->has_exponent ? "true" : "false");
+    cr_expect(
+        dwowe.double_exp_value.number == expected_number,
+        "Expected 'number' to be '%lf' but got '%lf'", expected_number,
+        dwowe.double_exp_value.number
+    );
+    cr_expect(
+        dwowe.double_exp_value.exponent == expected_exponent,
+        "Expected 'exponent' to be '%ld' but got '%ld'", expected_exponent,
+        dwowe.double_exp_value.exponent
+    );
+    cr_expect(
+        dwowe.double_value == expected_value,
+        "Expected 'double_value' to be '%lf' but got '%lf'", expected_value,
+        dwowe.double_value
+    );
+    cr_expect(
+        dwowe.has_exponent == expected_has_exponent,
+        "Expected 'has_exponent' to be '%s' but it was '%s'",
+        has_exponent ? "true" : "false", sl->has_exponent ? "true" : "false"
+    );
     free(sl);
 }
 
@@ -181,8 +197,10 @@ Test(base_json_parser, str_to_double_negative_exp_upper_negative)
 *******************************************************************************/
 void test_is_float(char *str, bool expected_res)
 {
-    cr_expect(is_float(str, str ? strlen(str) : 0) == expected_res,
-              "Expected '%s' to be a float", str);
+    cr_expect(
+        is_float(str, str ? strlen(str) : 0) == expected_res,
+        "Expected '%s' to be a float", str
+    );
 }
 
 Test(base_json_parser, is_float_null)
@@ -210,8 +228,10 @@ Test(base_json_parser, is_not_float)
 *******************************************************************************/
 void test_has_exponent(char *str, bool expected_res)
 {
-    cr_expect(has_exponent(str, str ? strlen(str) : 0) == expected_res,
-              "Expected '%s' to have an exponent", str);
+    cr_expect(
+        has_exponent(str, str ? strlen(str) : 0) == expected_res,
+        "Expected '%s' to have an exponent", str
+    );
 }
 
 Test(base_json_parser, has_exponent_null)
@@ -280,10 +300,10 @@ void test_parse_string(size_t *idx, char *expected_str)
         return;
     }
 
-    size_t initial_idx = idx ? *idx : 0;
+    size_t initial_idx  = idx ? *idx : 0;
     size_t expected_len = expected_str ? strlen(expected_str) : 0;
-    string_t s = NULL_STRING;
-    char *buff = 0;
+    string_t s          = NULL_STRING;
+    char *buff          = 0;
 
     if (fseek(f, 0, SEEK_SET) != 0)
     {
@@ -305,18 +325,24 @@ void test_parse_string(size_t *idx, char *expected_str)
 
     s = parse_string(buff, idx);
 
-    cr_expect(strncmp(s.str, expected_str,
-                      s.len < expected_len ? expected_len : s.len)
-                  == 0,
-              "Expected 'str' to be '%s' but got '%s'", expected_str, s.str);
-    cr_expect(s.len == expected_len, "Expected 'len' to be '%zu' but got '%u'",
-              expected_len, f && s.len);
+    cr_expect(
+        strncmp(
+            s.str, expected_str, s.len < expected_len ? expected_len : s.len
+        ) == 0,
+        "Expected 'str' to be '%s' but got '%s'", expected_str, s.str
+    );
+    cr_expect(
+        s.len == expected_len, "Expected 'len' to be '%zu' but got '%u'",
+        expected_len, f && s.len
+    );
     if (buff && idx)
     {
-        cr_expect(*idx - initial_idx == s.len + 1,
-                  "Expected '*idx' to be incremented by '%zu' but it got "
-                  "incremented by '%zu'",
-                  s.len + 1, *idx - initial_idx);
+        cr_expect(
+            *idx - initial_idx == s.len + 1,
+            "Expected '*idx' to be incremented by '%zu' but it got "
+            "incremented by '%zu'",
+            s.len + 1, *idx - initial_idx
+        );
     }
     destroy_string(s);
     if (buff)
@@ -354,12 +380,12 @@ void test_parse_number(size_t *idx, str_and_len_tuple_t expected_str_and_len)
         return;
     }
 
-    size_t initial_idx = idx ? *idx : 0;
-    char *expected_str = expected_str_and_len.str;
+    size_t initial_idx  = idx ? *idx : 0;
+    char *expected_str  = expected_str_and_len.str;
     size_t expected_len = expected_str_and_len.len;
 
     str_and_len_tuple_t s = NULL_STR_AND_LEN_TUPLE;
-    char *buff = 0;
+    char *buff            = 0;
 
     if (fseek(f, 0, SEEK_SET) != 0)
     {
@@ -381,26 +407,36 @@ void test_parse_number(size_t *idx, str_and_len_tuple_t expected_str_and_len)
 
     s = parse_number(buff, idx);
 
-    cr_expect(strncmp(s.str, expected_str,
-                      s.len < expected_len ? expected_len : s.len)
-                  == 0,
-              "Expected 'str' to be '%s' but got '%s'", expected_str, s.str);
-    cr_expect(s.len == expected_len, "Expected 'len' to be '%zu' but got '%zu'",
-              expected_len, s.len);
+    cr_expect(
+        strncmp(
+            s.str, expected_str, s.len < expected_len ? expected_len : s.len
+        ) == 0,
+        "Expected 'str' to be '%s' but got '%s'", expected_str, s.str
+    );
+    cr_expect(
+        s.len == expected_len, "Expected 'len' to be '%zu' but got '%zu'",
+        expected_len, s.len
+    );
     if (f && idx)
     {
-        cr_expect(*idx - initial_idx == s.len - 1,
-                  "Expected '*idx' to be incremented by '%zu' but it got "
-                  "incremented by '%zu'",
-                  s.len - 1, *idx - initial_idx);
-        cr_expect(s.is_float == expected_str_and_len.is_float,
-                  "Expected '%s' to %s a float but it %s", s.str,
-                  expected_str_and_len.is_float ? "be" : "not be",
-                  s.is_float ? "was" : "wasn't");
-        cr_expect(s.has_exponent == expected_str_and_len.has_exponent,
-                  "Expected '%s' to %s an exponent but it %s", s.str,
-                  expected_str_and_len.has_exponent ? "have" : "not have",
-                  s.has_exponent ? "did" : "didn't");
+        cr_expect(
+            *idx - initial_idx == s.len - 1,
+            "Expected '*idx' to be incremented by '%zu' but it got "
+            "incremented by '%zu'",
+            s.len - 1, *idx - initial_idx
+        );
+        cr_expect(
+            s.is_float == expected_str_and_len.is_float,
+            "Expected '%s' to %s a float but it %s", s.str,
+            expected_str_and_len.is_float ? "be" : "not be",
+            s.is_float ? "was" : "wasn't"
+        );
+        cr_expect(
+            s.has_exponent == expected_str_and_len.has_exponent,
+            "Expected '%s' to %s an exponent but it %s", s.str,
+            expected_str_and_len.has_exponent ? "have" : "not have",
+            s.has_exponent ? "did" : "didn't"
+        );
     }
     free(s.str);
     if (buff)
@@ -542,8 +578,8 @@ void test_parse_boolean(size_t *idx, size_t expected_len)
     }
 
     size_t initial_idx = idx ? *idx : 0;
-    size_t len = 0;
-    char *buff = 0;
+    size_t len         = 0;
+    char *buff         = 0;
 
     if (fseek(f, 0, SEEK_SET) != 0)
     {
@@ -565,15 +601,18 @@ void test_parse_boolean(size_t *idx, size_t expected_len)
 
     len = parse_boolean(buff, idx);
 
-    cr_expect(len == expected_len,
-              "Expected the boolean len to be '%zu' but got '%zu'",
-              expected_len, len);
+    cr_expect(
+        len == expected_len,
+        "Expected the boolean len to be '%zu' but got '%zu'", expected_len, len
+    );
     if (buff && idx)
     {
-        cr_expect(*idx - initial_idx == len - 1,
-                  "Expected '*idx' to be incremented by '%zu' but it got "
-                  "incremented by '%zu'",
-                  len - 1, *idx - initial_idx);
+        cr_expect(
+            *idx - initial_idx == len - 1,
+            "Expected '*idx' to be incremented by '%zu' but it got "
+            "incremented by '%zu'",
+            len - 1, *idx - initial_idx
+        );
     }
     if (buff)
     {
@@ -628,9 +667,11 @@ void test_get_nb_elts_array(size_t idx, size_t expected_len)
 
     len = get_nb_elts_array(buff, idx);
 
-    cr_expect(len == expected_len,
-              "Expected the length of the array to be '%zu' but got '%zu'",
-              expected_len, len);
+    cr_expect(
+        len == expected_len,
+        "Expected the length of the array to be '%zu' but got '%zu'",
+        expected_len, len
+    );
     if (buff)
     {
         free(buff);
@@ -687,9 +728,11 @@ void test_get_nb_elts_dict(size_t idx, size_t expected_len)
 
     len = get_nb_elts_dict(buff, idx);
 
-    cr_expect(len == expected_len,
-              "Expected the length of the dict to be '%zu' but got '%zu'",
-              expected_len, len);
+    cr_expect(
+        len == expected_len,
+        "Expected the length of the dict to be '%zu' but got '%zu'",
+        expected_len, len
+    );
     if (buff)
     {
         free(buff);
@@ -718,78 +761,91 @@ Test(base_json_parser, get_nb_elts_dict_buff_nested)
 Test(base_json_parser, error_str_to_long_nullarg)
 {
     long_with_or_without_exponent_t lwowe = str_to_long(0);
-    cr_expect(lwowe.has_exponent == 2,
-              "Expected str_to_long(0) to set the 'has_exponent' field to 2, "
-              "but it was set to '%d'",
-              lwowe.has_exponent);
+    cr_expect(
+        lwowe.has_exponent == 2,
+        "Expected str_to_long(0) to set the 'has_exponent' field to 2, "
+        "but it was set to '%d'",
+        lwowe.has_exponent
+    );
 }
 
 Test(base_json_parser, error_str_to_long_nullstr)
 {
-    str_and_len_tuple_t sl = STR_AND_LEN_OF(0, 1, 0, 0);
+    str_and_len_tuple_t sl                = STR_AND_LEN_OF(0, 1, 0, 0);
     long_with_or_without_exponent_t lwowe = str_to_long(&sl);
-    cr_expect(lwowe.has_exponent == 2,
-              "Expected str_to_long(0) to set the 'has_exponent' field to 2, "
-              "but it was set to '%d'",
-              lwowe.has_exponent);
+    cr_expect(
+        lwowe.has_exponent == 2,
+        "Expected str_to_long(0) to set the 'has_exponent' field to 2, "
+        "but it was set to '%d'",
+        lwowe.has_exponent
+    );
 }
 
 Test(base_json_parser, error_str_to_long_zerolen)
 {
-    str_and_len_tuple_t sl = STR_AND_LEN_OF("", 0, 0, 0);
+    str_and_len_tuple_t sl                = STR_AND_LEN_OF("", 0, 0, 0);
     long_with_or_without_exponent_t lwowe = str_to_long(&sl);
-    cr_expect(lwowe.has_exponent == 2,
-              "Expected str_to_long(sl) ; with 'sl' having a null string ; to "
-              "set the 'has_exponent' field to 2, but it was set to '%d'",
-              lwowe.has_exponent);
+    cr_expect(
+        lwowe.has_exponent == 2,
+        "Expected str_to_long(sl) ; with 'sl' having a null string ; to "
+        "set the 'has_exponent' field to 2, but it was set to '%d'",
+        lwowe.has_exponent
+    );
 }
 
 // str_to_double
 Test(base_json_parser, error_str_to_double_nullarg)
 {
     double_with_or_without_exponent_t dwowe = str_to_double(0);
-    cr_expect(dwowe.has_exponent == 2,
-              "Expected str_to_long(0) to set the 'has_exponent' field to 2, "
-              "but it was set to '%d'",
-              dwowe.has_exponent);
+    cr_expect(
+        dwowe.has_exponent == 2,
+        "Expected str_to_long(0) to set the 'has_exponent' field to 2, "
+        "but it was set to '%d'",
+        dwowe.has_exponent
+    );
 }
 
 Test(base_json_parser, error_str_to_double_nullstr)
 {
-    str_and_len_tuple_t sl = STR_AND_LEN_OF(0, 1, 0, 0);
+    str_and_len_tuple_t sl                  = STR_AND_LEN_OF(0, 1, 0, 0);
     double_with_or_without_exponent_t dwowe = str_to_double(&sl);
-    cr_expect(dwowe.has_exponent == 2,
-              "Expected str_to_long(0) to set the 'has_exponent' field to 2, "
-              "but it was set to '%d'",
-              dwowe.has_exponent);
+    cr_expect(
+        dwowe.has_exponent == 2,
+        "Expected str_to_long(0) to set the 'has_exponent' field to 2, "
+        "but it was set to '%d'",
+        dwowe.has_exponent
+    );
 }
 
 Test(base_json_parser, error_str_to_double_zerolen)
 {
-    str_and_len_tuple_t sl = STR_AND_LEN("", 0);
+    str_and_len_tuple_t sl                  = STR_AND_LEN("", 0);
     double_with_or_without_exponent_t dwowe = str_to_double(&sl);
-    cr_expect(dwowe.has_exponent == 2,
-              "Expected str_to_long(sl) ; with 'sl' having a null string ; to "
-              "set the 'has_exponent' field to 2, but it was set to '%d'",
-              dwowe.has_exponent);
+    cr_expect(
+        dwowe.has_exponent == 2,
+        "Expected str_to_long(sl) ; with 'sl' having a null string ; to "
+        "set the 'has_exponent' field to 2, but it was set to '%d'",
+        dwowe.has_exponent
+    );
 }
 
 // is_float
 Test(base_json_parser, error_is_float_null_str)
 {
     bool res = is_float(0, 0);
-    cr_expect(!res,
-              "Expected is_float(0, len) to return 0, but it returned '%d'",
-              res);
+    cr_expect(
+        !res, "Expected is_float(0, len) to return 0, but it returned '%d'", res
+    );
 }
 
 // has_exponent
 Test(base_json_parser, error_has_exponent_null_str)
 {
     bool res = has_exponent(0, 0);
-    cr_expect(!res,
-              "Expected has_exponent(0, len) to return 0, but it returned '%d'",
-              res);
+    cr_expect(
+        !res, "Expected has_exponent(0, len) to return 0, but it returned '%d'",
+        res
+    );
 }
 
 // parse_string
@@ -797,32 +853,37 @@ Test(base_json_parser, error_parse_string_buff_nullstr)
 {
     size_t idx = 5;
     string_t s = parse_string(0, &idx);
-    cr_expect(!s.str,
-              "Expected parse_string_buff(0, &idx) to a NULL_STRING, but it "
-              "returned '%s'",
-              s.str);
+    cr_expect(
+        !s.str,
+        "Expected parse_string_buff(0, &idx) to a NULL_STRING, but it "
+        "returned '%s'",
+        s.str
+    );
 }
 
 Test(base_json_parser, error_parse_string_buff_nullidx)
 {
     string_t s = parse_string("", 0);
-    cr_expect(!s.str,
-              "Expected parse_string_buff(\"\", 0) to a NULL_STRING, but it "
-              "returned '%s'",
-              s.str);
+    cr_expect(
+        !s.str,
+        "Expected parse_string_buff(\"\", 0) to a NULL_STRING, but it "
+        "returned '%s'",
+        s.str
+    );
 }
 
 // parse_number
 Test(base_json_parser, error_parse_number_buff_nullstr)
 {
-    size_t idx = 5;
+    size_t idx            = 5;
     str_and_len_tuple_t s = parse_number(0, &idx);
     cr_expect(
         !s.str,
         "Expected parse_number_buff(0, &idx) to a "
         "NULL_STR_AND_LEN_TUPLE, but it returned { .str = %s, .len = %zu, "
         ".is_float = %d, .has_exponent = %d }",
-        s.str, s.len, s.is_float, s.has_exponent);
+        s.str, s.len, s.is_float, s.has_exponent
+    );
 }
 
 Test(base_json_parser, error_parse_number_buff_nullidx)
@@ -833,7 +894,8 @@ Test(base_json_parser, error_parse_number_buff_nullidx)
         "Expected parse_number_buff(0, &idx) to a "
         "NULL_STR_AND_LEN_TUPLE, but it returned { .str = %s, .len = %zu, "
         ".is_float = %d, .has_exponent = %d }",
-        s.str, s.len, s.is_float, s.has_exponent);
+        s.str, s.len, s.is_float, s.has_exponent
+    );
 }
 
 // parse_boolean
@@ -841,37 +903,45 @@ Test(base_json_parser, error_parse_boolean_buff_nullstr)
 {
     size_t idx = 5;
     size_t len = parse_boolean(0, &idx);
-    cr_expect(!len,
-              "Expected parse_boolean_buff(0, &idx) to return 0, but it "
-              "returned '%zu'",
-              len);
+    cr_expect(
+        !len,
+        "Expected parse_boolean_buff(0, &idx) to return 0, but it "
+        "returned '%zu'",
+        len
+    );
 }
 
 Test(base_json_parser, error_parse_boolean_buff_nullidx)
 {
     size_t len = parse_boolean("", 0);
-    cr_expect(!len,
-              "Expected parse_boolean_buff(0, &idx) to return 0, but it "
-              "returned '%zu'",
-              len);
+    cr_expect(
+        !len,
+        "Expected parse_boolean_buff(0, &idx) to return 0, but it "
+        "returned '%zu'",
+        len
+    );
 }
 
 // get_nb_elts_array
 Test(base_json_parser, error_get_nb_elts_array_buff_nullbuff)
 {
     size_t len = get_nb_elts_array(0, 5);
-    cr_expect(!len,
-              "Expected get_nb_elts_array_buff(0, 5) to return 0, but it "
-              "returned '%zu'",
-              len);
+    cr_expect(
+        !len,
+        "Expected get_nb_elts_array_buff(0, 5) to return 0, but it "
+        "returned '%zu'",
+        len
+    );
 }
 
 // get_nb_elts_dict
 Test(base_json_parser, error_get_nb_elts_dict_buff_nullbuff)
 {
     size_t len = get_nb_elts_dict(0, 5);
-    cr_expect(!len,
-              "Expected get_nb_elts_dict_buff(0, 5) to return 0, but it "
-              "returned '%zu'",
-              len);
+    cr_expect(
+        !len,
+        "Expected get_nb_elts_dict_buff(0, 5) to return 0, but it "
+        "returned '%zu'",
+        len
+    );
 }

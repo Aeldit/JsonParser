@@ -44,7 +44,7 @@ ro_array_t ro_parse_array(char *b, size_t *idx)
 
     // We start at idx + 1 because if we entered this function, it means that we
     // already read a '['
-    size_t i         = idx == 0 ? 0 : *idx + 1;
+    size_t i         = idx ? *idx + 1 : 0;
     size_t initial_i = i;
 
     size_t nb_elts     = get_nb_elts_array(b, i);
@@ -184,7 +184,7 @@ ro_dict_t ro_parse_dict(char *b, size_t *idx)
 
     // We start at 1 because if we entered this function, it means that we
     // already read a '{'
-    size_t i = idx == 0 ? 0 : *idx + 1;
+    size_t i = idx ? *idx + 1 : 0;
 
     size_t nb_elts   = get_nb_elts_dict(b, i);
     ro_dict_t d      = RO_DICT(nb_elts);

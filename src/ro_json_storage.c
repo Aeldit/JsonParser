@@ -10,28 +10,20 @@
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
-ro_array_t *init_ro_array_with(size_t size, ...)
+ro_array_t init_ro_array_with(size_t size, ...)
 {
-    va_list args;
-
-    ro_array_t *a = calloc(1, sizeof(ro_array_t));
-    if (!a)
-    {
-        return 0;
-    }
-
     if (!size)
     {
-        return a;
+        return RO_ARRAY(0);
     }
 
     ro_value_t *values = calloc(size, sizeof(ro_value_t));
     if (!values)
     {
-        free(a);
-        return 0;
+        return RO_ARRAY(0);
     }
-    a->size = size;
+
+    va_list args;
 
     va_start(args, size);
     for (size_t i = 0; i < size; ++i)
@@ -40,32 +32,23 @@ ro_array_t *init_ro_array_with(size_t size, ...)
     }
 
     va_end(args);
-    a->values = values;
-    return a;
+    return (ro_array_t){ .size = size, .values = values };
 }
 
-ro_dict_t *init_ro_dict_with(size_t size, ...)
+ro_dict_t init_ro_dict_with(size_t size, ...)
 {
-    va_list args;
-
-    ro_dict_t *d = calloc(1, sizeof(ro_dict_t));
-    if (!d)
-    {
-        return 0;
-    }
-
     if (!size)
     {
-        return d;
+        return RO_DICT(0);
     }
 
     ro_item_t *items = calloc(size, sizeof(ro_item_t));
     if (!items)
     {
-        free(d);
-        return 0;
+        return RO_DICT(0);
     }
-    d->size = size;
+
+    va_list args;
 
     va_start(args, size);
     for (size_t i = 0; i < size; ++i)
@@ -74,8 +57,7 @@ ro_dict_t *init_ro_dict_with(size_t size, ...)
     }
 
     va_end(args);
-    d->items = items;
-    return d;
+    return (ro_dict_t){ .size = size, .items = items };
 }
 
 /*******************************************************************************

@@ -57,15 +57,11 @@
                    .exp_doublev = EXP_DOUBLE_OF((v), (e)) })
 
 #define RO_ARRAY(s)                                                            \
-    ((ro_array_t){                                                             \
-        .size   = (s),                                                         \
-        .values = calloc((s), sizeof(ro_value_t)),                             \
-    })
+    ((ro_array_t){ .size   = (s),                                              \
+                   .values = (s) ? calloc((s), sizeof(ro_value_t)) : 0 })
 #define RO_DICT(s)                                                             \
-    ((ro_dict_t){                                                              \
-        .size  = (s),                                                          \
-        .items = calloc((s), sizeof(ro_item_t)),                               \
-    })
+    ((ro_dict_t){ .size  = (s),                                                \
+                  .items = (s) ? calloc((s), sizeof(ro_item_t)) : 0 })
 #define RO_JSON(is_arr, a, d)                                                  \
     ((is_arr) ? (ro_json_t){ .is_array = true, .array = (a) }                  \
               : (ro_json_t){ .is_array = false, .dict = (d) })
@@ -138,8 +134,8 @@ typedef struct
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
-ro_array_t *init_ro_array_with(size_t size, ...);
-ro_dict_t *init_ro_dict_with(size_t size, ...);
+ro_array_t init_ro_array_with(size_t size, ...);
+ro_dict_t init_ro_dict_with(size_t size, ...);
 
 ro_value_t ro_array_get(ro_array_t a, size_t index);
 ro_item_t ro_dict_get(ro_dict_t d, string_t key);
