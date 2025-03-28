@@ -116,9 +116,6 @@ Test(ro_json_parser, ro_parse_array_buff_nested_multi_type)
         )),
         ROVAL_DICT(RO_DICT(0))
     );
-    printf("%zu\n", a.size);
-    ro_array_print(a);
-    ro_array_print(b);
 
     cr_expect(
         ro_arrays_equal(a, b),

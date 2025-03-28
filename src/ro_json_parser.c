@@ -144,7 +144,8 @@ ro_array_t ro_parse_array(char *b, size_t *idx)
             break;
 
         case '[':
-            if (!(tmp_a = ro_parse_array(b, &i)).values)
+            tmp_a = ro_parse_array(b, &i);
+            if (tmp_a.size && !tmp_a.values)
             {
                 return destroy_ro_array_on_error(a);
             }
@@ -152,7 +153,8 @@ ro_array_t ro_parse_array(char *b, size_t *idx)
             break;
 
         case '{':
-            if (!(tmp_jd = ro_parse_dict(b, &i)).items)
+            tmp_jd = ro_parse_dict(b, &i);
+            if (tmp_jd.size && !tmp_jd.items)
             {
                 return destroy_ro_array_on_error(a);
             }
@@ -298,7 +300,8 @@ ro_dict_t ro_parse_dict(char *b, size_t *idx)
             break;
 
         case '[':
-            if (!(tmp_ja = ro_parse_array(b, &i)).values)
+            tmp_ja = ro_parse_array(b, &i);
+            if (tmp_ja.size && !tmp_ja.values)
             {
                 return destroy_ro_dict_on_error(d, key);
             }
@@ -306,7 +309,8 @@ ro_dict_t ro_parse_dict(char *b, size_t *idx)
             break;
 
         case '{':
-            if (!(tmp_jd = ro_parse_dict(b, &i)).items)
+            tmp_jd = ro_parse_dict(b, &i);
+            if (tmp_jd.size && !tmp_jd.items)
             {
                 return destroy_ro_dict_on_error(d, key);
             }
