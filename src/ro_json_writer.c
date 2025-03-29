@@ -68,60 +68,74 @@ string_t get_ro_array_as_str(ro_array_t a, u16 indent)
         str[2] = 0;
         return STRING_OF(str, 2);
     }
+
     string_linked_list_t *ll = calloc(1, sizeof(string_linked_list_t));
     if (!ll)
     {
         return NULL_STRING;
-    }                                                                          \
-    /* '[' + '\n' + (indent - 1) * 4 * ' ' + ']' + '\n'*/                      \
-    /* indents are 4 spaces */                                                 \
-    /* indent == 1 -> if we are in the 'root' array, we add a '\n' at the */   \
-    /* end */
+    }
+
+    // '[' + '\n' + ((indent - 1) * 4 * ' ') + ']' + '\n'
+    // indents are 4 spaces
+    // indent == 1 -> if we are in the 'root' array, we add a '\n' at the end
     size_t nb_chars = 2 + ((indent - 1) * 4) + (indent == 1)
         + fill_ro_string_ll_with_values(ll, a, indent);
     u32 nb_chars_indent = indent * 4;
-    char *str           = calloc(nb_chars + 1, sizeof(char));
+    char *str           = malloc((nb_chars + 1) * sizeof(char));
     if (!str)
     {
         destroy_linked_list(ll);
         return NULL_STRING;
-    } /* |-> Start building the string */
+    }
+
+    // |-> Start building the string
     str[0]              = '[';
     str[1]              = '\n';
     size_t insert_idx   = 2;
     string_link_t *link = ll->head;
     while (link)
-    { /* Tabs */
+    {
+        // Tabs
         memset(str + insert_idx, ' ', nb_chars_indent);
         insert_idx += nb_chars_indent;
         if (link->is_from_str)
         {
             str[insert_idx++] = '"';
-        } /* Value as string */
+        }
+
+        // Value as string
         memcpy(str + insert_idx, link->s.str, link->s.len);
         insert_idx += link->s.len;
         if (link->is_from_str)
         {
             str[insert_idx++] = '"';
-        } /* Comma and line return */
+        }
+
+        // Comma and line return
         if (link->next)
         {
             str[insert_idx++] = ',';
         }
         str[insert_idx++] = '\n';
-        link              = link->next;
+
+        link = link->next;
     }
+
     if (indent == 1)
     {
         str[nb_chars - 2] = ']';
         str[nb_chars - 1] = '\n';
     }
     else
-    { /* Tabs before the last ']' */
+    {
+        // Tabs before the last ']'
         memset(str + insert_idx, ' ', nb_chars_indent - 4);
         insert_idx += nb_chars_indent - 4;
         str[nb_chars - 1] = ']';
-    } /* |-> End of string building */
+    }
+    str[nb_chars] = 0;
+    // |-> End of string building
+
     destroy_linked_list(ll);
     return STRING_OF(str, nb_chars);
 }
@@ -139,23 +153,27 @@ string_t get_ro_dict_as_str(ro_dict_t d, u16 indent)
         str[2] = 0;
         return STRING_OF(str, 2);
     }
+
     string_linked_list_t *ll = calloc(1, sizeof(string_linked_list_t));
     if (!ll)
     {
         return NULL_STRING;
-    } /* '{' + '\n' + (indent - 1) * '\t' + '}' + '\n'*/ /* indent == 1 -> if we
-                                                            are in the 'root'
-                                                            dict, we add a \n at
-                                                            the end */
+    }
+
+    // '{' + '\n' + (indent - 1) * '\t' + '}' + '\n'
+    // indent == 1 -> if we are in the 'root' dict, we add a \n at the end
     size_t nb_chars = 2 + ((indent - 1) * 4) + (indent == 1)
         + fill_ro_string_ll_with_items(ll, d, indent);
+
     u32 nb_chars_indent = indent * 4;
-    char *str           = calloc(nb_chars + 1, sizeof(char));
+    char *str           = malloc((nb_chars + 1) * sizeof(char));
     if (!str)
     {
         destroy_linked_list(ll);
         return NULL_STRING;
-    } /* |-> Start building the string */
+    }
+
+    // |-> Start building the string
     str[0]              = '{';
     str[1]              = '\n';
     size_t insert_idx   = 2;
@@ -164,10 +182,13 @@ string_t get_ro_dict_as_str(ro_dict_t d, u16 indent)
     while (link)
     {
         if (is_key)
-        { /* Tabs */
+        {
+            // Tabs
             memset(str + insert_idx, ' ', nb_chars_indent);
             insert_idx += nb_chars_indent;
-            str[insert_idx++] = '"'; /* String's contents */
+
+            // String's contents
+            str[insert_idx++] = '"';
             memcpy(str + insert_idx, link->s.str, link->s.len);
             insert_idx += link->s.len;
             memcpy(str + insert_idx, "\": ", 3);
@@ -184,7 +205,9 @@ string_t get_ro_dict_as_str(ro_dict_t d, u16 indent)
             if (link->is_from_str)
             {
                 str[insert_idx++] = '"';
-            } /* Comma and line return */
+            }
+
+            // Comma and line return
             if (link->next)
             {
                 str[insert_idx++] = ',';
@@ -194,17 +217,22 @@ string_t get_ro_dict_as_str(ro_dict_t d, u16 indent)
         is_key = !is_key;
         link   = link->next;
     }
+
     if (indent == 1)
     {
         str[nb_chars - 2] = '}';
         str[nb_chars - 1] = '\n';
     }
     else
-    { /* Tabs before the last '}' */
+    {
+        // Tabs before the last '}'
         memset(str + insert_idx, ' ', nb_chars_indent - 4);
         insert_idx += nb_chars_indent - 4;
         str[nb_chars - 1] = '}';
-    } /* |-> End of string building */
+    }
+    str[nb_chars] = 0;
+    // |-> End of string building
+
     destroy_linked_list(ll);
     return STRING_OF(str, nb_chars);
 }

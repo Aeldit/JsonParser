@@ -168,8 +168,8 @@ string_t get_exp_double_as_str(exp_double_t value)
 
     u8 exp_len = get_nb_char_long(exponent);
 
-    u32 len   = num_len + 1 + exp_len;
-    char *str = malloc((len + 1) * sizeof(char));
+    size_t len = num_len + 1 + exp_len;
+    char *str  = malloc((len + 1) * sizeof(char));
     if (!str)
     {
         return NULL_STRING;
