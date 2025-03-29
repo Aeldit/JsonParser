@@ -578,10 +578,13 @@ size_t get_nb_elts_array(const char *buff, size_t idx)
     u64 dict_count  = 0;
 
     char c = 0;
-    while ((c = buff[idx++]) && array_count)
+    while (array_count)
     {
-        switch (c)
+        switch (buff[idx++])
         {
+        case 0:
+            return 0;
+
         case '"':
             GET_NB_ELTS_ARRAY_INC;
             GET_STR_LEN(idx);
@@ -658,10 +661,13 @@ size_t get_nb_elts_dict(const char *buff, size_t idx)
     bool is_in_key = true;
 
     char c = 0;
-    while ((c = buff[idx++]) && dict_count)
+    while (dict_count)
     {
-        switch (c)
+        switch (buff[idx++])
         {
+        case 0:
+            return 0;
+
         case ':':
             is_in_key = false;
             break;
