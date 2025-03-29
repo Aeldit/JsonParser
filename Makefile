@@ -48,7 +48,8 @@ $(TARGET):
 
 clean:
 	if [ -f "$(TARGET)" ]; then rm $(TARGET); fi
-	if [ -f "json-parser-tests" ]; then rm json-parser-tests; fi
+	if [ -f "$(TARGET)-tests" ]; then rm $(TARGET)-tests; fi
+	rm *.out
 
 valgrind-compile: clean
 	$(CC) $(CFLAGS) $(NOPRINT) $(CFILESBASE) $(CFILESRO) -o $(TARGET) -g
