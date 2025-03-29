@@ -58,14 +58,15 @@ ro_array_t ro_parse_array(char *b, size_t *idx)
     size_t insert_idx     = 0;
     size_t nb_elts_parsed = 0;
 
+    string_t s             = NULL_STRING;
+    str_and_len_tuple_t sl = NULL_STR_AND_LEN_TUPLE;
+    size_t len             = 0;
+    ro_array_t tmp_a       = ERROR_RO_ARRAY;
+    ro_dict_t tmp_jd       = ERROR_RO_DICT;
+
     char c = 0;
     while ((c = b[i]) && nb_elts_parsed < nb_elts)
     {
-        string_t s             = NULL_STRING;
-        str_and_len_tuple_t sl = NULL_STR_AND_LEN_TUPLE;
-        size_t len             = 0;
-        ro_array_t tmp_a       = ERROR_RO_ARRAY;
-        ro_dict_t tmp_jd       = ERROR_RO_DICT;
         switch (c)
         {
         case '"':
@@ -203,14 +204,15 @@ ro_dict_t ro_parse_dict(char *b, size_t *idx)
     string_t key        = NULL_STRING;
     bool is_waiting_key = true;
 
+    string_t s             = NULL_STRING;
+    str_and_len_tuple_t sl = NULL_STR_AND_LEN_TUPLE;
+    size_t len             = 0;
+    ro_array_t tmp_ja      = ERROR_RO_ARRAY;
+    ro_dict_t tmp_jd       = ERROR_RO_DICT;
+
     char c = 0;
     while ((c = b[i]) && nb_elts_parsed < nb_elts)
     {
-        string_t s             = NULL_STRING;
-        str_and_len_tuple_t sl = NULL_STR_AND_LEN_TUPLE;
-        size_t len             = 0;
-        ro_array_t tmp_ja      = ERROR_RO_ARRAY;
-        ro_dict_t tmp_jd       = ERROR_RO_DICT;
         switch (c)
         {
         case '"':
