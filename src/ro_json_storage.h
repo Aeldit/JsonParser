@@ -17,11 +17,6 @@
 #define ERROR_RO_DICT ((ro_dict_t){ .items = 0 })
 #define ERROR_RO_JSON ((ro_json_t){ .is_array = true, .array = ERROR_RO_ARRAY })
 
-#define RO_VALUE_OF(T_TYPE, type_field, value)                                 \
-    ((ro_value_t){ .type = (T_TYPE), .type_field = (value) })
-#define RO_ITEM_OF(T_TYPE, type_field, value)                                  \
-    ((ro_item_t){ .type = (T_TYPE), .key = key, .type_field = (value) })
-
 #define ROVAL_STR(v) ((ro_value_t){ .type = T_STR, .strv = (v) })
 #define ROVAL_LONG(v) ((ro_value_t){ .type = T_LONG, .longv = (v) })
 #define ROVAL_DOUBLE(v) ((ro_value_t){ .type = T_DOUBLE, .doublev = (v) })
