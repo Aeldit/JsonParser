@@ -9,6 +9,8 @@ TESTFILES=tests/*.c
 
 TARGET=json-parser
 
+NOPRINT=-DVALGRING_DISABLE_PRINT -Wno-unused-parameter
+
 all: clean $(TARGET)
 	./$(TARGET) t.json
 
@@ -23,26 +25,22 @@ mem-least: clean
 	./$(TARGET) t.json
 
 noprint: clean
-	$(CC) $(CFLAGS) $(CFILESBASE) $(CFILESRO) -o $(TARGET) \
-		 -DVALGRING_DISABLE_PRINT -Wno-unused-parameter
+	$(CC) $(CFLAGS) $(NOPRINT) $(CFILESBASE) $(CFILESRO) -o $(TARGET)
 	./$(TARGET) flights-1m.json
 
 noprintrw: clean
-	$(CC) $(CFLAGS) $(CFILESBASE) $(CFILESRW) -o $(TARGET) \
-		 -DVALGRING_DISABLE_PRINT
+	$(CC) $(CFLAGS) $(NOPRINT) $(CFILESBASE) $(CFILESRW) -o $(TARGET)
 	./$(TARGET) flights-1m.json
 
 profile: clean
-	 	$(CC) $(CFLAGS) -pg -DVALGRING_DISABLE_PRINT \
-			$(CFILESBASE) $(CFILESRO) -o $(TARGET)
-		./$(TARGET) flights-1m.json
-		gprof -z $(TARGET)
+	$(CC) $(CFLAGS) -pg  $(CFILESBASE) $(CFILESRO) -o $(TARGET)
+	./$(TARGET) flights-1m.json
+	gprof -z $(TARGET)
 
 profilerw: clean
-	 	$(CC) $(CFLAGS) -pg -DVALGRING_DISABLE_PRINT \
-			$(CFILESBASE) $(CFILESRW) -o $(TARGET)
-		./$(TARGET) flights-1m.json
-		gprof -z $(TARGET)
+	$(CC) $(CFLAGS) $(NOPRINT) $(CFILESBASE) $(CFILESRW) -o $(TARGET)
+	./$(TARGET) flights-1m.json
+	gprof -z $(TARGET)
 
 .PHONY:
 $(TARGET):
@@ -53,9 +51,7 @@ clean:
 	if [ -f "json-parser-tests" ]; then rm json-parser-tests; fi
 
 valgrind-compile: clean
-	$(CC) $(CFLAGS) \
-		-DVALGRING_DISABLE_PRINT \
-		$(CFILESBASE) $(CFILESRO) -o $(TARGET) -g
+	$(CC) $(CFLAGS) $(NOPRINT) $(CFILESBASE) $(CFILESRO) -o $(TARGET) -g
 
 calgrind: valgrind-compile
 	valgrind --tool=callgrind --simulate-cache=yes \

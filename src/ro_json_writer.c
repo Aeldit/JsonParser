@@ -234,3 +234,17 @@ void write_ro_json_to_file(ro_json_t j, char *file_name)
     free(s.str);
     fclose(f);
 }
+
+void ro_array_print(ro_array_t a)
+{
+#ifndef VALGRING_DISABLE_PRINT
+    printf("%s\n", get_ro_array_as_str(a, 1).str);
+#endif
+}
+
+void ro_dict_print(ro_dict_t d)
+{
+#ifndef VALGRING_DISABLE_PRINT
+    printf("%s\n", get_ro_dict_as_str(d, 1).str);
+#endif
+}

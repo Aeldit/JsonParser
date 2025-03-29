@@ -140,9 +140,6 @@ ro_dict_t init_ro_dict_with(size_t size, ...);
 ro_value_t ro_array_get(ro_array_t a, size_t index);
 ro_item_t ro_dict_get(ro_dict_t d, string_t key);
 
-void ro_array_print(ro_array_t a);
-void ro_dict_print(ro_dict_t d);
-
 void destroy_ro_array(ro_array_t a);
 void destroy_ro_dict(ro_dict_t d);
 void destroy_ro_json(ro_json_t j);
