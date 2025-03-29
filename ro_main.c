@@ -1,6 +1,3 @@
-#include <stddef.h>
-#include <stdint.h>
-
 #include "src/ro_json_parser.h"
 #include "src/ro_json_storage.h"
 #include "src/ro_json_writer.h"
