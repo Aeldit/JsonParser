@@ -193,103 +193,6 @@ Test(base_json_parser, str_to_double_negative_exp_upper_negative)
 }
 
 /*******************************************************************************
-**                                   IS_FLOAT                                 **
-*******************************************************************************/
-void test_is_float(char *str, bool expected_res)
-{
-    cr_expect(
-        is_float(str, str ? strlen(str) : 0) == expected_res,
-        "Expected '%s' to be a float", str
-    );
-}
-
-Test(base_json_parser, is_float_null)
-{
-    test_is_float(0, false);
-}
-
-Test(base_json_parser, is_float)
-{
-    test_is_float("12.3456", true);
-}
-
-Test(base_json_parser, is_float_negative)
-{
-    test_is_float("-12345.6", true);
-}
-
-Test(base_json_parser, is_not_float)
-{
-    test_is_float("123456", false);
-}
-
-/*******************************************************************************
-**                                 HAS_EXPONENT                               **
-*******************************************************************************/
-void test_has_exponent(char *str, bool expected_res)
-{
-    cr_expect(
-        has_exponent(str, str ? strlen(str) : 0) == expected_res,
-        "Expected '%s' to have an exponent", str
-    );
-}
-
-Test(base_json_parser, has_exponent_null)
-{
-    test_has_exponent(0, false);
-}
-
-Test(base_json_parser, has_exponent_long_lower)
-{
-    test_has_exponent("123456e10", true);
-}
-
-Test(base_json_parser, has_exponent_double_lower)
-{
-    test_has_exponent("12.3456e14", true);
-}
-
-Test(base_json_parser, has_exponent_long_upper)
-{
-    test_has_exponent("123456E10", true);
-}
-
-Test(base_json_parser, has_exponent_double_upper)
-{
-    test_has_exponent("12.3456E14", true);
-}
-
-Test(base_json_parser, has_exponent_negative_long_lower)
-{
-    test_has_exponent("-123456e50", true);
-}
-
-Test(base_json_parser, has_exponent_negative_double_lower)
-{
-    test_has_exponent("-12345.6e6", true);
-}
-
-Test(base_json_parser, has_exponent_negative_long_upper)
-{
-    test_has_exponent("-123456E63", true);
-}
-
-Test(base_json_parser, has_exponent_negative_double_upper)
-{
-    test_has_exponent("-12345.6E47", true);
-}
-
-Test(base_json_parser, has_exponent_negative_double_upper_negative)
-{
-    test_has_exponent("-12345.6E-47", true);
-}
-
-Test(base_json_parser, doesnt_have_exponent)
-{
-    test_has_exponent("123456", false);
-}
-
-/*******************************************************************************
 **                                PARSE_STRING                                **
 *******************************************************************************/
 void test_parse_string(size_t *idx, char *expected_str)
@@ -826,25 +729,6 @@ Test(base_json_parser, error_str_to_double_zerolen)
         "Expected str_to_long(sl) ; with 'sl' having a null string ; to "
         "set the 'has_exponent' field to 2, but it was set to '%d'",
         dwowe.has_exponent
-    );
-}
-
-// is_float
-Test(base_json_parser, error_is_float_null_str)
-{
-    bool res = is_float(0, 0);
-    cr_expect(
-        !res, "Expected is_float(0, len) to return 0, but it returned '%d'", res
-    );
-}
-
-// has_exponent
-Test(base_json_parser, error_has_exponent_null_str)
-{
-    bool res = has_exponent(0, 0);
-    cr_expect(
-        !res, "Expected has_exponent(0, len) to return 0, but it returned '%d'",
-        res
     );
 }
 

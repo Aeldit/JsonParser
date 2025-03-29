@@ -105,9 +105,6 @@ typedef struct
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
-bool is_float(const char *str, size_t len);
-bool has_exponent(const char *s, size_t len);
-
 /**
 ** \brief Takes sl's char array and transforms it into a long.
 **        If the number has an exponent, the exponent is parsed and stored
