@@ -57,18 +57,18 @@ The arrays contains `ro_value_t` elements, while the dicts contain `ro_item_t` e
 ```c
 typedef struct
 {
-    u8 type;
-    union
-    {
-        string_t strv;
-        i64 longv;
-        double doublev;
-        exp_long_t exp_longv;
-        exp_double_t exp_doublev;
-        bool boolv;
-        ro_array_t *arrayv;
-        ro_dict_t *dictv;
-    };
+  u8 type;
+  union
+  {
+    string_t strv;
+    i64 longv;
+    double doublev;
+    exp_long_t exp_longv;
+    exp_double_t exp_doublev;
+    bool boolv;
+    ro_array_t *arrayv;
+    ro_dict_t *dictv;
+  };
 } ro_value_t;
 ```
 
@@ -78,19 +78,19 @@ typedef struct
 ```c
 typedef struct
 {
-    u8 type;
-    string_t key;
-    union
-    {
-        string_t strv;
-        i64 longv;
-        double doublev;
-        exp_long_t exp_longv;
-        exp_double_t exp_doublev;
-        bool boolv;
-        ro_array_t *arrayv;
-        ro_dict_t *dictv;
-    };
+  u8 type;
+  string_t key;
+  union
+  {
+    string_t strv;
+    i64 longv;
+    double doublev;
+    exp_long_t exp_longv;
+    exp_double_t exp_doublev;
+    bool boolv;
+    ro_array_t *arrayv;
+    ro_dict_t *dictv;
+  };
 } ro_item_t;
 ```
 
@@ -100,9 +100,9 @@ typedef struct
 ```c
 typedef struct
 {
-    char *str;
-    size_t len;
-    bool needs_freeing;
+  char *str;
+  size_t len;
+  bool needs_freeing;
 } string_t;
 ```
 
