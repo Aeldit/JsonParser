@@ -1,3 +1,4 @@
+// clang-format Language: C
 #ifndef RW_JSON_STORAGE_H
 #define RW_JSON_STORAGE_H
 
@@ -38,6 +39,38 @@ typedef u32 arr_size_t;
 typedef u64 arr_size_t;
 #    endif // !ARRAY_LEN
 #endif // LEAST
+
+#define RW_VALUE_OF(T_TYPE, type_field)                                        \
+    ((rw_value_t){ .type = (T_TYPE), .type_field = value })
+#define RW_ITEM_OF(T_TYPE, type_field)                                         \
+    ((rw_item_t){ .type = (T_TYPE), .key = key, .type_field = value })
+
+#define RWVAL_STR(v) ((rw_value_t){ .type = T_STR, .strv = (v) })
+#define RWVAL_LONG(v) ((rw_value_t){ .type = T_LONG, .longv = (v) })
+#define RWVAL_DOUBLE(v) ((rw_value_t){ .type = T_DOUBLE, .doublev = (v) })
+#define RWVAL_EXPLONG(v) ((rw_value_t){ .type = T_EXP_LONG, .exp_longv = (v) })
+#define RWVAL_EXPDOUBLE(v)                                                     \
+    ((rw_value_t){ .type = T_EXP_DOUBLE, .exp_doublev = (v) })
+#define RWVAL_BOOL(v) ((rw_value_t){ .type = T_BOOL, .boolv = (v) })
+#define RWVAL_NULL(v) ((rw_value_t){ .type = T_NULL })
+#define RWVAL_ARR(v) ((rw_value_t){ .type = T_ARR, .arrayv = (v) })
+#define RWVAL_DICT(v) ((rw_value_t){ .type = T_DICT, .dictv = (v) })
+
+#define RWIT_STR(k, v) ((rw_item_t){ .type = T_STR, .key = (k), .strv = (v) })
+#define RWIT_LONG(k, v)                                                        \
+    ((rw_item_t){ .type = T_LONG, .key = (k), .longv = (v) })
+#define RWIT_DOUBLE(k, v)                                                      \
+    ((rw_item_t){ .type = T_DOUBLE, .key = (k), .doublev = (v) })
+#define RWIT_EXPLONG(k, v)                                                     \
+    ((rw_item_t){ .type = T_EXP_LONG, .key = (k), .exp_longv = (v) })
+#define RWIT_EXPDOUBLE(k, v)                                                   \
+    ((rw_item_t){ .type = T_EXP_DOUBLE, .key = (k), .exp_doublev = (v) })
+#define RWIT_BOOL(k, v)                                                        \
+    ((rw_item_t){ .type = T_BOOL, .key = (k), .boolv = (v) })
+#define RWIT_NULL(k, v) ((rw_item_t){ .type = T_NULL, .key = (k) })
+#define RWIT_ARR(k, v) ((rw_item_t){ .type = T_ARR, .key = (k), .arrayv = (v) })
+#define RWIT_DICT(k, v)                                                        \
+    ((rw_item_t){ .type = T_DICT, .key = (k), .dictv = (v) })
 
 /*******************************************************************************
 **                                 STRUCTURES                                 **
@@ -156,9 +189,6 @@ void rw_dict_remove(rw_dict_t *d, string_t key);
 
 rw_value_t rw_array_get(rw_array_t *a, size_t index);
 rw_item_t rw_dict_get(rw_dict_t *d, string_t key);
-
-void rw_array_print(rw_array_t *a);
-void rw_dict_print(rw_dict_t *d);
 
 void destroy_rw_array(rw_array_t *a);
 void destroy_rw_dict(rw_dict_t *d);

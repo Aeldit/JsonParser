@@ -5,22 +5,17 @@
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
-bool ro_arrays_equal(ro_array_t *a, ro_array_t *b)
+bool ro_arrays_equal(ro_array_t a, ro_array_t b)
 {
-    if (!a || !b)
-    {
-        return false;
-    }
-
-    size_t a_size = a->size;
-    size_t b_size = b->size;
+    size_t a_size = a.size;
+    size_t b_size = b.size;
     if (a_size != b_size)
     {
         return false;
     }
 
-    ro_value_t *a_values = a->values;
-    ro_value_t *b_values = b->values;
+    ro_value_t *a_values = a.values;
+    ro_value_t *b_values = b.values;
     for (size_t i = 0; i < a_size; ++i)
     {
         ro_value_t a_val = a_values[i];
@@ -72,21 +67,16 @@ bool ro_arrays_equal(ro_array_t *a, ro_array_t *b)
     return true;
 }
 
-bool ro_dicts_equal(ro_dict_t *a, ro_dict_t *b)
+bool ro_dicts_equal(ro_dict_t a, ro_dict_t b)
 {
-    if (!a || !b)
-    {
-        return false;
-    }
-
-    size_t a_size = a->size;
-    size_t b_size = b->size;
+    size_t a_size = a.size;
+    size_t b_size = b.size;
     if (a_size != b_size)
     {
         return false;
     }
 
-    ro_item_t *a_items = a->items;
+    ro_item_t *a_items = a.items;
     for (size_t i = 0; i < a_size; ++i)
     {
         ro_item_t a_it = a_items[i];
@@ -147,12 +137,12 @@ bool ro_dicts_equal(ro_dict_t *a, ro_dict_t *b)
     return true;
 }
 
-bool ro_json_equal(ro_json_t *a, ro_json_t *b)
+bool ro_json_equal(ro_json_t a, ro_json_t b)
 {
-    if (!a || !b || a->is_array != b->is_array)
+    if (a.is_array != b.is_array)
     {
         return false;
     }
-    return a->is_array ? ro_arrays_equal(a->array, b->array)
-                       : ro_dicts_equal(a->dict, b->dict);
+    return a.is_array ? ro_arrays_equal(a.array, b.array)
+                      : ro_dicts_equal(a.dict, b.dict);
 }

@@ -1,6 +1,5 @@
 #include <stddef.h>
 #include <stdint.h>
-#include <stdio.h>
 #include <threads.h>
 
 #include "src/ro_json_parser.h"
@@ -14,16 +13,16 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    ro_json_t *j = ro_parse(argv[1]);
-    if (IS_ARRAY(j))
+    ro_json_t j = ro_parse(argv[1]);
+    if (j.is_array)
     {
-        printf("\n");
-        write_ro_json_to_file(j, "out.json");
-        ro_array_print(j->array);
+        // printf("\n");
+        // write_ro_json_to_file(j, "out.json");
+        ro_array_print(j.array);
     }
-    else if (IS_DICT(j))
+    else
     {
-        ro_dict_print(j->dict);
+        ro_dict_print(j.dict);
     }
 
     // thrd_sleep(&(struct timespec){ .tv_sec = 10 }, NULL);

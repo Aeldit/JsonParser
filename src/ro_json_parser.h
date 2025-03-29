@@ -1,11 +1,10 @@
+// clang-format Language: C
 #ifndef RO_JSON_PARSER_H
 #define RO_JSON_PARSER_H
 
 /*******************************************************************************
 **                                  INCLUDES                                  **
 *******************************************************************************/
-#include <stdio.h>
-
 #include "ro_json_storage.h"
 
 /*******************************************************************************
@@ -16,7 +15,7 @@
 ** \param idx The index of the character '[' that begins the current array
 ** \returns The json array parsed from the position
 */
-ro_array_t *ro_parse_array_buff(char *b, unsigned long *idx);
+ro_array_t ro_parse_array(char *b, size_t *idx);
 /**
 ** \param b The buffer containing the json currently being parsed
 ** \param idx A pointer to the index of the character '{' that begins the
@@ -26,26 +25,11 @@ ro_array_t *ro_parse_array_buff(char *b, unsigned long *idx);
 **            index starts at 0
 ** \returns The json dict parsed from the index
 */
-ro_dict_t *ro_parse_dict_buff(char *b, unsigned long *idx);
-
-/**
-** \param f The file stream
-** \param pos The postion in the file of the character after the '[' that
-**            begins the current array
-** \returns The json ro_array_t parsed from the position
-*/
-ro_array_t *ro_parse_array(FILE *f, unsigned long *pos);
-/**
-** \param f The file stream
-** \param pos A pointer to the position in the file of the character after
-**            the '{' that begins the current dict
-** \returns The json dict parsed from the position
-*/
-ro_dict_t *ro_parse_dict(FILE *f, unsigned long *pos);
+ro_dict_t ro_parse_dict(char *b, size_t *idx);
 
 /**
 ** \brief Parses the given file and returns the associated ro_json_t structure
 */
-ro_json_t *ro_parse(char *file);
+ro_json_t ro_parse(char *file);
 
 #endif // !RO_JSON_PARSER_H

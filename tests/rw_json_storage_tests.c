@@ -311,7 +311,7 @@ Test(rw_json_storage, rw_array_get_empty)
 {
     size_t idx = 0;
     char buff[] = "[]";
-    rw_array_t *a = rw_parse_array_buff(buff, &idx);
+    rw_array_t *a = rw_parse_array(buff, &idx);
     if (!a)
     {
         return;
@@ -342,7 +342,7 @@ Test(rw_json_storage, rw_dict_get_empty)
 {
     size_t idx = 0;
     char buff[] = "{}";
-    rw_dict_t *d = rw_parse_dict_buff(buff, &idx);
+    rw_dict_t *d = rw_parse_dict(buff, &idx);
     if (!d)
     {
         return;
@@ -390,7 +390,7 @@ char *rw_get_type_as_str(u8 type)
 void rw_array_get_type(char *buff, u8 expected_type)
 {
     size_t idx = 0;
-    rw_array_t *a = rw_parse_array_buff(buff, &idx);
+    rw_array_t *a = rw_parse_array(buff, &idx);
     if (!a)
     {
         return;
@@ -463,7 +463,7 @@ Test(rw_json_storage, rw_array_get_dict)
 void rw_dict_get_type(char *buff, u8 expected_type)
 {
     size_t idx = 0;
-    rw_dict_t *d = rw_parse_dict_buff(buff, &idx);
+    rw_dict_t *d = rw_parse_dict(buff, &idx);
     if (!d)
     {
         return;

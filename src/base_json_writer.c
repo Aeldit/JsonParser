@@ -24,8 +24,10 @@ u8 get_nb_char_long(i64 n)
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
-void add_link(string_linked_list_t *ll, string_t str, bool str_needs_free,
-              bool is_from_str)
+void add_link(
+    string_linked_list_t *ll, string_t str, bool str_needs_free,
+    bool is_from_str
+)
 {
     if (!ll)
     {
@@ -37,9 +39,9 @@ void add_link(string_linked_list_t *ll, string_t str, bool str_needs_free,
     {
         return;
     }
-    sl->s = str;
+    sl->s            = str;
     sl->s_needs_free = str_needs_free;
-    sl->is_from_str = is_from_str;
+    sl->is_from_str  = is_from_str;
 
     if (!ll->head)
     {
@@ -53,7 +55,7 @@ void add_link(string_linked_list_t *ll, string_t str, bool str_needs_free,
     else
     {
         ll->tail->next = sl;
-        ll->tail = sl;
+        ll->tail       = sl;
     }
 }
 
@@ -68,7 +70,7 @@ void destroy_linked_list(string_linked_list_t *ll)
     while (link)
     {
         string_link_t *tmp = link;
-        link = link->next;
+        link               = link->next;
         if (tmp->s_needs_free)
         {
             free(tmp->s.str);
@@ -84,12 +86,13 @@ void destroy_linked_list(string_linked_list_t *ll)
 string_t get_long_as_str(i64 value)
 {
     u8 nb_chars = get_nb_char_long(value);
-    char *str = calloc(nb_chars + 1, sizeof(char));
+    char *str   = malloc((nb_chars + 1) * sizeof(char));
     if (!str)
     {
         return NULL_STRING;
     }
     snprintf(str, nb_chars + 1, "%ld", value);
+    str[nb_chars] = 0;
     return STRING_OF(str, nb_chars);
 }
 
@@ -122,26 +125,26 @@ string_t get_double_as_str(double value)
         }
     }
 
-    char *str = calloc(18, sizeof(char));
+    char *str = malloc((nb_chars + 1) * sizeof(char));
     if (!str)
     {
         return NULL_STRING;
     }
-
     memcpy(str, double_str, nb_chars);
+    str[nb_chars] = 0;
     return STRING_OF(str, nb_chars);
 }
 
 string_t get_exp_long_as_str(exp_long_t value)
 {
-    i64 number = value.number;
+    i64 number   = value.number;
     i64 exponent = value.exponent;
 
-    u8 nb_chars_number = get_nb_char_long(number);
+    u8 nb_chars_number   = get_nb_char_long(number);
     u8 nb_chars_exponent = get_nb_char_long(exponent);
 
-    u32 len = nb_chars_number + 1 + nb_chars_exponent;
-    char *str = calloc(len + 1, sizeof(char));
+    u32 len   = nb_chars_number + 1 + nb_chars_exponent;
+    char *str = malloc((len + 1) * sizeof(char));
     if (!str)
     {
         return NULL_STRING;
@@ -150,21 +153,23 @@ string_t get_exp_long_as_str(exp_long_t value)
     snprintf(str, nb_chars_number + 1, "%ld", number);
     str[nb_chars_number] = 'e';
     snprintf(str + nb_chars_number + 1, nb_chars_exponent + 1, "%ld", exponent);
+    str[len] = 0;
     return STRING_OF(str, len);
 }
 
 string_t get_exp_double_as_str(exp_double_t value)
 {
     double number = value.number;
-    i64 exponent = value.exponent;
+    i64 exponent  = value.exponent;
 
-    string_t s = get_double_as_str(number);
+    string_t s       = get_double_as_str(number);
     char *double_str = s.str;
-    size_t num_len = s.len;
+    size_t num_len   = s.len;
 
     u8 exp_len = get_nb_char_long(exponent);
 
-    char *str = calloc(18 + 1 + exp_len, sizeof(char));
+    size_t len = num_len + 1 + exp_len;
+    char *str  = malloc((len + 1) * sizeof(char));
     if (!str)
     {
         return NULL_STRING;
@@ -172,26 +177,30 @@ string_t get_exp_double_as_str(exp_double_t value)
 
     // unsigned num_len = nb_chars + nb_decimals - (nb_decimals ? 0 : 1);
     memcpy(str, double_str, num_len);
+    destroy_string(s);
     str[num_len] = 'e';
     snprintf(str + num_len + 1, exp_len + 1, "%ld", exponent);
-    return STRING_OF(str, num_len + 1 + exp_len);
+    str[len] = 0;
+    return STRING_OF(str, len);
 }
 
 string_t get_bool_as_str(u8 value)
 {
     u8 nb_chars = (value ? 4 : 5);
-    char *str = calloc(nb_chars + 1, sizeof(char));
+    char *str   = malloc((nb_chars + 1) * sizeof(char));
     memcpy(str, value ? "true" : "false", nb_chars);
+    str[nb_chars] = 0;
     return STRING_OF(str ? str : 0, str ? nb_chars : 0);
 }
 
 string_t get_null_as_str()
 {
-    char *str = calloc(5, sizeof(char));
+    char *str = malloc(5 * sizeof(char));
     if (!str)
     {
         return NULL_STRING;
     }
     memcpy(str, "null", 4);
+    str[4] = 0;
     return STRING_OF(str, 4);
 }
