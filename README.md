@@ -202,16 +202,3 @@ You can change some defines directly at compilation time, depending on your use 
 
 Defines the maximum size of the allocated buffer that is used to store the file (defaults to `2 << 30`, which is roughly equals to 1GB)
 
-#### MAX_NESTED_ARRAYS
-
-Defines the maximum number of nested arrays (defaults to `UINT_FAST8_MAX`)
-
-If you want to change this, you can use the following additional flag
-`-DMAX_NESTED_ARRAYS=<your_value>`
-
-#### MAX_NESTED_DICTS
-
-Defines the maximum number of nested dict objects (defaults to `UINT_FAST8_MAX`)
-
-If you want to change this, you can use the following additional flags
-`-DMAX_NESTED_DICTS=<your_value>`
