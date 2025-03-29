@@ -32,16 +32,6 @@ noprintrw: clean
 	$(CC) $(CFLAGS) $(NOPRINT) $(CFILESBASE) $(CFILESRW) -o $(TARGET)
 	./$(TARGET) flights-1m.json
 
-profile: clean
-	$(CC) $(CFLAGS) -pg  $(CFILESBASE) $(CFILESRO) -o $(TARGET)
-	./$(TARGET) flights-1m.json
-	gprof -z $(TARGET)
-
-profilerw: clean
-	$(CC) $(CFLAGS) $(NOPRINT) $(CFILESBASE) $(CFILESRW) -o $(TARGET)
-	./$(TARGET) flights-1m.json
-	gprof -z $(TARGET)
-
 .PHONY:
 $(TARGET):
 	$(CC) $(CFLAGS) $(CFILESBASE) $(CFILESRO) -o $(TARGET)
@@ -49,7 +39,6 @@ $(TARGET):
 clean:
 	if [ -f "$(TARGET)" ]; then rm $(TARGET); fi
 	if [ -f "$(TARGET)-tests" ]; then rm $(TARGET)-tests; fi
-	rm *.out
 
 valgrind-compile: clean
 	$(CC) $(CFLAGS) $(NOPRINT) $(CFILESBASE) $(CFILESRO) -o $(TARGET) -g
