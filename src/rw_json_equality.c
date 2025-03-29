@@ -24,6 +24,7 @@ bool rw_arrays_equal(rw_array_t a, rw_array_t b)
             {
                 continue;
             }
+
             rw_value_t b_val = rw_array_get(b, i);
             if (a_val.type != b_val.type)
             {

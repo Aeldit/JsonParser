@@ -58,7 +58,7 @@ typedef u64 arr_size_t;
 #define RWVAL_EXPDOUBLE(v)                                                     \
     ((rw_value_t){ .type = T_EXP_DOUBLE, .exp_doublev = (v) })
 #define RWVAL_BOOL(v) ((rw_value_t){ .type = T_BOOL, .boolv = (v) })
-#define RWVAL_NULL(v) ((rw_value_t){ .type = T_NULL })
+#define RWVAL_NULL ((rw_value_t){ .type = T_NULL })
 #define RWVAL_ARR(v) ((rw_value_t){ .type = T_ARR, .arrayv = (v) })
 #define RWVAL_DICT(v) ((rw_value_t){ .type = T_DICT, .dictv = (v) })
 
@@ -73,7 +73,7 @@ typedef u64 arr_size_t;
     ((rw_item_t){ .type = T_EXP_DOUBLE, .key = (k), .exp_doublev = (v) })
 #define RWIT_BOOL(k, v)                                                        \
     ((rw_item_t){ .type = T_BOOL, .key = (k), .boolv = (v) })
-#define RWIT_NULL(k, v) ((rw_item_t){ .type = T_NULL, .key = (k) })
+#define RWIT_NULL(k) ((rw_item_t){ .type = T_NULL, .key = (k) })
 #define RWIT_ARR(k, v) ((rw_item_t){ .type = T_ARR, .key = (k), .arrayv = (v) })
 #define RWIT_DICT(k, v)                                                        \
     ((rw_item_t){ .type = T_DICT, .key = (k), .dictv = (v) })

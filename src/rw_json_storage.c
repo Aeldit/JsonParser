@@ -348,7 +348,7 @@ void defragment_dict(rw_dict_t *d)
     }
 }
 
-rw_array_t init_ro_array_with(size_t size, ...)
+rw_array_t init_rw_array_with(size_t size, ...)
 {
     if (!size)
     {
