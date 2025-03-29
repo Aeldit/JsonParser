@@ -5,22 +5,15 @@
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
-bool rw_arrays_equal(rw_array_t *a, rw_array_t *b)
+bool rw_arrays_equal(rw_array_t a, rw_array_t b)
 {
-    if (!a || !b)
+    if (a.size != b.size)
     {
         return false;
     }
 
-    size_t a_size = a->size;
-    size_t b_size = b->size;
-    if (a_size != b_size)
-    {
-        return false;
-    }
-
-    size_t i = 0;
-    value_link_t *link = a->head;
+    size_t i           = 0;
+    value_link_t *link = a.head;
     while (link)
     {
         rw_value_t *values = link->values;
@@ -80,22 +73,15 @@ bool rw_arrays_equal(rw_array_t *a, rw_array_t *b)
     return true;
 }
 
-bool rw_dicts_equal(rw_dict_t *a, rw_dict_t *b)
+bool rw_dicts_equal(rw_dict_t a, rw_dict_t b)
 {
-    if (!a || !b)
+    if (a.size != b.size)
     {
         return false;
     }
 
-    size_t a_size = a->size;
-    size_t b_size = b->size;
-    if (a_size != b_size)
-    {
-        return false;
-    }
-
-    size_t i = 0;
-    item_link_t *link = a->head;
+    size_t i          = 0;
+    item_link_t *link = a.head;
     while (link)
     {
         rw_item_t *items = link->items;
@@ -160,12 +146,12 @@ bool rw_dicts_equal(rw_dict_t *a, rw_dict_t *b)
     return true;
 }
 
-bool rw_json_equal(rw_json_t *a, rw_json_t *b)
+bool rw_json_equal(rw_json_t a, rw_json_t b)
 {
-    if (!a || !b || a->is_array != b->is_array)
+    if (a.is_array != b.is_array)
     {
         return false;
     }
-    return a->is_array ? rw_arrays_equal(a->array, b->array)
-                       : rw_dicts_equal(a->dict, b->dict);
+    return a.is_array ? rw_arrays_equal(a.array, b.array)
+                      : rw_dicts_equal(a.dict, b.dict);
 }

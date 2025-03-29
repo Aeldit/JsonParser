@@ -15,6 +15,12 @@
 #define ERROR_RW_VALUE ((rw_value_t){ .type = T_ERROR })
 #define ERROR_RW_ITEM ((rw_item_t){ .type = T_ERROR })
 
+#define EMPTY_RW_ARRAY                                                         \
+    ((rw_array_t){ .size = 0, .nb_deletions = 0, .head = 0, .tail = 0 })
+#define EMPTY_RW_DICT                                                          \
+    ((rw_dict_t){ .size = 0, .nb_deletions = 0, .head = 0, .tail = 0 })
+#define EMPTY_RW_JSON ((rw_json_t){ .is_array = true, .array = EMPTY_RW_ARRAY })
+
 #define ARRAY_LEN 32
 #define NB_DELETIONS_TO_DEFRAG 16
 
@@ -72,11 +78,38 @@ typedef u64 arr_size_t;
 #define RWIT_DICT(k, v)                                                        \
     ((rw_item_t){ .type = T_DICT, .key = (k), .dictv = (v) })
 
+// Variants used for the tests
+#define RWVAL_EXPLONG_T(v, e)                                                  \
+    ((rw_value_t){ .type = T_EXP_LONG, .exp_longv = EXP_LONG_OF((v), (e)) })
+#define RWVAL_EXPDOUBLE_T(v, e)                                                \
+    ((rw_value_t){ .type        = T_EXP_DOUBLE,                                \
+                   .exp_doublev = EXP_DOUBLE_OF((v), (e)) })
+
+#define RW_JSON(is_arr, a, d)                                                  \
+    ((is_arr) ? (rw_json_t){ .is_array = true, .array = (a) }                  \
+              : (rw_json_t){ .is_array = false, .dict = (d) })
+
 /*******************************************************************************
 **                                 STRUCTURES                                 **
 *******************************************************************************/
-typedef struct rw_array rw_array_t;
-typedef struct rw_dict rw_dict_t;
+typedef struct value_link value_link_t;
+typedef struct item_link item_link_t;
+
+typedef struct rw_array
+{
+    size_t size;
+    size_t nb_deletions;
+    value_link_t *head;
+    value_link_t *tail;
+} rw_array_t;
+
+typedef struct rw_dict
+{
+    size_t size;
+    size_t nb_deletions;
+    item_link_t *head;
+    item_link_t *tail;
+} rw_dict_t;
 
 // Used for functions that return an element of the array
 typedef struct
@@ -90,8 +123,8 @@ typedef struct
         exp_long_t exp_longv;
         exp_double_t exp_doublev;
         bool boolv;
-        rw_array_t *arrayv;
-        rw_dict_t *dictv;
+        rw_array_t arrayv;
+        rw_dict_t dictv;
     };
 } rw_value_t;
 
@@ -108,39 +141,23 @@ typedef struct
         exp_long_t exp_longv;
         exp_double_t exp_doublev;
         bool boolv;
-        rw_array_t *arrayv;
-        rw_dict_t *dictv;
+        rw_array_t arrayv;
+        rw_dict_t dictv;
     };
 } rw_item_t;
 
-typedef struct value_link
+struct value_link
 {
     rw_value_t values[ARRAY_LEN];
     arr_size_t insert_index;
     struct value_link *next;
-} value_link_t;
+};
 
-typedef struct item_link
+struct item_link
 {
     rw_item_t items[ARRAY_LEN];
     arr_size_t insert_index;
     struct item_link *next;
-} item_link_t;
-
-struct rw_array
-{
-    size_t size;
-    size_t nb_deletions;
-    value_link_t *head;
-    value_link_t *tail;
-};
-
-struct rw_dict
-{
-    size_t size;
-    size_t nb_deletions;
-    item_link_t *head;
-    item_link_t *tail;
 };
 
 typedef struct
@@ -148,17 +165,16 @@ typedef struct
     bool is_array;
     union
     {
-        rw_array_t *array;
-        rw_dict_t *dict;
+        rw_array_t array;
+        rw_dict_t dict;
     };
 } rw_json_t;
 
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
-rw_array_t *init_rw_array();
-rw_dict_t *init_rw_dict();
-rw_json_t *init_rw_json(bool is_array, rw_array_t *a, rw_dict_t *d);
+rw_array_t init_rw_array_with(size_t size, ...);
+rw_dict_t init_rw_dict_with(size_t size, ...);
 
 void rw_array_add_str(rw_array_t *a, string_t value);
 void rw_array_add_long(rw_array_t *a, i64 value);
@@ -169,8 +185,8 @@ void rw_array_add_bool(rw_array_t *a, bool value);
 void rw_array_add_null(rw_array_t *a);
 // WARN: Check if the array is added to itself, and deep-copy it if so to
 // prevent infinite recursion
-void rw_array_add_array(rw_array_t *a, rw_array_t *value);
-void rw_array_add_dict(rw_array_t *a, rw_dict_t *value);
+void rw_array_add_array(rw_array_t *a, rw_array_t value);
+void rw_array_add_dict(rw_array_t *a, rw_dict_t value);
 
 void rw_dict_add_str(rw_dict_t *d, string_t key, string_t value);
 void rw_dict_add_long(rw_dict_t *d, string_t key, i64 value);
@@ -179,19 +195,19 @@ void rw_dict_add_exp_long(rw_dict_t *d, string_t key, exp_long_t value);
 void rw_dict_add_exp_double(rw_dict_t *d, string_t key, exp_double_t value);
 void rw_dict_add_bool(rw_dict_t *d, string_t key, bool value);
 void rw_dict_add_null(rw_dict_t *d, string_t key);
-void rw_dict_add_array(rw_dict_t *d, string_t key, rw_array_t *value);
+void rw_dict_add_array(rw_dict_t *d, string_t key, rw_array_t value);
 // WARN: Check if the dict is added to itself, and deep-copy it if so to
 // prevent infinite recursion
-void rw_dict_add_dict(rw_dict_t *d, string_t key, rw_dict_t *value);
+void rw_dict_add_dict(rw_dict_t *d, string_t key, rw_dict_t value);
 
 void rw_array_remove(rw_array_t *a, size_t index);
 void rw_dict_remove(rw_dict_t *d, string_t key);
 
-rw_value_t rw_array_get(rw_array_t *a, size_t index);
-rw_item_t rw_dict_get(rw_dict_t *d, string_t key);
+rw_value_t rw_array_get(rw_array_t a, size_t index);
+rw_item_t rw_dict_get(rw_dict_t d, string_t key);
 
-void destroy_rw_array(rw_array_t *a);
-void destroy_rw_dict(rw_dict_t *d);
-void destroy_rw_json(rw_json_t *j);
+void destroy_rw_array(rw_array_t a);
+void destroy_rw_dict(rw_dict_t d);
+void destroy_rw_json(rw_json_t j);
 
 #endif // !RW_JSON_STORAGE_H

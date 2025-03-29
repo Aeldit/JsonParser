@@ -133,8 +133,8 @@ typedef struct
         is_key = !is_key;                                                      \
     }
 
-#define GET_ARRAY_AS_STR(fill_rx_string_ll_with_values)                        \
-    if (!a->size)                                                              \
+#define ARRAY_AS_STR(fill_rx_string_ll_with_values)                            \
+    if (!a.size)                                                               \
     {                                                                          \
         char *str = malloc(3 * sizeof(char));                                  \
         if (!str)                                                              \
@@ -145,24 +145,26 @@ typedef struct
         str[2] = 0;                                                            \
         return STRING_OF(str, 2);                                              \
     }                                                                          \
+    /*                                                                      */ \
     string_linked_list_t *ll = calloc(1, sizeof(string_linked_list_t));        \
     if (!ll)                                                                   \
     {                                                                          \
         return NULL_STRING;                                                    \
     }                                                                          \
-    /* '[' + '\n' + (indent - 1) * 4 * ' ' + ']' + '\n'*/                      \
+    /*                                                                      */ \
+    /* '[' + '\n' + ((indent - 1) * 4 * ' ') + ']' + '\n' */                   \
     /* indents are 4 spaces */                                                 \
-    /* indent == 1 -> if we are in the 'root' array, we add a '\n' at the */   \
-    /* end */                                                                  \
+    /* indent == 1: if we are in the 'root' array, we add a '\n' at the end */ \
     size_t nb_chars = 2 + ((indent - 1) * 4) + (indent == 1)                   \
         + fill_rx_string_ll_with_values(ll, a, indent);                        \
     u32 nb_chars_indent = indent * 4;                                          \
-    char *str           = calloc(nb_chars + 1, sizeof(char));                  \
+    char *str           = malloc((nb_chars + 1) * sizeof(char));               \
     if (!str)                                                                  \
     {                                                                          \
         destroy_linked_list(ll);                                               \
         return NULL_STRING;                                                    \
     }                                                                          \
+    /*                                                                      */ \
     /* |-> Start building the string */                                        \
     str[0]              = '[';                                                 \
     str[1]              = '\n';                                                \
@@ -177,6 +179,7 @@ typedef struct
         {                                                                      \
             str[insert_idx++] = '"';                                           \
         }                                                                      \
+        /*                                                                  */ \
         /* Value as string */                                                  \
         memcpy(str + insert_idx, link->s.str, link->s.len);                    \
         insert_idx += link->s.len;                                             \
@@ -184,14 +187,17 @@ typedef struct
         {                                                                      \
             str[insert_idx++] = '"';                                           \
         }                                                                      \
+        /*                                                                  */ \
         /* Comma and line return */                                            \
         if (link->next)                                                        \
         {                                                                      \
             str[insert_idx++] = ',';                                           \
         }                                                                      \
         str[insert_idx++] = '\n';                                              \
-        link              = link->next;                                        \
+        /*                                                                  */ \
+        link = link->next;                                                     \
     }                                                                          \
+    /*                                                                      */ \
     if (indent == 1)                                                           \
     {                                                                          \
         str[nb_chars - 2] = ']';                                               \
@@ -204,12 +210,14 @@ typedef struct
         insert_idx += nb_chars_indent - 4;                                     \
         str[nb_chars - 1] = ']';                                               \
     }                                                                          \
+    str[nb_chars] = 0;                                                         \
     /* |-> End of string building */                                           \
+    /*                                                                      */ \
     destroy_linked_list(ll);                                                   \
     return STRING_OF(str, nb_chars)
 
-#define GET_DICT_AS_STR(fill_rx_string_ll_with_items)                          \
-    if (!d->size)                                                              \
+#define DICT_AS_STR(fill_rx_string_ll_with_items)                              \
+    if (!d.size)                                                               \
     {                                                                          \
         char *str = malloc(3 * sizeof(char));                                  \
         if (!str)                                                              \
@@ -220,22 +228,26 @@ typedef struct
         str[2] = 0;                                                            \
         return STRING_OF(str, 2);                                              \
     }                                                                          \
+    /*                                                                      */ \
     string_linked_list_t *ll = calloc(1, sizeof(string_linked_list_t));        \
     if (!ll)                                                                   \
     {                                                                          \
         return NULL_STRING;                                                    \
     }                                                                          \
-    /* '{' + '\n' + (indent - 1) * '\t' + '}' + '\n'*/                         \
-    /* indent == 1 -> if we are in the 'root' dict, we add a \n at the end */  \
+    /*                                                                      */ \
+    /* '{' + '\n' + (indent - 1) * '\t' + '}' + '\n' */                        \
+    /* indent == 1: if we are in the 'root' dict, we add a \n at the end */    \
     size_t nb_chars = 2 + ((indent - 1) * 4) + (indent == 1)                   \
         + fill_rx_string_ll_with_items(ll, d, indent);                         \
+    /*                                                                      */ \
     u32 nb_chars_indent = indent * 4;                                          \
-    char *str           = calloc(nb_chars + 1, sizeof(char));                  \
+    char *str           = malloc((nb_chars + 1) * sizeof(char));               \
     if (!str)                                                                  \
     {                                                                          \
         destroy_linked_list(ll);                                               \
         return NULL_STRING;                                                    \
     }                                                                          \
+    /*                                                                      */ \
     /* |-> Start building the string */                                        \
     str[0]              = '{';                                                 \
     str[1]              = '\n';                                                \
@@ -249,8 +261,9 @@ typedef struct
             /* Tabs */                                                         \
             memset(str + insert_idx, ' ', nb_chars_indent);                    \
             insert_idx += nb_chars_indent;                                     \
-            str[insert_idx++] = '"';                                           \
+            /*                                                              */ \
             /* String's contents */                                            \
+            str[insert_idx++] = '"';                                           \
             memcpy(str + insert_idx, link->s.str, link->s.len);                \
             insert_idx += link->s.len;                                         \
             memcpy(str + insert_idx, "\": ", 3);                               \
@@ -268,6 +281,7 @@ typedef struct
             {                                                                  \
                 str[insert_idx++] = '"';                                       \
             }                                                                  \
+            /*                                                              */ \
             /* Comma and line return */                                        \
             if (link->next)                                                    \
             {                                                                  \
@@ -278,6 +292,7 @@ typedef struct
         is_key = !is_key;                                                      \
         link   = link->next;                                                   \
     }                                                                          \
+    /*                                                                      */ \
     if (indent == 1)                                                           \
     {                                                                          \
         str[nb_chars - 2] = '}';                                               \
@@ -290,7 +305,9 @@ typedef struct
         insert_idx += nb_chars_indent - 4;                                     \
         str[nb_chars - 1] = '}';                                               \
     }                                                                          \
+    str[nb_chars] = 0;                                                         \
     /* |-> End of string building */                                           \
+    /*                                                                      */ \
     destroy_linked_list(ll);                                                   \
     return STRING_OF(str, nb_chars)
 
@@ -304,8 +321,8 @@ typedef struct
     {                                                                          \
         return;                                                                \
     }                                                                          \
-    string_t s = j->is_array ? get_rx_array_as_str(j->array, 1)                \
-                             : get_rx_dict_as_str(j->dict, 1);                 \
+    string_t s = j.is_array ? get_rx_array_as_str(j.array, 1)                  \
+                            : get_rx_dict_as_str(j.dict, 1);                   \
     if (!s.str)                                                                \
     {                                                                          \
         fclose(f);                                                             \

@@ -14,37 +14,37 @@
 /*******************************************************************************
 **                               LOCAL FUNCTIONS                              **
 *******************************************************************************/
-rw_array_t *destroy_rw_array_on_error(rw_array_t *a)
+rw_array_t destroy_rw_array_on_error(rw_array_t a)
 {
     destroy_rw_array(a);
-    return 0;
+    return EMPTY_RW_ARRAY;
 }
 
-rw_dict_t *destroy_rw_dict_on_error(rw_dict_t *d, string_t key)
+rw_dict_t destroy_rw_dict_on_error(rw_dict_t d, string_t key)
 {
     destroy_string(key);
     destroy_rw_dict(d);
-    return 0;
+    return EMPTY_RW_DICT;
 }
 
 /*******************************************************************************
 **                              LOCAL FUNCTIONS                               **
 *******************************************************************************/
-rw_array_t *rw_parse_array(char *b, size_t *idx)
+rw_array_t rw_parse_array(const char *b, size_t *idx)
 {
     if (!b)
     {
-        return 0;
+        return EMPTY_RW_ARRAY;
     }
 
     // We start at 1 because if we entered this function, it means that we
     // already read a '['
-    size_t i = idx == 0 ? 0 : *idx + 1;
+    size_t i = idx ? *idx + 1 : 0;
 
     size_t nb_elts = get_nb_elts_array(b, i);
 
-    rw_array_t *a = calloc(1, sizeof(rw_array_t));
-    if (!a || nb_elts == 0)
+    rw_array_t a = EMPTY_RW_ARRAY;
+    if (!nb_elts)
     {
         return a;
     }
@@ -52,22 +52,23 @@ rw_array_t *rw_parse_array(char *b, size_t *idx)
     size_t nb_elts_parsed = 0;
     size_t initial_i      = i;
 
-    char c = 0;
-    while ((c = b[i]) && nb_elts_parsed < nb_elts)
+    string_t s             = NULL_STRING;
+    str_and_len_tuple_t sl = NULL_STR_AND_LEN_TUPLE;
+    size_t len             = 0;
+
+    while (nb_elts_parsed < nb_elts)
     {
-        string_t s             = NULL_STRING;
-        str_and_len_tuple_t sl = NULL_STR_AND_LEN_TUPLE;
-        size_t len             = 0;
-        rw_array_t *tmp_a      = 0;
-        rw_dict_t *tmp_jd      = 0;
-        switch (c)
+        switch (b[i])
         {
+        case 0:
+            return destroy_rw_array_on_error(a);
+
         case '"':
             if (!(s = parse_string(b, &i)).str)
             {
                 return destroy_rw_array_on_error(a);
             }
-            rw_array_add_str(a, s);
+            rw_array_add_str(&a, s);
             ++nb_elts_parsed;
             break;
 
@@ -94,13 +95,12 @@ rw_array_t *rw_parse_array(char *b, size_t *idx)
                 switch (dwowe.has_exponent)
                 {
                 case 0:
-                    rw_array_add_double(a, dwowe.double_value);
+                    rw_array_add_double(&a, dwowe.double_value);
                     break;
                 case 1:
-                    rw_array_add_exp_double(a, dwowe.double_exp_value);
+                    rw_array_add_exp_double(&a, dwowe.double_exp_value);
                     break;
                 case 2:
-                default:
                     free(sl.str);
                     return destroy_rw_array_on_error(a);
                 }
@@ -111,13 +111,12 @@ rw_array_t *rw_parse_array(char *b, size_t *idx)
                 switch (lwowe.has_exponent)
                 {
                 case 0:
-                    rw_array_add_long(a, lwowe.long_value);
+                    rw_array_add_long(&a, lwowe.long_value);
                     break;
                 case 1:
-                    rw_array_add_exp_long(a, lwowe.long_exp_value);
+                    rw_array_add_exp_long(&a, lwowe.long_exp_value);
                     break;
                 case 2:
-                default:
                     free(sl.str);
                     return destroy_rw_array_on_error(a);
                 }
@@ -129,35 +128,27 @@ rw_array_t *rw_parse_array(char *b, size_t *idx)
         case 't':
         case 'f':
             len = parse_boolean(b, &i);
-            if ((c == 'f' && len != 5) || (c == 't' && len != 4))
+            if ((b[i] == 'f' && len != 5) || (b[i] == 't' && len != 4))
             {
                 return destroy_rw_array_on_error(a);
             }
-            rw_array_add_bool(a, len == 4 ? 1 : 0);
+            rw_array_add_bool(&a, len == 4 ? 1 : 0);
             ++nb_elts_parsed;
             break;
 
         case 'n':
-            rw_array_add_null(a);
+            rw_array_add_null(&a);
             i += 3;
             ++nb_elts_parsed;
             break;
 
         case '[':
-            if (!(tmp_a = rw_parse_array(b, &i)))
-            {
-                return destroy_rw_array_on_error(a);
-            }
-            rw_array_add_array(a, tmp_a);
+            rw_array_add_array(&a, rw_parse_array(b, &i));
             ++nb_elts_parsed;
             break;
 
         case '{':
-            if (!(tmp_jd = rw_parse_dict(b, &i)))
-            {
-                return destroy_rw_array_on_error(a);
-            }
-            rw_array_add_dict(a, tmp_jd);
+            rw_array_add_dict(&a, rw_parse_dict(b, &i));
             ++nb_elts_parsed;
             break;
         }
@@ -170,11 +161,11 @@ rw_array_t *rw_parse_array(char *b, size_t *idx)
     return a;
 }
 
-rw_dict_t *rw_parse_dict(char *b, size_t *idx)
+rw_dict_t rw_parse_dict(const char *b, size_t *idx)
 {
     if (!b)
     {
-        return 0;
+        return EMPTY_RW_DICT;
     }
 
     // We start at 1 because if we entered this function, it means that we
@@ -182,8 +173,8 @@ rw_dict_t *rw_parse_dict(char *b, size_t *idx)
     size_t i = idx ? *idx + 1 : 0;
 
     size_t nb_elts = get_nb_elts_dict(b, i);
-    rw_dict_t *d   = calloc(1, sizeof(rw_dict_t));
-    if (!d || !nb_elts)
+    rw_dict_t d    = EMPTY_RW_DICT;
+    if (!nb_elts)
     {
         return d;
     }
@@ -197,14 +188,14 @@ rw_dict_t *rw_parse_dict(char *b, size_t *idx)
     string_t s             = NULL_STRING;
     str_and_len_tuple_t sl = NULL_STR_AND_LEN_TUPLE;
     size_t len             = 0;
-    rw_array_t *tmp_ja     = 0;
-    rw_dict_t *tmp_jd      = 0;
 
-    char c = 0;
-    while ((c = b[i]) && nb_elts_parsed < nb_elts)
+    while (nb_elts_parsed < nb_elts)
     {
-        switch (c)
+        switch (b[i])
         {
+        case 0:
+            return destroy_rw_dict_on_error(d, key);
+
         case '"':
             if (is_waiting_key)
             {
@@ -220,7 +211,7 @@ rw_dict_t *rw_parse_dict(char *b, size_t *idx)
                 {
                     return destroy_rw_dict_on_error(d, key);
                 }
-                rw_dict_add_str(d, key, s);
+                rw_dict_add_str(&d, key, s);
                 ++nb_elts_parsed;
             }
             break;
@@ -248,10 +239,10 @@ rw_dict_t *rw_parse_dict(char *b, size_t *idx)
                 switch (dwowe.has_exponent)
                 {
                 case 0:
-                    rw_dict_add_double(d, key, dwowe.double_value);
+                    rw_dict_add_double(&d, key, dwowe.double_value);
                     break;
                 case 1:
-                    rw_dict_add_exp_double(d, key, dwowe.double_exp_value);
+                    rw_dict_add_exp_double(&d, key, dwowe.double_exp_value);
                     break;
                 case 2:
                     free(sl.str);
@@ -264,10 +255,10 @@ rw_dict_t *rw_parse_dict(char *b, size_t *idx)
                 switch (lwowe.has_exponent)
                 {
                 case 0:
-                    rw_dict_add_long(d, key, lwowe.long_value);
+                    rw_dict_add_long(&d, key, lwowe.long_value);
                     break;
                 case 1:
-                    rw_dict_add_exp_long(d, key, lwowe.long_exp_value);
+                    rw_dict_add_exp_long(&d, key, lwowe.long_exp_value);
                     break;
                 case 2:
                     free(sl.str);
@@ -281,35 +272,27 @@ rw_dict_t *rw_parse_dict(char *b, size_t *idx)
         case 't':
         case 'f':
             len = parse_boolean(b, &i);
-            if ((c == 'f' && len != 5) || (c == 't' && len != 4))
+            if ((b[i] == 'f' && len != 5) || (b[i] == 't' && len != 4))
             {
                 return destroy_rw_dict_on_error(d, key);
             }
-            rw_dict_add_bool(d, key, len == 4 ? 1 : 0);
+            rw_dict_add_bool(&d, key, len == 4 ? 1 : 0);
             ++nb_elts_parsed;
             break;
 
         case 'n':
-            rw_dict_add_null(d, key);
+            rw_dict_add_null(&d, key);
             i += 3;
             ++nb_elts_parsed;
             break;
 
         case '[':
-            if (!(tmp_ja = rw_parse_array(b, &i)))
-            {
-                return destroy_rw_dict_on_error(d, key);
-            }
-            rw_dict_add_array(d, key, tmp_ja);
+            rw_dict_add_array(&d, key, rw_parse_array(b, &i));
             ++nb_elts_parsed;
             break;
 
         case '{':
-            if (!(tmp_jd = rw_parse_dict(b, &i)))
-            {
-                return destroy_rw_dict_on_error(d, key);
-            }
-            rw_dict_add_dict(d, key, tmp_jd);
+            rw_dict_add_dict(&d, key, rw_parse_dict(b, &i));
             ++nb_elts_parsed;
             break;
 
@@ -329,19 +312,19 @@ rw_dict_t *rw_parse_dict(char *b, size_t *idx)
 /*******************************************************************************
 **                                 FUNCTIONS **
 *******************************************************************************/
-rw_json_t *rw_parse(char *file)
+rw_json_t rw_parse(char *file)
 {
     FILE *f = fopen(file, "r");
     if (!f)
     {
-        return 0;
+        return EMPTY_RW_JSON;
     }
 
     long offset = 0;
     if (fseek(f, offset++, SEEK_SET))
     {
         fclose(f);
-        return 0;
+        return EMPTY_RW_JSON;
     }
 
     // Obtains the number of characters in the file
@@ -350,8 +333,8 @@ rw_json_t *rw_parse(char *file)
     size_t nb_chars = st.st_size;
 
     bool is_array = false;
-    rw_array_t *a = 0;
-    rw_dict_t *d  = 0;
+    rw_array_t a  = EMPTY_RW_ARRAY;
+    rw_dict_t d   = EMPTY_RW_DICT;
 
     int c = fgetc(f);
     if (c == '{' && nb_chars < MAX_READ_BUFF_SIZE)
@@ -361,7 +344,7 @@ rw_json_t *rw_parse(char *file)
         {
             fclose(f);
             free(b);
-            return 0;
+            return EMPTY_RW_JSON;
         }
         fread(b, sizeof(char), nb_chars, f);
 
@@ -370,7 +353,7 @@ rw_json_t *rw_parse(char *file)
             printf("Invalid json file\n");
             free(b);
             fclose(f);
-            return 0;
+            return EMPTY_RW_JSON;
         }
 
         d = rw_parse_dict(b, 0);
@@ -383,7 +366,7 @@ rw_json_t *rw_parse(char *file)
         {
             fclose(f);
             free(b);
-            return 0;
+            return EMPTY_RW_JSON;
         }
         fread(b, sizeof(char), nb_chars, f);
 
@@ -392,7 +375,7 @@ rw_json_t *rw_parse(char *file)
             printf("Invalid json file\n");
             fclose(f);
             free(b);
-            return 0;
+            return EMPTY_RW_JSON;
         }
 
         a        = rw_parse_array(b, 0);
@@ -400,5 +383,5 @@ rw_json_t *rw_parse(char *file)
         free(b);
     }
     fclose(f);
-    return init_rw_json(is_array, a, d);
+    return RW_JSON(is_array, a, d);
 }

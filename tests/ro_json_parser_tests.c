@@ -204,18 +204,23 @@ Test(ro_json_parser, ro_parse_dict_buff_nested_multi_type)
     size_t idx  = 905;
     ro_dict_t d = get_ro_dict_from_file(&idx);
 
-    ro_array_t a3 = init_ro_array_with(
-        3, ROVAL_STR(string_nofree_of("dd")), ROVAL_BOOL(true), ROVAL_LONG(5)
+    ro_dict_t b = init_ro_dict_with(
+        1,
+        ROIT_DICT(
+            string_nofree_of("array"),
+            init_ro_dict_with(
+                3, ROIT_LONG(string_nofree_of(""), 1),
+                ROIT_ARR(
+                    string_nofree_of("arr"),
+                    init_ro_array_with(
+                        3, ROVAL_STR(string_nofree_of("dd")), ROVAL_BOOL(true),
+                        ROVAL_LONG(5)
+                    )
+                ),
+                ROIT_DICT(string_nofree_of("d"), RO_DICT(0))
+            )
+        )
     );
-
-    ro_dict_t d2 = init_ro_dict_with(
-        3, ROIT_LONG(string_nofree_of(""), 1),
-        ROIT_ARR(string_nofree_of("arr"), a3),
-        ROIT_DICT(string_nofree_of("d"), RO_DICT(0))
-    );
-
-    ro_dict_t b =
-        init_ro_dict_with(1, ROIT_DICT(string_nofree_of("array"), d2));
 
     bool is_equal = ro_dicts_equal(d, b);
 
