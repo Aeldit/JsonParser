@@ -78,7 +78,9 @@ bool is_number_valid(const char *buff, size_t *idx)
 **        are valid, if the quotes are in even number, and brackets and curly
 **        brackets have a matching number of opening and closing
 */
-bool check_bools_nulls_numbers_counts(char *buff, size_t buff_len, bool is_dict)
+bool check_bools_nulls_numbers_counts(
+    const char *buff, size_t buff_len, bool is_dict
+)
 {
     if (!buff)
     {
@@ -204,9 +206,9 @@ bool check_bools_nulls_numbers_counts(char *buff, size_t buff_len, bool is_dict)
         && nb_opened_brackets == nb_closed_brackets;
 }
 
-bool check_dict_trailing_commas(char *buff, size_t *pos);
+bool check_dict_trailing_commas(const char *buff, size_t *pos);
 
-bool check_array_trailing_commas(char *buff, size_t *pos)
+bool check_array_trailing_commas(const char *buff, size_t *pos)
 {
     if (!buff)
     {
@@ -286,7 +288,7 @@ bool check_array_trailing_commas(char *buff, size_t *pos)
     return true;
 }
 
-bool check_dict_trailing_commas(char *buff, size_t *pos)
+bool check_dict_trailing_commas(const char *buff, size_t *pos)
 {
     if (!buff)
     {
@@ -366,9 +368,9 @@ bool check_dict_trailing_commas(char *buff, size_t *pos)
     return true;
 }
 
-bool check_dict_missing_colons_commas(char *buff, size_t *pos);
+bool check_dict_missing_colons_commas(const char *buff, size_t *pos);
 
-bool check_array_missing_commas(char *buff, size_t *pos)
+bool check_array_missing_commas(const char *buff, size_t *pos)
 {
     if (!buff)
     {
@@ -553,7 +555,7 @@ bool check_array_missing_commas(char *buff, size_t *pos)
     return false;
 }
 
-bool check_dict_missing_colons_commas(char *buff, size_t *pos)
+bool check_dict_missing_colons_commas(const char *buff, size_t *pos)
 {
     if (!buff)
     {
@@ -719,11 +721,11 @@ bool check_dict_missing_colons_commas(char *buff, size_t *pos)
     return false;
 }
 
-bool is_json_valid(char *buff, size_t buff_len, bool is_dict)
+bool is_json_valid(const char *buff, size_t buff_len, bool is_dict)
 {
-#ifdef SEPVALIDATION
+#ifdef NOVALIDATION
     return true;
-#endif // !SEPVALIDATION
+#endif // !NOVALIDATION
 
     if (!buff)
     {

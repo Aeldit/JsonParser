@@ -22,20 +22,22 @@ mv src/ json-parser/
 ```
 
 
-> Notice how each struct (json, array, dict, value, item) or the parse function is prefixed with `ro`. For read-write mode, they will be prefixed by `rw`
+> Notice how each struct (json, array, dict, value, item) or the parse function is prefixed with `ro`. For read-write mode, they will be prefixed by `rw`.
+>
+> In `rw` mode, the parsing functions return pointers for dicts and arrays, unlike in `ro` mode
 
 To read a json file in `ro` mode, call the `ro_parse()` function :
 ```c
-ro_json_t *j = ro_parse(file_path);
+ro_json_t j = ro_parse(file_path);
 // Once you have this ro_json_t struct pointer, you first have to check whether it is an array or a dict :
-if (IS_ARRAY(j))
+if (j.is_array)
 {
-    ro_array_ *a = j->array;
+    ro_array_t a = j.array;
     // Do stuff with the array
 }
-else if (IS_DICT(j))
+else
 {
-    ro_dict_t *d = j->dict;
+    ro_dict_t d = j.dict;
     // Do stuff with the dict
 }
 ```
@@ -66,8 +68,8 @@ typedef struct
     exp_long_t exp_longv;
     exp_double_t exp_doublev;
     bool boolv;
-    ro_array_t *arrayv;
-    ro_dict_t *dictv;
+    ro_array_t arrayv;
+    ro_dict_t dictv;
   };
 } ro_value_t;
 ```
@@ -88,8 +90,8 @@ typedef struct
     exp_long_t exp_longv;
     exp_double_t exp_doublev;
     bool boolv;
-    ro_array_t *arrayv;
-    ro_dict_t *dictv;
+    ro_array_t arrayv;
+    ro_dict_t dictv;
   };
 } ro_item_t;
 ```
@@ -181,12 +183,15 @@ The configure script accepts the following options :
 Base rules :
 - `all` : compiles and runs the program in `ro` mode with the file `t.json`
 - `rw` : same as `all` but  in `rw` mode (the main file is `rw_main.c`)
+- `mem-least` : compile using the `least` types of stdint
+- `noprint` : same as `all` but printing is disabled (using `-DVALGRING_DISABLE_PRINT`)
+- `noprintrw` : same as noprint but in `rw` mode
 - `json-parser` : Compiles the project in `ro` mode
 - `clean` : removes the executable
 
 Valgrind rules :
 - `valgrind-compile` : compiles the parser with the `-DVALGRING_DISABLE_PRINT` flag (disables the printing functions to only have the time of the parsing functions when using a profiler)
-- `valgrind` : calls `valgrind-compile` and generates a callgrind file usable by the `KCachegrind` profiling software
+- `calgrind` : calls `valgrind-compile` and generates a callgrind file usable by the `KCachegrind` profiling software
 - `leaks` : checks for leaks but using valgrind (using the file `t.json`)
 
 ## Compilation options
