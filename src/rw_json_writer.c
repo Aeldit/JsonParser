@@ -96,3 +96,23 @@ void write_rw_json_to_file(rw_json_t *j, char *file_name)
 {
     WRITE_JSON_TO_FILE(get_rw_array_as_str, get_rw_dict_as_str);
 }
+
+void rw_array_print(rw_array_t *a)
+{
+    if (a)
+    {
+#ifndef VALGRING_DISABLE_PRINT
+        printf("%s\n", get_rw_array_as_str(a, 1).str);
+#endif
+    }
+}
+
+void rw_dict_print(rw_dict_t *d)
+{
+    if (d)
+    {
+#ifndef VALGRING_DISABLE_PRINT
+        printf("%s\n", get_rw_dict_as_str(d, 1).str);
+#endif
+    }
+}

@@ -190,9 +190,6 @@ void rw_dict_remove(rw_dict_t *d, string_t key);
 rw_value_t rw_array_get(rw_array_t *a, size_t index);
 rw_item_t rw_dict_get(rw_dict_t *d, string_t key);
 
-void rw_array_print(rw_array_t *a);
-void rw_dict_print(rw_dict_t *d);
-
 void destroy_rw_array(rw_array_t *a);
 void destroy_rw_dict(rw_dict_t *d);
 void destroy_rw_json(rw_json_t *j);

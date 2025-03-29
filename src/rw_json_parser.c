@@ -179,12 +179,11 @@ rw_dict_t *rw_parse_dict(char *b, size_t *idx)
 
     // We start at 1 because if we entered this function, it means that we
     // already read a '{'
-    size_t i = idx == 0 ? 0 : *idx + 1;
+    size_t i = idx ? *idx + 1 : 0;
 
     size_t nb_elts = get_nb_elts_dict(b, i);
-
-    rw_dict_t *d = calloc(1, sizeof(rw_dict_t));
-    if (!d || nb_elts == 0)
+    rw_dict_t *d   = calloc(1, sizeof(rw_dict_t));
+    if (!d || !nb_elts)
     {
         return d;
     }
@@ -195,19 +194,15 @@ rw_dict_t *rw_parse_dict(char *b, size_t *idx)
     string_t key        = NULL_STRING;
     bool is_waiting_key = true;
 
-    char c = 0;
-    while ((c = b[i]))
-    {
-        if (nb_elts_parsed >= nb_elts)
-        {
-            break;
-        }
+    string_t s             = NULL_STRING;
+    str_and_len_tuple_t sl = NULL_STR_AND_LEN_TUPLE;
+    size_t len             = 0;
+    rw_array_t *tmp_ja     = 0;
+    rw_dict_t *tmp_jd      = 0;
 
-        string_t s             = NULL_STRING;
-        str_and_len_tuple_t sl = NULL_STR_AND_LEN_TUPLE;
-        size_t len             = 0;
-        rw_array_t *tmp_ja     = 0;
-        rw_dict_t *tmp_jd      = 0;
+    char c = 0;
+    while ((c = b[i]) && nb_elts_parsed < nb_elts)
+    {
         switch (c)
         {
         case '"':
@@ -259,7 +254,6 @@ rw_dict_t *rw_parse_dict(char *b, size_t *idx)
                     rw_dict_add_exp_double(d, key, dwowe.double_exp_value);
                     break;
                 case 2:
-                default:
                     free(sl.str);
                     return destroy_rw_dict_on_error(d, key);
                 }
@@ -276,7 +270,6 @@ rw_dict_t *rw_parse_dict(char *b, size_t *idx)
                     rw_dict_add_exp_long(d, key, lwowe.long_exp_value);
                     break;
                 case 2:
-                default:
                     free(sl.str);
                     return destroy_rw_dict_on_error(d, key);
                 }
@@ -402,7 +395,8 @@ rw_json_t *rw_parse(char *file)
             return 0;
         }
 
-        a = rw_parse_array(b, 0);
+        a        = rw_parse_array(b, 0);
+        is_array = true;
         free(b);
     }
     fclose(f);
