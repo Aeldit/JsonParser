@@ -64,22 +64,20 @@
 /*******************************************************************************
 **                                 STRUCTURES                                 **
 *******************************************************************************/
-typedef struct ro_array ro_array_t;
-typedef struct ro_dict ro_dict_t;
 typedef struct ro_value ro_value_t;
 typedef struct ro_item ro_item_t;
 
-struct ro_array
+typedef struct ro_array
 {
     size_t size;
     ro_value_t *values;
-};
+} ro_array_t;
 
-struct ro_dict
+typedef struct ro_dict
 {
     size_t size;
     ro_item_t *items;
-};
+} ro_dict_t;
 
 // Used for functions that return an element of the array
 struct ro_value
