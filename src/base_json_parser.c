@@ -424,7 +424,7 @@ double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t *sl)
 /***************************************
 **              PARSING               **
 ***************************************/
-string_t parse_string(char *buff, size_t *idx)
+string_t parse_string(const char *buff, size_t *idx)
 {
     if (!buff || !idx)
     {
@@ -464,7 +464,7 @@ string_t parse_string(char *buff, size_t *idx)
     return STRING_OF(str, len);
 }
 
-str_and_len_tuple_t parse_number(char *buff, size_t *idx)
+str_and_len_tuple_t parse_number(const char *buff, size_t *idx)
 {
     if (!buff || !idx)
     {
@@ -474,16 +474,26 @@ str_and_len_tuple_t parse_number(char *buff, size_t *idx)
     // Counts the number of characters until the first one that is an 'end char'
     size_t end_idx  = *idx;
     size_t nb_chars = 0;
-    char c          = 0;
-    while ((c = buff[end_idx++]))
+
+    bool has_exponent = false;
+    bool is_float     = false;
+    while (1)
     {
-        switch (c)
+        switch (buff[end_idx++])
         {
-        case '+':
-        case '-':
         case 'e':
         case 'E':
+            has_exponent = true;
+            ++nb_chars;
+            continue;
+
         case '.':
+            is_float = true;
+            ++nb_chars;
+            continue;
+
+        case '+':
+        case '-':
         case '0':
         case '1':
         case '2':
@@ -515,9 +525,7 @@ str_and_len_tuple_t parse_number(char *buff, size_t *idx)
     str[nb_chars] = 0;
 
     *idx += nb_chars - 1;
-    return STR_AND_LEN_OF(
-        str, nb_chars, is_float(str, nb_chars), has_exponent(str, nb_chars)
-    );
+    return STR_AND_LEN_OF(str, nb_chars, is_float, has_exponent);
 }
 
 size_t parse_boolean(const char *buff, size_t *idx)
@@ -529,10 +537,9 @@ size_t parse_boolean(const char *buff, size_t *idx)
 
     size_t end_idx  = *idx;
     size_t nb_chars = 0;
-    char c          = 0;
-    while ((c = buff[end_idx++]))
+    while (1)
     {
-        switch (c)
+        switch (buff[end_idx++])
         {
         case 't':
         case 'r':
