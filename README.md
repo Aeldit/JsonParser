@@ -5,9 +5,6 @@
 
 This parser has 2 modes: **read-only** and **read-write**, which will be refered to respectively as `ro` and `rw`
 
-> [!WARNING]\
-> This parser does not sanitize the content it reads (for now, at least). Use at your own risk.
-
 
 ## Usage
 
@@ -22,9 +19,7 @@ mv src/ json-parser/
 ```
 
 
-> Notice how each struct (json, array, dict, value, item) or the parse function is prefixed with `ro`. For read-write mode, they will be prefixed by `rw`.
->
-> In `rw` mode, the parsing functions return pointers for dicts and arrays, unlike in `ro` mode
+> Notice how each struct (json, array, dict, value, item) or the parse function is prefixed with `ro`. For read-write mode, they will be prefixed by `rw`
 
 To read a json file in `ro` mode, call the `ro_parse()` function :
 ```c
@@ -42,9 +37,7 @@ else
 }
 ```
 
-The arrays contains `ro_value_t` elements, while the dicts contain `ro_item_t` elements :
-
-> Also note the usage of `string_t`, it is a simple typedef struct
+Arrays contain `ro_value_t` elements, while dicts contain `ro_item_t` elements :
 
 <center>
 <table>
