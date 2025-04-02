@@ -9,15 +9,10 @@
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
-long_with_or_without_exponent_t str_to_long(str_and_len_tuple_t *sl)
+long_with_or_without_exponent_t str_to_long(str_and_len_tuple_t sl)
 {
-    if (!sl)
-    {
-        return ERROR_LWOWE;
-    }
-
-    char *str  = sl->str;
-    size_t len = sl->len;
+    char *str  = sl.str;
+    size_t len = sl.len;
     if (!str || len == 0)
     {
         return ERROR_LWOWE;
@@ -30,7 +25,7 @@ long_with_or_without_exponent_t str_to_long(str_and_len_tuple_t *sl)
 
     bool is_in_exponent = false;
 
-    u8 has_exponent    = sl->has_exponent;
+    u8 has_exponent    = sl.has_exponent;
     i8 is_negative     = str[0] == '-' ? -1 : 1;
     i8 is_exp_negative = 1;
 
@@ -91,15 +86,10 @@ long_with_or_without_exponent_t str_to_long(str_and_len_tuple_t *sl)
        .long_exp_value = (exp_long_t){ .number = 0, .exponent = 0 } };
 }
 
-double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t *sl)
+double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t sl)
 {
-    if (!sl)
-    {
-        return ERROR_DWOWE;
-    }
-
-    char *str  = sl->str;
-    size_t len = sl->len;
+    char *str  = sl.str;
+    size_t len = sl.len;
     if (!str || len == 0)
     {
         return ERROR_DWOWE;
@@ -115,7 +105,7 @@ double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t *sl)
 
     bool dot_reached    = false;
     bool is_in_exponent = false;
-    u8 has_exponent     = sl->has_exponent;
+    u8 has_exponent     = sl.has_exponent;
 
     // If the number is negative, this is set to -1 and the final res is
     // multiplied by it

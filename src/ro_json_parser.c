@@ -96,7 +96,7 @@ ro_array_t ro_parse_array(char *b, size_t *idx)
 
             if (sl.is_float)
             {
-                double_with_or_without_exponent_t dwowe = str_to_double(&sl);
+                double_with_or_without_exponent_t dwowe = str_to_double(sl);
                 switch (dwowe.has_exponent)
                 {
                 case 0:
@@ -112,7 +112,7 @@ ro_array_t ro_parse_array(char *b, size_t *idx)
             }
             else
             {
-                long_with_or_without_exponent_t lwowe = str_to_long(&sl);
+                long_with_or_without_exponent_t lwowe = str_to_long(sl);
                 switch (lwowe.has_exponent)
                 {
                 case 0:
@@ -253,7 +253,7 @@ ro_dict_t ro_parse_dict(char *b, size_t *idx)
 
             if (sl.is_float)
             {
-                double_with_or_without_exponent_t dwowe = str_to_double(&sl);
+                double_with_or_without_exponent_t dwowe = str_to_double(sl);
                 switch (dwowe.has_exponent)
                 {
                 case 0:
@@ -269,7 +269,7 @@ ro_dict_t ro_parse_dict(char *b, size_t *idx)
             }
             else
             {
-                long_with_or_without_exponent_t lwowe = str_to_long(&sl);
+                long_with_or_without_exponent_t lwowe = str_to_long(sl);
                 switch (lwowe.has_exponent)
                 {
                 case 0:

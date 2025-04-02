@@ -16,16 +16,15 @@ bool is_number_valid(const char *buff, size_t *idx)
     size_t i      = *idx - 1;
     u8 nb_inc_idx = 0;
 
-    char c      = 0;
-    char prev_c = 0;
-    while ((c = buff[i++]))
+    while (1)
     {
-        switch (c)
+        switch (buff[i++])
         {
         case '+':
         case '-':
             // Sign not preceded by an exponent
-            if ((nb_inc_idx > 0 && !(prev_c == 'e' || prev_c == 'E'))
+            if ((nb_inc_idx > 0
+                 && (i > 1 && !(buff[i - 2] == 'e' || buff[i - 2] == 'E')))
                 // Sign not followed by a digit
                 || !(buff[i] >= '0' && buff[i] <= '9'))
             {
@@ -68,7 +67,6 @@ bool is_number_valid(const char *buff, size_t *idx)
             return true;
         }
         ++nb_inc_idx;
-        prev_c = c;
     }
     return false;
 }
@@ -220,10 +218,13 @@ bool check_array_trailing_commas(const char *buff, size_t *pos)
 
     char c      = 0;
     char prev_c = 0;
-    while ((c = buff[i++]))
+    while (1)
     {
-        switch (c)
+        switch (buff[i++])
         {
+        case 0:
+            return false;
+
         case ',':
             prev_c = ',';
             continue;
@@ -300,10 +301,13 @@ bool check_dict_trailing_commas(const char *buff, size_t *pos)
 
     char c      = 0;
     char prev_c = 0;
-    while ((c = buff[i++]))
+    while (1)
     {
-        switch (c)
+        switch (buff[i++])
         {
+        case 0:
+            return false;
+
         case ',':
             prev_c = ',';
             continue;

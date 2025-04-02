@@ -14,22 +14,19 @@ void test_str_to_long(
     i64 expected_value, i64 expected_number, i64 expected_exponent
 )
 {
-    str_and_len_tuple_t *sl = calloc(1, sizeof(str_and_len_tuple_t));
-    if (!sl)
-    {
-        return;
-    }
-    sl->str          = str;
-    sl->len          = strlen(str);
-    sl->is_float     = is_float;
-    sl->has_exponent = has_exponent;
+    str_and_len_tuple_t sl = (str_and_len_tuple_t){
+        .str          = str,
+        .len          = strlen(str),
+        .is_float     = is_float,
+        .has_exponent = has_exponent,
+    };
 
     long_with_or_without_exponent_t lwowe = str_to_long(sl);
 
     cr_expect(
         lwowe.has_exponent == expected_has_exponent,
         "Expected 'has_exponent' to be '%s' but it was '%s'",
-        has_exponent ? "true" : "false", sl->has_exponent ? "true" : "false"
+        has_exponent ? "true" : "false", sl.has_exponent ? "true" : "false"
     );
     cr_expect(
         lwowe.long_value == expected_value,
@@ -46,7 +43,6 @@ void test_str_to_long(
         "Expected 'exponent' to be '%ld' but got '%ld'", expected_exponent,
         lwowe.long_exp_value.exponent
     );
-    free(sl);
 }
 
 Test(base_json_parser, str_to_long_noexp)
@@ -107,15 +103,12 @@ void test_str_to_double(
     double expected_value, double expected_number, i64 expected_exponent
 )
 {
-    str_and_len_tuple_t *sl = calloc(1, sizeof(str_and_len_tuple_t));
-    if (!sl)
-    {
-        return;
-    }
-    sl->str          = str;
-    sl->len          = strlen(str);
-    sl->is_float     = is_float;
-    sl->has_exponent = has_exponent;
+    str_and_len_tuple_t sl = (str_and_len_tuple_t){
+        .str          = str,
+        .len          = strlen(str),
+        .is_float     = is_float,
+        .has_exponent = has_exponent,
+    };
 
     double_with_or_without_exponent_t dwowe = str_to_double(sl);
 
@@ -137,9 +130,8 @@ void test_str_to_double(
     cr_expect(
         dwowe.has_exponent == expected_has_exponent,
         "Expected 'has_exponent' to be '%s' but it was '%s'",
-        has_exponent ? "true" : "false", sl->has_exponent ? "true" : "false"
+        has_exponent ? "true" : "false", sl.has_exponent ? "true" : "false"
     );
-    free(sl);
 }
 
 Test(base_json_parser, str_to_double_noexp)
@@ -661,21 +653,10 @@ Test(base_json_parser, get_nb_elts_dict_buff_nested)
 /*******************************************************************************
 **                                   ERRORS                                   **
 *******************************************************************************/
-Test(base_json_parser, error_str_to_long_nullarg)
-{
-    long_with_or_without_exponent_t lwowe = str_to_long(0);
-    cr_expect(
-        lwowe.has_exponent == 2,
-        "Expected str_to_long(0) to set the 'has_exponent' field to 2, "
-        "but it was set to '%d'",
-        lwowe.has_exponent
-    );
-}
-
 Test(base_json_parser, error_str_to_long_nullstr)
 {
-    str_and_len_tuple_t sl                = STR_AND_LEN_OF(0, 1, 0, 0);
-    long_with_or_without_exponent_t lwowe = str_to_long(&sl);
+    long_with_or_without_exponent_t lwowe =
+        str_to_long(STR_AND_LEN_OF(0, 1, 0, 0));
     cr_expect(
         lwowe.has_exponent == 2,
         "Expected str_to_long(0) to set the 'has_exponent' field to 2, "
@@ -686,8 +667,8 @@ Test(base_json_parser, error_str_to_long_nullstr)
 
 Test(base_json_parser, error_str_to_long_zerolen)
 {
-    str_and_len_tuple_t sl                = STR_AND_LEN_OF("", 0, 0, 0);
-    long_with_or_without_exponent_t lwowe = str_to_long(&sl);
+    long_with_or_without_exponent_t lwowe =
+        str_to_long(STR_AND_LEN_OF("", 0, 0, 0));
     cr_expect(
         lwowe.has_exponent == 2,
         "Expected str_to_long(sl) ; with 'sl' having a null string ; to "
@@ -697,21 +678,10 @@ Test(base_json_parser, error_str_to_long_zerolen)
 }
 
 // str_to_double
-Test(base_json_parser, error_str_to_double_nullarg)
-{
-    double_with_or_without_exponent_t dwowe = str_to_double(0);
-    cr_expect(
-        dwowe.has_exponent == 2,
-        "Expected str_to_long(0) to set the 'has_exponent' field to 2, "
-        "but it was set to '%d'",
-        dwowe.has_exponent
-    );
-}
-
 Test(base_json_parser, error_str_to_double_nullstr)
 {
-    str_and_len_tuple_t sl                  = STR_AND_LEN_OF(0, 1, 0, 0);
-    double_with_or_without_exponent_t dwowe = str_to_double(&sl);
+    double_with_or_without_exponent_t dwowe =
+        str_to_double(STR_AND_LEN_OF(0, 1, 0, 0));
     cr_expect(
         dwowe.has_exponent == 2,
         "Expected str_to_long(0) to set the 'has_exponent' field to 2, "
@@ -722,8 +692,7 @@ Test(base_json_parser, error_str_to_double_nullstr)
 
 Test(base_json_parser, error_str_to_double_zerolen)
 {
-    str_and_len_tuple_t sl                  = STR_AND_LEN("", 0);
-    double_with_or_without_exponent_t dwowe = str_to_double(&sl);
+    double_with_or_without_exponent_t dwowe = str_to_double(STR_AND_LEN("", 0));
     cr_expect(
         dwowe.has_exponent == 2,
         "Expected str_to_long(sl) ; with 'sl' having a null string ; to "

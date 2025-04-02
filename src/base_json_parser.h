@@ -113,7 +113,7 @@ typedef struct
 **          and without exponent, as well as a field indicating whether the
 **          number has an exponent
 */
-long_with_or_without_exponent_t str_to_long(str_and_len_tuple_t *sl);
+long_with_or_without_exponent_t str_to_long(str_and_len_tuple_t sl);
 /**
 ** \brief Takes sl's char array and transforms it into a double.
 **        If the number has an exponent, the exponent is parsed as well and the
@@ -123,7 +123,7 @@ long_with_or_without_exponent_t str_to_long(str_and_len_tuple_t *sl);
 **          and without exponent, as well as a field indicating whether the
 **          number has an exponent
 */
-double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t *sl);
+double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t sl);
 
 /***************************************
 **              FUNCTIONS             **

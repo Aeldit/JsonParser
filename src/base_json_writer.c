@@ -143,7 +143,7 @@ string_t get_exp_long_as_str(exp_long_t value)
     u8 nb_chars_number   = get_nb_char_long(number);
     u8 nb_chars_exponent = get_nb_char_long(exponent);
 
-    u32 len   = nb_chars_number + 1 + nb_chars_exponent;
+    u8 len    = nb_chars_number + 1 + nb_chars_exponent;
     char *str = malloc((len + 1) * sizeof(char));
     if (!str)
     {
