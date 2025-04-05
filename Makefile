@@ -25,7 +25,7 @@ mem-least: clean
 	./$(TARGET) t.json
 
 noprint: clean
-	$(CC) $(CFLAGS) $(NOPRINT) $(CFILESBASE) $(CFILESRO) -o $(TARGET)
+	$(CC) $(CFLAGS) -O2 $(NOPRINT) $(CFILESBASE) $(CFILESRO) -o $(TARGET)
 	./$(TARGET) flights-1m.json
 
 noprintrw: clean
@@ -35,6 +35,12 @@ noprintrw: clean
 .PHONY:
 $(TARGET):
 	$(CC) $(CFLAGS) $(CFILESBASE) $(CFILESRO) -o $(TARGET)
+
+release: clean
+	$(CC) $(CFLAGS) -O2 $(CFILESBASE) $(CFILESRO) -o $(TARGET)
+
+releaserw: clean
+	$(CC) $(CFLAGS) -O2 $(CFILESBASE) $(CFILESRW) -o $(TARGET)
 
 clean:
 	if [ -f "$(TARGET)" ]; then rm $(TARGET); fi
