@@ -1,4 +1,3 @@
-// clang-format Language: C
 #ifndef RO_JSON_STORAGE_H
 #define RO_JSON_STORAGE_H
 
@@ -10,11 +9,12 @@
 /*******************************************************************************
 **                              DEFINES / MACROS                              **
 *******************************************************************************/
-#define ERROR_RO_VALUE ((ro_value_t){ .type = T_ERROR })
-#define ERROR_RO_ITEM ((ro_item_t){ .type = T_ERROR })
+#define ERROR_RO_VALUE ((ro_value_t){ .type = T_ERROR, .strv = NULL_STRING })
+#define ERROR_RO_ITEM                                                          \
+    ((ro_item_t){ .type = T_ERROR, .key = NULL_STRING, .strv = NULL_STRING })
 
-#define ERROR_RO_ARRAY ((ro_array_t){ .values = 0 })
-#define ERROR_RO_DICT ((ro_dict_t){ .items = 0 })
+#define ERROR_RO_ARRAY ((ro_array_t){ .size = 0, .values = 0 })
+#define ERROR_RO_DICT ((ro_dict_t){ .size = 0, .items = 0 })
 #define ERROR_RO_JSON ((ro_json_t){ .is_array = true, .array = ERROR_RO_ARRAY })
 
 #define ROVAL_STR(v) ((ro_value_t){ .type = T_STR, .strv = (v) })

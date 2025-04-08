@@ -1,4 +1,3 @@
-// clang-format Language: C
 #ifndef RW_JSON_STORAGE_H
 #define RW_JSON_STORAGE_H
 
@@ -12,8 +11,9 @@
 /*******************************************************************************
 **                              DEFINES / MACROS                              **
 *******************************************************************************/
-#define ERROR_RW_VALUE ((rw_value_t){ .type = T_ERROR })
-#define ERROR_RW_ITEM ((rw_item_t){ .type = T_ERROR })
+#define ERROR_RW_VALUE                                                         \
+    ((rw_value_t){ .type = T_ERROR, .arrayv = EMPTY_RW_ARRAY })
+#define ERROR_RW_ITEM ((rw_item_t){ .type = T_ERROR, .dictv = EMPTY_RW_DICT })
 
 #define EMPTY_RW_ARRAY                                                         \
     ((rw_array_t){ .size = 0, .nb_deletions = 0, .head = 0, .tail = 0 })

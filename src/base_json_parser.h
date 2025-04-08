@@ -1,4 +1,3 @@
-// clang-format Language: C
 #ifndef BASE_JSON_PARSER_H
 #define BASE_JSON_PARSER_H
 
@@ -15,9 +14,23 @@
 #    define MAX_READ_BUFF_SIZE (1 << 30) // ~= 1 GB
 #endif
 
-#define NULL_STR_AND_LEN_TUPLE ((str_and_len_tuple_t){ .str = 0, .len = 0 })
-#define ERROR_LWOWE ((long_with_or_without_exponent_t){ .has_exponent = 2 })
-#define ERROR_DWOWE ((double_with_or_without_exponent_t){ .has_exponent = 2 })
+#define NULL_STR_AND_LEN_TUPLE                                                 \
+    ((str_and_len_tuple_t){                                                    \
+        .str          = 0,                                                     \
+        .len          = 0,                                                     \
+        .is_float     = false,                                                 \
+        .has_exponent = false,                                                 \
+    })
+#define ERROR_LWOWE                                                            \
+    ((long_with_or_without_exponent_t){                                        \
+        .long_exp_value = (exp_long_t){ .number = 0, .exponent = 0 },          \
+        .has_exponent   = 2,                                                   \
+    })
+#define ERROR_DWOWE                                                            \
+    ((double_with_or_without_exponent_t){                                      \
+        .double_exp_value = (exp_double_t){ .number = 0, .exponent = 0 },      \
+        .has_exponent     = 2,                                                 \
+    })
 
 #define STR_AND_LEN_OF(s, l, f, e)                                             \
     ((str_and_len_tuple_t                                                      \
@@ -90,16 +103,22 @@ typedef struct
 
 typedef struct
 {
-    exp_long_t long_exp_value;
-    i64 long_value;
     u8 has_exponent; // 0 => false | 1 => true | 2 => error
+    union
+    {
+        exp_long_t long_exp_value;
+        i64 long_value;
+    };
 } long_with_or_without_exponent_t;
 
 typedef struct
 {
-    exp_double_t double_exp_value;
-    double double_value;
     u8 has_exponent; // 0 => false | 1 => true | 2 => error
+    union
+    {
+        exp_double_t double_exp_value;
+        double double_value;
+    };
 } double_with_or_without_exponent_t;
 
 /*******************************************************************************

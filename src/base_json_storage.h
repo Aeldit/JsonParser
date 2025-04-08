@@ -1,4 +1,3 @@
-// clang-format Language: C
 #ifndef BASE_JSON_STORAGE_H
 #define BASE_JSON_STORAGE_H
 

@@ -73,17 +73,19 @@ long_with_or_without_exponent_t str_to_long(str_and_len_tuple_t sl)
     }
     if (has_exponent)
     {
-        return (long_with_or_without_exponent_t
-        ){ .has_exponent = 1,
-           .long_exp_value =
-               (exp_long_t){ .number   = number * is_negative,
-                             .exponent = exponent * is_exp_negative },
-           .long_value = 0 };
+        return (long_with_or_without_exponent_t){
+            .has_exponent = 1,
+            .long_exp_value =
+                (exp_long_t){
+                    .number   = number * is_negative,
+                    .exponent = exponent * is_exp_negative,
+                },
+        };
     }
-    return (long_with_or_without_exponent_t
-    ){ .has_exponent   = 0,
-       .long_value     = number * is_negative,
-       .long_exp_value = (exp_long_t){ .number = 0, .exponent = 0 } };
+    return (long_with_or_without_exponent_t){
+        .has_exponent = 0,
+        .long_value   = number * is_negative,
+    };
 }
 
 double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t sl)
@@ -165,18 +167,21 @@ double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t sl)
     }
     if (has_exponent)
     {
-        return (double_with_or_without_exponent_t
-        ){ .has_exponent     = 1,
-           .double_exp_value = (exp_double_t
-           ){ .number =
-                  (number + (decimals / nb_digits_decimals)) * is_negative,
-              .exponent = exponent * is_exp_negative },
-           .double_value     = 0 };
+        return (double_with_or_without_exponent_t){
+            .has_exponent = 1,
+            .double_exp_value =
+                (exp_double_t){
+                    .number = (number + (decimals / nb_digits_decimals))
+                        * is_negative,
+                    .exponent = exponent * is_exp_negative,
+                },
+        };
     }
-    return (double_with_or_without_exponent_t
-    ){ .has_exponent = 0,
-       .double_value = (number + (decimals / nb_digits_decimals)) * is_negative,
-       .double_exp_value = (exp_double_t){ .number = 0, .exponent = 0 } };
+    return (double_with_or_without_exponent_t){
+        .has_exponent = 0,
+        .double_value =
+            (number + (decimals / nb_digits_decimals)) * is_negative,
+    };
 }
 
 /***************************************

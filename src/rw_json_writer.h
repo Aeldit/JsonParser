@@ -1,4 +1,3 @@
-// clang-format Language: C
 #ifndef RW_JSON_WRITER_H
 #define RW_JSON_WRITER_H
 
