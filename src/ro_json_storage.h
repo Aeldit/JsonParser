@@ -82,7 +82,7 @@ typedef struct ro_dict
 // Used for functions that return an element of the array
 struct ro_value
 {
-    u8 type;
+    enum elt_type type;
     union
     {
         string_t strv;
@@ -99,7 +99,7 @@ struct ro_value
 // Used for functions that return an element of the dict
 struct ro_item
 {
-    u8 type;
+    enum elt_type type;
     string_t key;
     union
     {

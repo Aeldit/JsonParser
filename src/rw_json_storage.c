@@ -664,6 +664,8 @@ void rw_array_remove(rw_array_t *a, size_t index)
                     destroy_rw_dict(v.dictv);
                     v.dictv = EMPTY_RW_DICT;
                     break;
+                default:
+                    break;
                 };
                 link->values[i].type = T_ERROR;
 
@@ -709,6 +711,8 @@ void rw_dict_remove(rw_dict_t *d, string_t key)
                 case T_DICT:
                     destroy_rw_dict(it.dictv);
                     it.dictv = EMPTY_RW_DICT;
+                    break;
+                default:
                     break;
                 };
                 free(it.key.str);
@@ -798,6 +802,8 @@ void destroy_rw_array(rw_array_t a)
             case T_DICT:
                 destroy_rw_dict(values[i].dictv);
                 break;
+            default:
+                break;
             }
         }
         free(tmp);
@@ -824,6 +830,8 @@ void destroy_rw_dict(rw_dict_t d)
                 break;
             case T_DICT:
                 destroy_rw_dict(items[i].dictv);
+                break;
+            default:
                 break;
             }
             if (items[i].type != T_ERROR)

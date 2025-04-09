@@ -62,6 +62,8 @@ bool rw_arrays_equal(rw_array_t a, rw_array_t b)
             case T_DICT:
                 is_equal = rw_dicts_equal(a_val.dictv, b_val.dictv);
                 break;
+            default:
+                break;
             }
 
             if (!is_equal)
@@ -134,6 +136,8 @@ bool rw_dicts_equal(rw_dict_t a, rw_dict_t b)
                 break;
             case T_DICT:
                 is_equal = rw_dicts_equal(a_it.dictv, b_it.dictv);
+                break;
+            default:
                 break;
             }
 

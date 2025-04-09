@@ -109,6 +109,8 @@ void destroy_ro_array(ro_array_t a)
         case T_DICT:
             destroy_ro_dict(val.dictv);
             break;
+        default:
+            break;
         }
     }
     free(values);
@@ -132,6 +134,8 @@ void destroy_ro_dict(ro_dict_t d)
             break;
         case T_DICT:
             destroy_ro_dict(it.dictv);
+            break;
+        default:
             break;
         }
     }

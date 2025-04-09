@@ -114,7 +114,7 @@ typedef struct rw_dict
 // Used for functions that return an element of the array
 typedef struct
 {
-    u8 type;
+    enum elt_type type;
     union
     {
         string_t strv;
@@ -131,7 +131,7 @@ typedef struct
 // Used for functions that return an element of the dict
 typedef struct
 {
-    u8 type;
+    enum elt_type type;
     string_t key;
     union
     {

@@ -8,17 +8,6 @@
 /*******************************************************************************
 **                              DEFINES / MACROS                              **
 *******************************************************************************/
-#define T_ERROR 0
-#define T_STR 1
-#define T_LONG 2
-#define T_DOUBLE 3
-#define T_EXP_LONG 4
-#define T_EXP_DOUBLE 5
-#define T_BOOL 6
-#define T_NULL 7
-#define T_ARR 8
-#define T_DICT 9
-
 #define STRING_OF(s, l)                                                        \
     ((string_t){ .str = (s), .len = (l), .needs_freeing = true })
 #define STRING_NOFREE_OF(s, l)                                                 \
@@ -47,6 +36,23 @@ typedef uint_fast32_t u32;
 typedef int_fast64_t i64;
 typedef uint_fast64_t u64;
 #endif // !LEAST
+
+/*******************************************************************************
+**                                    ENUMS                                   **
+*******************************************************************************/
+enum elt_type
+{
+    T_ERROR,
+    T_STR,
+    T_LONG,
+    T_DOUBLE,
+    T_EXP_LONG,
+    T_EXP_DOUBLE,
+    T_BOOL,
+    T_NULL,
+    T_ARR,
+    T_DICT,
+};
 
 /*******************************************************************************
 **                                 STRUCTURES                                 **
