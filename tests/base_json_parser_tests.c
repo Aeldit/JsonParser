@@ -28,21 +28,28 @@ void test_str_to_long(
         "Expected 'has_exponent' to be '%s' but it was '%s'",
         has_exponent ? "true" : "false", sl.has_exponent ? "true" : "false"
     );
-    cr_expect(
-        lwowe.long_value == expected_value,
-        "Expected 'long_value' to be '%ld' but got '%ld'", expected_value,
-        lwowe.long_value
-    );
-    cr_expect(
-        lwowe.long_exp_value.number == expected_number,
-        "Expected 'number' to be '%ld' but got '%ld'", expected_number,
-        lwowe.long_exp_value.number
-    );
-    cr_expect(
-        lwowe.long_exp_value.exponent == expected_exponent,
-        "Expected 'exponent' to be '%ld' but got '%ld'", expected_exponent,
-        lwowe.long_exp_value.exponent
-    );
+
+    if (lwowe.has_exponent)
+    {
+        cr_expect(
+            lwowe.long_exp_value.number == expected_number,
+            "Expected 'number' to be '%ld' but got '%ld'", expected_number,
+            lwowe.long_exp_value.number
+        );
+        cr_expect(
+            lwowe.long_exp_value.exponent == expected_exponent,
+            "Expected 'exponent' to be '%ld' but got '%ld'", expected_exponent,
+            lwowe.long_exp_value.exponent
+        );
+    }
+    else
+    {
+        cr_expect(
+            lwowe.long_value == expected_value,
+            "Expected 'long_value' to be '%ld' but got '%ld'", expected_value,
+            lwowe.long_value
+        );
+    }
 }
 
 Test(base_json_parser, str_to_long_noexp)
@@ -113,25 +120,32 @@ void test_str_to_double(
     double_with_or_without_exponent_t dwowe = str_to_double(sl);
 
     cr_expect(
-        dwowe.double_exp_value.number == expected_number,
-        "Expected 'number' to be '%lf' but got '%lf'", expected_number,
-        dwowe.double_exp_value.number
-    );
-    cr_expect(
-        dwowe.double_exp_value.exponent == expected_exponent,
-        "Expected 'exponent' to be '%ld' but got '%ld'", expected_exponent,
-        dwowe.double_exp_value.exponent
-    );
-    cr_expect(
-        dwowe.double_value == expected_value,
-        "Expected 'double_value' to be '%lf' but got '%lf'", expected_value,
-        dwowe.double_value
-    );
-    cr_expect(
         dwowe.has_exponent == expected_has_exponent,
         "Expected 'has_exponent' to be '%s' but it was '%s'",
         has_exponent ? "true" : "false", sl.has_exponent ? "true" : "false"
     );
+
+    if (dwowe.has_exponent)
+    {
+        cr_expect(
+            dwowe.double_exp_value.number == expected_number,
+            "Expected 'number' to be '%lf' but got '%lf'", expected_number,
+            dwowe.double_exp_value.number
+        );
+        cr_expect(
+            dwowe.double_exp_value.exponent == expected_exponent,
+            "Expected 'exponent' to be '%ld' but got '%ld'", expected_exponent,
+            dwowe.double_exp_value.exponent
+        );
+    }
+    else
+    {
+        cr_expect(
+            dwowe.double_value == expected_value,
+            "Expected 'double_value' to be '%lf' but got '%lf'", expected_value,
+            dwowe.double_value
+        );
+    }
 }
 
 Test(base_json_parser, str_to_double_noexp)
