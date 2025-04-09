@@ -52,7 +52,7 @@ Arrays contain `ro_value_t` elements, while dicts contain `ro_item_t` elements :
 ```c
 typedef struct
 {
-  u8 type;
+  enum elt_type type;
   union
   {
     string_t strv;
@@ -73,7 +73,7 @@ typedef struct
 ```c
 typedef struct
 {
-  u8 type;
+  enum elt_type type;
   string_t key;
   union
   {
