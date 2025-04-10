@@ -102,3 +102,17 @@ void rw_dict_print(rw_dict_t d)
     printf("%s\n", get_rw_dict_as_str(d, 1).str);
 #endif
 }
+
+void rw_json_print(rw_json_t j)
+{
+#ifndef VALGRING_DISABLE_PRINT
+    if (j.is_array)
+    {
+        rw_array_print(j.array);
+    }
+    else
+    {
+        rw_dict_print(j.dict);
+    }
+#endif
+}
