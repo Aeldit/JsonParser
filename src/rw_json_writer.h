@@ -13,5 +13,6 @@ void write_rw_json_to_file(rw_json_t j, char *file_name);
 
 void rw_array_print(rw_array_t a);
 void rw_dict_print(rw_dict_t d);
+void rw_json_print(rw_json_t j);
 
 #endif // !RW_JSON_WRITER_H

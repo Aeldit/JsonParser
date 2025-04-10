@@ -5,6 +5,8 @@ CFILESBASE=src/base_*.c src/validator.c
 CFILESRO=src/ro_*.c ro_main.c
 CFILESRW=src/rw_*.c rw_main.c
 
+LIBCFILES=*.c
+
 TESTFILES=tests/*.c
 
 TARGET=json-parser
@@ -36,16 +38,11 @@ noprintrw: clean
 $(TARGET):
 	$(CC) $(CFLAGS) $(CFILESBASE) $(CFILESRO) -o $(TARGET)
 
-release: clean
-	$(CC) $(CFLAGS) -O2 $(CFILESBASE) $(CFILESRO) -o $(TARGET)
-
-releaserw: clean
-	$(CC) $(CFLAGS) -O2 $(CFILESBASE) $(CFILESRW) -o $(TARGET)
-
 clean:
 	if [ -f "$(TARGET)" ]; then rm $(TARGET); fi
 	if [ -f "$(TARGET)-tests" ]; then rm $(TARGET)-tests; fi
 
+# Testing
 valgrind-compile: clean
 	$(CC) $(CFLAGS) $(NOPRINT) $(CFILESBASE) $(CFILESRO) -o $(TARGET) -g
 
@@ -60,4 +57,17 @@ leaks: valgrind-compile
 check:
 	$(CC) $(CFLAGS) -DNOVALIDATION src/*.c $(TESTFILES) -o json-parser-tests -lcriterion
 	./json-parser-tests
+
+# Publishing
+release: clean
+	$(CC) $(CFLAGS) -O2 $(CFILESBASE) $(CFILESRO) -o $(TARGET)
+
+releaserw: clean
+	$(CC) $(CFLAGS) -O2 $(CFILESBASE) $(CFILESRW) -o $(TARGET)
+
+libshared:
+	cd src && $(CC) $(CFLAGS) $(LIBCFILES) -c -fpic
+	cd src && $(CC) -shared -o lib$(TARGET).so *.o
+	cd src && rm *.o
+	cd src && mv lib$(TARGET).so ..
 

@@ -86,3 +86,17 @@ void ro_dict_print(ro_dict_t d)
     printf("%s\n", get_ro_dict_as_str(d, 1).str);
 #endif
 }
+
+void ro_json_print(ro_json_t j)
+{
+#ifndef VALGRING_DISABLE_PRINT
+    if (j.is_array)
+    {
+        ro_array_print(j.array);
+    }
+    else
+    {
+        ro_dict_print(j.dict);
+    }
+#endif
+}
