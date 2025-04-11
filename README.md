@@ -5,19 +5,27 @@
 
 This parser has 2 modes: **read-only** and **read-write**, which will be refered to respectively as `ro` and `rw`
 
+## Performance
+
+Here is a little benchmark with 3 files (`t.json`, `big.json` and `flights-m1.json`), run
+with the command `time ./json-parser <json file>`:
+
+> `S` => sys time and `U` => usr time
+> | `ms` => milliseconds and `s` => seconds
+
+| `t.json` | `big.json` | `flights-m1.json` |
+|:------:|:--------:|:---------------:|
+| 3.06ms U=2.06ms S=1.06ms | 51.85ms U=39.63ms S=11.93ms | 2.26s U=1.87s S=0.33s |
+
+> `t.json` is 680 bytes | `big.json` is 4.9MB | `flights-m1.json` is 119MB
+>
+> `flights-m1.json` being above GitHub's 100MB limit so I cannot include it in the repo, but
+> it has a million lines like this one: `{"FL_DATE":"2006-01-01","DEP_DELAY":5,"ARR_DELAY":19,"AIR_TIME":350,"DISTANCE":2475,"DEP_TIME":9.083333,"ARR_TIME":12.483334}`
+
 
 ## Usage
 
-If you want to use this parser in your C code, put the source and header files of this project in yours :
-
-> The third line is to rename the directory
-
-```shell
-cp -r JsonParser/src/ <your_code_directory>
-cd <your_code_directory>
-mv src/ json-parser/
-```
-
+If you want to use this parser in your C code, put the `src` directory of the parser in your project's directory (probably rename in to `json_parser` before to not overwrite your project's `src` dir)
 
 > Notice how each struct (json, array, dict, value, item) or the parse function is prefixed with `ro`. For read-write mode, they will be prefixed by `rw`
 
