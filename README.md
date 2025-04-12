@@ -174,14 +174,14 @@ make json-parser
 ```
 
 The configure script accepts the following options :
-- `S` : Runs the script with the `-fsanitize=address` gcc flag (checks for memory leaks)
-- `D` : Displays some debug informations
+- `S` : Runs the parser with the `-fsanitize=address` gcc flag (checks for memory leaks)
+- `D` : Runs the parser with the flags `-g -ggdb -DDEBUG` (prints some debug info)
 - `SD` or `DS` : Use both options
 
 
 ## Makefile rules
 
-Base rules :
+Base rules:
 - `all` : compiles and runs the program in `ro` mode with the file `t.json`
 - `rw` : same as `all` but  in `rw` mode (the main file is `rw_main.c`)
 - `mem-least` : compile using the `least` types of stdint
@@ -190,10 +190,16 @@ Base rules :
 - `json-parser` : Compiles the project in `ro` mode
 - `clean` : removes the executable
 
-Valgrind rules :
+Testing rules:
 - `valgrind-compile` : compiles the parser with the `-DVALGRING_DISABLE_PRINT` flag (disables the printing functions to only have the time of the parsing functions when using a profiler)
 - `calgrind` : calls `valgrind-compile` and generates a callgrind file usable by the `KCachegrind` profiling software
 - `leaks` : checks for leaks but using valgrind (using the file `t.json`)
+- `check` : runs the criterion test suite
+
+Publishing rules:
+- `release` : compiles the parser using the `-O2` flag
+- `releaserw` : same as `release` but in `rw` mode
+- `lib` : generates a shared library (`.so` file)
 
 ## Compilation options
 
@@ -202,4 +208,8 @@ You can change some defines directly at compilation time, depending on your use 
 #### MAX_READ_BUFF_SIZE
 
 Defines the maximum size of the allocated buffer that is used to store the file (defaults to `2 << 30`, which is roughly equals to 1GB)
+
+#### LEAST
+
+By default, the program uses the `(u)int_fastX_t` types. If the program is run using `-DLEAST`, the types used will be `(u)int_leastX_t`.
 
