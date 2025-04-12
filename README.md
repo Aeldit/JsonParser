@@ -211,5 +211,5 @@ Defines the maximum size of the allocated buffer that is used to store the file 
 
 #### LEAST
 
-By default, the program uses the `(u)int_fastX_t` types. If the program is run using `-DLEAST`, the types used will be `(u)int_leastX_t`.
+By default, the program uses the `(u)int_fastX_t` types. If the program is run using `-DLEAST`, the types used will be `(u)int_leastX_t`
 
