@@ -82,8 +82,8 @@ typedef struct
     }
 
 #define ADD_ITEMS_FOR_MODE(rx_item_t, get_rx_array_as_str, get_rx_dict_as_str) \
-    size_t nb = 0;                                                             \
-    u8 is_key = 1;                                                             \
+    size_t nb   = 0;                                                           \
+    bool is_key = true;                                                        \
     for (size_t i = 0; i < size; ++i)                                          \
     {                                                                          \
         rx_item_t it = items[i];                                               \
@@ -251,7 +251,7 @@ typedef struct
     str[0]              = '{';                                                 \
     str[1]              = '\n';                                                \
     size_t insert_idx   = 2;                                                   \
-    u8 is_key           = 1;                                                   \
+    bool is_key         = true;                                                \
     string_link_t *link = ll->head;                                            \
     while (link)                                                               \
     {                                                                          \
@@ -340,7 +340,7 @@ string_t get_long_as_str(i64 value);
 string_t get_double_as_str(double value);
 string_t get_exp_long_as_str(exp_long_t value);
 string_t get_exp_double_as_str(exp_double_t value);
-string_t get_bool_as_str(u8 value);
+string_t get_bool_as_str(bool value);
 string_t get_null_as_str();
 
 void add_link(

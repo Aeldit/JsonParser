@@ -11,28 +11,30 @@ TESTFILES=tests/*.c
 
 TARGET=json-parser
 
+JSONFILESDIR=files
+
 NOPRINT=-DVALGRING_DISABLE_PRINT -Wno-unused-parameter
 
 all: clean $(TARGET)
-	./$(TARGET) ./json_files/t.json
+	./$(TARGET) ./$(JSONFILESDIR)/t.json
 
 rw: clean
 	$(CC) $(CFLAGS) $(CFILESBASE) $(CFILESRW) -o $(TARGET)
-	./$(TARGET) ./json_files/t.json
+	./$(TARGET) ./$(JSONFILESDIR)/t.json
 
 # Makes the parse use stdint's 'least' types to use less memory, at the
 # potential cost of performance
 mem-least: clean
 	$(CC) $(CFLAGS) -DLEAST $(CFILESBASE) $(CFILESRO) -o $(TARGET)
-	./$(TARGET) ./json_files/t.json
+	./$(TARGET) ./$(JSONFILESDIR)/t.json
 
 noprint: clean
 	$(CC) $(CFLAGS) -O2 $(NOPRINT) $(CFILESBASE) $(CFILESRO) -o $(TARGET)
-	./$(TARGET) ./json_files/flights-1m.json
+	./$(TARGET) ./$(JSONFILESDIR)/flights-1m.json
 
 noprintrw: clean
 	$(CC) $(CFLAGS) $(NOPRINT) $(CFILESBASE) $(CFILESRW) -o $(TARGET)
-	./$(TARGET) ./json_files/flights-1m.json
+	./$(TARGET) ./$(JSONFILESDIR)/flights-1m.json
 
 .PHONY:
 $(TARGET):
@@ -48,11 +50,11 @@ valgrind-compile: clean
 
 calgrind: valgrind-compile
 	valgrind --tool=callgrind --simulate-cache=yes \
-		--collect-jumps=yes ./$(TARGET) ./json_files/flights-1m.json
+		--collect-jumps=yes ./$(TARGET) ./$(JSONFILESDIR)/flights-1m.json
 
 leaks: valgrind-compile
 	valgrind --leak-check=full --show-leak-kinds=all \
-         --track-origins=yes ./$(TARGET) ./json_files/big.json
+         --track-origins=yes ./$(TARGET) ./$(JSONFILESDIR)/big.json
 
 check:
 	$(CC) $(CFLAGS) -DNOVALIDATION src/*.c $(TESTFILES) -o json-parser-tests -lcriterion

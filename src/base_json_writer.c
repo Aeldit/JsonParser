@@ -184,7 +184,7 @@ string_t get_exp_double_as_str(exp_double_t value)
     return STRING_OF(str, len);
 }
 
-string_t get_bool_as_str(u8 value)
+string_t get_bool_as_str(bool value)
 {
     u8 nb_chars = (value ? 4 : 5);
     char *str   = malloc((nb_chars + 1) * sizeof(char));

@@ -13,7 +13,7 @@ long_with_or_without_exponent_t str_to_long(str_and_len_tuple_t sl)
 {
     char *str  = sl.str;
     size_t len = sl.len;
-    if (!str || len == 0)
+    if (!str || !len)
     {
         return ERROR_LWOWE;
     }
@@ -32,7 +32,7 @@ long_with_or_without_exponent_t str_to_long(str_and_len_tuple_t sl)
     char c = 0;
     for (size_t i = 0; i < len; ++i)
     {
-        switch ((c = str[i]))
+        switch (c = str[i])
         {
         case 'e':
         case 'E':
@@ -92,16 +92,16 @@ double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t sl)
 {
     char *str  = sl.str;
     size_t len = sl.len;
-    if (!str || len == 0)
+    if (!str || !len)
     {
         return ERROR_DWOWE;
     }
 
     double nb_digits_decimals = 1;
 
-    double number   = 0; // Integer part
-    double decimals = 0; // Decimal part
-    i64 exponent    = 0; // Only used if sl->has_exponent is true
+    double number   = 0;
+    double decimals = 0;
+    i64 exponent    = 0;
 
     size_t exp_idx = 0;
 
@@ -234,7 +234,6 @@ str_and_len_tuple_t parse_number(const char *buff, size_t *idx)
         return NULL_STR_AND_LEN_TUPLE;
     }
 
-    // Counts the number of characters until the first one that is an 'end char'
     size_t end_idx  = *idx;
     size_t nb_chars = 0;
 
@@ -336,10 +335,11 @@ size_t get_nb_elts_array(const char *buff, size_t idx)
 
     size_t nb_elts = 0;
 
-    // Counts the number of nested arrays/dicts
+    // Counts the number of nested arrays/dicts at the current position
     u64 array_count = 1;
     u64 dict_count  = 0;
 
+    // Only used for strings and numbers, to limit the number of memory writes
     char c = 0;
     while (array_count)
     {
@@ -423,6 +423,7 @@ size_t get_nb_elts_dict(const char *buff, size_t idx)
 
     bool is_in_key = true;
 
+    // Only used for strings and numbers, to limit the number of memory writes
     char c = 0;
     while (dict_count)
     {

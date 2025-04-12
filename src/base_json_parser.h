@@ -150,33 +150,33 @@ double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t sl);
 /**
 ** \brief Parses the string starting at 'pos + 1' (first char after the '"')
 ** \param buff The buffer containing the current json file's contents
-** \param idx A pointer to the unsigned long containing the index of the '"'
-**            that started the string we want to parse
-** \returns A NULL_STRING in case of error, the parsed string otherwise
+** \param idx A pointer to the index in the buffer (this index will be
+**            incremented at the end of the function)
+** \returns The parsed string, or NULL_STRING in case of error
 */
 string_t parse_string(const char *buff, size_t *idx);
 
 /**
-** \brief Reads the buffer from the given pos - 1
+** \brief Reads the buffer from the given pos
 ** \param buff The buffer containing the current json file's contents
-** \param idx The index of the second character of the number (the first one
-**            was already read)
-** \returns A pointer to the str_and_len_tuple_t struct containing the number
-**          as a char array, the length of the char array and whether the number
-**          is a float and has an exponent, or NULL_STR_AND_LEN_TUPLE if there
-**          was an error
+** \param idx A pointer to the index in the buffer (this index will be
+**            incremented at the end of the function)
+** \returns An str_and_len_tuple_t struct containing the number as a char array,
+**          the length of the char array and whether the number is a float and
+**          has an exponent, or NULL_STR_AND_LEN_TUPLE if there was an error
 */
 str_and_len_tuple_t parse_number(const char *buff, size_t *idx);
 
 /**
 ** \param buff The current json file's contents
-** \param idx A pointer to the value containing the index of the 't' or 'f' that
-**            started the boolean
+** \param idx A pointer to the index in the buffer (this index will be
+**            incremented at the end of the function)
 ** \returns 5 if false, 4 if true, 0 otherwise
 */
 size_t parse_boolean(const char *buff, size_t *idx);
 
 /**
+** \brief Counts the number of elements in the array that is at the current idx
 ** \param idx The index of the character just after the '[' that begins the
 **            current array
 ** \returns The number of elements of the current array
@@ -184,6 +184,7 @@ size_t parse_boolean(const char *buff, size_t *idx);
 size_t get_nb_elts_array(const char *buff, size_t idx);
 
 /**
+** \brief Counts the number of elements in the dict that is at the current idx
 ** \param buff The buffer containing the object currently being parsed
 ** \param idx The index of the character just after the '{' that begins the
 **            current dict
