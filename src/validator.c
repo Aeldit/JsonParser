@@ -24,6 +24,10 @@ bool is_number_valid(const char *const buff, size_t *idx)
 
     while (1)
     {
+        // When checking if the current character is not a number, we check if
+        // it is > '9' first, because letters comme after it in the ascii table
+        // and are more likely to appear in a json file.
+        // This way, we can minimize the number of comparisions
         switch (buff[i++])
         {
         case '+':
@@ -32,7 +36,7 @@ bool is_number_valid(const char *const buff, size_t *idx)
             if ((nb_inc_idx > 0
                  && (i > 1 && !(buff[i - 2] == 'e' || buff[i - 2] == 'E')))
                 // Sign not followed by a digit
-                || !(buff[i] >= '0' && buff[i] <= '9'))
+                || buff[i] > '9' || buff[i] < '0')
             {
                 return false;
             }
@@ -41,8 +45,8 @@ bool is_number_valid(const char *const buff, size_t *idx)
         case 'e':
         case 'E':
             // Exponent not followed by a digit or a sign
-            if (!((buff[i] >= '0' && buff[i] <= '9') || buff[i] == '+'
-                  || buff[i] == '-'))
+            if (buff[i] > '9'
+                || (buff[i] < '0' && buff[i] != '+' && buff[i] != '-'))
             {
                 return false;
             }
@@ -50,7 +54,7 @@ bool is_number_valid(const char *const buff, size_t *idx)
 
         case '.':
             // Floating point dot not followed by a digit
-            if (!(buff[i] >= '0' && buff[i] <= '9'))
+            if (buff[i] > '9' || buff[i] < '0')
             {
                 return false;
             }
@@ -101,61 +105,57 @@ bool check_bools_nulls_numbers_counts(
 
     bool is_in_string = false;
 
-    char c      = 0;
-    char prev_c = 0;
-    while ((c = buff[i++]))
+    while (1)
     {
         if (is_in_string)
         {
-            if (c == '"' && prev_c != '\\') // String end
+            if (buff[i++] == '"' && i > 1 && buff[i - 2] != '\\') // String end
             {
                 is_in_string = false;
                 ++nb_quotes;
-                prev_c = c;
             }
             continue;
         }
 
-        switch (c)
+        switch (buff[i++])
         {
+        case 0:
+            break;
+
         case '"':
             if (!is_in_string)
             {
                 is_in_string = true;
                 ++nb_quotes;
             }
-            break;
+            continue;
 
         case 't':
-            if (i + 3 < buff_len)
+            if (i + 3 < buff_len
+                && !(buff[i++] == 'r' && buff[i++] == 'u' && buff[i++] == 'e'))
             {
-                if (!(buff[i++] == 'r' && buff[i++] == 'u' && buff[i++] == 'e'))
-                {
-                    return false;
-                }
+                return false;
             }
-            break;
+            continue;
 
         case 'f':
-            if (i + 4 < buff_len)
+            if (i + 4 < buff_len
+                && !(
+                    buff[i++] == 'a' && buff[i++] == 'l' && buff[i++] == 's'
+                    && buff[i++] == 'e'
+                ))
             {
-                if (!(buff[i++] == 'a' && buff[i++] == 'l' && buff[i++] == 's'
-                      && buff[i++] == 'e'))
-                {
-                    return false;
-                }
+                return false;
             }
-            break;
+            continue;
 
         case 'n':
-            if (i + 3 < buff_len)
+            if (i + 3 < buff_len
+                && !(buff[i++] == 'u' && buff[i++] == 'l' && buff[i++] == 'l'))
             {
-                if (!(buff[i++] == 'u' && buff[i++] == 'l' && buff[i++] == 'l'))
-                {
-                    return false;
-                }
+                return false;
             }
-            break;
+            continue;
 
         case '+':
         case '-':
@@ -173,37 +173,41 @@ bool check_bools_nulls_numbers_counts(
             {
                 return false;
             }
-            break;
+            continue;
 
         case '{':
             ++nb_opened_curly_brackets;
-            break;
+            continue;
         case '[':
             ++nb_opened_brackets;
-            break;
+            continue;
         case '}':
             ++nb_closed_curly_brackets;
-            break;
+            continue;
         case ']':
             ++nb_closed_brackets;
-            break;
+            continue;
 
         case ':':
         case ',':
         case '\n':
         case '\t':
         case ' ':
-            break;
+            continue;
 
         default:
             // The character is not part of the json syntax, which means
             // invalid json
-            printf(
-                "Found invalid character: '%c' (%d) at index : %zu\n", c, c, i
-            );
+            if (i) // To avoid doing '0 - 1' and doing a buffer underflow
+            {
+                printf(
+                    "Found invalid character: '%c' (%d) at index : %zu\n",
+                    buff[i - 1], buff[i - 1], i
+                );
+            }
             return false;
         }
-        prev_c = c;
+        break;
     }
     return nb_quotes % 2 == 0
         && nb_opened_curly_brackets == nb_closed_curly_brackets
