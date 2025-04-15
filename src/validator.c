@@ -240,15 +240,12 @@ bool check_array_trailing_commas(const char *const buff, size_t *pos)
             continue;
 
         case 't':
+        case 'n':
             i += 3;
             break;
 
         case 'f':
             i += 4;
-            break;
-
-        case 'n':
-            i += 3;
             break;
 
         case '"':
@@ -323,15 +320,12 @@ bool check_dict_trailing_commas(const char *const buff, size_t *pos)
             continue;
 
         case 't':
+        case 'n':
             i += 3;
             break;
 
         case 'f':
             i += 4;
-            break;
-
-        case 'n':
-            i += 3;
             break;
 
         case '"':
@@ -475,15 +469,12 @@ bool check_array_missing_commas(const char *const buff, size_t *pos)
             continue;
 
         case 't':
+        case 'n':
             i += 3;
             break;
 
         case 'f':
             i += 4;
-            break;
-
-        case 'n':
-            i += 3;
             break;
 
         case '"':
@@ -680,15 +671,12 @@ bool check_dict_missing_colons_commas(const char *const buff, size_t *pos)
             break;
 
         case 't':
+        case 'n':
             i += 3;
             break;
 
         case 'f':
             i += 4;
-            break;
-
-        case 'n':
-            i += 3;
             break;
 
         case '"':
