@@ -34,7 +34,7 @@ void add_link(
         return;
     }
 
-    string_link_t *sl = calloc(1, sizeof(string_link_t));
+    string_link_t *sl = malloc(sizeof(string_link_t));
     if (!sl)
     {
         return;
@@ -42,6 +42,7 @@ void add_link(
     sl->s            = str;
     sl->s_needs_free = str_needs_free;
     sl->is_from_str  = is_from_str;
+    sl->next         = 0;
 
     if (!ll->head)
     {

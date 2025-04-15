@@ -50,7 +50,7 @@ valgrind-compile: clean
 
 calgrind: valgrind-compile
 	valgrind --tool=callgrind --simulate-cache=yes \
-		--collect-jumps=yes ./$(TARGET) ./$(JSONFILESDIR)/flights-1m.json
+		--collect-jumps=yes ./$(TARGET) ./$(JSONFILESDIR)/big.json
 
 leaks: valgrind-compile
 	valgrind --leak-check=full --show-leak-kinds=all \
