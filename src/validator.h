@@ -10,6 +10,6 @@
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
-bool is_json_valid(const char *buff, size_t buff_len, bool is_dict);
+bool is_json_valid(const char *const buff, size_t buff_len, bool is_dict);
 
 #endif // !VALIDATOR_H

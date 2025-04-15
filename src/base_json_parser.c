@@ -187,7 +187,7 @@ double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t sl)
 /***************************************
 **              PARSING               **
 ***************************************/
-string_t parse_string(const char *buff, size_t *idx)
+string_t parse_string(const char *const buff, size_t *idx)
 {
     if (!buff || !idx)
     {
@@ -227,7 +227,7 @@ string_t parse_string(const char *buff, size_t *idx)
     return STRING_OF(str, len);
 }
 
-str_and_len_tuple_t parse_number(const char *buff, size_t *idx)
+str_and_len_tuple_t parse_number(const char *const buff, size_t *idx)
 {
     if (!buff || !idx)
     {
@@ -290,7 +290,7 @@ str_and_len_tuple_t parse_number(const char *buff, size_t *idx)
     return STR_AND_LEN_OF(str, nb_chars, is_float, has_exponent);
 }
 
-size_t parse_boolean(const char *buff, size_t *idx)
+size_t parse_boolean(const char *const buff, size_t *idx)
 {
     if (!buff || !idx)
     {
@@ -326,7 +326,7 @@ size_t parse_boolean(const char *buff, size_t *idx)
         ++nb_elts;                                                             \
     }
 
-size_t get_nb_elts_array(const char *buff, size_t idx)
+size_t get_nb_elts_array(const char *const buff, size_t idx)
 {
     if (!buff)
     {
@@ -408,7 +408,7 @@ size_t get_nb_elts_array(const char *buff, size_t idx)
         ++nb_elts;                                                             \
     }
 
-size_t get_nb_elts_dict(const char *buff, size_t idx)
+size_t get_nb_elts_dict(const char *const buff, size_t idx)
 {
     if (!buff)
     {

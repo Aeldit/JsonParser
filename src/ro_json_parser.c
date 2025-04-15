@@ -35,7 +35,7 @@ ro_dict_t destroy_ro_dict_on_error(ro_dict_t d, string_t key)
     }                                                                          \
     ++nb_elts_parsed
 
-ro_array_t ro_parse_array(char *b, size_t *idx)
+ro_array_t ro_parse_array(const char *const b, size_t *idx)
 {
     if (!b)
     {
@@ -178,7 +178,7 @@ ro_array_t ro_parse_array(char *b, size_t *idx)
     }                                                                          \
     ++nb_elts_parsed;
 
-ro_dict_t ro_parse_dict(char *b, size_t *idx)
+ro_dict_t ro_parse_dict(const char *const b, size_t *idx)
 {
     if (!b)
     {
@@ -366,8 +366,8 @@ ro_json_t ro_parse(char *file)
             free(b);
             return ERROR_RO_JSON;
         }
-        b[nb_chars] = 0;
         fread(b, sizeof(char), nb_chars, f);
+        b[nb_chars] = 0;
 
         if (!is_json_valid(b, nb_chars, true))
         {
@@ -389,8 +389,8 @@ ro_json_t ro_parse(char *file)
             free(b);
             return ERROR_RO_JSON;
         }
-        b[nb_chars] = 0;
         fread(b, sizeof(char), nb_chars, f);
+        b[nb_chars] = 0;
 
         if (!is_json_valid(b, nb_chars, false))
         {

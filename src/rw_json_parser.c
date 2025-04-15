@@ -30,7 +30,7 @@ rw_dict_t destroy_rw_dict_on_error(rw_dict_t d, string_t key)
 /*******************************************************************************
 **                              LOCAL FUNCTIONS                               **
 *******************************************************************************/
-rw_array_t rw_parse_array(const char *b, size_t *idx)
+rw_array_t rw_parse_array(const char *const b, size_t *idx)
 {
     if (!b)
     {
@@ -161,7 +161,7 @@ rw_array_t rw_parse_array(const char *b, size_t *idx)
     return a;
 }
 
-rw_dict_t rw_parse_dict(const char *b, size_t *idx)
+rw_dict_t rw_parse_dict(const char *const b, size_t *idx)
 {
     if (!b)
     {
@@ -339,7 +339,7 @@ rw_json_t rw_parse(char *file)
     int c = fgetc(f);
     if (c == '{' && nb_chars < MAX_READ_BUFF_SIZE)
     {
-        char *b = calloc(nb_chars + 1, sizeof(char));
+        char *b = malloc((nb_chars + 1) * sizeof(char));
         if (!b || fseek(f, offset, SEEK_SET))
         {
             fclose(f);
@@ -347,6 +347,7 @@ rw_json_t rw_parse(char *file)
             return EMPTY_RW_JSON;
         }
         fread(b, sizeof(char), nb_chars, f);
+        b[nb_chars] = 0;
 
         if (!is_json_valid(b, nb_chars, true))
         {
@@ -361,7 +362,7 @@ rw_json_t rw_parse(char *file)
     }
     else if (c == '[' && nb_chars < MAX_READ_BUFF_SIZE)
     {
-        char *b = calloc(nb_chars + 1, sizeof(char));
+        char *b = malloc((nb_chars + 1) * sizeof(char));
         if (!b || fseek(f, offset, SEEK_SET))
         {
             fclose(f);
@@ -369,6 +370,7 @@ rw_json_t rw_parse(char *file)
             return EMPTY_RW_JSON;
         }
         fread(b, sizeof(char), nb_chars, f);
+        b[nb_chars] = 0;
 
         if (!is_json_valid(b, nb_chars, false))
         {

@@ -1,12 +1,18 @@
 #include "validator.h"
 
+/*******************************************************************************
+**                                  INCLUDES                                  **
+*******************************************************************************/
 #include "base_json_parser.h"
 
+/*******************************************************************************
+**                                 FUNCTIONS                                  **
+*******************************************************************************/
 /**
 ** \brief Called after encountering a '+' or '-' sign, or any digit.
 **        Starts from the sign or digit that started the number
 */
-bool is_number_valid(const char *buff, size_t *idx)
+bool is_number_valid(const char *const buff, size_t *idx)
 {
     if (!buff || !idx)
     {
@@ -77,7 +83,7 @@ bool is_number_valid(const char *buff, size_t *idx)
 **        brackets have a matching number of opening and closing
 */
 bool check_bools_nulls_numbers_counts(
-    const char *buff, size_t buff_len, bool is_dict
+    const char *const buff, size_t buff_len, bool is_dict
 )
 {
     if (!buff)
@@ -204,9 +210,9 @@ bool check_bools_nulls_numbers_counts(
         && nb_opened_brackets == nb_closed_brackets;
 }
 
-bool check_dict_trailing_commas(const char *buff, size_t *pos);
+bool check_dict_trailing_commas(const char *const buff, size_t *pos);
 
-bool check_array_trailing_commas(const char *buff, size_t *pos)
+bool check_array_trailing_commas(const char *const buff, size_t *pos)
 {
     if (!buff)
     {
@@ -289,7 +295,7 @@ bool check_array_trailing_commas(const char *buff, size_t *pos)
     return true;
 }
 
-bool check_dict_trailing_commas(const char *buff, size_t *pos)
+bool check_dict_trailing_commas(const char *const buff, size_t *pos)
 {
     if (!buff)
     {
@@ -372,9 +378,9 @@ bool check_dict_trailing_commas(const char *buff, size_t *pos)
     return true;
 }
 
-bool check_dict_missing_colons_commas(const char *buff, size_t *pos);
+bool check_dict_missing_colons_commas(const char *const buff, size_t *pos);
 
-bool check_array_missing_commas(const char *buff, size_t *pos)
+bool check_array_missing_commas(const char *const buff, size_t *pos)
 {
     if (!buff)
     {
@@ -559,7 +565,7 @@ bool check_array_missing_commas(const char *buff, size_t *pos)
     return false;
 }
 
-bool check_dict_missing_colons_commas(const char *buff, size_t *pos)
+bool check_dict_missing_colons_commas(const char *const buff, size_t *pos)
 {
     if (!buff)
     {
@@ -725,7 +731,7 @@ bool check_dict_missing_colons_commas(const char *buff, size_t *pos)
     return false;
 }
 
-bool is_json_valid(const char *buff, size_t buff_len, bool is_dict)
+bool is_json_valid(const char *const buff, size_t buff_len, bool is_dict)
 {
 #ifdef NOVALIDATION
     return true;
