@@ -53,10 +53,10 @@
 
 #define RO_ARRAY(s)                                                            \
     ((ro_array_t){ .size   = (s),                                              \
-                   .values = (s) ? malloc((s) * sizeof(ro_value_t)) : 0 })
+                   .values = (s) ? calloc((s), sizeof(ro_value_t)) : 0 })
 #define RO_DICT(s)                                                             \
     ((ro_dict_t){ .size  = (s),                                                \
-                  .items = (s) ? malloc((s) * sizeof(ro_item_t)) : 0 })
+                  .items = (s) ? calloc((s), sizeof(ro_item_t)) : 0 })
 #define RO_JSON(is_arr, a, d)                                                  \
     ((is_arr) ? (ro_json_t){ .is_array = true, .array = (a) }                  \
               : (ro_json_t){ .is_array = false, .dict = (d) })
