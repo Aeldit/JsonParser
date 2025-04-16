@@ -42,15 +42,13 @@ rw_array_t rw_parse_array(const char *const b, size_t *idx)
     size_t i = idx ? *idx + 1 : 0;
 
     size_t nb_elts = get_nb_elts_array(b, i);
-
-    rw_array_t a = EMPTY_RW_ARRAY;
+    rw_array_t a   = EMPTY_RW_ARRAY;
     if (!nb_elts)
     {
         return a;
     }
 
     size_t nb_elts_parsed = 0;
-    size_t initial_i      = i;
 
     string_t s             = NULL_STRING;
     str_and_len_tuple_t sl = NULL_STR_AND_LEN_TUPLE;
@@ -156,7 +154,7 @@ rw_array_t rw_parse_array(const char *const b, size_t *idx)
     }
     if (idx)
     {
-        *idx += i - initial_i;
+        *idx = i;
     }
     return a;
 }
@@ -180,7 +178,6 @@ rw_dict_t rw_parse_dict(const char *const b, size_t *idx)
     }
 
     size_t nb_elts_parsed = 0;
-    size_t initial_i      = i;
 
     string_t key        = NULL_STRING;
     bool is_waiting_key = true;
@@ -304,7 +301,7 @@ rw_dict_t rw_parse_dict(const char *const b, size_t *idx)
     }
     if (idx)
     {
-        *idx += i - initial_i;
+        *idx = i;
     }
     return d;
 }

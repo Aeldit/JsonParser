@@ -28,13 +28,6 @@ ro_dict_t destroy_ro_dict_on_error(ro_dict_t d, string_t key)
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
-#define ARRAY_ADD(elt)                                                         \
-    if (insert_idx < nb_elts)                                                  \
-    {                                                                          \
-        values[insert_idx++] = (elt);                                          \
-    }                                                                          \
-    ++nb_elts_parsed
-
 ro_array_t ro_parse_array(const char *const b, size_t *idx)
 {
     if (!b)
@@ -44,8 +37,7 @@ ro_array_t ro_parse_array(const char *const b, size_t *idx)
 
     // We start at idx + 1 because if we entered this function, it means that we
     // already read a '['
-    size_t i         = idx ? *idx + 1 : 0;
-    size_t initial_i = i;
+    size_t i = idx ? *idx + 1 : 0;
 
     size_t nb_elts     = get_nb_elts_array(b, i);
     ro_array_t a       = RO_ARRAY(nb_elts);
@@ -55,7 +47,6 @@ ro_array_t ro_parse_array(const char *const b, size_t *idx)
         return a;
     }
 
-    size_t insert_idx     = 0;
     size_t nb_elts_parsed = 0;
 
     string_t s             = NULL_STRING;
@@ -74,7 +65,7 @@ ro_array_t ro_parse_array(const char *const b, size_t *idx)
             {
                 return destroy_ro_array_on_error(a);
             }
-            ARRAY_ADD(ROVAL_STR(s));
+            values[nb_elts_parsed++] = ROVAL_STR(s);
             break;
 
         case '+':
@@ -100,10 +91,11 @@ ro_array_t ro_parse_array(const char *const b, size_t *idx)
                 switch (dwowe.has_exponent)
                 {
                 case 0:
-                    ARRAY_ADD(ROVAL_DOUBLE(dwowe.double_value));
+                    values[nb_elts_parsed++] = ROVAL_DOUBLE(dwowe.double_value);
                     break;
                 case 1:
-                    ARRAY_ADD(ROVAL_EXPDOUBLE(dwowe.double_exp_value));
+                    values[nb_elts_parsed++] =
+                        ROVAL_EXPDOUBLE(dwowe.double_exp_value);
                     break;
                 case 2:
                     free(sl.str);
@@ -116,10 +108,11 @@ ro_array_t ro_parse_array(const char *const b, size_t *idx)
                 switch (lwowe.has_exponent)
                 {
                 case 0:
-                    ARRAY_ADD(ROVAL_LONG(lwowe.long_value));
+                    values[nb_elts_parsed++] = ROVAL_LONG(lwowe.long_value);
                     break;
                 case 1:
-                    ARRAY_ADD(ROVAL_EXPLONG(lwowe.long_exp_value));
+                    values[nb_elts_parsed++] =
+                        ROVAL_EXPLONG(lwowe.long_exp_value);
                     break;
                 case 2:
                     free(sl.str);
@@ -136,11 +129,11 @@ ro_array_t ro_parse_array(const char *const b, size_t *idx)
             {
                 return destroy_ro_array_on_error(a);
             }
-            ARRAY_ADD(ROVAL_BOOL(len == 4));
+            values[nb_elts_parsed++] = ROVAL_BOOL(len == 4);
             break;
 
         case 'n':
-            ARRAY_ADD(ROVAL_NULL);
+            values[nb_elts_parsed++] = ROVAL_NULL;
             i += 3;
             break;
 
@@ -150,7 +143,7 @@ ro_array_t ro_parse_array(const char *const b, size_t *idx)
             {
                 return destroy_ro_array_on_error(a);
             }
-            ARRAY_ADD(ROVAL_ARR(tmp_a));
+            values[nb_elts_parsed++] = ROVAL_ARR(tmp_a);
             break;
 
         case '{':
@@ -159,24 +152,23 @@ ro_array_t ro_parse_array(const char *const b, size_t *idx)
             {
                 return destroy_ro_array_on_error(a);
             }
-            ARRAY_ADD(ROVAL_DICT(tmp_jd));
+            values[nb_elts_parsed++] = ROVAL_DICT(tmp_jd);
             break;
         }
         ++i;
     }
     if (idx)
     {
-        *idx += i - initial_i;
+        *idx = i;
     }
     return a;
 }
 
 #define DICT_ADD(elt)                                                          \
-    if (insert_idx < nb_elts && key.str)                                       \
+    if (key.str)                                                               \
     {                                                                          \
-        items[insert_idx++] = elt;                                             \
-    }                                                                          \
-    ++nb_elts_parsed;
+        items[nb_elts_parsed++] = (elt);                                       \
+    }
 
 ro_dict_t ro_parse_dict(const char *const b, size_t *idx)
 {
@@ -197,9 +189,7 @@ ro_dict_t ro_parse_dict(const char *const b, size_t *idx)
         return d;
     }
 
-    size_t insert_idx     = 0;
     size_t nb_elts_parsed = 0;
-    size_t initial_i      = i;
 
     string_t key        = NULL_STRING;
     bool is_waiting_key = true;
@@ -327,7 +317,7 @@ ro_dict_t ro_parse_dict(const char *const b, size_t *idx)
     }
     if (idx)
     {
-        *idx += i - initial_i;
+        *idx = i;
     }
     return d;
 }
