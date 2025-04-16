@@ -31,7 +31,6 @@ size_t fill_rw_string_ll_with_values(
     {
         rw_value_t *values = link->values;
         arr_size_t size    = ARRAY_LEN;
-        size_t total_size  = a.size;
         ADD_VALUES_FOR_MODE(
             rw_value_t, get_rw_array_as_str, get_rw_dict_as_str
         );
@@ -58,9 +57,8 @@ fill_rw_string_ll_with_items(string_linked_list_t *ll, rw_dict_t d, u16 indent)
     item_link_t *link = d.head;
     while (link)
     {
-        rw_item_t *items  = link->items;
-        arr_size_t size   = ARRAY_LEN;
-        size_t total_size = d.size;
+        rw_item_t *items = link->items;
+        arr_size_t size  = ARRAY_LEN;
         ADD_ITEMS_FOR_MODE(rw_item_t, get_rw_array_as_str, get_rw_dict_as_str);
         nb_chars += nb;
         link = link->next;

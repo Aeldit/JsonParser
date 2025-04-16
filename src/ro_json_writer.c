@@ -27,7 +27,6 @@ size_t fill_ro_string_ll_with_values(
     // 'String's + counts the number of chars required for each value
     ro_value_t *values = a.values;
     size_t size        = a.size;
-    size_t total_size  = size;
     ADD_VALUES_FOR_MODE(ro_value_t, get_ro_array_as_str, get_ro_dict_as_str);
     return nb;
 }
@@ -44,10 +43,9 @@ fill_ro_string_ll_with_items(string_linked_list_t *ll, ro_dict_t d, u16 indent)
     }
 
     // Iterates over each value of the array and converts them to
-    // 'String's + counts the number of chars required for each value
-    ro_item_t *items  = d.items;
-    size_t size       = d.size;
-    size_t total_size = size;
+    // 'String's
+    ro_item_t *items = d.items;
+    size_t size      = d.size;
     ADD_ITEMS_FOR_MODE(ro_item_t, get_ro_array_as_str, get_ro_dict_as_str);
     return nb;
 }
