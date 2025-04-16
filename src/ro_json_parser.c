@@ -347,8 +347,6 @@ ro_json_t ro_parse(char *file)
     }
 
     bool is_array = false;
-    ro_array_t a  = ERROR_RO_ARRAY;
-    ro_dict_t d   = ERROR_RO_DICT;
 
     switch (fgetc(f))
     {
@@ -373,6 +371,7 @@ ro_json_t ro_parse(char *file)
     }
     fread(b, sizeof(char), nb_chars, f);
     b[nb_chars] = 0;
+    printf("'%s'\n", b);
 
     if (!is_json_valid(b, nb_chars, !is_array))
     {
@@ -382,6 +381,8 @@ ro_json_t ro_parse(char *file)
         return ERROR_RO_JSON;
     }
 
+    ro_array_t a = ERROR_RO_ARRAY;
+    ro_dict_t d  = ERROR_RO_DICT;
     if (is_array)
     {
         a = ro_parse_array(b, 0);
