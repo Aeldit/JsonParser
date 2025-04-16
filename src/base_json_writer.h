@@ -91,9 +91,9 @@ typedef struct
         }                                                                      \
     }                                                                          \
     /* size - 1 because we have a comma for each value except the last one */  \
-    /* size because we have 1 line return for each value */                    \
+    /* size + 1 because we have 1 line return for each value + for '['     */  \
     /* size * indent * 4 because we have 4 spaces of indent for each value */  \
-    /* => nb += size * 4 + size - 1 + size + 2 + size * indent * 4;         */ \
+    /* => nb += size - 1 + size + 1 + size * indent * 4;                   */  \
     nb += (size_t)size * 2 + size * indent * 4;                                \
     /*                                                                      */ \
     /* Adds the length of each string in the linked list */                    \
@@ -165,9 +165,9 @@ typedef struct
     }                                                                          \
     /* size * 4 because we add '": "' after each key                        */ \
     /* size - 1 because we have a comma for each item except the last one   */ \
-    /* size + 2 because we have 1 line return for each item + for { and }   */ \
+    /* size + 1 because we have 1 line return for each item + for '{'       */ \
     /* size * indent * 4 because we have 4 spaces of indent for each item   */ \
-    /* => nb += size * 4 + size - 1 + size + 2 + size * indent * 4;         */ \
+    /* => nb += size * 4 + size - 1 + size + 1 + size * indent * 4;         */ \
     nb += (size_t)size * 6 + size * indent * 4;                                \
     /*                                                                      */ \
     /* Adds the length of each string in the linked list */                    \
