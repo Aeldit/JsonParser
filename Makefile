@@ -29,7 +29,7 @@ mem-least: clean
 	./$(TARGET) ./$(JSONFILESDIR)/t.json
 
 noprint: clean
-	$(CC) $(CFLAGS) -O2 $(NOPRINT) $(CFILESBASE) $(CFILESRO) -o $(TARGET)
+	$(CC) $(CFLAGS) $(NOPRINT) $(CFILESBASE) $(CFILESRO) -o $(TARGET)
 	./$(TARGET) ./$(JSONFILESDIR)/flights-1m.json
 
 noprintrw: clean
@@ -50,9 +50,16 @@ valgrind-compile: clean
 
 calgrind: valgrind-compile
 	valgrind --tool=callgrind --simulate-cache=yes \
-		--collect-jumps=yes ./$(TARGET) ./$(JSONFILESDIR)/big.json
+		--collect-jumps=yes ./$(TARGET) ./$(JSONFILESDIR)/flights-1m.json
 
 leaks: valgrind-compile
+	valgrind --leak-check=full --show-leak-kinds=all \
+         --track-origins=yes ./$(TARGET) ./$(JSONFILESDIR)/big.json
+
+valgrind-compile-rw: clean
+	$(CC) $(CFLAGS)  $(CFILESBASE) $(CFILESRW) -o $(TARGET) -g
+
+leaks-rw: valgrind-compile-rw
 	valgrind --leak-check=full --show-leak-kinds=all \
          --track-origins=yes ./$(TARGET) ./$(JSONFILESDIR)/big.json
 
