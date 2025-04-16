@@ -317,8 +317,7 @@ rw_json_t rw_parse(char *file)
         return EMPTY_RW_JSON;
     }
 
-    long offset = 0;
-    if (fseek(f, offset++, SEEK_SET))
+    if (fseek(f, 0, SEEK_SET))
     {
         fclose(f);
         return EMPTY_RW_JSON;
@@ -327,7 +326,7 @@ rw_json_t rw_parse(char *file)
     // Obtains the number of characters in the file
     struct stat st;
     stat(file, &st);
-    size_t nb_chars = st.st_size;
+    size_t nb_chars = st.st_size - 1;
     if (nb_chars >= MAX_READ_BUFF_SIZE)
     {
         return EMPTY_RW_JSON;
@@ -350,13 +349,29 @@ rw_json_t rw_parse(char *file)
     }
 
     char *b = malloc((nb_chars + 1) * sizeof(char));
-    if (!b || fseek(f, offset, SEEK_SET))
+    if (!b || fseek(f, 1, SEEK_SET))
     {
         fclose(f);
         free(b);
         return EMPTY_RW_JSON;
     }
+
     fread(b, sizeof(char), nb_chars, f);
+    if (feof(f))
+    {
+        printf("Unexpected EOF\n");
+        free(b);
+        fclose(f);
+        return EMPTY_RW_JSON;
+    }
+    if (ferror(f))
+    {
+        printf("Error reading file\n");
+        free(b);
+        fclose(f);
+        return EMPTY_RW_JSON;
+    }
+
     b[nb_chars] = 0;
 
     if (!is_json_valid(b, nb_chars, !is_array))
