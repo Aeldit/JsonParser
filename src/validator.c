@@ -204,6 +204,7 @@ bool check_bools_nulls_numbers_counts(
                     "Found invalid character: '%c' (%d) at index : %zu\n",
                     buff[i - 1], buff[i - 1], i
                 );
+                // printf("'%s'\n", buff);
             }
             return false;
         }
@@ -729,9 +730,36 @@ bool is_json_valid(const char *const buff, size_t buff_len, bool is_dict)
     {
         return false;
     }
-    return check_bools_nulls_numbers_counts(buff, buff_len, is_dict) && is_dict
-        ? (check_dict_trailing_commas(buff, 0) && buff[buff_len - 3] == '}'
-           && check_dict_missing_colons_commas(buff, 0))
-        : (check_array_trailing_commas(buff, 0) && buff[buff_len - 3] == ']'
-           && check_array_missing_commas(buff, 0));
+
+    if (!check_bools_nulls_numbers_counts(buff, buff_len, is_dict))
+    {
+        printf("a");
+        return false;
+    }
+
+    if (is_dict)
+    {
+        if (!(check_dict_trailing_commas(buff, 0) && buff[buff_len - 2] == '}'))
+        {
+            printf("b");
+            return false;
+        }
+        if (!check_dict_missing_colons_commas(buff, 0))
+        {
+            printf("c");
+            return false;
+        }
+    }
+
+    if (!(check_array_trailing_commas(buff, 0) && buff[buff_len - 2] == ']'))
+    {
+        printf("d");
+        return false;
+    }
+    if (!check_array_missing_commas(buff, 0))
+    {
+        printf("e");
+        return false;
+    }
+    return true;
 }
