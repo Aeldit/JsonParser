@@ -223,8 +223,7 @@ bool check_array_trailing_commas(const char *const buff, size_t *pos)
         return false;
     }
 
-    size_t i         = pos ? *pos : 1;
-    size_t initial_i = i;
+    size_t i = pos ? *pos : 1;
 
     char c      = 0;
     char prev_c = 0;
@@ -270,7 +269,7 @@ bool check_array_trailing_commas(const char *const buff, size_t *pos)
         case ']':
             if (pos)
             {
-                *pos += i - initial_i;
+                *pos = i;
             }
             return prev_c != ',';
 
@@ -303,8 +302,7 @@ bool check_dict_trailing_commas(const char *const buff, size_t *pos)
         return false;
     }
 
-    size_t i         = pos ? *pos : 1;
-    size_t initial_i = i;
+    size_t i = pos ? *pos : 1;
 
     char c      = 0;
     char prev_c = 0;
@@ -350,7 +348,7 @@ bool check_dict_trailing_commas(const char *const buff, size_t *pos)
         case '}':
             if (pos)
             {
-                *pos += i - initial_i;
+                *pos = i;
             }
             return prev_c != ',';
 
@@ -385,8 +383,7 @@ bool check_array_missing_commas(const char *const buff, size_t *pos)
         return false;
     }
 
-    size_t i         = pos ? *pos : 0;
-    size_t initial_i = i;
+    size_t i = pos ? *pos : 0;
 
     bool value_encountered = false;
     bool is_first_val      = true;
@@ -403,7 +400,7 @@ bool check_array_missing_commas(const char *const buff, size_t *pos)
             case ']':
                 if (pos)
                 {
-                    *pos += i - initial_i;
+                    *pos = i;
                 }
                 return true;
 
@@ -499,7 +496,7 @@ bool check_array_missing_commas(const char *const buff, size_t *pos)
         case ']':
             if (pos)
             {
-                *pos += i - initial_i;
+                *pos = i;
             }
             return true;
 
@@ -567,8 +564,7 @@ bool check_dict_missing_colons_commas(const char *const buff, size_t *pos)
         return false;
     }
 
-    size_t i         = pos ? *pos : 0;
-    size_t initial_i = i;
+    size_t i = pos ? *pos : 0;
 
     size_t nb_colon = 0;
     size_t nb_comma = 0;
@@ -588,7 +584,7 @@ bool check_dict_missing_colons_commas(const char *const buff, size_t *pos)
             case '}':
                 if (pos)
                 {
-                    *pos += i - initial_i;
+                    *pos = i;
                 }
                 return true;
 
@@ -701,7 +697,7 @@ bool check_dict_missing_colons_commas(const char *const buff, size_t *pos)
         case '}':
             if (pos)
             {
-                *pos += i - initial_i;
+                *pos = i;
             }
             return nb_comma == nb_colon - 1;
 
