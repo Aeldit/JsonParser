@@ -17,12 +17,10 @@ int main(int argc, char *argv[])
     {
         printf("\n");
 
-        rw_array_t a = EMPTY_RW_ARRAY;
-        rw_array_add_long(&a, 1);
-        rw_array_add_long(&a, 2);
-        rw_array_add_long(&a, 3);
-        rw_array_add_long(&a, 4);
-        rw_array_add_long(&a, 5);
+        rw_array_t a = init_rw_array_with(
+            5, RWVAL_LONG(1), RWVAL_LONG(2), RWVAL_LONG(3), RWVAL_LONG(4),
+            RWVAL_LONG(5)
+        );
         rw_array_add_array(&j.array, a);
         rw_array_remove(&a, 2);
         rw_value_t v = rw_array_get(j.array, 0);
@@ -36,12 +34,8 @@ int main(int argc, char *argv[])
             printf("AAA %d", it.type);
         }
         write_rw_json_to_file(j, "out.json");
-        rw_array_print(j.array);
     }
-    else
-    {
-        rw_dict_print(j.dict);
-    }
+    rw_json_print(j);
     destroy_rw_json(j);
     return 0;
 }

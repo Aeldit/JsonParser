@@ -19,10 +19,10 @@
 ** \param x The name of the rw_array_t or rw_dict_t variable (a for array_t, d
 **          for rw_dict_t)
 */
-#define ADD(TypeLink, x)                                                       \
+#define ADD(type_link, x)                                                      \
     if (!x->head)                                                              \
     {                                                                          \
-        TypeLink *l = calloc(1, sizeof(TypeLink));                             \
+        type_link *l = calloc(1, sizeof(type_link));                           \
         if (!l)                                                                \
         {                                                                      \
             return;                                                            \
@@ -39,7 +39,7 @@
         /* If the current link's rw_array_t is full */                         \
         if (x->tail->insert_index >= ARRAY_LEN)                                \
         {                                                                      \
-            TypeLink *l = calloc(1, sizeof(TypeLink));                         \
+            type_link *l = calloc(1, sizeof(type_link));                       \
             if (!l)                                                            \
             {                                                                  \
                 return;                                                        \

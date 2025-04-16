@@ -38,7 +38,6 @@ typedef struct
 #define ADD_VALUES_FOR_MODE(                                                   \
     rx_value_t, get_rx_array_as_str, get_rx_dict_as_str                        \
 )                                                                              \
-    size_t nb = 0;                                                             \
     for (size_t i = 0; i < (size_t)size; ++i)                                  \
     {                                                                          \
         rx_value_t v = values[i];                                              \
@@ -48,7 +47,7 @@ typedef struct
             continue;                                                          \
         case T_STR:                                                            \
             ADD_VALUES_FOR_MODE_ADD_VALUE(v.strv, false, true);                \
-            nb += 2; /* Strings are encased by 2 double-quotes (\"\") */       \
+            nb_chars += 2; /* Strings are encased by 2 double-quotes (\"\") */ \
             break;                                                             \
         case T_LONG:                                                           \
             ADD_VALUES_FOR_MODE_ADD_VALUE(                                     \
@@ -89,19 +88,6 @@ typedef struct
             );                                                                 \
             break;                                                             \
         }                                                                      \
-    }                                                                          \
-    /* size - 1 because we have a comma for each value except the last one */  \
-    /* size + 1 because we have 1 line return for each value + for '['     */  \
-    /* size * indent * 4 because we have 4 spaces of indent for each value */  \
-    /* => nb += size - 1 + size + 1 + size * indent * 4;                   */  \
-    nb += (size_t)size * 2 + size * indent * 4;                                \
-    /*                                                                      */ \
-    /* Adds the length of each string in the linked list */                    \
-    string_link_t *link = ll->head;                                            \
-    while (link)                                                               \
-    {                                                                          \
-        nb += link->s.len;                                                     \
-        link = link->next;                                                     \
     }
 
 #define ADD_ITEMS_FOR_MODE_ADD_PAIR(val, b1, b2)                               \
@@ -109,7 +95,6 @@ typedef struct
     add_link(ll, val, b1, b2)
 
 #define ADD_ITEMS_FOR_MODE(rx_item_t, get_rx_array_as_str, get_rx_dict_as_str) \
-    size_t nb   = 0;                                                           \
     bool is_key = true;                                                        \
     for (size_t i = 0; i < (size_t)size; ++i)                                  \
     {                                                                          \
@@ -120,7 +105,7 @@ typedef struct
             continue;                                                          \
         case T_STR:                                                            \
             ADD_ITEMS_FOR_MODE_ADD_PAIR(it.strv, false, true);                 \
-            nb += 2; /* Strings are encased by 2 double-quotes (\"\") */       \
+            nb_chars += 2; /* Strings are encased by 2 double-quotes (\"\") */ \
             break;                                                             \
         case T_LONG:                                                           \
             ADD_ITEMS_FOR_MODE_ADD_PAIR(                                       \
@@ -162,20 +147,6 @@ typedef struct
             break;                                                             \
         }                                                                      \
         is_key = !is_key;                                                      \
-    }                                                                          \
-    /* size * 4 because we add '": "' after each key                        */ \
-    /* size - 1 because we have a comma for each item except the last one   */ \
-    /* size + 1 because we have 1 line return for each item + for '{'       */ \
-    /* size * indent * 4 because we have 4 spaces of indent for each item   */ \
-    /* => nb += size * 4 + size - 1 + size + 1 + size * indent * 4;         */ \
-    nb += (size_t)size * 6 + size * indent * 4;                                \
-    /*                                                                      */ \
-    /* Adds the length of each string in the linked list */                    \
-    string_link_t *link = ll->head;                                            \
-    while (link)                                                               \
-    {                                                                          \
-        nb += link->s.len;                                                     \
-        link = link->next;                                                     \
     }
 
 #define ARRAY_AS_STR(fill_rx_string_ll_with_values)                            \
