@@ -341,59 +341,57 @@ ro_json_t ro_parse(char *file)
     struct stat st;
     stat(file, &st);
     size_t nb_chars = st.st_size;
+    if (nb_chars >= MAX_READ_BUFF_SIZE)
+    {
+        return ERROR_RO_JSON;
+    }
 
     bool is_array = false;
     ro_array_t a  = ERROR_RO_ARRAY;
     ro_dict_t d   = ERROR_RO_DICT;
 
-    int c = fgetc(f);
-    if (c == '{' && nb_chars < MAX_READ_BUFF_SIZE)
+    switch (fgetc(f))
     {
-        char *b = malloc((nb_chars + 1) * sizeof(char));
-        if (!b || fseek(f, offset, SEEK_SET))
-        {
-            fclose(f);
-            free(b);
-            return ERROR_RO_JSON;
-        }
-        fread(b, sizeof(char), nb_chars, f);
-        b[nb_chars] = 0;
+    case '{':
+        break;
 
-        if (!is_json_valid(b, nb_chars, true))
-        {
-            printf("Invalid json file\n");
-            free(b);
-            fclose(f);
-            return ERROR_RO_JSON;
-        }
-
-        d = ro_parse_dict(b, 0);
-        free(b);
-    }
-    else if (c == '[' && nb_chars < MAX_READ_BUFF_SIZE)
-    {
-        char *b = malloc((nb_chars + 1) * sizeof(char));
-        if (!b || fseek(f, offset, SEEK_SET))
-        {
-            fclose(f);
-            free(b);
-            return ERROR_RO_JSON;
-        }
-        fread(b, sizeof(char), nb_chars, f);
-        b[nb_chars] = 0;
-
-        if (!is_json_valid(b, nb_chars, false))
-        {
-            printf("Invalid json file\n");
-            free(b);
-            fclose(f);
-            return ERROR_RO_JSON;
-        }
-
-        a        = ro_parse_array(b, 0);
+    case '[':
         is_array = true;
-        free(b);
+        break;
+
+    default:
+        fclose(f);
+        return ERROR_RO_JSON;
     }
+
+    char *b = malloc((nb_chars + 1) * sizeof(char));
+    if (!b || fseek(f, offset, SEEK_SET))
+    {
+        fclose(f);
+        free(b);
+        return ERROR_RO_JSON;
+    }
+    fread(b, sizeof(char), nb_chars, f);
+    b[nb_chars] = 0;
+
+    if (!is_json_valid(b, nb_chars, !is_array))
+    {
+        printf("Invalid json file\n");
+        free(b);
+        fclose(f);
+        return ERROR_RO_JSON;
+    }
+
+    if (is_array)
+    {
+        a = ro_parse_array(b, 0);
+    }
+    else
+    {
+        d = ro_parse_dict(b, 0);
+    }
+
+    free(b);
     fclose(f);
     return RO_JSON(is_array, a, d);
 }
