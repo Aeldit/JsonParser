@@ -74,14 +74,18 @@ void write_ro_json_to_file(ro_json_t j, char *file_name)
 void ro_array_print(ro_array_t a)
 {
 #ifndef VALGRING_DISABLE_PRINT
-    printf("%s\n", get_ro_array_as_str(a, 1).str);
+    string_t s = get_ro_array_as_str(a, 1);
+    printf("%s\n", s.str);
+    destroy_string(s);
 #endif
 }
 
 void ro_dict_print(ro_dict_t d)
 {
 #ifndef VALGRING_DISABLE_PRINT
-    printf("%s\n", get_ro_dict_as_str(d, 1).str);
+    string_t s = get_ro_dict_as_str(d, 1);
+    printf("%s\n", s.str);
+    destroy_string(s);
 #endif
 }
 
