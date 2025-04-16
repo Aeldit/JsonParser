@@ -367,16 +367,8 @@ rw_json_t rw_parse(char *file)
         return EMPTY_RW_JSON;
     }
 
-    rw_array_t a = EMPTY_RW_ARRAY;
-    rw_dict_t d  = EMPTY_RW_DICT;
-    if (is_array)
-    {
-        a = rw_parse_array(b, 0);
-    }
-    else
-    {
-        d = rw_parse_dict(b, 0);
-    }
+    rw_array_t a = is_array ? rw_parse_array(b, 0) : EMPTY_RW_ARRAY;
+    rw_dict_t d  = is_array ? EMPTY_RW_DICT : rw_parse_dict(b, 0);
 
     free(b);
     fclose(f);

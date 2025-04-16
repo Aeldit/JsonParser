@@ -381,16 +381,8 @@ ro_json_t ro_parse(char *file)
         return ERROR_RO_JSON;
     }
 
-    ro_array_t a = ERROR_RO_ARRAY;
-    ro_dict_t d  = ERROR_RO_DICT;
-    if (is_array)
-    {
-        a = ro_parse_array(b, 0);
-    }
-    else
-    {
-        d = ro_parse_dict(b, 0);
-    }
+    ro_array_t a = is_array ? ro_parse_array(b, 0) : ERROR_RO_ARRAY;
+    ro_dict_t d  = is_array ? ERROR_RO_DICT : ro_parse_dict(b, 0);
 
     free(b);
     fclose(f);
