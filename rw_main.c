@@ -12,6 +12,8 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    // FIX: Some weird characters appear when printing
+
     rw_json_t j = rw_parse(argv[1]);
     if (j.is_array)
     {

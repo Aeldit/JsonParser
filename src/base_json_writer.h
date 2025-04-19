@@ -30,15 +30,13 @@ typedef struct
 /*******************************************************************************
 **                              DEFINES / MACROS                              **
 *******************************************************************************/
-#define ADD_VALUES_FOR_MODE_ADD_VALUE(val, b1, b2) add_link(ll, val, b1, b2)
-
 // The following MACROS are used because we have 2 'modes' (ro & rw), which
 // means we have different functions for each type. However, these functions do
 // exactly the same thing, so this macros prevents duplicated code
 #define ADD_VALUES_FOR_MODE(                                                   \
     rx_value_t, get_rx_array_as_str, get_rx_dict_as_str                        \
 )                                                                              \
-    for (size_t i = 0; i < (size_t)size; ++i)                                  \
+    for (size_t i = 0; i < size; ++i)                                          \
     {                                                                          \
         rx_value_t v = values[i];                                              \
         switch (v.type)                                                        \
@@ -46,45 +44,35 @@ typedef struct
         case T_ERROR:                                                          \
             continue;                                                          \
         case T_STR:                                                            \
-            ADD_VALUES_FOR_MODE_ADD_VALUE(v.strv, false, true);                \
+            add_link(ll, v.strv, false, true);                                 \
             nb_chars += 2; /* Strings are encased by 2 double-quotes (\"\") */ \
             break;                                                             \
         case T_LONG:                                                           \
-            ADD_VALUES_FOR_MODE_ADD_VALUE(                                     \
-                get_long_as_str(v.longv), true, false                          \
-            );                                                                 \
+            add_link(ll, get_long_as_str(v.longv), true, false);               \
             break;                                                             \
         case T_DOUBLE:                                                         \
-            ADD_VALUES_FOR_MODE_ADD_VALUE(                                     \
-                get_double_as_str(v.doublev), true, false                      \
-            );                                                                 \
+            add_link(ll, get_double_as_str(v.doublev), true, false);           \
             break;                                                             \
         case T_EXP_LONG:                                                       \
-            ADD_VALUES_FOR_MODE_ADD_VALUE(                                     \
-                get_exp_long_as_str(v.exp_longv), true, false                  \
-            );                                                                 \
+            add_link(ll, get_exp_long_as_str(v.exp_longv), true, false);       \
             break;                                                             \
         case T_EXP_DOUBLE:                                                     \
-            ADD_VALUES_FOR_MODE_ADD_VALUE(                                     \
-                get_exp_double_as_str(v.exp_doublev), true, false              \
-            );                                                                 \
+            add_link(ll, get_exp_double_as_str(v.exp_doublev), true, false);   \
             break;                                                             \
         case T_BOOL:                                                           \
-            ADD_VALUES_FOR_MODE_ADD_VALUE(                                     \
-                get_bool_as_str(v.boolv), true, false                          \
-            );                                                                 \
+            add_link(ll, get_bool_as_str(v.boolv), true, false);               \
             break;                                                             \
         case T_NULL:                                                           \
-            ADD_VALUES_FOR_MODE_ADD_VALUE(get_null_as_str(), true, false);     \
+            add_link(ll, get_null_as_str(), true, false);                      \
             break;                                                             \
         case T_ARR:                                                            \
-            ADD_VALUES_FOR_MODE_ADD_VALUE(                                     \
-                get_rx_array_as_str(v.arrayv, indent + 1), true, false         \
+            add_link(                                                          \
+                ll, get_rx_array_as_str(v.arrayv, indent + 1), true, false     \
             );                                                                 \
             break;                                                             \
         case T_DICT:                                                           \
-            ADD_VALUES_FOR_MODE_ADD_VALUE(                                     \
-                get_rx_dict_as_str(v.dictv, indent + 1), true, false           \
+            add_link(                                                          \
+                ll, get_rx_dict_as_str(v.dictv, indent + 1), true, false       \
             );                                                                 \
             break;                                                             \
         }                                                                      \
