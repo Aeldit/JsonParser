@@ -654,7 +654,7 @@ void rw_array_remove(rw_array_t *a, size_t index)
                 {
                 case T_STR:
                     destroy_string(v.strv);
-                    v.strv.str = 0;
+                    v.strv = NULL_STRING;
                     break;
                 case T_ARR:
                     destroy_rw_array(v.arrayv);
@@ -702,7 +702,7 @@ void rw_dict_remove(rw_dict_t *d, string_t key)
                 {
                 case T_STR:
                     destroy_string(it.strv);
-                    it.strv.str = 0;
+                    it.strv = NULL_STRING;
                     break;
                 case T_ARR:
                     destroy_rw_array(it.arrayv);
@@ -716,7 +716,7 @@ void rw_dict_remove(rw_dict_t *d, string_t key)
                     break;
                 };
                 free(it.key.str);
-                it.key.str          = 0;
+                it.key              = NULL_STRING;
                 link->items[i].type = T_ERROR;
 
                 --d->size;
