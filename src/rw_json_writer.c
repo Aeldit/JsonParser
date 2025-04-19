@@ -26,21 +26,14 @@ size_t fill_rw_string_ll_with_values(
     // Iterates over each value of the array and converts them to
     // 'String's + counts the number of chars required for each value
     size_t nb_chars        = 0;
-    size_t nb_elts         = a.size;
     value_link_t *str_link = a.head;
     while (str_link)
     {
         rw_value_t *values = str_link->values;
-        arr_size_t size    = ARRAY_LEN;
+        size_t size        = ARRAY_LEN;
         ADD_VALUES_FOR_MODE(
             rw_value_t, get_rw_array_as_str, get_rw_dict_as_str
         );
-
-        // size - 1 because we have a comma for each value except the last one
-        // size + 1 because we have 1 line return for each value + for '[' */ /*
-        // size * indent * 4 because we have 4 spaces of indent for each value
-        // => nb += size - 1 + size + 1 + size * indent * 4;
-        nb_chars += nb_elts * 2 + nb_elts * indent * 4;
         // Adds the length of each string in the linked list
         string_link_t *link = ll->head;
         while (link)
@@ -50,6 +43,11 @@ size_t fill_rw_string_ll_with_values(
         }
         str_link = str_link->next;
     }
+    // size - 1 because we have a comma for each value except the last one
+    // size + 1 because we have 1 line return for each value + for '[' */ /*
+    // size * indent * 4 because we have 4 spaces of indent for each value
+    // => nb += size - 1 + size + 1 + size * indent * 4;
+    nb_chars += a.size * 2 + a.size * indent * 4;
     return nb_chars;
 }
 
@@ -67,20 +65,13 @@ fill_rw_string_ll_with_items(string_linked_list_t *ll, rw_dict_t d, u16 indent)
     // Iterates over each value of the array and converts them to
     // 'String's + counts the number of chars required for each value
     size_t nb_chars       = 0;
-    size_t nb_elts        = d.size;
     item_link_t *str_link = d.head;
     while (str_link)
     {
         rw_item_t *items = str_link->items;
-        arr_size_t size  = ARRAY_LEN;
+        size_t size      = ARRAY_LEN;
         ADD_ITEMS_FOR_MODE(rw_item_t, get_rw_array_as_str, get_rw_dict_as_str);
 
-        // size * 4 because we add '": "' after each key
-        // size - 1 because we have a comma for each item except the last one
-        // size + 1 because we have 1 line return for each item + for '{'
-        // size * indent * 4 because we have 4 spaces of indent for each item
-        // => nb += size * 4 + size - 1 + size + 1 + size * indent * 4;
-        nb_chars += nb_elts * 6 + nb_elts * indent * 4;
         // Adds the length of each string in the linked list
         string_link_t *link = ll->head;
         while (link)
@@ -90,6 +81,12 @@ fill_rw_string_ll_with_items(string_linked_list_t *ll, rw_dict_t d, u16 indent)
         }
         str_link = str_link->next;
     }
+    // size * 4 because we add '": "' after each key
+    // size - 1 because we have a comma for each item except the last one
+    // size + 1 because we have 1 line return for each item + for '{'
+    // size * indent * 4 because we have 4 spaces of indent for each item
+    // => nb += size * 4 + size - 1 + size + 1 + size * indent * 4;
+    nb_chars += d.size * 6 + d.size * indent * 4;
     return nb_chars;
 }
 
