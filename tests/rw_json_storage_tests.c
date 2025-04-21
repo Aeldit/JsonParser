@@ -11,15 +11,19 @@
 *******************************************************************************/
 Test(rw_json_storage, init_rw_array_zero_size)
 {
-    size_t size  = 0;
-    rw_array_t a = EMPTY_RW_ARRAY;
+    size_t size   = 0;
+    rw_array_t *a = init_rw_array();
+    if (!a)
+    {
+        return;
+    }
 
     cr_expect(
-        a.size == size, "Expected the array size to be %zu, but got %zu", size,
-        a.size
+        a->size == size, "Expected the array size to be %zu, but got %zu", size,
+        a->size
     );
     cr_expect(
-        !a.head, "Expected a->head to be a null pointer, but got '%p'", a.head
+        !a->head, "Expected a->head to be a null pointer, but got '%p'", a->head
     );
 
     destroy_rw_array(a);
@@ -27,20 +31,24 @@ Test(rw_json_storage, init_rw_array_zero_size)
 
 Test(rw_json_storage, init_rw_array_normal_size)
 {
-    size_t size  = 5;
-    rw_array_t a = EMPTY_RW_ARRAY;
-    rw_array_add_bool(&a, 1);
-    rw_array_add_bool(&a, 1);
-    rw_array_add_bool(&a, 1);
-    rw_array_add_bool(&a, 1);
-    rw_array_add_bool(&a, 1);
+    size_t size   = 5;
+    rw_array_t *a = init_rw_array();
+    if (!a)
+    {
+        return;
+    }
+    rw_array_add_bool(a, 1);
+    rw_array_add_bool(a, 1);
+    rw_array_add_bool(a, 1);
+    rw_array_add_bool(a, 1);
+    rw_array_add_bool(a, 1);
 
     cr_expect(
-        a.size == size, "Expected the array size to be %zu, but got %zu", size,
-        a.size
+        a->size == size, "Expected the array size to be %zu, but got %zu", size,
+        a->size
     );
     cr_expect(
-        a.head, "Expected a->values to be a valid pointer, but it was null"
+        a->head, "Expected a->values to be a valid pointer, but it was null"
     );
 
     destroy_rw_array(a);
@@ -51,15 +59,19 @@ Test(rw_json_storage, init_rw_array_normal_size)
 *******************************************************************************/
 Test(rw_json_storage, init_rw_dict_zero_size)
 {
-    size_t size = 0;
-    rw_dict_t d = EMPTY_RW_DICT;
+    size_t size  = 0;
+    rw_dict_t *d = calloc(1, sizeof(rw_dict_t));
+    if (!d)
+    {
+        return;
+    }
 
     cr_expect(
-        d.size == size, "Expected the dict size to be %zu, but got %zu", size,
-        d.size
+        d->size == size, "Expected the dict size to be %zu, but got %zu", size,
+        d->size
     );
     cr_expect(
-        !d.head, "Expected d->head to be a null pointer, but got '%p'", d.head
+        !d->head, "Expected d->head to be a null pointer, but got '%p'", d->head
     );
 
     destroy_rw_dict(d);
@@ -67,20 +79,24 @@ Test(rw_json_storage, init_rw_dict_zero_size)
 
 Test(rw_json_storage, init_rw_dict_normal_size)
 {
-    size_t size = 5;
-    rw_dict_t d = EMPTY_RW_DICT;
-    rw_dict_add_bool(&d, string_nofree_of("1"), true);
-    rw_dict_add_bool(&d, string_nofree_of("2"), true);
-    rw_dict_add_bool(&d, string_nofree_of("3"), true);
-    rw_dict_add_bool(&d, string_nofree_of("4"), true);
-    rw_dict_add_bool(&d, string_nofree_of("5"), true);
+    size_t size  = 5;
+    rw_dict_t *d = calloc(1, sizeof(rw_dict_t));
+    if (!d)
+    {
+        return;
+    }
+    rw_dict_add_bool(d, string_nofree_of("1"), true);
+    rw_dict_add_bool(d, string_nofree_of("2"), true);
+    rw_dict_add_bool(d, string_nofree_of("3"), true);
+    rw_dict_add_bool(d, string_nofree_of("4"), true);
+    rw_dict_add_bool(d, string_nofree_of("5"), true);
 
     cr_expect(
-        d.size == size, "Expected the dict size to be %zu, but got %zu", size,
-        d.size
+        d->size == size, "Expected the dict size to be %zu, but got %zu", size,
+        d->size
     );
     cr_expect(
-        d.head, "Expected d->items to be a valid pointer, but it was null"
+        d->head, "Expected d->items to be a valid pointer, but it was null"
     );
 
     destroy_rw_dict(d);
@@ -90,16 +106,20 @@ Test(rw_json_storage, init_rw_dict_normal_size)
 **                                  ARRAY ADDS                                **
 *******************************************************************************/
 #define RW_ARRAY_ADD_TYPE_TEST_ADD_3_TYPE(rw_array_add_type, v1, v2, v3)       \
-    size_t len   = 3;                                                          \
-    rw_array_t a = EMPTY_RW_ARRAY;                                             \
-    rw_array_add_type(&a, v1);                                                 \
-    rw_array_add_type(&a, v2);                                                 \
-    rw_array_add_type(&a, v3);                                                 \
+    size_t len    = 3;                                                         \
+    rw_array_t *a = init_rw_array();                                           \
+    if (!a)                                                                    \
+    {                                                                          \
+        return;                                                                \
+    }                                                                          \
+    rw_array_add_type(a, v1);                                                  \
+    rw_array_add_type(a, v2);                                                  \
+    rw_array_add_type(a, v3);                                                  \
     cr_expect(                                                                 \
-        a.size == len,                                                         \
+        a->size == len,                                                        \
         "Expected the insert_index of the array to be %zu after the "          \
         "additions, but got '%zu'",                                            \
-        len, a.size                                                            \
+        len, a->size                                                           \
     );                                                                         \
     destroy_rw_array(a)
 
@@ -144,17 +164,21 @@ Test(rw_json_storage, rw_array_add_bool_array_add_3)
 
 Test(rw_json_storage, rw_array_add_null_array_add_3)
 {
-    size_t len   = 3;
-    rw_array_t a = EMPTY_RW_ARRAY;
-    rw_array_add_null(&a);
-    rw_array_add_null(&a);
-    rw_array_add_null(&a);
+    size_t len    = 3;
+    rw_array_t *a = init_rw_array();
+    if (!a)
+    {
+        return;
+    }
+    rw_array_add_null(a);
+    rw_array_add_null(a);
+    rw_array_add_null(a);
     cr_expect(
-        a.size == len,
+        a->size == len,
         "Expected the insert_index of the array to be %zu after the "
         "additions, "
         "but got '%zu'",
-        len, a.size
+        len, a->size
     );
     destroy_rw_array(a);
 }
@@ -165,16 +189,20 @@ Test(rw_json_storage, rw_array_add_null_array_add_3)
 #define RW_DICT_ADD_TYPE_TEST_ADD_3_TYPE(                                      \
     rw_dict_add_type, k1, k2, k3, v1, v2, v3                                   \
 )                                                                              \
-    size_t len  = 3;                                                           \
-    rw_dict_t d = EMPTY_RW_DICT;                                               \
-    rw_dict_add_type(&d, k1, v1);                                              \
-    rw_dict_add_type(&d, k2, v2);                                              \
-    rw_dict_add_type(&d, k3, v3);                                              \
+    size_t len   = 3;                                                          \
+    rw_dict_t *d = calloc(1, sizeof(rw_dict_t));                               \
+    if (!d)                                                                    \
+    {                                                                          \
+        return;                                                                \
+    }                                                                          \
+    rw_dict_add_type(d, k1, v1);                                               \
+    rw_dict_add_type(d, k2, v2);                                               \
+    rw_dict_add_type(d, k3, v3);                                               \
     cr_expect(                                                                 \
-        d.size == len,                                                         \
+        d->size == len,                                                        \
         "Expected the insert_index of the dict to be %zu after the "           \
         "additions, but got '%zu'",                                            \
-        len, d.size                                                            \
+        len, d->size                                                           \
     );                                                                         \
     destroy_rw_dict(d)
 
@@ -231,16 +259,20 @@ Test(rw_json_storage, ro_dict_add_bool_array_add_3)
 
 Test(rw_json_storage, ro_dict_add_null_array_add_3)
 {
-    size_t len  = 3;
-    rw_dict_t d = EMPTY_RW_DICT;
-    rw_dict_add_null(&d, string_nofree_of("k1"));
-    rw_dict_add_null(&d, string_nofree_of("k2"));
-    rw_dict_add_null(&d, string_nofree_of("k3"));
+    size_t len   = 3;
+    rw_dict_t *d = calloc(1, sizeof(rw_dict_t));
+    if (!d)
+    {
+        return;
+    }
+    rw_dict_add_null(d, string_nofree_of("k1"));
+    rw_dict_add_null(d, string_nofree_of("k2"));
+    rw_dict_add_null(d, string_nofree_of("k3"));
     cr_expect(
-        d.size == len,
+        d->size == len,
         "Expected the insert_index of the dict to be %zu after the "
         "additions, but got '%zu'",
-        len, d.size
+        len, d->size
     );
     destroy_rw_dict(d);
 }
@@ -250,15 +282,24 @@ Test(rw_json_storage, ro_dict_add_null_array_add_3)
 *******************************************************************************/
 Test(rw_json_storage, rw_array_get_empty)
 {
-    size_t idx   = 0;
-    char buff[]  = "[]";
-    rw_array_t a = rw_parse_array(buff, &idx);
+    size_t idx    = 0;
+    char buff[]   = "[]";
+    rw_array_t *a = rw_parse_array(buff, &idx);
+    if (!a)
+    {
+        return;
+    }
 
-    size_t i     = 5;
-    rw_value_t v = rw_array_get(a, i);
+    size_t i      = 5;
+    rw_value_t *v = rw_array_get(a, i);
+    if (!v)
+    {
+        destroy_rw_array(a);
+        return;
+    }
 
     cr_expect(
-        v.type == T_ERROR,
+        v->type == T_ERROR,
         "Expected the value to be of type T_ERROR because we tried to "
         "get the value of index %zu from an array of size 0, but it wasn't",
         i
@@ -269,15 +310,24 @@ Test(rw_json_storage, rw_array_get_empty)
 
 Test(rw_json_storage, rw_dict_get_empty)
 {
-    size_t idx  = 0;
-    char buff[] = "{}";
-    rw_dict_t d = rw_parse_dict(buff, &idx);
+    size_t idx   = 0;
+    char buff[]  = "{}";
+    rw_dict_t *d = rw_parse_dict(buff, &idx);
+    if (!d)
+    {
+        return;
+    }
 
-    string_t key = string_nofree_of("test");
-    rw_item_t it = rw_dict_get(d, key);
+    string_t key  = string_nofree_of("test");
+    rw_item_t *it = rw_dict_get(d, key);
+    if (!it)
+    {
+        destroy_rw_dict(d);
+        return;
+    }
 
     cr_expect(
-        it.type == T_ERROR,
+        it->type == T_ERROR,
         "Expected the value to be of type T_ERROR because we tried to "
         "get the value of key %s on a dict of size 0, but it wasn't",
         key.str
@@ -316,15 +366,24 @@ char *rw_get_type_as_str(u8 type)
 
 void rw_array_get_type(char *buff, u8 expected_type)
 {
-    size_t idx   = 0;
-    rw_array_t a = rw_parse_array(buff, &idx);
+    size_t idx    = 0;
+    rw_array_t *a = rw_parse_array(buff, &idx);
+    if (!a)
+    {
+        return;
+    }
 
-    rw_value_t v = rw_array_get(a, 0);
+    rw_value_t *v = rw_array_get(a, 0);
+    if (!v)
+    {
+        destroy_rw_array(a);
+        return;
+    }
 
     cr_expect(
-        v.type == expected_type,
+        v->type == expected_type,
         "Expected the value to be of type %s (got '%s')",
-        rw_get_type_as_str(expected_type), rw_get_type_as_str(v.type)
+        rw_get_type_as_str(expected_type), rw_get_type_as_str(v->type)
     );
 
     destroy_rw_array(a);
@@ -387,15 +446,24 @@ Test(rw_json_storage, rw_array_get_dict)
 
 void rw_dict_get_type(char *buff, u8 expected_type)
 {
-    size_t idx  = 0;
-    rw_dict_t d = rw_parse_dict(buff, &idx);
+    size_t idx   = 0;
+    rw_dict_t *d = rw_parse_dict(buff, &idx);
+    if (!d)
+    {
+        return;
+    }
 
-    rw_item_t it = rw_dict_get(d, string_nofree_of("k"));
+    rw_item_t *it = rw_dict_get(d, string_nofree_of("k"));
+    if (!it)
+    {
+        destroy_rw_dict(d);
+        return;
+    }
 
     cr_expect(
-        it.type == expected_type,
+        it->type == expected_type,
         "Expected the item to be of type %s (got '%s')",
-        rw_get_type_as_str(expected_type), rw_get_type_as_str(it.type)
+        rw_get_type_as_str(expected_type), rw_get_type_as_str(it->type)
     );
 
     destroy_rw_dict(d);

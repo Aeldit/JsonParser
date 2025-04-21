@@ -154,7 +154,7 @@ double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t sl);
 **            incremented at the end of the function)
 ** \returns The parsed string, or NULL_STRING in case of error
 */
-string_t parse_string(const char *buff, size_t *idx);
+string_t parse_string(const char *const buff, size_t *idx);
 
 /**
 ** \brief Reads the buffer from the given pos
@@ -165,7 +165,7 @@ string_t parse_string(const char *buff, size_t *idx);
 **          the length of the char array and whether the number is a float and
 **          has an exponent, or NULL_STR_AND_LEN_TUPLE if there was an error
 */
-str_and_len_tuple_t parse_number(const char *buff, size_t *idx);
+str_and_len_tuple_t parse_number(const char *const buff, size_t *idx);
 
 /**
 ** \param buff The current json file's contents
@@ -173,7 +173,7 @@ str_and_len_tuple_t parse_number(const char *buff, size_t *idx);
 **            incremented at the end of the function)
 ** \returns 5 if false, 4 if true, 0 otherwise
 */
-size_t parse_boolean(const char *buff, size_t *idx);
+size_t parse_boolean(const char *const buff, size_t *idx);
 
 /**
 ** \brief Counts the number of elements in the array that is at the current idx
@@ -181,7 +181,7 @@ size_t parse_boolean(const char *buff, size_t *idx);
 **            current array
 ** \returns The number of elements of the current array
 */
-size_t get_nb_elts_array(const char *buff, size_t idx);
+size_t get_nb_elts_array(const char *const buff, size_t idx);
 
 /**
 ** \brief Counts the number of elements in the dict that is at the current idx
@@ -190,6 +190,6 @@ size_t get_nb_elts_array(const char *buff, size_t idx);
 **            current dict
 ** \returns The number of elements of the current dict
 */
-size_t get_nb_elts_dict(const char *buff, size_t idx);
+size_t get_nb_elts_dict(const char *const buff, size_t idx);
 
 #endif // !BASE_JSON_PARSER_H

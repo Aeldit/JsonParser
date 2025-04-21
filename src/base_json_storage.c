@@ -24,8 +24,8 @@ bool strings_equals(string_t s1, string_t s2)
         return false;
     }
 
-    const char *a = s1.str;
-    const char *b = s2.str;
+    const char *const a = s1.str;
+    const char *const b = s2.str;
     if (!a || !b)
     {
         return false;

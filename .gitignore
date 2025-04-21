@@ -3,4 +3,6 @@
 json-parser
 json-parser-tests
 Makefile.rules
+files/flights-1m.json
+out.json
 

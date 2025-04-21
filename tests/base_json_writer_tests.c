@@ -8,9 +8,11 @@
 Test(base_json_writer, get_nb_char_long_zero)
 {
     u8 nb_char = get_nb_char_long(0);
-    cr_expect(nb_char == 1,
-              "Expected get_nb_char_long(0) to return 1, but it returned '%u'",
-              nb_char);
+    cr_expect(
+        nb_char == 1,
+        "Expected get_nb_char_long(0) to return 1, but it returned '%u'",
+        nb_char
+    );
 }
 
 Test(base_json_writer, get_nb_char_long_positive)
@@ -19,7 +21,8 @@ Test(base_json_writer, get_nb_char_long_positive)
     cr_expect(
         nb_char == 6,
         "Expected get_nb_char_long(123456) to return 6, but it returned '%u'",
-        nb_char);
+        nb_char
+    );
 }
 
 Test(base_json_writer, get_nb_char_long_negative)
@@ -28,7 +31,8 @@ Test(base_json_writer, get_nb_char_long_negative)
     cr_expect(
         nb_char == 7,
         "Expected get_nb_char_long(-123456) to return 7, but it returned '%u'",
-        nb_char);
+        nb_char
+    );
 }
 
 /*******************************************************************************
@@ -36,34 +40,29 @@ Test(base_json_writer, get_nb_char_long_negative)
 *******************************************************************************/
 Test(base_json_writer, add_link_normal)
 {
-    string_linked_list_t *sll = calloc(1, sizeof(string_linked_list_t));
-    if (!sll)
-    {
-        return;
-    }
-    string_link_t *sl1 = calloc(1, sizeof(string_link_t));
-    string_link_t *sl2 = calloc(1, sizeof(string_link_t));
-    string_link_t *sl3 = calloc(1, sizeof(string_link_t));
-    string_link_t *sl4 = calloc(1, sizeof(string_link_t));
+    string_linked_list_t sll = (string_linked_list_t){ 0 };
+    string_link_t *sl1       = calloc(1, sizeof(string_link_t));
+    string_link_t *sl2       = calloc(1, sizeof(string_link_t));
+    string_link_t *sl3       = calloc(1, sizeof(string_link_t));
+    string_link_t *sl4       = calloc(1, sizeof(string_link_t));
     if (!sl1 || !sl2 || !sl3 || !sl4)
     {
         free(sl1);
         free(sl2);
         free(sl3);
         free(sl4);
-        free(sll);
         return;
     }
-    sll->head = sl1;
-    sll->tail = sl4;
+    sll.head = sl1;
+    sll.tail = sl4;
 
     sl1->next = sl2;
     sl2->next = sl3;
     sl3->next = sl4;
 
-    add_link(sll, STRING_OF("test", 4), 0, 0);
-    size_t len = 0;
-    string_link_t *tmp = sll->head;
+    add_link(&sll, STRING_OF("test", 4), true);
+    size_t len         = 0;
+    string_link_t *tmp = sll.head;
     while (tmp)
     {
         ++len;
@@ -73,8 +72,9 @@ Test(base_json_writer, add_link_normal)
         len == 5,
         "Expected the length of a string_linked_list_t with 4 elements to be 5 "
         "after calling the add_link() function once, but got '%zu'",
-        len);
-    destroy_linked_list(sll);
+        len
+    );
+    destroy_linked_list(&sll);
 }
 
 /*******************************************************************************
@@ -83,10 +83,12 @@ Test(base_json_writer, add_link_normal)
 void test_get_long_as_str(i64 n, size_t len, char *nstr)
 {
     string_t s = get_long_as_str(n);
-    cr_expect(strings_equals(s, STRING_OF(nstr, len)),
-              "Expected get_long_as_str(%zu) to return the string { .str = "
-              "\"%zu\", .len = %zu }, but got { .str = \"%s\", .len = %zu }",
-              n, n, len, s.str, s.len);
+    cr_expect(
+        strings_equals(s, STRING_OF(nstr, len)),
+        "Expected get_long_as_str(%zu) to return the string { .str = "
+        "\"%zu\", .len = %zu }, but got { .str = \"%s\", .len = %zu }",
+        n, n, len, s.str, s.len
+    );
     destroy_string(s);
 }
 
@@ -111,10 +113,12 @@ Test(base_json_writer, get_long_as_str_negative)
 void test_get_double_as_str(double n, size_t len, char *nstr)
 {
     string_t s = get_double_as_str(n);
-    cr_expect(strings_equals(s, STRING_OF(nstr, len)),
-              "Expected get_double_as_str(%s) to return the string { .str = "
-              "\"%s\", .len = %zu }, but got { .str = \"%s\", .len = %zu }",
-              nstr, nstr, len, s.str, s.len);
+    cr_expect(
+        strings_equals(s, STRING_OF(nstr, len)),
+        "Expected get_double_as_str(%s) to return the string { .str = "
+        "\"%s\", .len = %zu }, but got { .str = \"%s\", .len = %zu }",
+        nstr, nstr, len, s.str, s.len
+    );
     destroy_string(s);
 }
 
@@ -139,12 +143,13 @@ Test(base_json_writer, get_double_as_str_negative)
 void test_get_long_exp_as_str(i64 n, i64 e, size_t len, char *nstr)
 {
     exp_long_t el = (exp_long_t){ .number = n, .exponent = e };
-    string_t s = get_exp_long_as_str(el);
+    string_t s    = get_exp_long_as_str(el);
     cr_expect(
         strings_equals(s, STRING_OF(nstr, len)),
         "Expected get_exp_long_as_str(%lde%ld) to return the string { .str = "
         "\"%lde%ld\", .len = %zu }, but got { .str = \"%s\", .len = %zu }",
-        el.number, el.exponent, el.number, el.exponent, len, s.str, s.len);
+        el.number, el.exponent, el.number, el.exponent, len, s.str, s.len
+    );
     destroy_string(s);
 }
 
@@ -169,12 +174,13 @@ Test(base_json_writer, get_long_exp_as_str_negative)
 void test_get_double_exp_as_str(double n, i64 e, size_t len, char *nstr)
 {
     exp_double_t ed = (exp_double_t){ .number = n, .exponent = e };
-    string_t s = get_exp_double_as_str(ed);
+    string_t s      = get_exp_double_as_str(ed);
     cr_expect(
         strings_equals(s, STRING_OF(nstr, len)),
         "Expected get_double_exp_as_str(%lfe%ld) to return the string { .str = "
         "\"%lfe%ld\", .len = %zu }, but got { .str = \"%s\", .len = %zu }",
-        ed.number, ed.exponent, ed.number, ed.exponent, len, s.str, s.len);
+        ed.number, ed.exponent, ed.number, ed.exponent, len, s.str, s.len
+    );
     destroy_string(s);
 }
 
@@ -199,10 +205,12 @@ Test(base_json_writer, get_double_exp_as_str_negative)
 void test_get_bool_as_str(bool b, size_t len, char *nstr)
 {
     string_t s = get_bool_as_str(b);
-    cr_expect(strings_equals(s, STRING_OF(nstr, len)),
-              "Expected get_bool_as_str(%s) to return the string { .str = "
-              "\"%s\", .len = %zu }, but got { .str = \"%s\", .len = %zu }",
-              b ? "true" : "false", b ? "true" : "false", len, s.str, s.len);
+    cr_expect(
+        strings_equals(s, STRING_OF(nstr, len)),
+        "Expected get_bool_as_str(%s) to return the string { .str = "
+        "\"%s\", .len = %zu }, but got { .str = \"%s\", .len = %zu }",
+        b ? "true" : "false", b ? "true" : "false", len, s.str, s.len
+    );
     destroy_string(s);
 }
 
@@ -222,9 +230,11 @@ Test(base_json_writer, get_bool_as_str_false)
 Test(base_json_writer, get_null_as_str)
 {
     string_t s = get_null_as_str();
-    cr_expect(strings_equals(s, STRING_OF("null", 4)),
-              "Expected get_null_as_str() to return the string { .str = "
-              "\"null\", .len = 4 }, but got { .str = \"%s\", .len = %zu }",
-              s.str, s.len);
+    cr_expect(
+        strings_equals(s, STRING_OF("null", 4)),
+        "Expected get_null_as_str() to return the string { .str = "
+        "\"null\", .len = 4 }, but got { .str = \"%s\", .len = %zu }",
+        s.str, s.len
+    );
     free(s.str);
 }
