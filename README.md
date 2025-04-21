@@ -7,6 +7,8 @@ This parser has 2 modes: **read-only** and **read-write**, which will be refered
 
 ## Performance
 
+> This benchmark was run on my laptop with an `intel i5 12th generation`
+
 Here is a little benchmark with 3 files (`t.json`, `big.json` and `flights-m1.json`), run
 with the command `time ./json-parser <json file>`:
 
