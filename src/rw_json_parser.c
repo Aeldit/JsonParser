@@ -14,27 +14,27 @@
 /*******************************************************************************
 **                               LOCAL FUNCTIONS                              **
 *******************************************************************************/
-rw_array_t destroy_rw_array_on_error(rw_array_t a)
+rw_array_t *destroy_rw_array_on_error(rw_array_t *a)
 {
     destroy_rw_array(a);
-    return EMPTY_RW_ARRAY;
+    return 0;
 }
 
-rw_dict_t destroy_rw_dict_on_error(rw_dict_t d, string_t key)
+rw_dict_t *destroy_rw_dict_on_error(rw_dict_t *d, string_t key)
 {
     destroy_string(key);
     destroy_rw_dict(d);
-    return EMPTY_RW_DICT;
+    return 0;
 }
 
 /*******************************************************************************
 **                              LOCAL FUNCTIONS                               **
 *******************************************************************************/
-rw_array_t rw_parse_array(const char *const b, size_t *idx)
+rw_array_t *rw_parse_array(const char *const b, size_t *idx)
 {
     if (!b)
     {
-        return EMPTY_RW_ARRAY;
+        return 0;
     }
 
     // We start at 1 because if we entered this function, it means that we
@@ -42,8 +42,8 @@ rw_array_t rw_parse_array(const char *const b, size_t *idx)
     size_t i = idx ? *idx + 1 : 0;
 
     size_t nb_elts = get_nb_elts_array(b, i);
-    rw_array_t a   = EMPTY_RW_ARRAY;
-    if (!nb_elts)
+    rw_array_t *a  = calloc(1, sizeof(rw_array_t));
+    if (!a || !nb_elts)
     {
         return a;
     }
@@ -66,7 +66,7 @@ rw_array_t rw_parse_array(const char *const b, size_t *idx)
             {
                 return destroy_rw_array_on_error(a);
             }
-            rw_array_add_str(&a, s);
+            rw_array_add_str(a, s);
             ++nb_elts_parsed;
             break;
 
@@ -93,10 +93,10 @@ rw_array_t rw_parse_array(const char *const b, size_t *idx)
                 switch (dwowe.has_exponent)
                 {
                 case 0:
-                    rw_array_add_double(&a, dwowe.double_value);
+                    rw_array_add_double(a, dwowe.double_value);
                     break;
                 case 1:
-                    rw_array_add_exp_double(&a, dwowe.double_exp_value);
+                    rw_array_add_exp_double(a, dwowe.double_exp_value);
                     break;
                 case 2:
                     free(sl.str);
@@ -109,10 +109,10 @@ rw_array_t rw_parse_array(const char *const b, size_t *idx)
                 switch (lwowe.has_exponent)
                 {
                 case 0:
-                    rw_array_add_long(&a, lwowe.long_value);
+                    rw_array_add_long(a, lwowe.long_value);
                     break;
                 case 1:
-                    rw_array_add_exp_long(&a, lwowe.long_exp_value);
+                    rw_array_add_exp_long(a, lwowe.long_exp_value);
                     break;
                 case 2:
                     free(sl.str);
@@ -130,23 +130,23 @@ rw_array_t rw_parse_array(const char *const b, size_t *idx)
             {
                 return destroy_rw_array_on_error(a);
             }
-            rw_array_add_bool(&a, len == 4 ? 1 : 0);
+            rw_array_add_bool(a, len == 4 ? 1 : 0);
             ++nb_elts_parsed;
             break;
 
         case 'n':
-            rw_array_add_null(&a);
+            rw_array_add_null(a);
             i += 3;
             ++nb_elts_parsed;
             break;
 
         case '[':
-            rw_array_add_array(&a, rw_parse_array(b, &i));
+            rw_array_add_array(a, rw_parse_array(b, &i));
             ++nb_elts_parsed;
             break;
 
         case '{':
-            rw_array_add_dict(&a, rw_parse_dict(b, &i));
+            rw_array_add_dict(a, rw_parse_dict(b, &i));
             ++nb_elts_parsed;
             break;
         }
@@ -159,11 +159,11 @@ rw_array_t rw_parse_array(const char *const b, size_t *idx)
     return a;
 }
 
-rw_dict_t rw_parse_dict(const char *const b, size_t *idx)
+rw_dict_t *rw_parse_dict(const char *const b, size_t *idx)
 {
     if (!b)
     {
-        return EMPTY_RW_DICT;
+        return 0;
     }
 
     // We start at 1 because if we entered this function, it means that we
@@ -171,8 +171,8 @@ rw_dict_t rw_parse_dict(const char *const b, size_t *idx)
     size_t i = idx ? *idx + 1 : 0;
 
     size_t nb_elts = get_nb_elts_dict(b, i);
-    rw_dict_t d    = EMPTY_RW_DICT;
-    if (!nb_elts)
+    rw_dict_t *d   = calloc(1, sizeof(rw_dict_t));
+    if (!d || !nb_elts)
     {
         return d;
     }
@@ -208,7 +208,7 @@ rw_dict_t rw_parse_dict(const char *const b, size_t *idx)
                 {
                     return destroy_rw_dict_on_error(d, key);
                 }
-                rw_dict_add_str(&d, key, s);
+                rw_dict_add_str(d, key, s);
                 ++nb_elts_parsed;
             }
             break;
@@ -236,10 +236,10 @@ rw_dict_t rw_parse_dict(const char *const b, size_t *idx)
                 switch (dwowe.has_exponent)
                 {
                 case 0:
-                    rw_dict_add_double(&d, key, dwowe.double_value);
+                    rw_dict_add_double(d, key, dwowe.double_value);
                     break;
                 case 1:
-                    rw_dict_add_exp_double(&d, key, dwowe.double_exp_value);
+                    rw_dict_add_exp_double(d, key, dwowe.double_exp_value);
                     break;
                 case 2:
                     free(sl.str);
@@ -252,10 +252,10 @@ rw_dict_t rw_parse_dict(const char *const b, size_t *idx)
                 switch (lwowe.has_exponent)
                 {
                 case 0:
-                    rw_dict_add_long(&d, key, lwowe.long_value);
+                    rw_dict_add_long(d, key, lwowe.long_value);
                     break;
                 case 1:
-                    rw_dict_add_exp_long(&d, key, lwowe.long_exp_value);
+                    rw_dict_add_exp_long(d, key, lwowe.long_exp_value);
                     break;
                 case 2:
                     free(sl.str);
@@ -273,23 +273,23 @@ rw_dict_t rw_parse_dict(const char *const b, size_t *idx)
             {
                 return destroy_rw_dict_on_error(d, key);
             }
-            rw_dict_add_bool(&d, key, len == 4 ? 1 : 0);
+            rw_dict_add_bool(d, key, len == 4 ? 1 : 0);
             ++nb_elts_parsed;
             break;
 
         case 'n':
-            rw_dict_add_null(&d, key);
+            rw_dict_add_null(d, key);
             i += 3;
             ++nb_elts_parsed;
             break;
 
         case '[':
-            rw_dict_add_array(&d, key, rw_parse_array(b, &i));
+            rw_dict_add_array(d, key, rw_parse_array(b, &i));
             ++nb_elts_parsed;
             break;
 
         case '{':
-            rw_dict_add_dict(&d, key, rw_parse_dict(b, &i));
+            rw_dict_add_dict(d, key, rw_parse_dict(b, &i));
             ++nb_elts_parsed;
             break;
 
@@ -309,18 +309,18 @@ rw_dict_t rw_parse_dict(const char *const b, size_t *idx)
 /*******************************************************************************
 **                                 FUNCTIONS **
 *******************************************************************************/
-rw_json_t rw_parse(char *file)
+rw_json_t *rw_parse(char *file)
 {
     FILE *f = fopen(file, "r");
     if (!f)
     {
-        return EMPTY_RW_JSON;
+        return 0;
     }
 
     if (fseek(f, 0, SEEK_SET))
     {
         fclose(f);
-        return EMPTY_RW_JSON;
+        return 0;
     }
 
     // Obtains the number of characters in the file
@@ -329,7 +329,8 @@ rw_json_t rw_parse(char *file)
     size_t nb_chars = st.st_size - 1;
     if (nb_chars >= MAX_READ_BUFF_SIZE)
     {
-        return EMPTY_RW_JSON;
+        fclose(f);
+        return 0;
     }
 
     bool is_array = false;
@@ -338,14 +339,12 @@ rw_json_t rw_parse(char *file)
     {
     case '{':
         break;
-
     case '[':
         is_array = true;
         break;
-
     default:
         fclose(f);
-        return EMPTY_RW_JSON;
+        return 0;
     }
 
     char *b = malloc((nb_chars + 1) * sizeof(char));
@@ -353,7 +352,7 @@ rw_json_t rw_parse(char *file)
     {
         fclose(f);
         free(b);
-        return EMPTY_RW_JSON;
+        return 0;
     }
 
     fread(b, sizeof(char), nb_chars, f);
@@ -362,14 +361,14 @@ rw_json_t rw_parse(char *file)
         printf("Unexpected EOF\n");
         free(b);
         fclose(f);
-        return EMPTY_RW_JSON;
+        return 0;
     }
     if (ferror(f))
     {
         printf("Error reading file\n");
         free(b);
         fclose(f);
-        return EMPTY_RW_JSON;
+        return 0;
     }
 
     b[nb_chars] = 0;
@@ -379,13 +378,29 @@ rw_json_t rw_parse(char *file)
         printf("Invalid json file\n");
         free(b);
         fclose(f);
-        return EMPTY_RW_JSON;
+        return 0;
     }
 
-    rw_array_t a = is_array ? rw_parse_array(b, 0) : EMPTY_RW_ARRAY;
-    rw_dict_t d  = is_array ? EMPTY_RW_DICT : rw_parse_dict(b, 0);
+    rw_array_t *a = is_array ? rw_parse_array(b, 0) : 0;
+    rw_dict_t *d  = is_array ? 0 : rw_parse_dict(b, 0);
 
     free(b);
     fclose(f);
-    return RW_JSON(is_array, a, d);
+
+    rw_json_t *j = calloc(1, sizeof(rw_json_t));
+    if (!j)
+    {
+        return 0;
+    }
+
+    j->is_array = is_array;
+    if (is_array)
+    {
+        j->array = a;
+    }
+    else
+    {
+        j->dict = d;
+    }
+    return j;
 }

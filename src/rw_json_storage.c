@@ -25,7 +25,7 @@
         type_link *l = calloc(1, sizeof(type_link));                           \
         if (!l)                                                                \
         {                                                                      \
-            return;                                                            \
+            return false;                                                      \
         }                                                                      \
         x->head = l;                                                           \
         x->tail = l;                                                           \
@@ -34,7 +34,7 @@
     {                                                                          \
         if (!x->tail)                                                          \
         {                                                                      \
-            return;                                                            \
+            return false;                                                      \
         }                                                                      \
         /* If the current link's rw_array_t is full */                         \
         if (x->tail->insert_index >= ARRAY_LEN)                                \
@@ -42,7 +42,7 @@
             type_link *l = calloc(1, sizeof(type_link));                       \
             if (!l)                                                            \
             {                                                                  \
-                return;                                                        \
+                return false;                                                  \
             }                                                                  \
             x->tail->next = l;                                                 \
             x->tail       = l;                                                 \
@@ -70,7 +70,7 @@ void arr_print_array(rw_array_t *a)
     {
         printf("[");
         rw_value_t *values = link->values;
-        for (arr_size_t i = 0; i < ARRAY_LEN; ++i)
+        for (size_t i = 0; i < ARRAY_LEN; ++i)
         {
             if (values[i].type != 0)
             {
@@ -119,7 +119,7 @@ void arr_copy_array(rw_value_t *src, rw_value_t *dest)
         return;
     }
 
-    for (arr_size_t i = 0; i < ARRAY_LEN; ++i)
+    for (size_t i = 0; i < ARRAY_LEN; ++i)
     {
         dest[i] = src[i];
     }
@@ -132,7 +132,7 @@ void dict_copy_array(rw_item_t *src, rw_item_t *dest)
         return;
     }
 
-    for (arr_size_t i = 0; i < ARRAY_LEN; ++i)
+    for (size_t i = 0; i < ARRAY_LEN; ++i)
     {
         dest[i] = src[i];
     }
@@ -145,7 +145,7 @@ void arr_empty_array(rw_value_t *rw_array_t)
         return;
     }
 
-    for (arr_size_t i = 0; i < ARRAY_LEN; ++i)
+    for (size_t i = 0; i < ARRAY_LEN; ++i)
     {
         rw_array_t[i].type = 0;
     }
@@ -158,7 +158,7 @@ void dict_empty_array(rw_item_t *rw_array_t)
         return;
     }
 
-    for (arr_size_t i = 0; i < ARRAY_LEN; ++i)
+    for (size_t i = 0; i < ARRAY_LEN; ++i)
     {
         rw_array_t[i].type = 0;
     }
@@ -175,7 +175,7 @@ void defragment_array(rw_array_t *a)
     // not T_ERROR), and then we copy its contents to the previously fragmented
     // rw_array_t
     rw_value_t tmps[ARRAY_LEN] = { 0 };
-    arr_size_t tmps_insert_idx = 0;
+    size_t tmps_insert_idx     = 0;
 
     value_link_t *link_to_fill      = a->head;
     value_link_t *prev_link_to_fill = a->head;
@@ -186,7 +186,7 @@ void defragment_array(rw_array_t *a)
     // contents of 'tmps' in the 'link_to_fill' (which starts at the head)
     while (link)
     {
-        for (arr_size_t i = 0; i < ARRAY_LEN; ++i)
+        for (size_t i = 0; i < ARRAY_LEN; ++i)
         {
             // The temp rw_array_t is filled, so we can put the defragmented
             // rw_array_t back inside it
@@ -246,7 +246,7 @@ void defragment_array(rw_array_t *a)
 
     // Sets the insert index of the last link to the correct position
     rw_value_t *values = a->tail->values;
-    for (arr_size_t i = 0; i < ARRAY_LEN; ++i)
+    for (size_t i = 0; i < ARRAY_LEN; ++i)
     {
         if (values[i].type == T_ERROR)
         {
@@ -266,8 +266,8 @@ void defragment_dict(rw_dict_t *d)
     // We fill this rw_array_t with each non-empty element (where the type is
     // not T_ERROR), and then we copy its contents to the previously fragmented
     // rw_array_t
-    rw_item_t tmps[ARRAY_LEN]  = { 0 };
-    arr_size_t tmps_insert_idx = 0;
+    rw_item_t tmps[ARRAY_LEN] = { 0 };
+    size_t tmps_insert_idx    = 0;
 
     item_link_t *link_to_fill      = d->head;
     item_link_t *prev_link_to_fill = d->head;
@@ -278,7 +278,7 @@ void defragment_dict(rw_dict_t *d)
     // contents of 'tmps' in the 'link_to_fill' (which starts at the head)
     while (link)
     {
-        for (arr_size_t i = 0; i < ARRAY_LEN; ++i)
+        for (size_t i = 0; i < ARRAY_LEN; ++i)
         {
             // The temp rw_array_t is filled, so we can put the defragmented
             // rw_array_t back inside it
@@ -338,7 +338,7 @@ void defragment_dict(rw_dict_t *d)
 
     // Sets the insert index of the last link to the correct position
     rw_item_t *items = d->tail->items;
-    for (arr_size_t i = 0; i < ARRAY_LEN; ++i)
+    for (size_t i = 0; i < ARRAY_LEN; ++i)
     {
         if (items[i].type == T_ERROR)
         {
@@ -348,14 +348,14 @@ void defragment_dict(rw_dict_t *d)
     }
 }
 
-rw_array_t init_rw_array_with(size_t size, ...)
+rw_array_t *init_rw_array_with(size_t size, ...)
 {
     if (!size)
     {
-        return EMPTY_RW_ARRAY;
+        return 0;
     }
 
-    rw_array_t a = EMPTY_RW_ARRAY;
+    rw_array_t *a = calloc(1, sizeof(rw_array_t));
 
     va_list args;
 
@@ -368,31 +368,31 @@ rw_array_t init_rw_array_with(size_t size, ...)
         case T_ERROR:
             break;
         case T_STR:
-            rw_array_add_str(&a, v.strv);
+            rw_array_add_str(a, v.strv);
             break;
         case T_LONG:
-            rw_array_add_long(&a, v.longv);
+            rw_array_add_long(a, v.longv);
             break;
         case T_DOUBLE:
-            rw_array_add_double(&a, v.doublev);
+            rw_array_add_double(a, v.doublev);
             break;
         case T_EXP_LONG:
-            rw_array_add_exp_long(&a, v.exp_longv);
+            rw_array_add_exp_long(a, v.exp_longv);
             break;
         case T_EXP_DOUBLE:
-            rw_array_add_exp_double(&a, v.exp_doublev);
+            rw_array_add_exp_double(a, v.exp_doublev);
             break;
         case T_BOOL:
-            rw_array_add_bool(&a, v.boolv);
+            rw_array_add_bool(a, v.boolv);
             break;
         case T_NULL:
-            rw_array_add_null(&a);
+            rw_array_add_null(a);
             break;
         case T_ARR:
-            rw_array_add_array(&a, v.arrayv);
+            rw_array_add_array(a, v.arrayv);
             break;
         case T_DICT:
-            rw_array_add_dict(&a, v.dictv);
+            rw_array_add_dict(a, v.dictv);
             break;
         }
     }
@@ -401,14 +401,14 @@ rw_array_t init_rw_array_with(size_t size, ...)
     return a;
 }
 
-rw_dict_t init_rw_dict_with(size_t size, ...)
+rw_dict_t *init_rw_dict_with(size_t size, ...)
 {
     if (!size)
     {
-        return EMPTY_RW_DICT;
+        return 0;
     }
 
-    rw_dict_t d = EMPTY_RW_DICT;
+    rw_dict_t *d = calloc(1, sizeof(rw_dict_t));
 
     va_list args;
 
@@ -421,31 +421,31 @@ rw_dict_t init_rw_dict_with(size_t size, ...)
         case T_ERROR:
             break;
         case T_STR:
-            rw_dict_add_str(&d, it.key, it.strv);
+            rw_dict_add_str(d, it.key, it.strv);
             break;
         case T_LONG:
-            rw_dict_add_long(&d, it.key, it.longv);
+            rw_dict_add_long(d, it.key, it.longv);
             break;
         case T_DOUBLE:
-            rw_dict_add_double(&d, it.key, it.doublev);
+            rw_dict_add_double(d, it.key, it.doublev);
             break;
         case T_EXP_LONG:
-            rw_dict_add_exp_long(&d, it.key, it.exp_longv);
+            rw_dict_add_exp_long(d, it.key, it.exp_longv);
             break;
         case T_EXP_DOUBLE:
-            rw_dict_add_exp_double(&d, it.key, it.exp_doublev);
+            rw_dict_add_exp_double(d, it.key, it.exp_doublev);
             break;
         case T_BOOL:
-            rw_dict_add_bool(&d, it.key, it.boolv);
+            rw_dict_add_bool(d, it.key, it.boolv);
             break;
         case T_NULL:
-            rw_dict_add_null(&d, it.key);
+            rw_dict_add_null(d, it.key);
             break;
         case T_ARR:
-            rw_dict_add_array(&d, it.key, it.arrayv);
+            rw_dict_add_array(d, it.key, it.arrayv);
             break;
         case T_DICT:
-            rw_dict_add_dict(&d, it.key, it.dictv);
+            rw_dict_add_dict(d, it.key, it.dictv);
             break;
         }
     }
@@ -457,173 +457,209 @@ rw_dict_t init_rw_dict_with(size_t size, ...)
 /*******************************************************************************
 **                                     ADDS                                   **
 *******************************************************************************/
-void rw_array_add_str(rw_array_t *a, string_t value)
+bool rw_array_add_str(rw_array_t *a, string_t value)
 {
     if (a && value.str)
     {
         ADD(value_link_t, a);
         a->tail->values[a->tail->insert_index++] = RW_VALUE_OF(T_STR, strv);
+        return true;
     }
+    return false;
 }
 
-void rw_array_add_long(rw_array_t *a, i64 value)
+bool rw_array_add_long(rw_array_t *a, i64 value)
 {
     if (a)
     {
         ADD(value_link_t, a);
         a->tail->values[a->tail->insert_index++] = RW_VALUE_OF(T_LONG, longv);
+        return true;
     }
+    return false;
 }
 
-void rw_array_add_double(rw_array_t *a, double value)
+bool rw_array_add_double(rw_array_t *a, double value)
 {
     if (a)
     {
         ADD(value_link_t, a);
         a->tail->values[a->tail->insert_index++] =
             RW_VALUE_OF(T_DOUBLE, doublev);
+        return true;
     }
+    return false;
 }
 
-void rw_array_add_exp_long(rw_array_t *a, exp_long_t value)
+bool rw_array_add_exp_long(rw_array_t *a, exp_long_t value)
 {
     if (a)
     {
         ADD(value_link_t, a);
         a->tail->values[a->tail->insert_index++] =
             RW_VALUE_OF(T_EXP_LONG, exp_longv);
+        return true;
     }
+    return false;
 }
 
-void rw_array_add_exp_double(rw_array_t *a, exp_double_t value)
+bool rw_array_add_exp_double(rw_array_t *a, exp_double_t value)
 {
     if (a)
     {
         ADD(value_link_t, a);
         a->tail->values[a->tail->insert_index++] =
             RW_VALUE_OF(T_EXP_DOUBLE, exp_doublev);
+        return true;
     }
+    return false;
 }
 
-void rw_array_add_bool(rw_array_t *a, bool value)
+bool rw_array_add_bool(rw_array_t *a, bool value)
 {
     if (a)
     {
         ADD(value_link_t, a);
         a->tail->values[a->tail->insert_index++] = RW_VALUE_OF(T_BOOL, boolv);
+        return true;
     }
+    return false;
 }
 
-void rw_array_add_null(rw_array_t *a)
+bool rw_array_add_null(rw_array_t *a)
 {
     if (a)
     {
         ADD(value_link_t, a);
         a->tail->values[a->tail->insert_index++] =
             (rw_value_t){ .type = T_NULL };
+        return true;
     }
+    return false;
 }
 
-void rw_array_add_array(rw_array_t *a, rw_array_t value)
+bool rw_array_add_array(rw_array_t *a, rw_array_t *value)
 {
-    if (a)
+    if (a && value)
     {
         ADD(value_link_t, a);
         a->tail->values[a->tail->insert_index++] = RW_VALUE_OF(T_ARR, arrayv);
+        return true;
     }
+    return false;
 }
 
-void rw_array_add_dict(rw_array_t *a, rw_dict_t value)
+bool rw_array_add_dict(rw_array_t *a, rw_dict_t *value)
 {
-    if (a)
+    if (a && value)
     {
         ADD(value_link_t, a);
         a->tail->values[a->tail->insert_index++] = RW_VALUE_OF(T_DICT, dictv);
+        return true;
     }
+    return false;
 }
 
-void rw_dict_add_str(rw_dict_t *d, string_t key, string_t value)
+bool rw_dict_add_str(rw_dict_t *d, string_t key, string_t value)
 {
     if (d && key.str)
     {
         ADD(item_link_t, d);
         d->tail->items[d->tail->insert_index++] = RW_ITEM_OF(T_STR, strv);
+        return true;
     }
+    return false;
 }
 
-void rw_dict_add_long(rw_dict_t *d, string_t key, i64 value)
+bool rw_dict_add_long(rw_dict_t *d, string_t key, i64 value)
 {
     if (d && key.str)
     {
         ADD(item_link_t, d);
         d->tail->items[d->tail->insert_index++] = RW_ITEM_OF(T_LONG, longv);
+        return true;
     }
+    return false;
 }
 
-void rw_dict_add_double(rw_dict_t *d, string_t key, double value)
+bool rw_dict_add_double(rw_dict_t *d, string_t key, double value)
 {
     if (d && key.str)
     {
         ADD(item_link_t, d);
         d->tail->items[d->tail->insert_index++] = RW_ITEM_OF(T_DOUBLE, doublev);
+        return true;
     }
+    return false;
 }
 
-void rw_dict_add_exp_long(rw_dict_t *d, string_t key, exp_long_t value)
+bool rw_dict_add_exp_long(rw_dict_t *d, string_t key, exp_long_t value)
 {
     if (d && key.str)
     {
         ADD(item_link_t, d);
         d->tail->items[d->tail->insert_index++] =
             RW_ITEM_OF(T_EXP_LONG, exp_longv);
+        return true;
     }
+    return false;
 }
 
-void rw_dict_add_exp_double(rw_dict_t *d, string_t key, exp_double_t value)
+bool rw_dict_add_exp_double(rw_dict_t *d, string_t key, exp_double_t value)
 {
     if (d && key.str)
     {
         ADD(item_link_t, d);
         d->tail->items[d->tail->insert_index++] =
             RW_ITEM_OF(T_EXP_DOUBLE, exp_doublev);
+        return true;
     }
+    return false;
 }
 
-void rw_dict_add_bool(rw_dict_t *d, string_t key, bool value)
+bool rw_dict_add_bool(rw_dict_t *d, string_t key, bool value)
 {
     if (d && key.str)
     {
         ADD(item_link_t, d);
         d->tail->items[d->tail->insert_index++] = RW_ITEM_OF(T_BOOL, boolv);
+        return true;
     }
+    return false;
 }
 
-void rw_dict_add_null(rw_dict_t *d, string_t key)
+bool rw_dict_add_null(rw_dict_t *d, string_t key)
 {
     if (d && key.str)
     {
         ADD(item_link_t, d);
         d->tail->items[d->tail->insert_index++] =
             (rw_item_t){ .type = T_NULL, .key = key };
+        return true;
     }
+    return false;
 }
 
-void rw_dict_add_array(rw_dict_t *d, string_t key, rw_array_t value)
+bool rw_dict_add_array(rw_dict_t *d, string_t key, rw_array_t *value)
 {
-    if (d && key.str)
+    if (d && key.str && value)
     {
         ADD(item_link_t, d);
         d->tail->items[d->tail->insert_index++] = RW_ITEM_OF(T_ARR, arrayv);
+        return true;
     }
+    return false;
 }
 
-void rw_dict_add_dict(rw_dict_t *d, string_t key, rw_dict_t value)
+bool rw_dict_add_dict(rw_dict_t *d, string_t key, rw_dict_t *value)
 {
-    if (d && key.str)
+    if (d && key.str && value)
     {
         ADD(item_link_t, d);
         d->tail->items[d->tail->insert_index++] = RW_ITEM_OF(T_DICT, dictv);
+        return true;
     }
+    return false;
 }
 
 /*******************************************************************************
@@ -640,7 +676,7 @@ void rw_array_remove(rw_array_t *a, size_t index)
     size_t non_null_values = 0;
     while (link)
     {
-        for (arr_size_t i = 0; i < ARRAY_LEN; ++i)
+        for (size_t i = 0; i < ARRAY_LEN; ++i)
         {
             rw_value_t v = link->values[i];
             if (v.type != T_ERROR)
@@ -654,19 +690,19 @@ void rw_array_remove(rw_array_t *a, size_t index)
                 {
                 case T_STR:
                     destroy_string(v.strv);
-                    v.strv = NULL_STRING;
                     break;
                 case T_ARR:
                     destroy_rw_array(v.arrayv);
-                    v.arrayv = EMPTY_RW_ARRAY;
                     break;
                 case T_DICT:
                     destroy_rw_dict(v.dictv);
-                    v.dictv = EMPTY_RW_DICT;
                     break;
                 default:
                     break;
                 };
+                // To make sure all the values of the union are st to 0, we set
+                // the biggest type to 0
+                v.strv               = NULL_STRING;
                 link->values[i].type = T_ERROR;
 
                 --a->size;
@@ -693,7 +729,7 @@ void rw_dict_remove(rw_dict_t *d, string_t key)
     item_link_t *link = d->head;
     while (link)
     {
-        for (arr_size_t i = 0; i < ARRAY_LEN; ++i)
+        for (size_t i = 0; i < ARRAY_LEN; ++i)
         {
             rw_item_t it = link->items[i];
             if (it.type != T_ERROR && strings_equals(key, it.key))
@@ -702,21 +738,21 @@ void rw_dict_remove(rw_dict_t *d, string_t key)
                 {
                 case T_STR:
                     destroy_string(it.strv);
-                    it.strv = NULL_STRING;
                     break;
                 case T_ARR:
                     destroy_rw_array(it.arrayv);
-                    it.arrayv = EMPTY_RW_ARRAY;
                     break;
                 case T_DICT:
                     destroy_rw_dict(it.dictv);
-                    it.dictv = EMPTY_RW_DICT;
                     break;
                 default:
                     break;
                 };
                 free(it.key.str);
-                it.key              = NULL_STRING;
+                it.key = NULL_STRING;
+                // To make sure all the values of the union are st to 0, we set
+                // the biggest type to 0
+                it.strv             = NULL_STRING;
                 link->items[i].type = T_ERROR;
 
                 --d->size;
@@ -736,60 +772,69 @@ void rw_dict_remove(rw_dict_t *d, string_t key)
 /*******************************************************************************
 **                                    GETS                                    **
 *******************************************************************************/
-rw_value_t rw_array_get(rw_array_t a, size_t index)
+rw_value_t *rw_array_get(rw_array_t *a, size_t index)
 {
-    if (index >= a.size)
+    if (!a || index >= a->size)
     {
-        return ERROR_RW_VALUE;
+        return 0;
     }
 
-    value_link_t *link     = a.head;
+    value_link_t *link     = a->head;
     size_t non_null_values = 0;
     while (link)
     {
-        for (arr_size_t i = 0; i < ARRAY_LEN; ++i)
+        for (size_t i = 0; i < ARRAY_LEN; ++i)
         {
             if (non_null_values == index)
             {
-                return link->values[i];
+                return &link->values[i];
             }
             non_null_values += link->values[i].type != T_ERROR;
         }
         link = link->next;
     }
-    return ERROR_RW_VALUE;
+    return 0;
 }
 
-rw_item_t rw_dict_get(rw_dict_t d, string_t key)
+rw_item_t *rw_dict_get(rw_dict_t *d, string_t key)
 {
-    item_link_t *link = d.head;
+    if (!d)
+    {
+        return 0;
+    }
+
+    item_link_t *link = d->head;
     while (link)
     {
-        for (arr_size_t i = 0; i < ARRAY_LEN; ++i)
+        for (size_t i = 0; i < ARRAY_LEN; ++i)
         {
-            rw_item_t it = link->items[i];
-            if (strings_equals(key, it.key))
+            if (strings_equals(key, link->items[i].key))
             {
-                return it;
+                return &link->items[i];
             }
         }
         link = link->next;
     }
-    return ERROR_RW_ITEM;
+    return 0;
 }
 
 /*******************************************************************************
 **                                 DESTRUCTION                                **
 *******************************************************************************/
-void destroy_rw_array(rw_array_t a)
+void destroy_rw_array(rw_array_t *a)
 {
-    value_link_t *link = a.head;
+    if (!a)
+    {
+        return;
+    }
+
+    value_link_t *link = a->head;
     while (link)
     {
         value_link_t *tmp  = link;
         rw_value_t *values = link->values;
         link               = link->next;
-        for (arr_size_t i = 0; i < ARRAY_LEN; ++i)
+        for (size_t i = 0; i < ARRAY_LEN; ++i)
         {
             switch (values[i].type)
             {
@@ -808,20 +853,32 @@ void destroy_rw_array(rw_array_t a)
         }
         free(tmp);
     }
+    a->size         = 0;
+    a->nb_deletions = 0;
+    a->head         = 0;
+    a->tail         = 0;
+    free(a);
 }
 
-void destroy_rw_dict(rw_dict_t d)
+void destroy_rw_dict(rw_dict_t *d)
 {
-    item_link_t *link = d.head;
+    if (!d)
+    {
+        return;
+    }
+
+    item_link_t *link = d->head;
     while (link)
     {
         item_link_t *tmp = link;
         rw_item_t *items = link->items;
         link             = link->next;
-        for (arr_size_t i = 0; i < ARRAY_LEN; ++i)
+        for (size_t i = 0; i < ARRAY_LEN; ++i)
         {
             switch (items[i].type)
             {
+            case T_ERROR:
+                continue;
             case T_STR:
                 destroy_string(items[i].strv);
                 break;
@@ -834,23 +891,31 @@ void destroy_rw_dict(rw_dict_t d)
             default:
                 break;
             }
-            if (items[i].type != T_ERROR)
-            {
-                destroy_string(items[i].key);
-            }
+            destroy_string(items[i].key);
         }
         free(tmp);
     }
+    d->size         = 0;
+    d->nb_deletions = 0;
+    d->head         = 0;
+    d->tail         = 0;
+    free(d);
 }
 
-void destroy_rw_json(rw_json_t j)
+void destroy_rw_json(rw_json_t *j)
 {
-    if (j.is_array)
+    if (!j)
     {
-        destroy_rw_array(j.array);
+        return;
+    }
+
+    if (j->is_array)
+    {
+        destroy_rw_array(j->array);
     }
     else
     {
-        destroy_rw_dict(j.dict);
+        destroy_rw_dict(j->dict);
     }
+    free(j);
 }

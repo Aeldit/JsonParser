@@ -24,10 +24,7 @@ u8 get_nb_char_long(i64 n)
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
-void add_link(
-    string_linked_list_t *ll, string_t str, bool str_needs_free,
-    bool is_from_str
-)
+void add_link(string_linked_list_t *ll, string_t str, bool is_from_str)
 {
     if (!ll)
     {
@@ -39,10 +36,9 @@ void add_link(
     {
         return;
     }
-    sl->s            = str;
-    sl->s_needs_free = str_needs_free;
-    sl->is_from_str  = is_from_str;
-    sl->next         = 0;
+    sl->s           = str;
+    sl->is_from_str = is_from_str;
+    sl->next        = 0;
 
     if (!ll->head)
     {
@@ -72,13 +68,14 @@ void destroy_linked_list(string_linked_list_t *ll)
     {
         string_link_t *tmp = link;
         link               = link->next;
-        if (tmp->s_needs_free)
+        // If the value came from a string_t, the char array pointed to may
+        // still be used in another place in the program
+        if (!tmp->is_from_str)
         {
             free(tmp->s.str);
         }
         free(tmp);
     }
-    free(ll);
 }
 
 /*******************************************************************************

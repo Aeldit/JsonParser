@@ -5,15 +5,15 @@
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
-bool rw_arrays_equal(rw_array_t a, rw_array_t b)
+bool rw_arrays_equal(rw_array_t *a, rw_array_t *b)
 {
-    if (a.size != b.size)
+    if (!a || !b || a->size != b->size)
     {
         return false;
     }
 
     size_t i           = 0;
-    value_link_t *link = a.head;
+    value_link_t *link = a->head;
     while (link)
     {
         rw_value_t *values = link->values;
@@ -25,8 +25,8 @@ bool rw_arrays_equal(rw_array_t a, rw_array_t b)
                 continue;
             }
 
-            rw_value_t b_val = rw_array_get(b, i);
-            if (a_val.type != b_val.type)
+            rw_value_t *b_val = rw_array_get(b, i);
+            if (!b_val || a_val.type != b_val->type)
             {
                 return false;
             }
@@ -35,32 +35,32 @@ bool rw_arrays_equal(rw_array_t a, rw_array_t b)
             switch (a_val.type)
             {
             case T_STR:
-                is_equal = strings_equals(a_val.strv, b_val.strv);
+                is_equal = strings_equals(a_val.strv, b_val->strv);
                 break;
             case T_LONG:
-                is_equal = a_val.longv == b_val.longv;
+                is_equal = a_val.longv == b_val->longv;
                 break;
             case T_DOUBLE:
-                is_equal = a_val.doublev == b_val.doublev;
+                is_equal = a_val.doublev == b_val->doublev;
                 break;
             case T_EXP_LONG:
-                is_equal = exp_long_equals(a_val.exp_longv, b_val.exp_longv);
+                is_equal = exp_long_equals(a_val.exp_longv, b_val->exp_longv);
                 break;
             case T_EXP_DOUBLE:
                 is_equal =
-                    exp_double_equals(a_val.exp_doublev, b_val.exp_doublev);
+                    exp_double_equals(a_val.exp_doublev, b_val->exp_doublev);
                 break;
             case T_BOOL:
-                is_equal = a_val.boolv == b_val.boolv;
+                is_equal = a_val.boolv == b_val->boolv;
                 break;
             case T_NULL:
                 is_equal = true;
                 break;
             case T_ARR:
-                is_equal = rw_arrays_equal(a_val.arrayv, b_val.arrayv);
+                is_equal = rw_arrays_equal(a_val.arrayv, b_val->arrayv);
                 break;
             case T_DICT:
-                is_equal = rw_dicts_equal(a_val.dictv, b_val.dictv);
+                is_equal = rw_dicts_equal(a_val.dictv, b_val->dictv);
                 break;
             default:
                 break;
@@ -76,15 +76,15 @@ bool rw_arrays_equal(rw_array_t a, rw_array_t b)
     return true;
 }
 
-bool rw_dicts_equal(rw_dict_t a, rw_dict_t b)
+bool rw_dicts_equal(rw_dict_t *a, rw_dict_t *b)
 {
-    if (a.size != b.size)
+    if (!a || !b || a->size != b->size)
     {
         return false;
     }
 
     size_t i          = 0;
-    item_link_t *link = a.head;
+    item_link_t *link = a->head;
     while (link)
     {
         rw_item_t *items = link->items;
@@ -95,13 +95,17 @@ bool rw_dicts_equal(rw_dict_t a, rw_dict_t b)
             {
                 continue;
             }
-            rw_item_t b_it = rw_dict_get(b, a_it.key);
+            rw_item_t *b_it = rw_dict_get(b, a_it.key);
+            if (!b_it)
+            {
+                continue;
+            }
 
             // If the second dict doesn't contain the current key
             // OR
             // If the second dict contains the key but the associated
             // element is not of the same type
-            if (a_it.type != b_it.type)
+            if (a_it.type != b_it->type)
             {
                 return false;
             }
@@ -110,32 +114,32 @@ bool rw_dicts_equal(rw_dict_t a, rw_dict_t b)
             switch (a_it.type)
             {
             case T_STR:
-                is_equal = strings_equals(a_it.strv, b_it.strv);
+                is_equal = strings_equals(a_it.strv, b_it->strv);
                 break;
             case T_LONG:
-                is_equal = a_it.longv == b_it.longv;
+                is_equal = a_it.longv == b_it->longv;
                 break;
             case T_DOUBLE:
-                is_equal = a_it.doublev == b_it.doublev;
+                is_equal = a_it.doublev == b_it->doublev;
                 break;
             case T_EXP_LONG:
-                is_equal = exp_long_equals(a_it.exp_longv, b_it.exp_longv);
+                is_equal = exp_long_equals(a_it.exp_longv, b_it->exp_longv);
                 break;
             case T_EXP_DOUBLE:
                 is_equal =
-                    exp_double_equals(a_it.exp_doublev, b_it.exp_doublev);
+                    exp_double_equals(a_it.exp_doublev, b_it->exp_doublev);
                 break;
             case T_BOOL:
-                is_equal = a_it.boolv == b_it.boolv;
+                is_equal = a_it.boolv == b_it->boolv;
                 break;
             case T_NULL:
                 is_equal = true;
                 break;
             case T_ARR:
-                is_equal = rw_arrays_equal(a_it.arrayv, b_it.arrayv);
+                is_equal = rw_arrays_equal(a_it.arrayv, b_it->arrayv);
                 break;
             case T_DICT:
-                is_equal = rw_dicts_equal(a_it.dictv, b_it.dictv);
+                is_equal = rw_dicts_equal(a_it.dictv, b_it->dictv);
                 break;
             default:
                 break;
@@ -151,12 +155,12 @@ bool rw_dicts_equal(rw_dict_t a, rw_dict_t b)
     return true;
 }
 
-bool rw_json_equal(rw_json_t a, rw_json_t b)
+bool rw_json_equal(rw_json_t *a, rw_json_t *b)
 {
-    if (a.is_array != b.is_array)
+    if (!a || !b || a->is_array != b->is_array)
     {
         return false;
     }
-    return a.is_array ? rw_arrays_equal(a.array, b.array)
-                      : rw_dicts_equal(a.dict, b.dict);
+    return a->is_array ? rw_arrays_equal(a->array, b->array)
+                       : rw_dicts_equal(a->dict, b->dict);
 }

@@ -11,40 +11,15 @@
 /*******************************************************************************
 **                              DEFINES / MACROS                              **
 *******************************************************************************/
-#define ERROR_RW_VALUE                                                         \
-    ((rw_value_t){ .type = T_ERROR, .arrayv = EMPTY_RW_ARRAY })
-#define ERROR_RW_ITEM ((rw_item_t){ .type = T_ERROR, .dictv = EMPTY_RW_DICT })
+#define ERROR_RW_VALUE ((rw_value_t){ .type = T_ERROR, .arrayv = 0 })
+#define ERROR_RW_ITEM ((rw_item_t){ .type = T_ERROR, .arrayv = 0 })
 
-#define EMPTY_RW_ARRAY                                                         \
-    ((rw_array_t){ .size = 0, .nb_deletions = 0, .head = 0, .tail = 0 })
-#define EMPTY_RW_DICT                                                          \
-    ((rw_dict_t){ .size = 0, .nb_deletions = 0, .head = 0, .tail = 0 })
-#define EMPTY_RW_JSON ((rw_json_t){ .is_array = true, .array = EMPTY_RW_ARRAY })
+#define EMPTY_RW_ARRAY ((rw_array_t){ 0 })
+#define EMPTY_RW_DICT ((rw_dict_t){ 0 })
+#define EMPTY_RW_JSON ((rw_json_t){ .is_array = true, .array = 0 })
 
 #define ARRAY_LEN 32
 #define NB_DELETIONS_TO_DEFRAG 16
-
-#ifdef LEAST
-#    if ARRAY_LEN <= UINT_LEAST8_MAX
-typedef u8 arr_size_t;
-#    elif ARRAY_LEN <= UINT_LEAST16_MAX
-typedef u16 arr_size_t;
-#    elif ARRAY_LEN <= UINT_LEAST32_MAX
-typedef u32 arr_size_t;
-#    else
-typedef u64 arr_size_t;
-#    endif // !ARRAY_LEN
-#else
-#    if ARRAY_LEN <= UINT_FAST8_MAX
-typedef u8 arr_size_t;
-#    elif ARRAY_LEN <= UINT_FAST16_MAX
-typedef u16 arr_size_t;
-#    elif ARRAY_LEN <= UINT_FAST32_MAX
-typedef u32 arr_size_t;
-#    else
-typedef u64 arr_size_t;
-#    endif // !ARRAY_LEN
-#endif // LEAST
 
 #define RW_VALUE_OF(T_TYPE, type_field)                                        \
     ((rw_value_t){ .type = (T_TYPE), .type_field = value })
@@ -123,8 +98,8 @@ typedef struct
         exp_long_t exp_longv;
         exp_double_t exp_doublev;
         bool boolv;
-        rw_array_t arrayv;
-        rw_dict_t dictv;
+        rw_array_t *arrayv;
+        rw_dict_t *dictv;
     };
 } rw_value_t;
 
@@ -141,23 +116,23 @@ typedef struct
         exp_long_t exp_longv;
         exp_double_t exp_doublev;
         bool boolv;
-        rw_array_t arrayv;
-        rw_dict_t dictv;
+        rw_array_t *arrayv;
+        rw_dict_t *dictv;
     };
 } rw_item_t;
 
 struct value_link
 {
-    rw_value_t values[ARRAY_LEN];
-    arr_size_t insert_index;
+    size_t insert_index;
     struct value_link *next;
+    rw_value_t values[ARRAY_LEN];
 };
 
 struct item_link
 {
-    rw_item_t items[ARRAY_LEN];
-    arr_size_t insert_index;
+    size_t insert_index;
     struct item_link *next;
+    rw_item_t items[ARRAY_LEN];
 };
 
 typedef struct
@@ -165,49 +140,49 @@ typedef struct
     bool is_array;
     union
     {
-        rw_array_t array;
-        rw_dict_t dict;
+        rw_array_t *array;
+        rw_dict_t *dict;
     };
 } rw_json_t;
 
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
-rw_array_t init_rw_array_with(size_t size, ...);
-rw_dict_t init_rw_dict_with(size_t size, ...);
+rw_array_t *init_rw_array_with(size_t size, ...);
+rw_dict_t *init_rw_dict_with(size_t size, ...);
 
-void rw_array_add_str(rw_array_t *a, string_t value);
-void rw_array_add_long(rw_array_t *a, i64 value);
-void rw_array_add_double(rw_array_t *a, double value);
-void rw_array_add_exp_long(rw_array_t *a, exp_long_t value);
-void rw_array_add_exp_double(rw_array_t *a, exp_double_t value);
-void rw_array_add_bool(rw_array_t *a, bool value);
-void rw_array_add_null(rw_array_t *a);
+bool rw_array_add_str(rw_array_t *a, string_t value);
+bool rw_array_add_long(rw_array_t *a, i64 value);
+bool rw_array_add_double(rw_array_t *a, double value);
+bool rw_array_add_exp_long(rw_array_t *a, exp_long_t value);
+bool rw_array_add_exp_double(rw_array_t *a, exp_double_t value);
+bool rw_array_add_bool(rw_array_t *a, bool value);
+bool rw_array_add_null(rw_array_t *a);
 // WARN: Check if the array is added to itself, and deep-copy it if so to
 // prevent infinite recursion
-void rw_array_add_array(rw_array_t *a, rw_array_t value);
-void rw_array_add_dict(rw_array_t *a, rw_dict_t value);
+bool rw_array_add_array(rw_array_t *a, rw_array_t *value);
+bool rw_array_add_dict(rw_array_t *a, rw_dict_t *value);
 
-void rw_dict_add_str(rw_dict_t *d, string_t key, string_t value);
-void rw_dict_add_long(rw_dict_t *d, string_t key, i64 value);
-void rw_dict_add_double(rw_dict_t *d, string_t key, double value);
-void rw_dict_add_exp_long(rw_dict_t *d, string_t key, exp_long_t value);
-void rw_dict_add_exp_double(rw_dict_t *d, string_t key, exp_double_t value);
-void rw_dict_add_bool(rw_dict_t *d, string_t key, bool value);
-void rw_dict_add_null(rw_dict_t *d, string_t key);
-void rw_dict_add_array(rw_dict_t *d, string_t key, rw_array_t value);
+bool rw_dict_add_str(rw_dict_t *d, string_t key, string_t value);
+bool rw_dict_add_long(rw_dict_t *d, string_t key, i64 value);
+bool rw_dict_add_double(rw_dict_t *d, string_t key, double value);
+bool rw_dict_add_exp_long(rw_dict_t *d, string_t key, exp_long_t value);
+bool rw_dict_add_exp_double(rw_dict_t *d, string_t key, exp_double_t value);
+bool rw_dict_add_bool(rw_dict_t *d, string_t key, bool value);
+bool rw_dict_add_null(rw_dict_t *d, string_t key);
+bool rw_dict_add_array(rw_dict_t *d, string_t key, rw_array_t *value);
 // WARN: Check if the dict is added to itself, and deep-copy it if so to
 // prevent infinite recursion
-void rw_dict_add_dict(rw_dict_t *d, string_t key, rw_dict_t value);
+bool rw_dict_add_dict(rw_dict_t *d, string_t key, rw_dict_t *value);
 
 void rw_array_remove(rw_array_t *a, size_t index);
 void rw_dict_remove(rw_dict_t *d, string_t key);
 
-rw_value_t rw_array_get(rw_array_t a, size_t index);
-rw_item_t rw_dict_get(rw_dict_t d, string_t key);
+rw_value_t *rw_array_get(rw_array_t *a, size_t index);
+rw_item_t *rw_dict_get(rw_dict_t *d, string_t key);
 
-void destroy_rw_array(rw_array_t a);
-void destroy_rw_dict(rw_dict_t d);
-void destroy_rw_json(rw_json_t j);
+void destroy_rw_array(rw_array_t *a);
+void destroy_rw_dict(rw_dict_t *d);
+void destroy_rw_json(rw_json_t *j);
 
 #endif // !RW_JSON_STORAGE_H

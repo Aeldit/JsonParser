@@ -16,7 +16,6 @@
 typedef struct str_link
 {
     string_t s;
-    bool s_needs_free;
     bool is_from_str;
     struct str_link *next;
 } string_link_t;
@@ -44,47 +43,43 @@ typedef struct
         case T_ERROR:                                                          \
             continue;                                                          \
         case T_STR:                                                            \
-            add_link(ll, v.strv, false, true);                                 \
+            add_link(ll, v.strv, true);                                        \
             nb_chars += 2; /* Strings are encased by 2 double-quotes (\"\") */ \
             break;                                                             \
         case T_LONG:                                                           \
-            add_link(ll, get_long_as_str(v.longv), true, false);               \
+            add_link(ll, get_long_as_str(v.longv), false);                     \
             break;                                                             \
         case T_DOUBLE:                                                         \
-            add_link(ll, get_double_as_str(v.doublev), true, false);           \
+            add_link(ll, get_double_as_str(v.doublev), false);                 \
             break;                                                             \
         case T_EXP_LONG:                                                       \
-            add_link(ll, get_exp_long_as_str(v.exp_longv), true, false);       \
+            add_link(ll, get_exp_long_as_str(v.exp_longv), false);             \
             break;                                                             \
         case T_EXP_DOUBLE:                                                     \
-            add_link(ll, get_exp_double_as_str(v.exp_doublev), true, false);   \
+            add_link(ll, get_exp_double_as_str(v.exp_doublev), false);         \
             break;                                                             \
         case T_BOOL:                                                           \
-            add_link(ll, get_bool_as_str(v.boolv), true, false);               \
+            add_link(ll, get_bool_as_str(v.boolv), false);                     \
             break;                                                             \
         case T_NULL:                                                           \
-            add_link(ll, get_null_as_str(), true, false);                      \
+            add_link(ll, get_null_as_str(), false);                            \
             break;                                                             \
         case T_ARR:                                                            \
-            add_link(                                                          \
-                ll, get_rx_array_as_str(v.arrayv, indent + 1), true, false     \
-            );                                                                 \
+            add_link(ll, get_rx_array_as_str(v.arrayv, indent + 1), false);    \
             break;                                                             \
         case T_DICT:                                                           \
-            add_link(                                                          \
-                ll, get_rx_dict_as_str(v.dictv, indent + 1), true, false       \
-            );                                                                 \
+            add_link(ll, get_rx_dict_as_str(v.dictv, indent + 1), false);      \
             break;                                                             \
         }                                                                      \
     }
 
-#define ADD_ITEMS_FOR_MODE_ADD_PAIR(val, b1, b2)                               \
-    add_link(ll, it.key, false, true);                                         \
-    add_link(ll, val, b1, b2)
+#define ADD_ITEMS_FOR_MODE_ADD_PAIR(val, is_from_str)                          \
+    add_link(ll, it.key, true);                                                \
+    add_link(ll, (val), (is_from_str))
 
 #define ADD_ITEMS_FOR_MODE(rx_item_t, get_rx_array_as_str, get_rx_dict_as_str) \
     bool is_key = true;                                                        \
-    for (size_t i = 0; i < (size_t)size; ++i)                                  \
+    for (size_t i = 0; i < size; ++i)                                          \
     {                                                                          \
         rx_item_t it = items[i];                                               \
         switch (it.type)                                                       \
@@ -92,45 +87,39 @@ typedef struct
         case T_ERROR:                                                          \
             continue;                                                          \
         case T_STR:                                                            \
-            ADD_ITEMS_FOR_MODE_ADD_PAIR(it.strv, false, true);                 \
+            ADD_ITEMS_FOR_MODE_ADD_PAIR(it.strv, true);                        \
             nb_chars += 2; /* Strings are encased by 2 double-quotes (\"\") */ \
             break;                                                             \
         case T_LONG:                                                           \
-            ADD_ITEMS_FOR_MODE_ADD_PAIR(                                       \
-                get_long_as_str(it.longv), true, false                         \
-            );                                                                 \
+            ADD_ITEMS_FOR_MODE_ADD_PAIR(get_long_as_str(it.longv), false);     \
             break;                                                             \
         case T_DOUBLE:                                                         \
-            ADD_ITEMS_FOR_MODE_ADD_PAIR(                                       \
-                get_double_as_str(it.doublev), true, false                     \
-            );                                                                 \
+            ADD_ITEMS_FOR_MODE_ADD_PAIR(get_double_as_str(it.doublev), false); \
             break;                                                             \
         case T_EXP_LONG:                                                       \
             ADD_ITEMS_FOR_MODE_ADD_PAIR(                                       \
-                get_exp_long_as_str(it.exp_longv), true, false                 \
+                get_exp_long_as_str(it.exp_longv), false                       \
             );                                                                 \
             break;                                                             \
         case T_EXP_DOUBLE:                                                     \
             ADD_ITEMS_FOR_MODE_ADD_PAIR(                                       \
-                get_exp_double_as_str(it.exp_doublev), true, false             \
+                get_exp_double_as_str(it.exp_doublev), false                   \
             );                                                                 \
             break;                                                             \
         case T_BOOL:                                                           \
-            ADD_ITEMS_FOR_MODE_ADD_PAIR(                                       \
-                get_bool_as_str(it.boolv), true, false                         \
-            );                                                                 \
+            ADD_ITEMS_FOR_MODE_ADD_PAIR(get_bool_as_str(it.boolv), false);     \
             break;                                                             \
         case T_NULL:                                                           \
-            ADD_ITEMS_FOR_MODE_ADD_PAIR(get_null_as_str(), true, false);       \
+            ADD_ITEMS_FOR_MODE_ADD_PAIR(get_null_as_str(), false);             \
             break;                                                             \
         case T_ARR:                                                            \
             ADD_ITEMS_FOR_MODE_ADD_PAIR(                                       \
-                get_rx_array_as_str(it.arrayv, indent + 1), true, false        \
+                get_rx_array_as_str(it.arrayv, indent + 1), false              \
             );                                                                 \
             break;                                                             \
         case T_DICT:                                                           \
             ADD_ITEMS_FOR_MODE_ADD_PAIR(                                       \
-                get_rx_dict_as_str(it.dictv, indent + 1), true, false          \
+                get_rx_dict_as_str(it.dictv, indent + 1), false                \
             );                                                                 \
             break;                                                             \
         }                                                                      \
@@ -138,34 +127,30 @@ typedef struct
     }
 
 #define ARRAY_AS_STR(fill_rx_string_ll_with_values)                            \
-    if (!a.size)                                                               \
+    if (!a->size)                                                              \
     {                                                                          \
         char *str = malloc(3 * sizeof(char));                                  \
         if (!str)                                                              \
         {                                                                      \
             return NULL_STRING;                                                \
         }                                                                      \
-        memcpy(str, "[]", 2);                                                  \
+        str[0] = '[';                                                          \
+        str[1] = ']';                                                          \
         str[2] = 0;                                                            \
         return STRING_OF(str, 2);                                              \
     }                                                                          \
     /*                                                                      */ \
-    string_linked_list_t *ll = calloc(1, sizeof(string_linked_list_t));        \
-    if (!ll)                                                                   \
-    {                                                                          \
-        return NULL_STRING;                                                    \
-    }                                                                          \
-    /*                                                                      */ \
-    /* '[' + '\n' + ((indent - 1) * 4 * ' ') + ']' + '\n' */                   \
-    /* indents are 4 spaces */                                                 \
+    string_linked_list_t ll = (string_linked_list_t){ 0 };                     \
+    /* '[' + '\n' + ((indent - 1) * 4 * ' ') + ']' + '\n'                   */ \
+    /* ((indent - 1) * 4): indents are 4 spaces                             */ \
     /* indent == 1: if we are in the 'root' array, we add a '\n' at the end */ \
-    size_t nb_chars = 2 + ((indent - 1) * 4) + (indent == 1)                   \
-        + fill_rx_string_ll_with_values(ll, a, indent);                        \
-    u32 nb_chars_indent = indent * 4;                                          \
-    char *str           = malloc((nb_chars + 1) * sizeof(char));               \
+    const size_t nb_chars = 2 + ((indent - 1) * 4) + (indent == 1)             \
+        + fill_rx_string_ll_with_values(&ll, a, indent);                       \
+    const u32 nb_chars_indent = indent * 4;                                    \
+    char *str                 = malloc((nb_chars + 1) * sizeof(char));         \
     if (!str)                                                                  \
     {                                                                          \
-        destroy_linked_list(ll);                                               \
+        destroy_linked_list(&ll);                                              \
         return NULL_STRING;                                                    \
     }                                                                          \
     /*                                                                      */ \
@@ -173,7 +158,7 @@ typedef struct
     str[0]              = '[';                                                 \
     str[1]              = '\n';                                                \
     size_t insert_idx   = 2;                                                   \
-    string_link_t *link = ll->head;                                            \
+    string_link_t *link = ll.head;                                             \
     while (link)                                                               \
     {                                                                          \
         /* Tabs */                                                             \
@@ -217,38 +202,35 @@ typedef struct
     str[nb_chars] = 0;                                                         \
     /* |-> End of string building */                                           \
     /*                                                                      */ \
-    destroy_linked_list(ll);                                                   \
+    destroy_linked_list(&ll);                                                  \
     return STRING_OF(str, nb_chars)
 
 #define DICT_AS_STR(fill_rx_string_ll_with_items)                              \
-    if (!d.size)                                                               \
+    if (!d->size)                                                              \
     {                                                                          \
         char *str = malloc(3 * sizeof(char));                                  \
         if (!str)                                                              \
         {                                                                      \
             return NULL_STRING;                                                \
         }                                                                      \
-        memcpy(str, "{}", 2);                                                  \
+        str[0] = '{';                                                          \
+        str[1] = '}';                                                          \
         str[2] = 0;                                                            \
         return STRING_OF(str, 2);                                              \
     }                                                                          \
     /*                                                                      */ \
-    string_linked_list_t *ll = calloc(1, sizeof(string_linked_list_t));        \
-    if (!ll)                                                                   \
-    {                                                                          \
-        return NULL_STRING;                                                    \
-    }                                                                          \
+    string_linked_list_t ll = (string_linked_list_t){ 0 };                     \
     /*                                                                      */ \
-    /* '{' + '\n' + (indent - 1) * '\t' + '}' + '\n' */                        \
-    /* indent == 1: if we are in the 'root' dict, we add a \n at the end */    \
-    size_t nb_chars = 2 + ((indent - 1) * 4) + (indent == 1)                   \
-        + fill_rx_string_ll_with_items(ll, d, indent);                         \
-    /*                                                                      */ \
-    u32 nb_chars_indent = indent * 4;                                          \
-    char *str           = malloc((nb_chars + 1) * sizeof(char));               \
+    /* '{' + '\n' + (indent - 1) * '\t' + '}' + '\n'                        */ \
+    /* ((indent - 1) * 4): each indent is 4 spaces                          */ \
+    /* indent == 1: if we are in the 'root' dict, we add a \n at the end    */ \
+    const size_t nb_chars = 2 + ((indent - 1) * 4) + (indent == 1)             \
+        + fill_rx_string_ll_with_items(&ll, d, indent);                        \
+    const u32 nb_chars_indent = indent * 4;                                    \
+    char *str                 = malloc((nb_chars + 1) * sizeof(char));         \
     if (!str)                                                                  \
     {                                                                          \
-        destroy_linked_list(ll);                                               \
+        destroy_linked_list(&ll);                                              \
         return NULL_STRING;                                                    \
     }                                                                          \
     /*                                                                      */ \
@@ -257,7 +239,7 @@ typedef struct
     str[1]              = '\n';                                                \
     size_t insert_idx   = 2;                                                   \
     bool is_key         = true;                                                \
-    string_link_t *link = ll->head;                                            \
+    string_link_t *link = ll.head;                                             \
     while (link)                                                               \
     {                                                                          \
         if (is_key)                                                            \
@@ -312,7 +294,7 @@ typedef struct
     str[nb_chars] = 0;                                                         \
     /* |-> End of string building */                                           \
     /*                                                                      */ \
-    destroy_linked_list(ll);                                                   \
+    destroy_linked_list(&ll);                                                  \
     return STRING_OF(str, nb_chars)
 
 #define WRITE_JSON_TO_FILE(get_rx_array_as_str, get_rx_dict_as_str)            \
@@ -348,10 +330,7 @@ string_t get_exp_double_as_str(exp_double_t value);
 string_t get_bool_as_str(bool value);
 string_t get_null_as_str();
 
-void add_link(
-    string_linked_list_t *ll, string_t str, bool str_needs_free,
-    bool is_from_str
-);
+void add_link(string_linked_list_t *ll, string_t str, bool is_from_str);
 void destroy_linked_list(string_linked_list_t *ll);
 
 #endif // !BASE_JSON_WRITER_H
