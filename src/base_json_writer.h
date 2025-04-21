@@ -126,8 +126,8 @@ typedef struct
         is_key = !is_key;                                                      \
     }
 
-#define ARRAY_AS_STR(fill_rx_string_ll_with_values)                            \
-    if (!a->size)                                                              \
+#define ARRAY_AS_STR(fill_rx_string_ll_with_values, null_check)                \
+    if (!(null_check))                                                         \
     {                                                                          \
         char *str = malloc(3 * sizeof(char));                                  \
         if (!str)                                                              \
@@ -205,8 +205,8 @@ typedef struct
     destroy_linked_list(&ll);                                                  \
     return STRING_OF(str, nb_chars)
 
-#define DICT_AS_STR(fill_rx_string_ll_with_items)                              \
-    if (!d->size)                                                              \
+#define DICT_AS_STR(fill_rx_string_ll_with_items, null_check)                  \
+    if (!(null_check))                                                         \
     {                                                                          \
         char *str = malloc(3 * sizeof(char));                                  \
         if (!str)                                                              \

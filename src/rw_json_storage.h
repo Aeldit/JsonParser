@@ -148,8 +148,11 @@ typedef struct
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
+rw_array_t *init_rw_array();
 rw_array_t *init_rw_array_with(size_t size, ...);
+rw_dict_t *init_rw_dict();
 rw_dict_t *init_rw_dict_with(size_t size, ...);
+rw_json_t *init_rw_json(bool is_array, rw_array_t *a, rw_dict_t *d);
 
 bool rw_array_add_str(rw_array_t *a, string_t value);
 bool rw_array_add_long(rw_array_t *a, i64 value);

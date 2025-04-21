@@ -348,14 +348,18 @@ void defragment_dict(rw_dict_t *d)
     }
 }
 
+inline rw_array_t *init_rw_array()
+{
+    return calloc(1, sizeof(rw_array_t));
+}
+
 rw_array_t *init_rw_array_with(size_t size, ...)
 {
-    if (!size)
-    {
-        return 0;
-    }
-
     rw_array_t *a = calloc(1, sizeof(rw_array_t));
+    if (!a || !size)
+    {
+        return a;
+    }
 
     va_list args;
 
@@ -368,7 +372,10 @@ rw_array_t *init_rw_array_with(size_t size, ...)
         case T_ERROR:
             break;
         case T_STR:
-            rw_array_add_str(a, v.strv);
+            if (!rw_array_add_str(a, v.strv))
+            {
+                destroy_string(v.strv);
+            }
             break;
         case T_LONG:
             rw_array_add_long(a, v.longv);
@@ -389,26 +396,35 @@ rw_array_t *init_rw_array_with(size_t size, ...)
             rw_array_add_null(a);
             break;
         case T_ARR:
-            rw_array_add_array(a, v.arrayv);
+            if (!rw_array_add_array(a, v.arrayv))
+            {
+                destroy_rw_array(v.arrayv);
+            }
             break;
         case T_DICT:
-            rw_array_add_dict(a, v.dictv);
+            if (!rw_array_add_dict(a, v.dictv))
+            {
+                destroy_rw_dict(v.dictv);
+            }
             break;
         }
     }
-
     va_end(args);
     return a;
 }
 
+inline rw_dict_t *init_rw_dict()
+{
+    return calloc(1, sizeof(rw_dict_t));
+}
+
 rw_dict_t *init_rw_dict_with(size_t size, ...)
 {
-    if (!size)
-    {
-        return 0;
-    }
-
     rw_dict_t *d = calloc(1, sizeof(rw_dict_t));
+    if (!d || !size)
+    {
+        return d;
+    }
 
     va_list args;
 
@@ -421,7 +437,10 @@ rw_dict_t *init_rw_dict_with(size_t size, ...)
         case T_ERROR:
             break;
         case T_STR:
-            rw_dict_add_str(d, it.key, it.strv);
+            if (!rw_dict_add_str(d, it.key, it.strv))
+            {
+                destroy_string(it.strv);
+            }
             break;
         case T_LONG:
             rw_dict_add_long(d, it.key, it.longv);
@@ -442,16 +461,54 @@ rw_dict_t *init_rw_dict_with(size_t size, ...)
             rw_dict_add_null(d, it.key);
             break;
         case T_ARR:
-            rw_dict_add_array(d, it.key, it.arrayv);
+            if (!rw_dict_add_array(d, it.key, it.arrayv))
+            {
+                destroy_rw_array(it.arrayv);
+            }
             break;
         case T_DICT:
-            rw_dict_add_dict(d, it.key, it.dictv);
+            if (!rw_dict_add_dict(d, it.key, it.dictv))
+            {
+                destroy_rw_dict(it.dictv);
+            }
             break;
         }
     }
-
     va_end(args);
     return d;
+}
+
+rw_json_t *init_rw_json(bool is_array, rw_array_t *a, rw_dict_t *d)
+{
+    if ((is_array && !a) || (!is_array && !d))
+    {
+        return 0;
+    }
+
+    rw_json_t *j = calloc(1, sizeof(rw_json_t));
+    if (!j)
+    {
+        return 0;
+    }
+
+    j->is_array = is_array;
+    if (is_array)
+    {
+        j->array = a;
+        if (d)
+        {
+            destroy_rw_dict(d);
+        }
+    }
+    else
+    {
+        j->dict = d;
+        if (a)
+        {
+            destroy_rw_array(a);
+        }
+    }
+    return j;
 }
 
 /*******************************************************************************
@@ -562,7 +619,7 @@ bool rw_array_add_dict(rw_array_t *a, rw_dict_t *value)
 
 bool rw_dict_add_str(rw_dict_t *d, string_t key, string_t value)
 {
-    if (d && key.str)
+    if (d && key.str && value.str)
     {
         ADD(item_link_t, d);
         d->tail->items[d->tail->insert_index++] = RW_ITEM_OF(T_STR, strv);

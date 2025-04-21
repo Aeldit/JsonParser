@@ -95,17 +95,13 @@ bool rw_dicts_equal(rw_dict_t *a, rw_dict_t *b)
             {
                 continue;
             }
-            rw_item_t *b_it = rw_dict_get(b, a_it.key);
-            if (!b_it)
-            {
-                continue;
-            }
 
+            rw_item_t *b_it = rw_dict_get(b, a_it.key);
             // If the second dict doesn't contain the current key
             // OR
             // If the second dict contains the key but the associated
             // element is not of the same type
-            if (a_it.type != b_it->type)
+            if (!b_it || a_it.type != b_it->type)
             {
                 return false;
             }

@@ -84,12 +84,12 @@ fill_ro_string_ll_with_items(string_linked_list_t *ll, ro_dict_t d, u16 indent)
 *******************************************************************************/
 string_t get_ro_array_as_str(ro_array_t a, u16 indent)
 {
-    ARRAY_AS_STR(fill_ro_string_ll_with_values);
+    ARRAY_AS_STR(fill_ro_string_ll_with_values, a.size);
 }
 
 string_t get_ro_dict_as_str(ro_dict_t d, u16 indent)
 {
-    DICT_AS_STR(fill_ro_string_ll_with_items);
+    DICT_AS_STR(fill_ro_string_ll_with_items, d.size);
 }
 
 /*******************************************************************************

@@ -12,41 +12,39 @@
 /*******************************************************************************
 **                              rw_PARSE_ARRAY_BUFF                           **
 *******************************************************************************/
-rw_array_t get_rw_array_from_file(size_t *idx)
+rw_array_t *get_rw_array_from_file(size_t *idx)
 {
     if (!idx)
     {
-        return EMPTY_RW_ARRAY;
+        return 0;
     }
 
     FILE *f = fopen(JSON_TESTS_FILE, "r");
     if (!f)
     {
-        return EMPTY_RW_ARRAY;
+        return 0;
     }
-
-    rw_array_t a = EMPTY_RW_ARRAY;
-    char *buff   = 0;
 
     if (fseek(f, 0, SEEK_SET) != 0)
     {
         fclose(f);
-        return EMPTY_RW_ARRAY;
+        return 0;
     }
 
     struct stat st;
     stat(JSON_TESTS_FILE, &st);
     size_t nb_chars = st.st_size;
 
-    buff = calloc(nb_chars + 1, sizeof(char));
+    char *buff = malloc((nb_chars + 1) * sizeof(char));
     if (!buff)
     {
         fclose(f);
-        return EMPTY_RW_ARRAY;
+        return 0;
     }
     fread(buff, sizeof(char), nb_chars, f);
+    buff[nb_chars] = 0;
 
-    a = rw_parse_array(buff, idx);
+    rw_array_t *a = rw_parse_array(buff, idx);
     if (buff)
     {
         free(buff);
@@ -57,10 +55,9 @@ rw_array_t get_rw_array_from_file(size_t *idx)
 
 Test(rw_json_parser, rw_parse_array_buff_empty)
 {
-    size_t idx   = 518;
-    rw_array_t a = get_rw_array_from_file(&idx);
-
-    rw_array_t b = EMPTY_RW_ARRAY;
+    size_t idx    = 518;
+    rw_array_t *a = get_rw_array_from_file(&idx);
+    rw_array_t *b = init_rw_array();
 
     cr_expect(
         rw_arrays_equal(a, b),
@@ -73,10 +70,9 @@ Test(rw_json_parser, rw_parse_array_buff_empty)
 
 Test(rw_json_parser, rw_parse_array_buff_long_numbers)
 {
-    size_t idx   = 85;
-    rw_array_t a = get_rw_array_from_file(&idx);
-
-    rw_array_t b = init_rw_array_with(
+    size_t idx    = 85;
+    rw_array_t *a = get_rw_array_from_file(&idx);
+    rw_array_t *b = init_rw_array_with(
         20, RWVAL_LONG(64220), RWVAL_LONG(-512), RWVAL_DOUBLE(642.25),
         RWVAL_DOUBLE(-642.25), RWVAL_EXPLONG_T(2, 8), RWVAL_EXPLONG_T(-53, 4),
         RWVAL_EXPLONG_T(200, -10), RWVAL_EXPLONG_T(-251, -10),
@@ -99,11 +95,10 @@ Test(rw_json_parser, rw_parse_array_buff_long_numbers)
 
 Test(rw_json_parser, rw_parse_array_buff_nested_multi_type)
 {
-    size_t idx   = 508;
-    rw_array_t a = get_rw_array_from_file(&idx);
-
-    rw_array_t b = init_rw_array_with(
-        8, RWVAL_ARR(EMPTY_RW_ARRAY), RWVAL_LONG(1), RWVAL_LONG(2),
+    size_t idx    = 508;
+    rw_array_t *a = get_rw_array_from_file(&idx);
+    rw_array_t *b = init_rw_array_with(
+        8, RWVAL_ARR(init_rw_array()), RWVAL_LONG(1), RWVAL_LONG(2),
         RWVAL_LONG(3),
         RWVAL_ARR(init_rw_array_with(
             4, RWVAL_STR(string_nofree_of("")), RWVAL_LONG(5),
@@ -111,13 +106,13 @@ Test(rw_json_parser, rw_parse_array_buff_nested_multi_type)
                 3, RWVAL_STR(string_nofree_of("dd")), RWVAL_BOOL(true),
                 RWVAL_LONG(5)
             )),
-            RWVAL_DICT(EMPTY_RW_DICT)
+            RWVAL_DICT(init_rw_dict())
         )),
-        RWVAL_DICT(EMPTY_RW_DICT),
+        RWVAL_DICT(init_rw_dict()),
         RWVAL_DICT(init_rw_dict_with(
             1, RWIT_STR(string_nofree_of("first"), string_nofree_of("w"))
         )),
-        RWVAL_DICT(EMPTY_RW_DICT)
+        RWVAL_DICT(init_rw_dict())
     );
 
     cr_expect(
@@ -130,44 +125,41 @@ Test(rw_json_parser, rw_parse_array_buff_nested_multi_type)
 }
 
 /*******************************************************************************
-**                               rw_PARSE_DICT_BUFF                           **
+**                               rw_PARSE_DICT_BUFF **
 *******************************************************************************/
-rw_dict_t get_rw_dict_from_file(size_t *idx)
+rw_dict_t *get_rw_dict_from_file(size_t *idx)
 {
     if (!idx)
     {
-        return EMPTY_RW_DICT;
+        return 0;
     }
 
     FILE *f = fopen(JSON_TESTS_FILE, "r");
     if (!f)
     {
-        return EMPTY_RW_DICT;
+        return 0;
     }
-
-    rw_dict_t a = EMPTY_RW_DICT;
-    char *buff  = 0;
 
     if (fseek(f, 0, SEEK_SET) != 0)
     {
         fclose(f);
-        return EMPTY_RW_DICT;
+        return 0;
     }
 
     struct stat st;
     stat(JSON_TESTS_FILE, &st);
     size_t nb_chars = st.st_size;
 
-    buff = calloc(nb_chars + 1, sizeof(char));
+    char *buff = malloc((nb_chars + 1) * sizeof(char));
     if (!buff)
     {
         fclose(f);
-        return EMPTY_RW_DICT;
+        return 0;
     }
     fread(buff, sizeof(char), nb_chars, f);
+    buff[nb_chars] = 0;
 
-    a = rw_parse_dict(buff, idx);
-
+    rw_dict_t *a = rw_parse_dict(buff, idx);
     if (buff)
     {
         free(buff);
@@ -178,10 +170,9 @@ rw_dict_t get_rw_dict_from_file(size_t *idx)
 
 Test(rw_json_parser, rw_parse_dict_buff_empty)
 {
-    size_t idx  = 812;
-    rw_dict_t a = get_rw_dict_from_file(&idx);
-
-    rw_dict_t b = EMPTY_RW_DICT;
+    size_t idx   = 812;
+    rw_dict_t *a = get_rw_dict_from_file(&idx);
+    rw_dict_t *b = init_rw_dict();
 
     cr_expect(
         rw_dicts_equal(a, b),
@@ -194,10 +185,9 @@ Test(rw_json_parser, rw_parse_dict_buff_empty)
 
 Test(rw_json_parser, rw_parse_dict_buff_numbers)
 {
-    size_t idx  = 824;
-    rw_dict_t a = get_rw_dict_from_file(&idx);
-
-    rw_dict_t b = init_rw_dict_with(
+    size_t idx   = 824;
+    rw_dict_t *a = get_rw_dict_from_file(&idx);
+    rw_dict_t *b = init_rw_dict_with(
         3, RWIT_LONG(string_nofree_of("1"), 1),
         RWIT_LONG(string_nofree_of("2"), 2), RWIT_LONG(string_nofree_of("3"), 3)
     );
@@ -213,10 +203,9 @@ Test(rw_json_parser, rw_parse_dict_buff_numbers)
 
 Test(rw_json_parser, rw_parse_dict_buff_nested_multi_type)
 {
-    size_t idx  = 905;
-    rw_dict_t a = get_rw_dict_from_file(&idx);
-
-    rw_dict_t b = init_rw_dict_with(
+    size_t idx   = 905;
+    rw_dict_t *a = get_rw_dict_from_file(&idx);
+    rw_dict_t *b = init_rw_dict_with(
         1,
         RWIT_DICT(
             string_nofree_of("array"),
@@ -229,7 +218,7 @@ Test(rw_json_parser, rw_parse_dict_buff_nested_multi_type)
                         RWVAL_LONG(5)
                     )
                 ),
-                RWIT_DICT(string_nofree_of("d"), EMPTY_RW_DICT)
+                RWIT_DICT(string_nofree_of("d"), init_rw_dict())
             )
         )
     );
@@ -244,18 +233,16 @@ Test(rw_json_parser, rw_parse_dict_buff_nested_multi_type)
 }
 
 /*******************************************************************************
-**                                   rw_PARSE                                 **
+**                                   RW_PARSE                                 **
 *******************************************************************************/
 Test(rw_json_parser, rw_parse_array)
 {
-    rw_json_t rw_json = rw_parse(JSON_TESTS_FILE);
-
-    rw_array_t strings = init_rw_array_with(
+    rw_array_t *strings = init_rw_array_with(
         2, RWVAL_STR(string_nofree_of("testing normal string")),
         RWVAL_STR(string_nofree_of(""))
     );
 
-    rw_array_t numbers = init_rw_array_with(
+    rw_array_t *numbers = init_rw_array_with(
         20, RWVAL_LONG(64220), RWVAL_LONG(-512), RWVAL_DOUBLE(642.25),
         RWVAL_DOUBLE(-642.25), RWVAL_EXPLONG_T(2, 8), RWVAL_EXPLONG_T(-53, 4),
         RWVAL_EXPLONG_T(200, -10), RWVAL_EXPLONG_T(-251, -10),
@@ -267,11 +254,11 @@ Test(rw_json_parser, rw_parse_array)
         RWVAL_EXPDOUBLE_T(200.5, -10), RWVAL_EXPDOUBLE_T(-200.5, -10)
     );
 
-    rw_array_t booleans =
+    rw_array_t *booleans =
         init_rw_array_with(2, RWVAL_BOOL(true), RWVAL_BOOL(false));
 
-    rw_array_t arrays = init_rw_array_with(
-        8, RWVAL_ARR(EMPTY_RW_ARRAY), RWVAL_LONG(1), RWVAL_LONG(2),
+    rw_array_t *arrays = init_rw_array_with(
+        8, RWVAL_ARR(init_rw_array()), RWVAL_LONG(1), RWVAL_LONG(2),
         RWVAL_LONG(3),
         RWVAL_ARR(init_rw_array_with(
             4, RWVAL_STR(string_nofree_of("")), RWVAL_LONG(5),
@@ -279,17 +266,17 @@ Test(rw_json_parser, rw_parse_array)
                 3, RWVAL_STR(string_nofree_of("dd")), RWVAL_BOOL(true),
                 RWVAL_LONG(5)
             )),
-            RWVAL_DICT(EMPTY_RW_DICT)
+            RWVAL_DICT(init_rw_dict())
         )),
-        RWVAL_DICT(EMPTY_RW_DICT),
+        RWVAL_DICT(init_rw_dict()),
         RWVAL_DICT(init_rw_dict_with(
             1, RWIT_STR(string_nofree_of("first"), string_nofree_of("w"))
         )),
-        RWVAL_DICT(EMPTY_RW_DICT)
+        RWVAL_DICT(init_rw_dict())
     );
 
-    rw_array_t dicts = init_rw_array_with(
-        3, RWVAL_DICT(EMPTY_RW_DICT),
+    rw_array_t *dicts = init_rw_array_with(
+        3, RWVAL_DICT(init_rw_dict()),
         RWVAL_DICT(init_rw_dict_with(
             3, RWIT_LONG(string_nofree_of("1"), 1),
             RWIT_LONG(string_nofree_of("2"), 2),
@@ -308,13 +295,13 @@ Test(rw_json_parser, rw_parse_array)
                             RWVAL_BOOL(true), RWVAL_LONG(5)
                         )
                     ),
-                    RWIT_DICT(string_nofree_of("d"), EMPTY_RW_DICT)
+                    RWIT_DICT(string_nofree_of("d"), init_rw_dict())
                 )
             )
         ))
     );
 
-    rw_dict_t file_dict = init_rw_dict_with(
+    rw_dict_t *file_dict = init_rw_dict_with(
         5, RWIT_ARR(string_nofree_of("strings"), strings),
         RWIT_ARR(string_nofree_of("numbers"), numbers),
         RWIT_ARR(string_nofree_of("booleans"), booleans),
@@ -322,13 +309,14 @@ Test(rw_json_parser, rw_parse_array)
         RWIT_ARR(string_nofree_of("dicts"), dicts)
     );
 
-    rw_json_t rw_json_manual = RW_JSON(false, EMPTY_RW_ARRAY, file_dict);
+    rw_json_t *rw_json_manual = init_rw_json(false, 0, file_dict);
+    rw_json_t *rw_json        = rw_parse(JSON_TESTS_FILE);
 
     cr_expect(
-        rw_json_equal(rw_json, rw_json_manual),
+        rw_json_equal(rw_json_manual, rw_json),
         "Expected the 2 dicts to be equal, but they were not"
     );
 
-    destroy_rw_json(rw_json);
     destroy_rw_json(rw_json_manual);
+    destroy_rw_json(rw_json);
 }

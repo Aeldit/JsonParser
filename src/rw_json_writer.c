@@ -100,7 +100,7 @@ string_t get_rw_array_as_str(rw_array_t *a, u16 indent)
     {
         return NULL_STRING;
     }
-    ARRAY_AS_STR(fill_rw_string_ll_with_values);
+    ARRAY_AS_STR(fill_rw_string_ll_with_values, a->size);
 }
 
 string_t get_rw_dict_as_str(rw_dict_t *d, u16 indent)
@@ -109,7 +109,7 @@ string_t get_rw_dict_as_str(rw_dict_t *d, u16 indent)
     {
         return NULL_STRING;
     }
-    DICT_AS_STR(fill_rw_string_ll_with_items);
+    DICT_AS_STR(fill_rw_string_ll_with_items, d->size);
 }
 
 /*******************************************************************************
@@ -120,34 +120,39 @@ void write_rw_json_to_file(rw_json_t j, char *file_name)
     WRITE_JSON_TO_FILE(get_rw_array_as_str, get_rw_dict_as_str);
 }
 
-void rw_array_print(rw_array_t a)
+void rw_array_print(rw_array_t *a)
 {
 #ifndef VALGRING_DISABLE_PRINT
-    string_t s = get_rw_array_as_str(&a, 1);
+    string_t s = get_rw_array_as_str(a, 1);
     printf("%s", s.str);
     destroy_string(s);
 #endif
 }
 
-void rw_dict_print(rw_dict_t d)
+void rw_dict_print(rw_dict_t *d)
 {
 #ifndef VALGRING_DISABLE_PRINT
-    string_t s = get_rw_dict_as_str(&d, 1);
+    string_t s = get_rw_dict_as_str(d, 1);
     printf("%s", s.str);
     destroy_string(s);
 #endif
 }
 
-void rw_json_print(rw_json_t j)
+void rw_json_print(rw_json_t *j)
 {
-#ifndef VALGRING_DISABLE_PRINT
-    if (j.is_array && j.array)
+    if (!j)
     {
-        rw_array_print(*j.array);
+        return;
     }
-    else if (!j.is_array && j.dict)
+
+#ifndef VALGRING_DISABLE_PRINT
+    if (j->is_array && j->array)
     {
-        rw_dict_print(*j.dict);
+        rw_array_print(j->array);
+    }
+    else if (!j->is_array && j->dict)
+    {
+        rw_dict_print(j->dict);
     }
 #endif
 }
