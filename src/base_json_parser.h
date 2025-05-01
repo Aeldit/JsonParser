@@ -61,9 +61,9 @@
     }
 
 #define GET_NUM_LEN(idx)                                                       \
-    while ((c = buff[(idx)]))                                                  \
+    while (1)                                                                  \
     {                                                                          \
-        switch (c)                                                             \
+        switch (buff[(idx)])                                                   \
         {                                                                      \
         case '+':                                                              \
         case '-':                                                              \
@@ -82,6 +82,8 @@
         case '9':                                                              \
             ++(idx);                                                           \
             continue;                                                          \
+        default:                                                               \
+            break;                                                             \
         }                                                                      \
         break;                                                                 \
     }
