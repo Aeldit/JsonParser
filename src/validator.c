@@ -226,7 +226,6 @@ bool check_array_trailing_commas(const char *const buff, size_t *pos)
 
     size_t i = pos ? *pos : 1;
 
-    char c      = 0;
     char prev_c = 0;
     while (1)
     {
@@ -305,7 +304,6 @@ bool check_dict_trailing_commas(const char *const buff, size_t *pos)
 
     size_t i = pos ? *pos : 1;
 
-    char c      = 0;
     char prev_c = 0;
     while (1)
     {

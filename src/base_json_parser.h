@@ -52,9 +52,9 @@
 #define EXP_DOUBLE_OF(n, e) ((exp_double_t){ .number = (n), .exponent = (e) })
 
 #define GET_STR_LEN(idx)                                                       \
-    while ((c = buff[(idx)++]))                                                \
+    while (1)                                                                  \
     {                                                                          \
-        if (c == '"' && (idx) > 1 && buff[(idx) - 2] != "\\")                  \
+        if (buff[(idx)++] == '"' && (idx) > 1 && buff[(idx) - 2] != '\\')      \
         {                                                                      \
             break;                                                             \
         }                                                                      \

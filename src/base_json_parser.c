@@ -340,7 +340,6 @@ size_t get_nb_elts_array(const char *const buff, size_t idx)
     u64 dict_count  = 0;
 
     // Only used for strings and numbers, to limit the number of memory writes
-    char c = 0;
     while (array_count)
     {
         switch (buff[idx++])
@@ -424,7 +423,6 @@ size_t get_nb_elts_dict(const char *const buff, size_t idx)
     bool is_in_key = true;
 
     // Only used for strings and numbers, to limit the number of memory writes
-    char c = 0;
     while (dict_count)
     {
         switch (buff[idx++])
