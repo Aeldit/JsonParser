@@ -54,7 +54,7 @@
 #define GET_STR_LEN(idx)                                                       \
     while ((c = buff[(idx)++]))                                                \
     {                                                                          \
-        if (c == '"' && (idx) > 1 && buff[(idx) - 2])                          \
+        if (c == '"' && (idx) > 1 && buff[(idx) - 2] != "\\")                  \
         {                                                                      \
             break;                                                             \
         }                                                                      \
