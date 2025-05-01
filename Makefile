@@ -30,11 +30,11 @@ mem-least: clean
 
 noprint: clean
 	$(CC) $(CFLAGS) $(NOPRINT) $(CFILESBASE) $(CFILESRO) -o $(TARGET)
-	./$(TARGET) ./$(JSONFILESDIR)/flights-1m.json
+	./$(TARGET) ./$(JSONFILESDIR)/big.json
 
 noprintrw: clean
 	$(CC) $(CFLAGS) $(NOPRINT) $(CFILESBASE) $(CFILESRW) -o $(TARGET)
-	./$(TARGET) ./$(JSONFILESDIR)/flights-1m.json
+	./$(TARGET) ./$(JSONFILESDIR)/big.json
 
 .PHONY:
 $(TARGET):
@@ -50,14 +50,14 @@ valgrind-compile: clean
 
 calgrind: valgrind-compile
 	valgrind --tool=callgrind --simulate-cache=yes \
-		--collect-jumps=yes ./$(TARGET) ./$(JSONFILESDIR)/flights-1m.json
+		--collect-jumps=yes ./$(TARGET) ./$(JSONFILESDIR)/big.json
 
 leaks: valgrind-compile
 	valgrind --leak-check=full --show-leak-kinds=all \
          --track-origins=yes ./$(TARGET) ./$(JSONFILESDIR)/big.json
 
 valgrind-compile-rw: clean
-	$(CC) $(CFLAGS)  $(CFILESBASE) $(CFILESRW) -o $(TARGET) -g
+	$(CC) $(CFLAGS) $(NOPRINT) -DNOVALIDATION $(CFILESBASE) $(CFILESRW) -o $(TARGET) -g
 
 calgrind-rw: valgrind-compile-rw
 	valgrind --tool=callgrind --simulate-cache=yes \
