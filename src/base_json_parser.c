@@ -196,11 +196,10 @@ string_t parse_string(const char *const buff, size_t *idx)
 
     size_t start_idx = *idx + 1;
     size_t len       = 0;
-    char c           = 0;
     // Counts the number of characters
-    while ((c = buff[start_idx + len]))
+    while (1)
     {
-        if (c == '"' && start_idx + len > 1
+        if (buff[start_idx + len] == '"' && start_idx + len > 1
             && buff[start_idx + len - 2] != '\\')
         {
             break;
