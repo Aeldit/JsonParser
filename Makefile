@@ -59,6 +59,10 @@ leaks: valgrind-compile
 valgrind-compile-rw: clean
 	$(CC) $(CFLAGS)  $(CFILESBASE) $(CFILESRW) -o $(TARGET) -g
 
+calgrind-rw: valgrind-compile-rw
+	valgrind --tool=callgrind --simulate-cache=yes \
+		--collect-jumps=yes ./$(TARGET) ./$(JSONFILESDIR)/big.json
+
 leaks-rw: valgrind-compile-rw
 	valgrind --leak-check=full --show-leak-kinds=all \
          --track-origins=yes ./$(TARGET) ./$(JSONFILESDIR)/big.json
