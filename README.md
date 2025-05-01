@@ -32,17 +32,22 @@ If you want to use this parser in your C code, put the `src` directory of the pa
 > Notice how each struct (json, array, dict, value, item) or the parse function is prefixed with `ro`. For read-write mode, they will be prefixed by `rw`
 
 To read a json file in `ro` mode, call the `ro_parse()` function :
+
+> Note that in `ro` mode, `ro_array_t`, `ro_dict_t` and `ro_json_t` are passed by value.
+> However, in `rw` mode, they are passed by reference. This is because in `rw` mode, the values can be modified and thus need to exist in only one place to avoid errors.
+
 ```c
-ro_json_t j = ro_parse(file_path);
+ro_json_t j = ro_parse(file_path); // rw_json_t *j = rw_parse(file_path);
+// In rw mode, make sure to check if j is a valid pointer
 // Once you have this ro_json_t struct pointer, you first have to check whether it is an array or a dict :
-if (j.is_array)
+if (j.is_array) // if (j->is_array)
 {
-    ro_array_t a = j.array;
+    ro_array_t a = j.array; // rw_array_t *a = j->array;
     // Do stuff with the array
 }
 else
 {
-    ro_dict_t d = j.dict;
+    ro_dict_t d = j.dict; // rw_dict_t *d = j->dict;
     // Do stuff with the dict
 }
 ```
