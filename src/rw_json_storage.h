@@ -181,6 +181,8 @@ bool rw_dict_add_dict(rw_dict_t *d, string_t key, rw_dict_t *value);
 void rw_array_remove(rw_array_t *a, size_t index);
 void rw_dict_remove(rw_dict_t *d, string_t key);
 
+bool rw_dict_contains_key(rw_dict_t *d, string_t key);
+
 rw_value_t *rw_array_get(rw_array_t *a, size_t index);
 rw_item_t *rw_dict_get(rw_dict_t *d, string_t key);
 

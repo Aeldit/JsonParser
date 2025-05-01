@@ -54,7 +54,6 @@
 **                               LOCAL FUNCTIONS                              **
 *******************************************************************************/
 #ifdef DEBUG
-#    include <stdio.h>
 /**
 ** \brief Debug function that allows printing the linked lists arrays
 */
@@ -97,6 +96,8 @@ void arr_print_array(rw_array_t *a)
                     break;
                 case T_DICT:
                     printf("rw_dict_t, ");
+                    break;
+                default:
                     break;
                 }
             }
@@ -619,7 +620,7 @@ bool rw_array_add_dict(rw_array_t *a, rw_dict_t *value)
 
 bool rw_dict_add_str(rw_dict_t *d, string_t key, string_t value)
 {
-    if (d && key.str && value.str)
+    if (d && key.str && value.str && !rw_dict_contains_key(d, key))
     {
         ADD(item_link_t, d);
         d->tail->items[d->tail->insert_index++] = RW_ITEM_OF(T_STR, strv);
@@ -630,7 +631,7 @@ bool rw_dict_add_str(rw_dict_t *d, string_t key, string_t value)
 
 bool rw_dict_add_long(rw_dict_t *d, string_t key, i64 value)
 {
-    if (d && key.str)
+    if (d && key.str && !rw_dict_contains_key(d, key))
     {
         ADD(item_link_t, d);
         d->tail->items[d->tail->insert_index++] = RW_ITEM_OF(T_LONG, longv);
@@ -641,7 +642,7 @@ bool rw_dict_add_long(rw_dict_t *d, string_t key, i64 value)
 
 bool rw_dict_add_double(rw_dict_t *d, string_t key, double value)
 {
-    if (d && key.str)
+    if (d && key.str && !rw_dict_contains_key(d, key))
     {
         ADD(item_link_t, d);
         d->tail->items[d->tail->insert_index++] = RW_ITEM_OF(T_DOUBLE, doublev);
@@ -652,7 +653,7 @@ bool rw_dict_add_double(rw_dict_t *d, string_t key, double value)
 
 bool rw_dict_add_exp_long(rw_dict_t *d, string_t key, exp_long_t value)
 {
-    if (d && key.str)
+    if (d && key.str && !rw_dict_contains_key(d, key))
     {
         ADD(item_link_t, d);
         d->tail->items[d->tail->insert_index++] =
@@ -664,7 +665,7 @@ bool rw_dict_add_exp_long(rw_dict_t *d, string_t key, exp_long_t value)
 
 bool rw_dict_add_exp_double(rw_dict_t *d, string_t key, exp_double_t value)
 {
-    if (d && key.str)
+    if (d && key.str && !rw_dict_contains_key(d, key))
     {
         ADD(item_link_t, d);
         d->tail->items[d->tail->insert_index++] =
@@ -676,7 +677,7 @@ bool rw_dict_add_exp_double(rw_dict_t *d, string_t key, exp_double_t value)
 
 bool rw_dict_add_bool(rw_dict_t *d, string_t key, bool value)
 {
-    if (d && key.str)
+    if (d && key.str && !rw_dict_contains_key(d, key))
     {
         ADD(item_link_t, d);
         d->tail->items[d->tail->insert_index++] = RW_ITEM_OF(T_BOOL, boolv);
@@ -687,7 +688,7 @@ bool rw_dict_add_bool(rw_dict_t *d, string_t key, bool value)
 
 bool rw_dict_add_null(rw_dict_t *d, string_t key)
 {
-    if (d && key.str)
+    if (d && key.str && !rw_dict_contains_key(d, key))
     {
         ADD(item_link_t, d);
         d->tail->items[d->tail->insert_index++] =
@@ -699,7 +700,7 @@ bool rw_dict_add_null(rw_dict_t *d, string_t key)
 
 bool rw_dict_add_array(rw_dict_t *d, string_t key, rw_array_t *value)
 {
-    if (d && key.str && value)
+    if (d && key.str && value && !rw_dict_contains_key(d, key))
     {
         ADD(item_link_t, d);
         d->tail->items[d->tail->insert_index++] = RW_ITEM_OF(T_ARR, arrayv);
@@ -710,7 +711,7 @@ bool rw_dict_add_array(rw_dict_t *d, string_t key, rw_array_t *value)
 
 bool rw_dict_add_dict(rw_dict_t *d, string_t key, rw_dict_t *value)
 {
-    if (d && key.str && value)
+    if (d && key.str && value && !rw_dict_contains_key(d, key))
     {
         ADD(item_link_t, d);
         d->tail->items[d->tail->insert_index++] = RW_ITEM_OF(T_DICT, dictv);
@@ -824,6 +825,32 @@ void rw_dict_remove(rw_dict_t *d, string_t key)
         }
         link = link->next;
     }
+}
+
+/*******************************************************************************
+**                                 CONTAINS                                   **
+*******************************************************************************/
+bool rw_dict_contains_key(rw_dict_t *d, string_t key)
+{
+    if (!d)
+    {
+        return false;
+    }
+
+    item_link_t *link = d->head;
+    while (link)
+    {
+        rw_item_t *items = link->items;
+        for (unsigned char i = 0; i < ARRAY_LEN; ++i)
+        {
+            if (strings_equals(key, items[i].key))
+            {
+                return true;
+            }
+        }
+        link = link->next;
+    }
+    return false;
 }
 
 /*******************************************************************************

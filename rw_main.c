@@ -27,6 +27,11 @@ int main(int argc, char *argv[])
         );
         rw_array_add_array(j->array, a);
         rw_array_remove(a, 2);
+        rw_dict_t *d = init_rw_dict_with(
+            2, RWIT_BOOL(string_nofree_of("test"), true),
+            RWIT_BOOL(string_nofree_of("test"), false)
+        );
+        rw_array_add_dict(j->array, d);
         write_rw_json_to_file(*j, "out.json");
     }
     rw_json_print(j);
