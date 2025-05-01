@@ -30,6 +30,15 @@ rw_dict_t *destroy_rw_dict_on_error(rw_dict_t *d, string_t key)
 /*******************************************************************************
 **                              LOCAL FUNCTIONS                               **
 *******************************************************************************/
+// destroy_fn should be __asm__("nop") when the value doesn't need to be freed
+#define ARR_ADD_OR_RET_DESTROY(add_fn, value, destroy_fn)                      \
+    if (!add_fn(a, (value)))                                                   \
+    {                                                                          \
+        destroy_fn;                                                            \
+        return destroy_rw_array_on_error(a);                                   \
+    }                                                                          \
+    ++nb_elts_parsed
+
 rw_array_t *rw_parse_array(const char *const b, size_t *idx)
 {
     if (!b)
@@ -42,7 +51,7 @@ rw_array_t *rw_parse_array(const char *const b, size_t *idx)
     size_t i = idx ? *idx + 1 : 0;
 
     size_t nb_elts = get_nb_elts_array(b, i);
-    rw_array_t *a  = calloc(1, sizeof(rw_array_t));
+    rw_array_t *a  = init_rw_array();
     if (!a || !nb_elts)
     {
         return a;
@@ -52,7 +61,8 @@ rw_array_t *rw_parse_array(const char *const b, size_t *idx)
 
     string_t s             = NULL_STRING;
     str_and_len_tuple_t sl = NULL_STR_AND_LEN_TUPLE;
-    size_t len             = 0;
+    rw_array_t *tmp_a      = 0;
+    rw_dict_t *tmp_d       = 0;
 
     while (nb_elts_parsed < nb_elts)
     {
@@ -66,8 +76,7 @@ rw_array_t *rw_parse_array(const char *const b, size_t *idx)
             {
                 return destroy_rw_array_on_error(a);
             }
-            rw_array_add_str(a, s);
-            ++nb_elts_parsed;
+            ARR_ADD_OR_RET_DESTROY(rw_array_add_str, s, destroy_string(s));
             break;
 
         case '+':
@@ -93,10 +102,15 @@ rw_array_t *rw_parse_array(const char *const b, size_t *idx)
                 switch (dwowe.has_exponent)
                 {
                 case 0:
-                    rw_array_add_double(a, dwowe.double_value);
+                    ARR_ADD_OR_RET_DESTROY(
+                        rw_array_add_double, dwowe.double_value, __asm__("nop")
+                    );
                     break;
                 case 1:
-                    rw_array_add_exp_double(a, dwowe.double_exp_value);
+                    ARR_ADD_OR_RET_DESTROY(
+                        rw_array_add_exp_double, dwowe.double_exp_value,
+                        __asm__("nop")
+                    );
                     break;
                 case 2:
                     free(sl.str);
@@ -109,10 +123,15 @@ rw_array_t *rw_parse_array(const char *const b, size_t *idx)
                 switch (lwowe.has_exponent)
                 {
                 case 0:
-                    rw_array_add_long(a, lwowe.long_value);
+                    ARR_ADD_OR_RET_DESTROY(
+                        rw_array_add_long, lwowe.long_value, __asm__("nop")
+                    );
                     break;
                 case 1:
-                    rw_array_add_exp_long(a, lwowe.long_exp_value);
+                    ARR_ADD_OR_RET_DESTROY(
+                        rw_array_add_exp_long, lwowe.long_exp_value,
+                        __asm__("nop")
+                    );
                     break;
                 case 2:
                     free(sl.str);
@@ -120,30 +139,43 @@ rw_array_t *rw_parse_array(const char *const b, size_t *idx)
                 }
             }
             free(sl.str);
-            ++nb_elts_parsed;
             break;
 
         case 't':
         case 'f':
-            len = parse_boolean(b, &i);
-            rw_array_add_bool(a, len == 4 ? 1 : 0);
-            ++nb_elts_parsed;
+            ARR_ADD_OR_RET_DESTROY(
+                rw_array_add_bool, parse_boolean(b, &i) == 4 ? true : false,
+                __asm__("nop")
+            );
             break;
 
         case 'n':
-            rw_array_add_null(a);
+            if (!rw_array_add_null(a))
+            {
+                return destroy_rw_array_on_error(a);
+            }
             i += 3;
             ++nb_elts_parsed;
             break;
 
         case '[':
-            rw_array_add_array(a, rw_parse_array(b, &i));
-            ++nb_elts_parsed;
+            if (!(tmp_a = rw_parse_array(b, &i)))
+            {
+                return destroy_rw_array_on_error(a);
+            }
+            ARR_ADD_OR_RET_DESTROY(
+                rw_array_add_array, tmp_a, destroy_rw_array(tmp_a)
+            );
             break;
 
         case '{':
-            rw_array_add_dict(a, rw_parse_dict(b, &i));
-            ++nb_elts_parsed;
+            if (!(tmp_d = rw_parse_dict(b, &i)))
+            {
+                return destroy_rw_array_on_error(a);
+            }
+            ARR_ADD_OR_RET_DESTROY(
+                rw_array_add_dict, tmp_d, destroy_rw_dict(tmp_d)
+            );
             break;
         }
         ++i;
@@ -155,9 +187,11 @@ rw_array_t *rw_parse_array(const char *const b, size_t *idx)
     return a;
 }
 
-#define ADD_OR_RETURN_DESTROY(add_fn, value)                                   \
+// destroy_fn should be __asm__("nop") when the value doesn't need to be freed
+#define DICT_ADD_OR_RET_DESTROY(add_fn, value, destroy_fn)                     \
     if (!add_fn(d, key, (value)))                                              \
     {                                                                          \
+        destroy_fn;                                                            \
         return destroy_rw_dict_on_error(d, key);                               \
     }                                                                          \
     ++nb_elts_parsed
@@ -174,7 +208,7 @@ rw_dict_t *rw_parse_dict(const char *const b, size_t *idx)
     size_t i = idx ? *idx + 1 : 0;
 
     size_t nb_elts = get_nb_elts_dict(b, i);
-    rw_dict_t *d   = calloc(1, sizeof(rw_dict_t));
+    rw_dict_t *d   = init_rw_dict();
     if (!d || !nb_elts)
     {
         return d;
@@ -182,12 +216,13 @@ rw_dict_t *rw_parse_dict(const char *const b, size_t *idx)
 
     size_t nb_elts_parsed = 0;
 
-    string_t key        = NULL_STRING;
     bool is_waiting_key = true;
 
+    string_t key           = NULL_STRING;
     string_t s             = NULL_STRING;
     str_and_len_tuple_t sl = NULL_STR_AND_LEN_TUPLE;
-    size_t len             = 0;
+    rw_array_t *tmp_a      = 0;
+    rw_dict_t *tmp_d       = 0;
 
     while (nb_elts_parsed < nb_elts)
     {
@@ -211,12 +246,7 @@ rw_dict_t *rw_parse_dict(const char *const b, size_t *idx)
                 {
                     return destroy_rw_dict_on_error(d, key);
                 }
-                if (!rw_dict_add_str(d, key, s))
-                {
-                    destroy_string(s);
-                    return destroy_rw_dict_on_error(d, key);
-                }
-                ++nb_elts_parsed;
+                DICT_ADD_OR_RET_DESTROY(rw_dict_add_str, s, destroy_string(s));
             }
             break;
 
@@ -243,13 +273,14 @@ rw_dict_t *rw_parse_dict(const char *const b, size_t *idx)
                 switch (dwowe.has_exponent)
                 {
                 case 0:
-                    ADD_OR_RETURN_DESTROY(
-                        rw_dict_add_double, dwowe.double_value
+                    DICT_ADD_OR_RET_DESTROY(
+                        rw_dict_add_double, dwowe.double_value, __asm__("nop")
                     );
                     break;
                 case 1:
-                    ADD_OR_RETURN_DESTROY(
-                        rw_dict_add_exp_double, dwowe.double_exp_value
+                    DICT_ADD_OR_RET_DESTROY(
+                        rw_dict_add_exp_double, dwowe.double_exp_value,
+                        __asm__("nop")
                     );
                     break;
                 case 2:
@@ -263,11 +294,14 @@ rw_dict_t *rw_parse_dict(const char *const b, size_t *idx)
                 switch (lwowe.has_exponent)
                 {
                 case 0:
-                    ADD_OR_RETURN_DESTROY(rw_dict_add_long, lwowe.long_value);
+                    DICT_ADD_OR_RET_DESTROY(
+                        rw_dict_add_long, lwowe.long_value, __asm__("nop")
+                    );
                     break;
                 case 1:
-                    ADD_OR_RETURN_DESTROY(
-                        rw_dict_add_exp_long, lwowe.long_exp_value
+                    DICT_ADD_OR_RET_DESTROY(
+                        rw_dict_add_exp_long, lwowe.long_exp_value,
+                        __asm__("nop")
                     );
                     break;
                 case 2:
@@ -280,8 +314,10 @@ rw_dict_t *rw_parse_dict(const char *const b, size_t *idx)
 
         case 't':
         case 'f':
-            len = parse_boolean(b, &i);
-            ADD_OR_RETURN_DESTROY(rw_dict_add_bool, len == 4 ? true : false);
+            DICT_ADD_OR_RET_DESTROY(
+                rw_dict_add_bool, parse_boolean(b, &i) == 4 ? true : false,
+                __asm__("nop")
+            );
             break;
 
         case 'n':
@@ -294,11 +330,23 @@ rw_dict_t *rw_parse_dict(const char *const b, size_t *idx)
             break;
 
         case '[':
-            ADD_OR_RETURN_DESTROY(rw_dict_add_array, rw_parse_array(b, &i));
+            if (!(tmp_a = rw_parse_array(b, &i)))
+            {
+                return destroy_rw_dict_on_error(d, key);
+            }
+            DICT_ADD_OR_RET_DESTROY(
+                rw_dict_add_array, tmp_a, destroy_rw_array(tmp_a)
+            );
             break;
 
         case '{':
-            ADD_OR_RETURN_DESTROY(rw_dict_add_dict, rw_parse_dict(b, &i));
+            if (!(tmp_d = rw_parse_dict(b, &i)))
+            {
+                return destroy_rw_dict_on_error(d, key);
+            }
+            DICT_ADD_OR_RET_DESTROY(
+                rw_dict_add_dict, tmp_d, destroy_rw_dict(tmp_d)
+            );
             break;
 
         case ',':
