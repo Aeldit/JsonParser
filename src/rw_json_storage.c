@@ -517,7 +517,7 @@ rw_json_t *init_rw_json(bool is_array, rw_array_t *a, rw_dict_t *d)
 *******************************************************************************/
 bool rw_array_add_str(rw_array_t *a, string_t value)
 {
-    if (a && value.str)
+    if (a)
     {
         ADD(value_link_t, a);
         a->tail->values[a->tail->insert_index++] = RW_VALUE_OF(T_STR, strv);
@@ -598,7 +598,7 @@ bool rw_array_add_null(rw_array_t *a)
 
 bool rw_array_add_array(rw_array_t *a, rw_array_t *value)
 {
-    if (a && value)
+    if (a)
     {
         ADD(value_link_t, a);
         a->tail->values[a->tail->insert_index++] = RW_VALUE_OF(T_ARR, arrayv);
@@ -609,7 +609,7 @@ bool rw_array_add_array(rw_array_t *a, rw_array_t *value)
 
 bool rw_array_add_dict(rw_array_t *a, rw_dict_t *value)
 {
-    if (a && value)
+    if (a)
     {
         ADD(value_link_t, a);
         a->tail->values[a->tail->insert_index++] = RW_VALUE_OF(T_DICT, dictv);
@@ -620,7 +620,7 @@ bool rw_array_add_dict(rw_array_t *a, rw_dict_t *value)
 
 bool rw_dict_add_str(rw_dict_t *d, string_t key, string_t value)
 {
-    if (d && key.str && value.str && !rw_dict_contains_key(d, key))
+    if (d && !rw_dict_contains_key(d, key))
     {
         ADD(item_link_t, d);
         d->tail->items[d->tail->insert_index++] = RW_ITEM_OF(T_STR, strv);
@@ -631,7 +631,7 @@ bool rw_dict_add_str(rw_dict_t *d, string_t key, string_t value)
 
 bool rw_dict_add_long(rw_dict_t *d, string_t key, i64 value)
 {
-    if (d && key.str && !rw_dict_contains_key(d, key))
+    if (d && !rw_dict_contains_key(d, key))
     {
         ADD(item_link_t, d);
         d->tail->items[d->tail->insert_index++] = RW_ITEM_OF(T_LONG, longv);
@@ -642,7 +642,7 @@ bool rw_dict_add_long(rw_dict_t *d, string_t key, i64 value)
 
 bool rw_dict_add_double(rw_dict_t *d, string_t key, double value)
 {
-    if (d && key.str && !rw_dict_contains_key(d, key))
+    if (d && !rw_dict_contains_key(d, key))
     {
         ADD(item_link_t, d);
         d->tail->items[d->tail->insert_index++] = RW_ITEM_OF(T_DOUBLE, doublev);
@@ -653,7 +653,7 @@ bool rw_dict_add_double(rw_dict_t *d, string_t key, double value)
 
 bool rw_dict_add_exp_long(rw_dict_t *d, string_t key, exp_long_t value)
 {
-    if (d && key.str && !rw_dict_contains_key(d, key))
+    if (d && !rw_dict_contains_key(d, key))
     {
         ADD(item_link_t, d);
         d->tail->items[d->tail->insert_index++] =
@@ -665,7 +665,7 @@ bool rw_dict_add_exp_long(rw_dict_t *d, string_t key, exp_long_t value)
 
 bool rw_dict_add_exp_double(rw_dict_t *d, string_t key, exp_double_t value)
 {
-    if (d && key.str && !rw_dict_contains_key(d, key))
+    if (d && !rw_dict_contains_key(d, key))
     {
         ADD(item_link_t, d);
         d->tail->items[d->tail->insert_index++] =
@@ -677,7 +677,7 @@ bool rw_dict_add_exp_double(rw_dict_t *d, string_t key, exp_double_t value)
 
 bool rw_dict_add_bool(rw_dict_t *d, string_t key, bool value)
 {
-    if (d && key.str && !rw_dict_contains_key(d, key))
+    if (d && !rw_dict_contains_key(d, key))
     {
         ADD(item_link_t, d);
         d->tail->items[d->tail->insert_index++] = RW_ITEM_OF(T_BOOL, boolv);
@@ -688,7 +688,7 @@ bool rw_dict_add_bool(rw_dict_t *d, string_t key, bool value)
 
 bool rw_dict_add_null(rw_dict_t *d, string_t key)
 {
-    if (d && key.str && !rw_dict_contains_key(d, key))
+    if (d && !rw_dict_contains_key(d, key))
     {
         ADD(item_link_t, d);
         d->tail->items[d->tail->insert_index++] =
@@ -700,7 +700,7 @@ bool rw_dict_add_null(rw_dict_t *d, string_t key)
 
 bool rw_dict_add_array(rw_dict_t *d, string_t key, rw_array_t *value)
 {
-    if (d && key.str && value && !rw_dict_contains_key(d, key))
+    if (d && !rw_dict_contains_key(d, key))
     {
         ADD(item_link_t, d);
         d->tail->items[d->tail->insert_index++] = RW_ITEM_OF(T_ARR, arrayv);
@@ -711,7 +711,7 @@ bool rw_dict_add_array(rw_dict_t *d, string_t key, rw_array_t *value)
 
 bool rw_dict_add_dict(rw_dict_t *d, string_t key, rw_dict_t *value)
 {
-    if (d && key.str && value && !rw_dict_contains_key(d, key))
+    if (d && !rw_dict_contains_key(d, key))
     {
         ADD(item_link_t, d);
         d->tail->items[d->tail->insert_index++] = RW_ITEM_OF(T_DICT, dictv);
