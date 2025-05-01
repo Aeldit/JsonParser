@@ -126,10 +126,6 @@ rw_array_t *rw_parse_array(const char *const b, size_t *idx)
         case 't':
         case 'f':
             len = parse_boolean(b, &i);
-            if ((b[i] == 'f' && len != 5) || (b[i] == 't' && len != 4))
-            {
-                return destroy_rw_array_on_error(a);
-            }
             rw_array_add_bool(a, len == 4 ? 1 : 0);
             ++nb_elts_parsed;
             break;
@@ -285,10 +281,6 @@ rw_dict_t *rw_parse_dict(const char *const b, size_t *idx)
         case 't':
         case 'f':
             len = parse_boolean(b, &i);
-            if ((b[i] == 'f' && len != 5) || (b[i] == 't' && len != 4))
-            {
-                return destroy_rw_dict_on_error(d, key);
-            }
             ADD_OR_RETURN_DESTROY(rw_dict_add_bool, len == 4 ? true : false);
             break;
 
