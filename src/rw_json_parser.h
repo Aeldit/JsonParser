@@ -15,7 +15,6 @@
 ** \returns The json rw_array_t parsed from the position
 */
 rw_array_t *rw_parse_array(const char *const b, size_t *idx);
-
 /**
 ** \param b The buffer containing the object currently being parsed
 ** \param idx A pointer to the index of the character '{' that begins the
