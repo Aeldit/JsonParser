@@ -733,7 +733,6 @@ bool is_json_valid(const char *const buff, size_t buff_len, bool is_dict)
 
     if (!check_bools_nulls_numbers_counts(buff, buff_len, is_dict))
     {
-        printf("a");
         return false;
     }
 
@@ -741,24 +740,20 @@ bool is_json_valid(const char *const buff, size_t buff_len, bool is_dict)
     {
         if (!(check_dict_trailing_commas(buff, 0) && buff[buff_len - 2] == '}'))
         {
-            printf("b");
             return false;
         }
         if (!check_dict_missing_colons_commas(buff, 0))
         {
-            printf("c");
             return false;
         }
     }
 
     if (!(check_array_trailing_commas(buff, 0) && buff[buff_len - 2] == ']'))
     {
-        printf("d");
         return false;
     }
     if (!check_array_missing_commas(buff, 0))
     {
-        printf("e");
         return false;
     }
     return true;
