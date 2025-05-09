@@ -39,10 +39,9 @@ ro_array_t ro_parse_array(const char *const b, size_t *idx)
     // already read a '['
     size_t i = idx ? *idx + 1 : 0;
 
-    size_t nb_elts     = get_nb_elts_array(b, i);
-    ro_array_t a       = RO_ARRAY(nb_elts);
-    ro_value_t *values = a.values;
-    if (!nb_elts || !values)
+    size_t nb_elts = get_nb_elts_array(b, i);
+    ro_array_t a   = init_ro_array(nb_elts);
+    if (!nb_elts || !a.values)
     {
         return a;
     }
@@ -65,7 +64,7 @@ ro_array_t ro_parse_array(const char *const b, size_t *idx)
             {
                 return destroy_ro_array_on_error(&a);
             }
-            values[nb_elts_parsed++] = ROVAL_STR(s);
+            a.values[nb_elts_parsed++] = ROVAL_STR(s);
             break;
 
         case '+':
@@ -91,10 +90,11 @@ ro_array_t ro_parse_array(const char *const b, size_t *idx)
                 switch (dwowe.has_exponent)
                 {
                 case 0:
-                    values[nb_elts_parsed++] = ROVAL_DOUBLE(dwowe.double_value);
+                    a.values[nb_elts_parsed++] =
+                        ROVAL_DOUBLE(dwowe.double_value);
                     break;
                 case 1:
-                    values[nb_elts_parsed++] =
+                    a.values[nb_elts_parsed++] =
                         ROVAL_EXPDOUBLE(dwowe.double_exp_value);
                     break;
                 case 2:
@@ -108,10 +108,10 @@ ro_array_t ro_parse_array(const char *const b, size_t *idx)
                 switch (lwowe.has_exponent)
                 {
                 case 0:
-                    values[nb_elts_parsed++] = ROVAL_LONG(lwowe.long_value);
+                    a.values[nb_elts_parsed++] = ROVAL_LONG(lwowe.long_value);
                     break;
                 case 1:
-                    values[nb_elts_parsed++] =
+                    a.values[nb_elts_parsed++] =
                         ROVAL_EXPLONG(lwowe.long_exp_value);
                     break;
                 case 2:
@@ -129,11 +129,11 @@ ro_array_t ro_parse_array(const char *const b, size_t *idx)
             {
                 return destroy_ro_array_on_error(&a);
             }
-            values[nb_elts_parsed++] = ROVAL_BOOL(len == 4);
+            a.values[nb_elts_parsed++] = ROVAL_BOOL(len == 4);
             break;
 
         case 'n':
-            values[nb_elts_parsed++] = ROVAL_NULL;
+            a.values[nb_elts_parsed++] = ROVAL_NULL;
             i += 3;
             break;
 
@@ -143,7 +143,7 @@ ro_array_t ro_parse_array(const char *const b, size_t *idx)
             {
                 return destroy_ro_array_on_error(&a);
             }
-            values[nb_elts_parsed++] = ROVAL_ARR(tmp_a);
+            a.values[nb_elts_parsed++] = ROVAL_ARR(tmp_a);
             break;
 
         case '{':
@@ -152,7 +152,7 @@ ro_array_t ro_parse_array(const char *const b, size_t *idx)
             {
                 return destroy_ro_array_on_error(&a);
             }
-            values[nb_elts_parsed++] = ROVAL_DICT(tmp_jd);
+            a.values[nb_elts_parsed++] = ROVAL_DICT(tmp_jd);
             break;
         }
         ++i;
@@ -167,7 +167,7 @@ ro_array_t ro_parse_array(const char *const b, size_t *idx)
 #define DICT_ADD(elt)                                                          \
     if (key.str)                                                               \
     {                                                                          \
-        items[nb_elts_parsed++] = (elt);                                       \
+        d.items[nb_elts_parsed++] = (elt);                                     \
     }
 
 ro_dict_t ro_parse_dict(const char *const b, size_t *idx)
@@ -181,10 +181,9 @@ ro_dict_t ro_parse_dict(const char *const b, size_t *idx)
     // already read a '{'
     size_t i = idx ? *idx + 1 : 0;
 
-    size_t nb_elts   = get_nb_elts_dict(b, i);
-    ro_dict_t d      = RO_DICT(nb_elts);
-    ro_item_t *items = d.items;
-    if (!nb_elts || !items)
+    size_t nb_elts = get_nb_elts_dict(b, i);
+    ro_dict_t d    = init_ro_dict(nb_elts);
+    if (!nb_elts || !d.items)
     {
         return d;
     }

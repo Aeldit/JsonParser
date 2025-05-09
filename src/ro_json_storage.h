@@ -127,7 +127,9 @@ typedef struct
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
+ro_array_t init_ro_array(size_t size);
 ro_array_t init_ro_array_with(size_t size, ...);
+ro_dict_t init_ro_dict(size_t size);
 ro_dict_t init_ro_dict_with(size_t size, ...);
 
 ro_value_t ro_array_get(ro_array_t a, size_t index);

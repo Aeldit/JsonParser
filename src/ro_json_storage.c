@@ -10,6 +10,22 @@
 /*******************************************************************************
 **                                 FUNCTIONS                                  **
 *******************************************************************************/
+ro_array_t init_ro_array(size_t size)
+{
+    if (!size)
+    {
+        return (ro_array_t){ 0 };
+    }
+
+    ro_array_t a = { .size   = size,
+                     .values = malloc(size * sizeof(ro_value_t)) };
+    if (!a.values)
+    {
+        return (ro_array_t){ 0 };
+    }
+    return a;
+}
+
 ro_array_t init_ro_array_with(size_t size, ...)
 {
     if (!size)
@@ -33,6 +49,21 @@ ro_array_t init_ro_array_with(size_t size, ...)
 
     va_end(args);
     return (ro_array_t){ .size = size, .values = values };
+}
+
+ro_dict_t init_ro_dict(size_t size)
+{
+    if (!size)
+    {
+        return (ro_dict_t){ 0 };
+    }
+
+    ro_dict_t d = { .size = size, .items = malloc(size * sizeof(ro_item_t)) };
+    if (!d.items)
+    {
+        return (ro_dict_t){ 0 };
+    }
+    return d;
 }
 
 ro_dict_t init_ro_dict_with(size_t size, ...)
