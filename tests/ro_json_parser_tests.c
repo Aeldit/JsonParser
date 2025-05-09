@@ -65,8 +65,8 @@ Test(ro_json_parser, ro_parse_array_buff_empty)
         "Expected the 2 arrays to be equal, but they were not"
     );
 
-    destroy_ro_array(a);
-    destroy_ro_array(b);
+    destroy_ro_array(&a);
+    destroy_ro_array(&b);
 }
 
 Test(ro_json_parser, ro_parse_array_buff_long_numbers)
@@ -91,8 +91,8 @@ Test(ro_json_parser, ro_parse_array_buff_long_numbers)
         "Expected the 2 arrays to be equal, but they were not"
     );
 
-    destroy_ro_array(a);
-    destroy_ro_array(b);
+    destroy_ro_array(&a);
+    destroy_ro_array(&b);
 }
 
 Test(ro_json_parser, ro_parse_array_buff_nested_multi_type)
@@ -122,8 +122,8 @@ Test(ro_json_parser, ro_parse_array_buff_nested_multi_type)
         "Expected the 2 arrays to be equal, but they were not"
     );
 
-    destroy_ro_array(a);
-    destroy_ro_array(b);
+    destroy_ro_array(&a);
+    destroy_ro_array(&b);
 }
 
 /*******************************************************************************
@@ -178,8 +178,8 @@ Test(ro_json_parser, ro_parse_dict_buff_empty)
     bool is_equal = ro_dicts_equal(d, b);
 
     cr_expect(is_equal, "Expected the 2 dicts to be equal, but they were not");
-    destroy_ro_dict(d);
-    destroy_ro_dict(b);
+    destroy_ro_dict(&d);
+    destroy_ro_dict(&b);
 }
 
 Test(ro_json_parser, ro_parse_dict_buff_numbers)
@@ -195,8 +195,8 @@ Test(ro_json_parser, ro_parse_dict_buff_numbers)
     bool is_equal = ro_dicts_equal(d, b);
 
     cr_expect(is_equal, "Expected the 2 dicts to be equal, but they were not");
-    destroy_ro_dict(d);
-    destroy_ro_dict(b);
+    destroy_ro_dict(&d);
+    destroy_ro_dict(&b);
 }
 
 Test(ro_json_parser, ro_parse_dict_buff_nested_multi_type)
@@ -225,8 +225,8 @@ Test(ro_json_parser, ro_parse_dict_buff_nested_multi_type)
     bool is_equal = ro_dicts_equal(d, b);
 
     cr_expect(is_equal, "Expected the 2 dicts to be equal, but they were not");
-    destroy_ro_dict(d);
-    destroy_ro_dict(b);
+    destroy_ro_dict(&d);
+    destroy_ro_dict(&b);
 }
 
 /*******************************************************************************
@@ -314,6 +314,6 @@ Test(ro_json_parser, ro_parse_array)
         "Expected the 2 dicts to be equal, but they were not"
     );
 
-    destroy_ro_json(ro_json);
-    destroy_ro_json(ro_json_manual);
+    destroy_ro_json(&ro_json);
+    destroy_ro_json(&ro_json_manual);
 }

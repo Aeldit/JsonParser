@@ -125,7 +125,7 @@ void rw_array_print(rw_array_t *a)
 #ifndef VALGRING_DISABLE_PRINT
     string_t s = get_rw_array_as_str(a, 1);
     printf("%s", s.str);
-    destroy_string(s);
+    destroy_string(&s);
 #endif
 }
 
@@ -134,7 +134,7 @@ void rw_dict_print(rw_dict_t *d)
 #ifndef VALGRING_DISABLE_PRINT
     string_t s = get_rw_dict_as_str(d, 1);
     printf("%s", s.str);
-    destroy_string(s);
+    destroy_string(&s);
 #endif
 }
 

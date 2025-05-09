@@ -12,13 +12,13 @@
 /*******************************************************************************
 **                               LOCAL FUNCTIONS                              **
 *******************************************************************************/
-ro_array_t destroy_ro_array_on_error(ro_array_t a)
+ro_array_t destroy_ro_array_on_error(ro_array_t *a)
 {
     destroy_ro_array(a);
     return ERROR_RO_ARRAY;
 }
 
-ro_dict_t destroy_ro_dict_on_error(ro_dict_t d, string_t key)
+ro_dict_t destroy_ro_dict_on_error(ro_dict_t *d, string_t *key)
 {
     destroy_string(key);
     destroy_ro_dict(d);
@@ -63,7 +63,7 @@ ro_array_t ro_parse_array(const char *const b, size_t *idx)
         case '"':
             if (!(s = parse_string(b, &i)).str)
             {
-                return destroy_ro_array_on_error(a);
+                return destroy_ro_array_on_error(&a);
             }
             values[nb_elts_parsed++] = ROVAL_STR(s);
             break;
@@ -82,7 +82,7 @@ ro_array_t ro_parse_array(const char *const b, size_t *idx)
         case '9':
             if (!(sl = parse_number(b, &i)).str)
             {
-                return destroy_ro_array_on_error(a);
+                return destroy_ro_array_on_error(&a);
             }
 
             if (sl.is_float)
@@ -99,7 +99,7 @@ ro_array_t ro_parse_array(const char *const b, size_t *idx)
                     break;
                 case 2:
                     free(sl.str);
-                    return destroy_ro_array_on_error(a);
+                    return destroy_ro_array_on_error(&a);
                 }
             }
             else
@@ -116,7 +116,7 @@ ro_array_t ro_parse_array(const char *const b, size_t *idx)
                     break;
                 case 2:
                     free(sl.str);
-                    return destroy_ro_array_on_error(a);
+                    return destroy_ro_array_on_error(&a);
                 }
             }
             free(sl.str);
@@ -127,7 +127,7 @@ ro_array_t ro_parse_array(const char *const b, size_t *idx)
             len = parse_boolean(b, &i);
             if ((c == 'f' && len != 5) || (c == 't' && len != 4))
             {
-                return destroy_ro_array_on_error(a);
+                return destroy_ro_array_on_error(&a);
             }
             values[nb_elts_parsed++] = ROVAL_BOOL(len == 4);
             break;
@@ -141,7 +141,7 @@ ro_array_t ro_parse_array(const char *const b, size_t *idx)
             tmp_a = ro_parse_array(b, &i);
             if (tmp_a.size && !tmp_a.values)
             {
-                return destroy_ro_array_on_error(a);
+                return destroy_ro_array_on_error(&a);
             }
             values[nb_elts_parsed++] = ROVAL_ARR(tmp_a);
             break;
@@ -150,7 +150,7 @@ ro_array_t ro_parse_array(const char *const b, size_t *idx)
             tmp_jd = ro_parse_dict(b, &i);
             if (tmp_jd.size && !tmp_jd.items)
             {
-                return destroy_ro_array_on_error(a);
+                return destroy_ro_array_on_error(&a);
             }
             values[nb_elts_parsed++] = ROVAL_DICT(tmp_jd);
             break;
@@ -210,7 +210,7 @@ ro_dict_t ro_parse_dict(const char *const b, size_t *idx)
             {
                 if (!(key = parse_string(b, &i)).str)
                 {
-                    return destroy_ro_dict_on_error(d, key);
+                    return destroy_ro_dict_on_error(&d, &key);
                 }
                 is_waiting_key = false;
             }
@@ -218,7 +218,7 @@ ro_dict_t ro_parse_dict(const char *const b, size_t *idx)
             {
                 if (!(s = parse_string(b, &i)).str)
                 {
-                    return destroy_ro_dict_on_error(d, key);
+                    return destroy_ro_dict_on_error(&d, &key);
                 }
                 DICT_ADD(ROIT_STR(key, s));
             }
@@ -238,7 +238,7 @@ ro_dict_t ro_parse_dict(const char *const b, size_t *idx)
         case '9':
             if (!(sl = parse_number(b, &i)).str)
             {
-                return destroy_ro_dict_on_error(d, key);
+                return destroy_ro_dict_on_error(&d, &key);
             }
 
             if (sl.is_float)
@@ -254,7 +254,7 @@ ro_dict_t ro_parse_dict(const char *const b, size_t *idx)
                     break;
                 case 2:
                     free(sl.str);
-                    return destroy_ro_dict_on_error(d, key);
+                    return destroy_ro_dict_on_error(&d, &key);
                 }
             }
             else
@@ -270,7 +270,7 @@ ro_dict_t ro_parse_dict(const char *const b, size_t *idx)
                     break;
                 case 2:
                     free(sl.str);
-                    return destroy_ro_dict_on_error(d, key);
+                    return destroy_ro_dict_on_error(&d, &key);
                 }
             }
             free(sl.str);
@@ -281,7 +281,7 @@ ro_dict_t ro_parse_dict(const char *const b, size_t *idx)
             len = parse_boolean(b, &i);
             if ((c == 'f' && len != 5) || (c == 't' && len != 4))
             {
-                return destroy_ro_dict_on_error(d, key);
+                return destroy_ro_dict_on_error(&d, &key);
             }
             DICT_ADD(ROIT_BOOL(key, len == 4));
             break;
@@ -295,7 +295,7 @@ ro_dict_t ro_parse_dict(const char *const b, size_t *idx)
             tmp_ja = ro_parse_array(b, &i);
             if (tmp_ja.size && !tmp_ja.values)
             {
-                return destroy_ro_dict_on_error(d, key);
+                return destroy_ro_dict_on_error(&d, &key);
             }
             DICT_ADD(ROIT_ARR(key, tmp_ja));
             break;
@@ -304,7 +304,7 @@ ro_dict_t ro_parse_dict(const char *const b, size_t *idx)
             tmp_jd = ro_parse_dict(b, &i);
             if (tmp_jd.size && !tmp_jd.items)
             {
-                return destroy_ro_dict_on_error(d, key);
+                return destroy_ro_dict_on_error(&d, &key);
             }
             DICT_ADD(ROIT_DICT(key, tmp_jd));
             break;

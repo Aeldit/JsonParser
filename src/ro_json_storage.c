@@ -91,65 +91,79 @@ ro_item_t ro_dict_get(ro_dict_t d, string_t key)
 /*******************************************************************************
 **                                 DESTRUCTION                                **
 *******************************************************************************/
-void destroy_ro_array(ro_array_t a)
+void destroy_ro_array(ro_array_t *a)
 {
-    ro_value_t *values = a.values;
-    size_t size        = a.size;
+    if (!a || !a->values)
+    {
+        return;
+    }
+
+    ro_value_t *values = a->values;
+    size_t size        = a->size;
     for (size_t i = 0; i < size; ++i)
     {
         ro_value_t val = values[i];
         switch (val.type)
         {
         case T_STR:
-            destroy_string(val.strv);
+            destroy_string(&val.strv);
             break;
         case T_ARR:
-            destroy_ro_array(val.arrayv);
+            destroy_ro_array(&val.arrayv);
             break;
         case T_DICT:
-            destroy_ro_dict(val.dictv);
+            destroy_ro_dict(&val.dictv);
             break;
         default:
             break;
         }
     }
     free(values);
+    a->size   = 0;
+    a->values = 0;
 }
 
-void destroy_ro_dict(ro_dict_t d)
+void destroy_ro_dict(ro_dict_t *d)
 {
-    ro_item_t *items = d.items;
-    size_t size      = d.size;
+    if (!d || !d->items)
+    {
+        return;
+    }
+
+    ro_item_t *items = d->items;
+    size_t size      = d->size;
     for (size_t i = 0; i < size; ++i)
     {
         ro_item_t it = items[i];
-        destroy_string(it.key);
+        destroy_string(&it.key);
         switch (it.type)
         {
         case T_STR:
-            destroy_string(it.strv);
+            destroy_string(&it.strv);
             break;
         case T_ARR:
-            destroy_ro_array(it.arrayv);
+            destroy_ro_array(&it.arrayv);
             break;
         case T_DICT:
-            destroy_ro_dict(it.dictv);
+            destroy_ro_dict(&it.dictv);
             break;
         default:
             break;
         }
     }
     free(items);
+    d->size  = 0;
+    d->items = 0;
 }
 
-void destroy_ro_json(ro_json_t j)
+void destroy_ro_json(ro_json_t *j)
 {
-    if (j.is_array)
+    if (j->is_array)
     {
-        destroy_ro_array(j.array);
+        destroy_ro_array(&j->array);
     }
     else
     {
-        destroy_ro_dict(j.dict);
+        destroy_ro_dict(&j->dict);
     }
 }

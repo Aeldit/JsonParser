@@ -375,7 +375,7 @@ rw_array_t *init_rw_array_with(size_t size, ...)
         case T_STR:
             if (!rw_array_add_str(a, v.strv))
             {
-                destroy_string(v.strv);
+                destroy_string(&v.strv);
             }
             break;
         case T_LONG:
@@ -440,7 +440,7 @@ rw_dict_t *init_rw_dict_with(size_t size, ...)
         case T_STR:
             if (!rw_dict_add_str(d, it.key, it.strv))
             {
-                destroy_string(it.strv);
+                destroy_string(&it.strv);
             }
             break;
         case T_LONG:
@@ -747,7 +747,7 @@ void rw_array_remove(rw_array_t *a, size_t index)
                 switch (v.type)
                 {
                 case T_STR:
-                    destroy_string(v.strv);
+                    destroy_string(&v.strv);
                     break;
                 case T_ARR:
                     destroy_rw_array(v.arrayv);
@@ -795,7 +795,7 @@ void rw_dict_remove(rw_dict_t *d, string_t key)
                 switch (it.type)
                 {
                 case T_STR:
-                    destroy_string(it.strv);
+                    destroy_string(&it.strv);
                     break;
                 case T_ARR:
                     destroy_rw_array(it.arrayv);
@@ -863,17 +863,17 @@ rw_value_t *rw_array_get(rw_array_t *a, size_t index)
         return 0;
     }
 
-    value_link_t *link     = a->head;
-    size_t non_null_values = 0;
+    value_link_t *link      = a->head;
+    size_t non_error_values = 0;
     while (link)
     {
         for (size_t i = 0; i < ARRAY_LEN; ++i)
         {
-            if (non_null_values == index)
+            if (non_error_values == index)
             {
                 return &link->values[i];
             }
-            non_null_values += link->values[i].type != T_ERROR;
+            non_error_values += link->values[i].type != T_ERROR;
         }
         link = link->next;
     }
@@ -923,7 +923,7 @@ void destroy_rw_array(rw_array_t *a)
             switch (values[i].type)
             {
             case T_STR:
-                destroy_string(values[i].strv);
+                destroy_string(&values[i].strv);
                 break;
             case T_ARR:
                 destroy_rw_array(values[i].arrayv);
@@ -964,7 +964,7 @@ void destroy_rw_dict(rw_dict_t *d)
             case T_ERROR:
                 continue;
             case T_STR:
-                destroy_string(items[i].strv);
+                destroy_string(&items[i].strv);
                 break;
             case T_ARR:
                 destroy_rw_array(items[i].arrayv);
@@ -975,7 +975,7 @@ void destroy_rw_dict(rw_dict_t *d)
             default:
                 break;
             }
-            destroy_string(items[i].key);
+            destroy_string(&items[i].key);
         }
         free(tmp);
     }

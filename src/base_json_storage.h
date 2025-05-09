@@ -85,8 +85,8 @@ typedef struct
 string_t string_of(char *s);
 /**
 ** \returns A string_t representation of the given char array but specifies that
-**          the string must no be freed (usually used when manually writing the
-**          string in the code)
+**          the string must no be freed (used when manually writing the string
+**          in the code)
 */
 string_t string_nofree_of(char *s);
 
@@ -95,8 +95,8 @@ bool exp_long_equals(exp_long_t a, exp_long_t b);
 bool exp_double_equals(exp_double_t a, exp_double_t b);
 
 /**
-** \brief Frees the memory allocated to the string when necessary
+** \brief Frees the memory allocated to the string, when necessary
 */
-void destroy_string(string_t s);
+void destroy_string(string_t *s);
 
 #endif // !BASE_JSON_STORAGE_H

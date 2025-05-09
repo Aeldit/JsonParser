@@ -51,10 +51,11 @@ inline bool exp_double_equals(exp_double_t a, exp_double_t b)
     return a.number == b.number && a.exponent == b.exponent;
 }
 
-void destroy_string(string_t s)
+void destroy_string(string_t *s)
 {
-    if (s.str && s.needs_freeing)
+    if (s->str && s->needs_freeing)
     {
-        free(s.str);
+        free(s->str);
+        s->str = 0;
     }
 }

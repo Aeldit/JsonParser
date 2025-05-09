@@ -22,7 +22,7 @@ Test(ro_json_storage, init_ro_array_zero_size)
         a.values
     );
 
-    destroy_ro_array(a);
+    destroy_ro_array(&a);
 }
 
 Test(ro_json_storage, init_ro_array_normal_size)
@@ -38,7 +38,7 @@ Test(ro_json_storage, init_ro_array_normal_size)
         a.values, "Expected a->values to not be a null pointer, but it was"
     );
 
-    destroy_ro_array(a);
+    destroy_ro_array(&a);
 }
 
 /*******************************************************************************
@@ -58,7 +58,7 @@ Test(ro_json_storage, init_ro_dict_zero_size)
         d.items
     );
 
-    destroy_ro_dict(d);
+    destroy_ro_dict(&d);
 }
 
 Test(ro_json_storage, init_ro_dict_normal_size)
@@ -74,7 +74,7 @@ Test(ro_json_storage, init_ro_dict_normal_size)
         d.items, "Expected d->items to not be a null pointer, but it was"
     );
 
-    destroy_ro_dict(d);
+    destroy_ro_dict(&d);
 }
 
 /*******************************************************************************
@@ -96,7 +96,7 @@ Test(ro_json_storage, ro_array_get_empty)
         i
     );
 
-    destroy_ro_array(a);
+    destroy_ro_array(&a);
 }
 
 Test(ro_json_storage, ro_dict_get_empty)
@@ -115,7 +115,7 @@ Test(ro_json_storage, ro_dict_get_empty)
         key.str
     );
 
-    destroy_ro_dict(d);
+    destroy_ro_dict(&d);
 }
 
 char *ro_get_type_as_str(u8 type)
@@ -159,7 +159,7 @@ void ro_array_get_type(char *buff, u8 expected_type)
         ro_get_type_as_str(expected_type), ro_get_type_as_str(v.type)
     );
 
-    destroy_ro_array(a);
+    destroy_ro_array(&a);
 }
 
 Test(ro_json_storage, ro_array_get_str)
@@ -230,7 +230,7 @@ void ro_dict_get_type(char *buff, u8 expected_type)
         ro_get_type_as_str(expected_type), ro_get_type_as_str(it.type)
     );
 
-    destroy_ro_dict(d);
+    destroy_ro_dict(&d);
 }
 
 Test(ro_json_storage, ro_dict_get_str)

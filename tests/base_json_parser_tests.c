@@ -253,7 +253,7 @@ void test_parse_string(size_t *idx, char *expected_str)
             s.len + 1, *idx - initial_idx
         );
     }
-    destroy_string(s);
+    destroy_string(&s);
     if (buff)
     {
         free(buff);

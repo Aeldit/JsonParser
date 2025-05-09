@@ -44,8 +44,8 @@ Test(ro_equality, arrays_equal_true)
 
     ro_test_arrays_equal(a, b, true);
 
-    destroy_ro_array(a);
-    destroy_ro_array(b);
+    destroy_ro_array(&a);
+    destroy_ro_array(&b);
 }
 
 Test(ro_equality, arrays_equal_diff_size_returns_false)
@@ -66,8 +66,8 @@ Test(ro_equality, arrays_equal_diff_size_returns_false)
 
     ro_test_arrays_equal(a, b, false);
 
-    destroy_ro_array(a);
-    destroy_ro_array(b);
+    destroy_ro_array(&a);
+    destroy_ro_array(&b);
 }
 
 Test(ro_equality, arrays_equal_diff_strings_returns_false)
@@ -88,8 +88,8 @@ Test(ro_equality, arrays_equal_diff_strings_returns_false)
 
     ro_test_arrays_equal(a, b, false);
 
-    destroy_ro_array(a);
-    destroy_ro_array(b);
+    destroy_ro_array(&a);
+    destroy_ro_array(&b);
 }
 
 Test(ro_equality, arrays_equal_diff_longs_returns_false)
@@ -110,8 +110,8 @@ Test(ro_equality, arrays_equal_diff_longs_returns_false)
 
     ro_test_arrays_equal(a, b, false);
 
-    destroy_ro_array(a);
-    destroy_ro_array(b);
+    destroy_ro_array(&a);
+    destroy_ro_array(&b);
 }
 
 Test(ro_equality, arrays_equal_diff_doubles_returns_false)
@@ -132,8 +132,8 @@ Test(ro_equality, arrays_equal_diff_doubles_returns_false)
 
     ro_test_arrays_equal(a, b, false);
 
-    destroy_ro_array(a);
-    destroy_ro_array(b);
+    destroy_ro_array(&a);
+    destroy_ro_array(&b);
 }
 
 Test(ro_equality, arrays_equal_diff_exp_longs_returns_false)
@@ -154,8 +154,8 @@ Test(ro_equality, arrays_equal_diff_exp_longs_returns_false)
 
     ro_test_arrays_equal(a, b, false);
 
-    destroy_ro_array(a);
-    destroy_ro_array(b);
+    destroy_ro_array(&a);
+    destroy_ro_array(&b);
 }
 
 Test(ro_equality, arrays_equal_diff_exp_doubles_returns_false)
@@ -176,8 +176,8 @@ Test(ro_equality, arrays_equal_diff_exp_doubles_returns_false)
 
     ro_test_arrays_equal(a, b, false);
 
-    destroy_ro_array(a);
-    destroy_ro_array(b);
+    destroy_ro_array(&a);
+    destroy_ro_array(&b);
 }
 
 Test(ro_equality, arrays_equal_diff_bools_returns_false)
@@ -198,8 +198,8 @@ Test(ro_equality, arrays_equal_diff_bools_returns_false)
 
     ro_test_arrays_equal(a, b, false);
 
-    destroy_ro_array(a);
-    destroy_ro_array(b);
+    destroy_ro_array(&a);
+    destroy_ro_array(&b);
 }
 
 Test(ro_equality, arrays_equal_diff_arrays_returns_false)
@@ -220,8 +220,8 @@ Test(ro_equality, arrays_equal_diff_arrays_returns_false)
 
     ro_test_arrays_equal(a, b, false);
 
-    destroy_ro_array(a);
-    destroy_ro_array(b);
+    destroy_ro_array(&a);
+    destroy_ro_array(&b);
 }
 
 Test(ro_equality, arrays_equal_diff_dicts_returns_false)
@@ -242,8 +242,8 @@ Test(ro_equality, arrays_equal_diff_dicts_returns_false)
 
     ro_test_arrays_equal(a, b, false);
 
-    destroy_ro_array(a);
-    destroy_ro_array(b);
+    destroy_ro_array(&a);
+    destroy_ro_array(&b);
 }
 
 /*******************************************************************************
@@ -296,8 +296,8 @@ Test(ro_equality, dicts_equal_true)
 
     ro_test_dicts_equal(a, b, true);
 
-    destroy_ro_dict(a);
-    destroy_ro_dict(b);
+    destroy_ro_dict(&a);
+    destroy_ro_dict(&b);
 }
 
 Test(ro_equality, dicts_equal_diff_strings)
@@ -328,8 +328,8 @@ Test(ro_equality, dicts_equal_diff_strings)
 
     ro_test_dicts_equal(a, b, false);
 
-    destroy_ro_dict(a);
-    destroy_ro_dict(b);
+    destroy_ro_dict(&a);
+    destroy_ro_dict(&b);
 }
 
 Test(ro_equality, dicts_equal_diff_longs)
@@ -360,8 +360,8 @@ Test(ro_equality, dicts_equal_diff_longs)
 
     ro_test_dicts_equal(a, b, false);
 
-    destroy_ro_dict(a);
-    destroy_ro_dict(b);
+    destroy_ro_dict(&a);
+    destroy_ro_dict(&b);
 }
 
 Test(ro_equality, dicts_equal_diff_doubles)
@@ -392,8 +392,8 @@ Test(ro_equality, dicts_equal_diff_doubles)
 
     ro_test_dicts_equal(a, b, false);
 
-    destroy_ro_dict(a);
-    destroy_ro_dict(b);
+    destroy_ro_dict(&a);
+    destroy_ro_dict(&b);
 }
 
 Test(ro_equality, dicts_equal_diff_exp_longs)
@@ -424,8 +424,8 @@ Test(ro_equality, dicts_equal_diff_exp_longs)
 
     ro_test_dicts_equal(a, b, false);
 
-    destroy_ro_dict(a);
-    destroy_ro_dict(b);
+    destroy_ro_dict(&a);
+    destroy_ro_dict(&b);
 }
 
 Test(ro_equality, dicts_equal_diff_exp_doubles)
@@ -456,8 +456,8 @@ Test(ro_equality, dicts_equal_diff_exp_doubles)
 
     ro_test_dicts_equal(a, b, false);
 
-    destroy_ro_dict(a);
-    destroy_ro_dict(b);
+    destroy_ro_dict(&a);
+    destroy_ro_dict(&b);
 }
 
 Test(ro_equality, dicts_equal_diff_bools)
@@ -488,8 +488,8 @@ Test(ro_equality, dicts_equal_diff_bools)
 
     ro_test_dicts_equal(a, b, false);
 
-    destroy_ro_dict(a);
-    destroy_ro_dict(b);
+    destroy_ro_dict(&a);
+    destroy_ro_dict(&b);
 }
 
 Test(ro_equality, dicts_equal_diff_arrays)
@@ -520,8 +520,8 @@ Test(ro_equality, dicts_equal_diff_arrays)
 
     ro_test_dicts_equal(a, b, false);
 
-    destroy_ro_dict(a);
-    destroy_ro_dict(b);
+    destroy_ro_dict(&a);
+    destroy_ro_dict(&b);
 }
 
 Test(ro_equality, dicts_equal_diff_dicts)
@@ -552,6 +552,6 @@ Test(ro_equality, dicts_equal_diff_dicts)
 
     ro_test_dicts_equal(a, b, false);
 
-    destroy_ro_dict(a);
-    destroy_ro_dict(b);
+    destroy_ro_dict(&a);
+    destroy_ro_dict(&b);
 }

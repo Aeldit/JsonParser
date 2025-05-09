@@ -89,7 +89,7 @@ void test_get_long_as_str(i64 n, size_t len, char *nstr)
         "\"%zu\", .len = %zu }, but got { .str = \"%s\", .len = %zu }",
         n, n, len, s.str, s.len
     );
-    destroy_string(s);
+    destroy_string(&s);
 }
 
 Test(base_json_writer, get_long_as_str_zero)
@@ -119,7 +119,7 @@ void test_get_double_as_str(double n, size_t len, char *nstr)
         "\"%s\", .len = %zu }, but got { .str = \"%s\", .len = %zu }",
         nstr, nstr, len, s.str, s.len
     );
-    destroy_string(s);
+    destroy_string(&s);
 }
 
 Test(base_json_writer, get_double_as_str_zero_zero)
@@ -150,7 +150,7 @@ void test_get_long_exp_as_str(i64 n, i64 e, size_t len, char *nstr)
         "\"%lde%ld\", .len = %zu }, but got { .str = \"%s\", .len = %zu }",
         el.number, el.exponent, el.number, el.exponent, len, s.str, s.len
     );
-    destroy_string(s);
+    destroy_string(&s);
 }
 
 Test(base_json_writer, get_long_exp_as_str_small)
@@ -181,7 +181,7 @@ void test_get_double_exp_as_str(double n, i64 e, size_t len, char *nstr)
         "\"%lfe%ld\", .len = %zu }, but got { .str = \"%s\", .len = %zu }",
         ed.number, ed.exponent, ed.number, ed.exponent, len, s.str, s.len
     );
-    destroy_string(s);
+    destroy_string(&s);
 }
 
 Test(base_json_writer, get_double_exp_as_str_small)
@@ -211,7 +211,7 @@ void test_get_bool_as_str(bool b, size_t len, char *nstr)
         "\"%s\", .len = %zu }, but got { .str = \"%s\", .len = %zu }",
         b ? "true" : "false", b ? "true" : "false", len, s.str, s.len
     );
-    destroy_string(s);
+    destroy_string(&s);
 }
 
 Test(base_json_writer, get_bool_as_str_true)

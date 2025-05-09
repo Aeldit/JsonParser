@@ -20,7 +20,7 @@ rw_array_t *destroy_rw_array_on_error(rw_array_t *a)
     return 0;
 }
 
-rw_dict_t *destroy_rw_dict_on_error(rw_dict_t *d, string_t key)
+rw_dict_t *destroy_rw_dict_on_error(rw_dict_t *d, string_t *key)
 {
     destroy_string(key);
     destroy_rw_dict(d);
@@ -76,7 +76,7 @@ rw_array_t *rw_parse_array(const char *const b, size_t *idx)
             {
                 return destroy_rw_array_on_error(a);
             }
-            ARR_ADD_OR_RET_DESTROY(rw_array_add_str, s, destroy_string(s));
+            ARR_ADD_OR_RET_DESTROY(rw_array_add_str, s, destroy_string(&s));
             break;
 
         case '+':
@@ -192,7 +192,7 @@ rw_array_t *rw_parse_array(const char *const b, size_t *idx)
     if (!add_fn(d, key, (value)))                                              \
     {                                                                          \
         destroy_fn;                                                            \
-        return destroy_rw_dict_on_error(d, key);                               \
+        return destroy_rw_dict_on_error(d, &key);                              \
     }                                                                          \
     ++nb_elts_parsed
 
@@ -229,14 +229,14 @@ rw_dict_t *rw_parse_dict(const char *const b, size_t *idx)
         switch (b[i])
         {
         case 0:
-            return destroy_rw_dict_on_error(d, key);
+            return destroy_rw_dict_on_error(d, &key);
 
         case '"':
             if (is_waiting_key)
             {
                 if (!(key = parse_string(b, &i)).str)
                 {
-                    return destroy_rw_dict_on_error(d, key);
+                    return destroy_rw_dict_on_error(d, &key);
                 }
                 is_waiting_key = false;
             }
@@ -244,9 +244,9 @@ rw_dict_t *rw_parse_dict(const char *const b, size_t *idx)
             {
                 if (!(s = parse_string(b, &i)).str)
                 {
-                    return destroy_rw_dict_on_error(d, key);
+                    return destroy_rw_dict_on_error(d, &key);
                 }
-                DICT_ADD_OR_RET_DESTROY(rw_dict_add_str, s, destroy_string(s));
+                DICT_ADD_OR_RET_DESTROY(rw_dict_add_str, s, destroy_string(&s));
             }
             break;
 
@@ -264,7 +264,7 @@ rw_dict_t *rw_parse_dict(const char *const b, size_t *idx)
         case '9':
             if (!(sl = parse_number(b, &i)).str)
             {
-                return destroy_rw_dict_on_error(d, key);
+                return destroy_rw_dict_on_error(d, &key);
             }
 
             if (sl.is_float)
@@ -285,7 +285,7 @@ rw_dict_t *rw_parse_dict(const char *const b, size_t *idx)
                     break;
                 case 2:
                     free(sl.str);
-                    return destroy_rw_dict_on_error(d, key);
+                    return destroy_rw_dict_on_error(d, &key);
                 }
             }
             else
@@ -306,7 +306,7 @@ rw_dict_t *rw_parse_dict(const char *const b, size_t *idx)
                     break;
                 case 2:
                     free(sl.str);
-                    return destroy_rw_dict_on_error(d, key);
+                    return destroy_rw_dict_on_error(d, &key);
                 }
             }
             free(sl.str);
@@ -323,7 +323,7 @@ rw_dict_t *rw_parse_dict(const char *const b, size_t *idx)
         case 'n':
             if (!rw_dict_add_null(d, key))
             {
-                return destroy_rw_dict_on_error(d, key);
+                return destroy_rw_dict_on_error(d, &key);
             }
             i += 3;
             ++nb_elts_parsed;
@@ -332,7 +332,7 @@ rw_dict_t *rw_parse_dict(const char *const b, size_t *idx)
         case '[':
             if (!(tmp_a = rw_parse_array(b, &i)))
             {
-                return destroy_rw_dict_on_error(d, key);
+                return destroy_rw_dict_on_error(d, &key);
             }
             DICT_ADD_OR_RET_DESTROY(
                 rw_dict_add_array, tmp_a, destroy_rw_array(tmp_a)
@@ -342,7 +342,7 @@ rw_dict_t *rw_parse_dict(const char *const b, size_t *idx)
         case '{':
             if (!(tmp_d = rw_parse_dict(b, &i)))
             {
-                return destroy_rw_dict_on_error(d, key);
+                return destroy_rw_dict_on_error(d, &key);
             }
             DICT_ADD_OR_RET_DESTROY(
                 rw_dict_add_dict, tmp_d, destroy_rw_dict(tmp_d)
