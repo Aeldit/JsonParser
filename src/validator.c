@@ -745,6 +745,7 @@ bool is_json_valid(const char *const buff, size_t buff_len, bool is_dict)
         {
             return false;
         }
+        return true;
     }
 
     if (!check_array_trailing_commas(buff, 0))
