@@ -190,6 +190,7 @@ bool check_bools_nulls_numbers_counts(
 
         case ':':
         case ',':
+        case '\r':
         case '\n':
         case '\t':
         case ' ':
@@ -736,7 +737,7 @@ bool is_json_valid(const char *const buff, size_t buff_len, bool is_dict)
 
     if (is_dict)
     {
-        if (!(check_dict_trailing_commas(buff, 0) && buff[buff_len - 2] == '}'))
+        if (!check_dict_trailing_commas(buff, 0))
         {
             return false;
         }
@@ -746,7 +747,7 @@ bool is_json_valid(const char *const buff, size_t buff_len, bool is_dict)
         }
     }
 
-    if (!(check_array_trailing_commas(buff, 0) && buff[buff_len - 2] == ']'))
+    if (!check_array_trailing_commas(buff, 0))
     {
         return false;
     }
