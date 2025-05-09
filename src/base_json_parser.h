@@ -33,20 +33,20 @@
     })
 
 #define STR_AND_LEN_OF(s, l, f, e)                                             \
-    ((str_and_len_tuple_t                                                      \
-    ){ .str = (s), .len = (l), .is_float = (f), .has_exponent = (e) })
+    ((str_and_len_tuple_t){                                                    \
+        .str = (s), .len = (l), .is_float = (f), .has_exponent = (e) })
 #define STR_AND_LEN(s, l)                                                      \
-    ((str_and_len_tuple_t                                                      \
-    ){ .str = (s), .len = (l), .is_float = false, .has_exponent = false })
+    ((str_and_len_tuple_t){                                                    \
+        .str = (s), .len = (l), .is_float = false, .has_exponent = false })
 #define STR_AND_LEN_F_OF(s, l)                                                 \
-    ((str_and_len_tuple_t                                                      \
-    ){ .str = (s), .len = (l), .is_float = true, .has_exponent = false })
+    ((str_and_len_tuple_t){                                                    \
+        .str = (s), .len = (l), .is_float = true, .has_exponent = false })
 #define STR_AND_LEN_E_OF(s, l)                                                 \
-    ((str_and_len_tuple_t                                                      \
-    ){ .str = (s), .len = (l), .is_float = false, .has_exponent = true })
+    ((str_and_len_tuple_t){                                                    \
+        .str = (s), .len = (l), .is_float = false, .has_exponent = true })
 #define STR_AND_LEN_FE_OF(s, l)                                                \
-    ((str_and_len_tuple_t                                                      \
-    ){ .str = (s), .len = (l), .is_float = true, .has_exponent = true })
+    ((str_and_len_tuple_t){                                                    \
+        .str = (s), .len = (l), .is_float = true, .has_exponent = true })
 
 #define EXP_LONG_OF(n, e) ((exp_long_t){ .number = (n), .exponent = (e) })
 #define EXP_DOUBLE_OF(n, e) ((exp_double_t){ .number = (n), .exponent = (e) })
@@ -146,9 +146,6 @@ long_with_or_without_exponent_t str_to_long(str_and_len_tuple_t sl);
 */
 double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t sl);
 
-/***************************************
-**              FUNCTIONS             **
-***************************************/
 /**
 ** \brief Parses the string starting at 'pos + 1' (first char after the '"')
 ** \param buff The buffer containing the current json file's contents
