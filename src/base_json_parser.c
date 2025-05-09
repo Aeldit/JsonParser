@@ -76,14 +76,14 @@ long_with_or_without_exponent_t str_to_long(str_and_len_tuple_t sl)
             .has_exponent = 1,
             .long_exp_value =
                 (exp_long_t){
-                    .number   = number * str[0] == '-' ? -1 : 1,
+                    .number   = number * (str[0] == '-' ? -1 : 1),
                     .exponent = exponent * is_exp_negative,
                 },
         };
     }
     return (long_with_or_without_exponent_t){
         .has_exponent = 0,
-        .long_value   = number * str[0] == '-' ? -1 : 1,
+        .long_value   = number * (str[0] == '-' ? -1 : 1),
     };
 }
 
@@ -169,19 +169,16 @@ double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t sl)
             .has_exponent = 1,
             .double_exp_value =
                 (exp_double_t){
-                    .number =
-                        (number + (decimals / nb_digits_decimals)) * str[0]
-                            == '-'
-                        ? -1
-                        : 1,
+                    .number = (number + (decimals / nb_digits_decimals))
+                        * (str[0] == '-' ? -1 : 1),
                     .exponent = exponent * is_exp_negative,
                 },
         };
     }
     return (double_with_or_without_exponent_t){
         .has_exponent = 0,
-        .double_value =
-            (number + (decimals / nb_digits_decimals)) * str[0] == '-' ? -1 : 1,
+        .double_value = (number + (decimals / nb_digits_decimals))
+            * (str[0] == '-' ? -1 : 1),
     };
 }
 
