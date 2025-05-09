@@ -15,8 +15,13 @@ JSONFILESDIR=files
 
 NOPRINT=-DVALGRING_DISABLE_PRINT -Wno-unused-parameter
 
+
 all: clean $(TARGET)
 	./$(TARGET) ./$(JSONFILESDIR)/t.json
+
+.PHONY:
+$(TARGET):
+	$(CC) $(CFLAGS) $(CFILESBASE) $(CFILESRO) -o $(TARGET)
 
 rw: clean
 	$(CC) $(CFLAGS) $(CFILESBASE) $(CFILESRW) -o $(TARGET)
@@ -36,10 +41,6 @@ noprintrw: clean
 	$(CC) $(CFLAGS) $(NOPRINT) $(CFILESBASE) $(CFILESRW) -o $(TARGET)
 	./$(TARGET) ./$(JSONFILESDIR)/big.json
 
-.PHONY:
-$(TARGET):
-	$(CC) $(CFLAGS) $(CFILESBASE) $(CFILESRO) -o $(TARGET)
-
 clean:
 	if [ -f "$(TARGET)" ]; then rm $(TARGET); fi
 	if [ -f "$(TARGET)-tests" ]; then rm $(TARGET)-tests; fi
@@ -49,8 +50,8 @@ valgrind-compile: clean
 	$(CC) $(CFLAGS) $(NOPRINT) $(CFILESBASE) $(CFILESRO) -o $(TARGET) -g
 
 calgrind: valgrind-compile
-	valgrind --tool=callgrind --simulate-cache=yes \
-		--collect-jumps=yes ./$(TARGET) ./$(JSONFILESDIR)/big.json
+	valgrind --tool=callgrind --simulate-cache=yes --collect-jumps=yes \
+		--dump-instr=yes ./$(TARGET) ./$(JSONFILESDIR)/big.json
 
 leaks: valgrind-compile
 	valgrind --leak-check=full --show-leak-kinds=all \
