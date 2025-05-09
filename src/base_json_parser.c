@@ -25,7 +25,6 @@ long_with_or_without_exponent_t str_to_long(str_and_len_tuple_t sl)
 
     bool is_in_exponent = false;
 
-    u8 has_exponent    = sl.has_exponent;
     i8 is_exp_negative = 1;
 
     char c = 0;
@@ -35,7 +34,7 @@ long_with_or_without_exponent_t str_to_long(str_and_len_tuple_t sl)
         {
         case 'e':
         case 'E':
-            if (has_exponent)
+            if (sl.has_exponent)
             {
                 exp_idx        = i;
                 is_in_exponent = true;
@@ -70,7 +69,7 @@ long_with_or_without_exponent_t str_to_long(str_and_len_tuple_t sl)
             break;
         }
     }
-    if (has_exponent)
+    if (sl.has_exponent)
     {
         return (long_with_or_without_exponent_t){
             .has_exponent = 1,
@@ -106,7 +105,6 @@ double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t sl)
 
     bool dot_reached    = false;
     bool is_in_exponent = false;
-    u8 has_exponent     = sl.has_exponent;
 
     // If the number is negative, this is set to -1 and the final res is
     // multiplied by it
@@ -123,7 +121,7 @@ double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t sl)
 
         case 'e':
         case 'E':
-            if (has_exponent)
+            if (sl.has_exponent)
             {
                 exp_idx        = i;
                 is_in_exponent = true;
@@ -163,7 +161,7 @@ double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t sl)
             break;
         }
     }
-    if (has_exponent)
+    if (sl.has_exponent)
     {
         return (double_with_or_without_exponent_t){
             .has_exponent = 1,
