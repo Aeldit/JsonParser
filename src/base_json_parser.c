@@ -184,9 +184,6 @@ double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t sl)
     };
 }
 
-/***************************************
-**              PARSING               **
-***************************************/
 string_t parse_string(const char *const buff, size_t *idx)
 {
     if (!buff || !idx)
@@ -222,7 +219,7 @@ string_t parse_string(const char *const buff, size_t *idx)
     str[len] = 0;
 
     // + 1 to not read the last '"' when returning in the calling function
-    *idx += ++len;
+    *idx += len + 1;
     return STRING_OF(str, len);
 }
 
