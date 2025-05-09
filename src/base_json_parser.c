@@ -26,7 +26,6 @@ long_with_or_without_exponent_t str_to_long(str_and_len_tuple_t sl)
     bool is_in_exponent = false;
 
     u8 has_exponent    = sl.has_exponent;
-    i8 is_negative     = str[0] == '-' ? -1 : 1;
     i8 is_exp_negative = 1;
 
     char c = 0;
@@ -77,14 +76,14 @@ long_with_or_without_exponent_t str_to_long(str_and_len_tuple_t sl)
             .has_exponent = 1,
             .long_exp_value =
                 (exp_long_t){
-                    .number   = number * is_negative,
+                    .number   = number * str[0] == '-' ? -1 : 1,
                     .exponent = exponent * is_exp_negative,
                 },
         };
     }
     return (long_with_or_without_exponent_t){
         .has_exponent = 0,
-        .long_value   = number * is_negative,
+        .long_value   = number * str[0] == '-' ? -1 : 1,
     };
 }
 
@@ -111,7 +110,6 @@ double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t sl)
 
     // If the number is negative, this is set to -1 and the final res is
     // multiplied by it
-    i8 is_negative     = str[0] == '-' ? -1 : 1;
     i8 is_exp_negative = 1;
 
     char c = 0;
@@ -171,8 +169,11 @@ double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t sl)
             .has_exponent = 1,
             .double_exp_value =
                 (exp_double_t){
-                    .number = (number + (decimals / nb_digits_decimals))
-                        * is_negative,
+                    .number =
+                        (number + (decimals / nb_digits_decimals)) * str[0]
+                            == '-'
+                        ? -1
+                        : 1,
                     .exponent = exponent * is_exp_negative,
                 },
         };
@@ -180,7 +181,7 @@ double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t sl)
     return (double_with_or_without_exponent_t){
         .has_exponent = 0,
         .double_value =
-            (number + (decimals / nb_digits_decimals)) * is_negative,
+            (number + (decimals / nb_digits_decimals)) * str[0] == '-' ? -1 : 1,
     };
 }
 
