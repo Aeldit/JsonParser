@@ -11,9 +11,7 @@
 *******************************************************************************/
 long_with_or_without_exponent_t str_to_long(str_and_len_tuple_t sl)
 {
-    char *str  = sl.str;
-    size_t len = sl.len;
-    if (!str || !len)
+    if (!sl.str || !sl.len)
     {
         return ERROR_LWOWE;
     }
@@ -28,9 +26,9 @@ long_with_or_without_exponent_t str_to_long(str_and_len_tuple_t sl)
     i8 is_exp_negative = 1;
 
     char c = 0;
-    for (size_t i = 0; i < len; ++i)
+    for (size_t i = 0; i < sl.len; ++i)
     {
-        switch (c = str[i])
+        switch (c = sl.str[i])
         {
         case 'e':
         case 'E':
@@ -75,22 +73,20 @@ long_with_or_without_exponent_t str_to_long(str_and_len_tuple_t sl)
             .has_exponent = 1,
             .long_exp_value =
                 (exp_long_t){
-                    .number   = number * (str[0] == '-' ? -1 : 1),
+                    .number   = number * (sl.str[0] == '-' ? -1 : 1),
                     .exponent = exponent * is_exp_negative,
                 },
         };
     }
     return (long_with_or_without_exponent_t){
         .has_exponent = 0,
-        .long_value   = number * (str[0] == '-' ? -1 : 1),
+        .long_value   = number * (sl.str[0] == '-' ? -1 : 1),
     };
 }
 
 double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t sl)
 {
-    char *str  = sl.str;
-    size_t len = sl.len;
-    if (!str || !len)
+    if (!sl.str || !sl.len)
     {
         return ERROR_DWOWE;
     }
@@ -111,9 +107,9 @@ double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t sl)
     i8 is_exp_negative = 1;
 
     char c = 0;
-    for (size_t i = 0; i < len; ++i)
+    for (size_t i = 0; i < sl.len; ++i)
     {
-        switch (c = str[i])
+        switch (c = sl.str[i])
         {
         case '.':
             dot_reached = true;
@@ -168,7 +164,7 @@ double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t sl)
             .double_exp_value =
                 (exp_double_t){
                     .number = (number + (decimals / nb_digits_decimals))
-                        * (str[0] == '-' ? -1 : 1),
+                        * (sl.str[0] == '-' ? -1 : 1),
                     .exponent = exponent * is_exp_negative,
                 },
         };
@@ -176,7 +172,7 @@ double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t sl)
     return (double_with_or_without_exponent_t){
         .has_exponent = 0,
         .double_value = (number + (decimals / nb_digits_decimals))
-            * (str[0] == '-' ? -1 : 1),
+            * (sl.str[0] == '-' ? -1 : 1),
     };
 }
 
@@ -223,8 +219,7 @@ str_and_len_tuple_t parse_number(const char *const buff, size_t *idx)
         return NULL_STR_AND_LEN_TUPLE;
     }
 
-    size_t end_idx  = *idx;
-    size_t nb_chars = 0;
+    size_t end_idx = *idx;
 
     bool has_exponent = false;
     bool is_float     = false;
@@ -235,12 +230,10 @@ str_and_len_tuple_t parse_number(const char *const buff, size_t *idx)
         case 'e':
         case 'E':
             has_exponent = true;
-            ++nb_chars;
             continue;
 
         case '.':
             is_float = true;
-            ++nb_chars;
             continue;
 
         case '+':
@@ -255,12 +248,12 @@ str_and_len_tuple_t parse_number(const char *const buff, size_t *idx)
         case '7':
         case '8':
         case '9':
-            ++nb_chars;
             continue;
         }
         break;
     }
 
+    size_t nb_chars = end_idx - *idx - 1;
     if (!nb_chars)
     {
         return NULL_STR_AND_LEN_TUPLE;
