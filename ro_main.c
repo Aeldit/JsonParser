@@ -12,7 +12,6 @@ int main(int argc, char *argv[])
     ro_json_t j = ro_parse(argv[1]);
     if (j.is_array)
     {
-        // printf("\n");
         write_ro_json_to_file(j, "out.json");
         ro_array_print(j.array);
     }
@@ -21,6 +20,6 @@ int main(int argc, char *argv[])
         ro_dict_print(j.dict);
     }
 
-    destroy_ro_json(j);
+    destroy_ro_json(&j);
     return 0;
 }
