@@ -195,18 +195,18 @@ string_t parse_string(const char *const buff, size_t *idx)
     }
 
     size_t start_idx = *idx + 1;
-    size_t len       = 0;
     // Counts the number of characters
     while (1)
     {
-        if (buff[start_idx + len] == '"' && start_idx + len > 1
-            && buff[start_idx + len - 2] != '\\')
+        if (buff[start_idx] == '"' && start_idx > 1
+            && buff[start_idx - 2] != '\\')
         {
             break;
         }
-        ++len;
+        ++start_idx;
     }
 
+    size_t len = start_idx - *idx - 1;
     if (!len)
     {
         ++(*idx);
@@ -218,11 +218,11 @@ string_t parse_string(const char *const buff, size_t *idx)
     {
         return NULL_STRING;
     }
-    memcpy(str, buff + start_idx, len);
+    memcpy(str, buff + *idx + 1, len);
     str[len] = 0;
 
     // + 1 to not read the last '"' when returning in the calling function
-    *idx += len + 1;
+    *idx += ++len;
     return STRING_OF(str, len);
 }
 
