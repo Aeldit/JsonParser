@@ -176,26 +176,53 @@ double_with_or_without_exponent_t str_to_double(str_and_len_tuple_t sl)
     };
 }
 
-string_t parse_string(const char *const buff, size_t *idx)
+string_t parse_string(const char *buff, size_t *idx)
 {
     if (!buff || !idx)
     {
         return NULL_STRING;
     }
 
-    size_t start_idx = *idx + 1;
+    // Sets the start of the buffer to the first char after the '"' that started
+    // the string
+    ++(*idx);
+    buff += *idx;
+#include <stdio.h>
+
+    size_t len = 0;
+    // Stores whether the previous char was a '\' or if it was '\\'
+    bool prev_is_backslash = false;
     // Counts the number of characters
-    while (
-        !(buff[start_idx] == '"' && start_idx && buff[start_idx - 1] != '\\')
-    )
+    while (1)
     {
-        ++start_idx;
+        switch (buff[len])
+        {
+        case 0:
+            return NULL_STRING;
+        case '"':
+            if (!prev_is_backslash)
+            {
+                break;
+            }
+            ++len;
+            continue;
+        case '\\':
+            prev_is_backslash = !prev_is_backslash;
+            ++len;
+            continue;
+        default:
+            if (prev_is_backslash)
+            {
+                prev_is_backslash = false;
+            }
+            ++len;
+            continue;
+        }
+        break;
     }
 
-    size_t len = start_idx - *idx - 1;
     if (!len)
     {
-        ++(*idx);
         return STRING_NOFREE_OF("", 0);
     }
 
@@ -204,11 +231,12 @@ string_t parse_string(const char *const buff, size_t *idx)
     {
         return NULL_STRING;
     }
-    memcpy(str, buff + *idx + 1, len);
+    memcpy(str, buff, len);
     str[len] = 0;
 
     // + 1 to not read the last '"' when returning in the calling function
-    *idx += len + 1;
+    *idx += len;
+    printf("%zu\n", *idx);
     return STRING_OF(str, len);
 }
 
