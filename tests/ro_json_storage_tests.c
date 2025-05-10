@@ -11,7 +11,7 @@
 Test(ro_json_storage, init_ro_array_zero_size)
 {
     size_t size  = 0;
-    ro_array_t a = RO_ARRAY(size);
+    ro_array_t a = init_ro_array(size);
 
     cr_expect(
         a.size == size, "Expected the array size to be %zu, but got %zu", size,
@@ -28,7 +28,7 @@ Test(ro_json_storage, init_ro_array_zero_size)
 Test(ro_json_storage, init_ro_array_normal_size)
 {
     size_t size  = 5;
-    ro_array_t a = RO_ARRAY(size);
+    ro_array_t a = init_ro_array(size);
 
     cr_expect(
         a.size == size, "Expected the array size to be %zu, but got %zu", size,
@@ -47,15 +47,14 @@ Test(ro_json_storage, init_ro_array_normal_size)
 Test(ro_json_storage, init_ro_dict_zero_size)
 {
     size_t size = 0;
-    ro_dict_t d = RO_DICT(size);
+    ro_dict_t d = init_ro_dict(size);
 
     cr_expect(
         d.size == size, "Expected the dict size to be %zu, but got %zu", size,
         d.size
     );
     cr_expect(
-        !d.items, "Expected d->items to be a null pointer, but got '%p'",
-        d.items
+        !d.items, "Expected d.items to be a null pointer, but got '%p'", d.items
     );
 
     destroy_ro_dict(&d);
@@ -63,16 +62,18 @@ Test(ro_json_storage, init_ro_dict_zero_size)
 
 Test(ro_json_storage, init_ro_dict_normal_size)
 {
-    size_t size = 5;
-    ro_dict_t d = RO_DICT(size);
+    size_t size = 3;
+    ro_dict_t d = init_ro_dict_with(
+        size, ROIT_BOOL(string_nofree_of("it1"), true),
+        ROIT_DOUBLE(string_nofree_of("it2"), 45.236),
+        ROIT_BOOL(string_nofree_of("it3"), false)
+    );
 
     cr_expect(
         d.size == size, "Expected the dict size to be %zu, but got %zu", size,
         d.size
     );
-    cr_expect(
-        d.items, "Expected d->items to not be a null pointer, but it was"
-    );
+    cr_expect(d.items, "Expected d.items to not be a null pointer, but it was");
 
     destroy_ro_dict(&d);
 }

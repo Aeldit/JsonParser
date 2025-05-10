@@ -58,7 +58,7 @@ Test(ro_json_parser, ro_parse_array_buff_empty)
     size_t idx   = 518;
     ro_array_t a = get_ro_array_from_file(&idx);
 
-    ro_array_t b = RO_ARRAY(0);
+    ro_array_t b = init_ro_array(0);
 
     cr_expect(
         ro_arrays_equal(a, b),
@@ -101,20 +101,21 @@ Test(ro_json_parser, ro_parse_array_buff_nested_multi_type)
     ro_array_t a = get_ro_array_from_file(&idx);
 
     ro_array_t b = init_ro_array_with(
-        8, ROVAL_ARR(RO_ARRAY(0)), ROVAL_LONG(1), ROVAL_LONG(2), ROVAL_LONG(3),
+        8, ROVAL_ARR(init_ro_array(0)), ROVAL_LONG(1), ROVAL_LONG(2),
+        ROVAL_LONG(3),
         ROVAL_ARR(init_ro_array_with(
             4, ROVAL_STR(string_nofree_of("")), ROVAL_LONG(5),
             ROVAL_ARR(init_ro_array_with(
                 3, ROVAL_STR(string_nofree_of("dd")), ROVAL_BOOL(true),
                 ROVAL_LONG(5)
             )),
-            ROVAL_DICT(RO_DICT(0))
+            ROVAL_DICT(init_ro_dict(0))
         )),
-        ROVAL_DICT(RO_DICT(0)),
+        ROVAL_DICT(init_ro_dict(0)),
         ROVAL_DICT(init_ro_dict_with(
             1, ROIT_STR(string_nofree_of("first"), string_nofree_of("w"))
         )),
-        ROVAL_DICT(RO_DICT(0))
+        ROVAL_DICT(init_ro_dict(0))
     );
 
     cr_expect(
@@ -174,7 +175,7 @@ Test(ro_json_parser, ro_parse_dict_buff_empty)
     size_t idx  = 812;
     ro_dict_t d = get_ro_dict_from_file(&idx);
 
-    ro_dict_t b   = RO_DICT(0);
+    ro_dict_t b   = init_ro_dict(0);
     bool is_equal = ro_dicts_equal(d, b);
 
     cr_expect(is_equal, "Expected the 2 dicts to be equal, but they were not");
@@ -217,7 +218,7 @@ Test(ro_json_parser, ro_parse_dict_buff_nested_multi_type)
                         ROVAL_LONG(5)
                     )
                 ),
-                ROIT_DICT(string_nofree_of("d"), RO_DICT(0))
+                ROIT_DICT(string_nofree_of("d"), init_ro_dict(0))
             )
         )
     );
@@ -257,24 +258,25 @@ Test(ro_json_parser, ro_parse_array)
         init_ro_array_with(2, ROVAL_BOOL(true), ROVAL_BOOL(false));
 
     ro_array_t arrays = init_ro_array_with(
-        8, ROVAL_ARR(RO_ARRAY(0)), ROVAL_LONG(1), ROVAL_LONG(2), ROVAL_LONG(3),
+        8, ROVAL_ARR(init_ro_array(0)), ROVAL_LONG(1), ROVAL_LONG(2),
+        ROVAL_LONG(3),
         ROVAL_ARR(init_ro_array_with(
             4, ROVAL_STR(string_nofree_of("")), ROVAL_LONG(5),
             ROVAL_ARR(init_ro_array_with(
                 3, ROVAL_STR(string_nofree_of("dd")), ROVAL_BOOL(true),
                 ROVAL_LONG(5)
             )),
-            ROVAL_DICT(RO_DICT(0))
+            ROVAL_DICT(init_ro_dict(0))
         )),
-        ROVAL_DICT(RO_DICT(0)),
+        ROVAL_DICT(init_ro_dict(0)),
         ROVAL_DICT(init_ro_dict_with(
             1, ROIT_STR(string_nofree_of("first"), string_nofree_of("w"))
         )),
-        ROVAL_DICT(RO_DICT(0))
+        ROVAL_DICT(init_ro_dict(0))
     );
 
     ro_array_t dicts = init_ro_array_with(
-        3, ROVAL_DICT(RO_DICT(0)),
+        3, ROVAL_DICT(init_ro_dict(0)),
         ROVAL_DICT(init_ro_dict_with(
             3, ROIT_LONG(string_nofree_of("1"), 1),
             ROIT_LONG(string_nofree_of("2"), 2),
@@ -293,7 +295,7 @@ Test(ro_json_parser, ro_parse_array)
                             ROVAL_BOOL(true), ROVAL_LONG(5)
                         )
                     ),
-                    ROIT_DICT(string_nofree_of("d"), RO_DICT(0))
+                    ROIT_DICT(string_nofree_of("d"), init_ro_dict(0))
                 )
             )
         ))
@@ -307,7 +309,7 @@ Test(ro_json_parser, ro_parse_array)
         ROIT_ARR(string_nofree_of("dicts"), dicts)
     );
 
-    ro_json_t ro_json_manual = RO_JSON(false, ERROR_RO_ARRAY, file_dict);
+    ro_json_t ro_json_manual = init_ro_json(false, ERROR_RO_ARRAY, file_dict);
 
     cr_expect(
         ro_json_equal(ro_json, ro_json_manual),
