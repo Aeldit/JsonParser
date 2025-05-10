@@ -12,12 +12,15 @@ bool ro_arrays_equal(ro_array_t a, ro_array_t b)
         return false;
     }
 
-    ro_value_t *a_values = a.values;
-    ro_value_t *b_values = b.values;
+    if (a.size && (!a.values || !b.values))
+    {
+        return false;
+    }
+
     for (size_t i = 0; i < a.size; ++i)
     {
-        ro_value_t a_val = a_values[i];
-        ro_value_t b_val = b_values[i];
+        ro_value_t a_val = a.values[i];
+        ro_value_t b_val = b.values[i];
         if (a_val.type != b_val.type)
         {
             return false;
@@ -72,10 +75,14 @@ bool ro_dicts_equal(ro_dict_t a, ro_dict_t b)
         return false;
     }
 
-    ro_item_t *a_items = a.items;
+    if (a.size && (!a.items || !b.items))
+    {
+        return false;
+    }
+
     for (size_t i = 0; i < a.size; ++i)
     {
-        ro_item_t a_it = a_items[i];
+        ro_item_t a_it = a.items[i];
         ro_item_t b_it = ro_dict_get(b, a_it.key);
 
         // If the second dict doesn't contain the current key
