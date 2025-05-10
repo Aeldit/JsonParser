@@ -14,7 +14,7 @@ ro_array_t init_ro_array(size_t size)
 {
     if (!size)
     {
-        return (ro_array_t){ 0 };
+        return ERROR_RO_ARRAY;
     }
 
     ro_array_t a = {
@@ -23,7 +23,7 @@ ro_array_t init_ro_array(size_t size)
     };
     if (!a.values)
     {
-        return (ro_array_t){ 0 };
+        return ERROR_RO_ARRAY;
     }
     return a;
 }
@@ -32,7 +32,7 @@ ro_array_t init_ro_array_with(size_t size, ...)
 {
     if (!size)
     {
-        return (ro_array_t){ 0 };
+        return ERROR_RO_ARRAY;
     }
 
     ro_array_t a = {
@@ -41,7 +41,7 @@ ro_array_t init_ro_array_with(size_t size, ...)
     };
     if (!a.values)
     {
-        return (ro_array_t){ 0 };
+        return ERROR_RO_ARRAY;
     }
 
     va_list args;
@@ -60,13 +60,13 @@ ro_dict_t init_ro_dict(size_t size)
 {
     if (!size)
     {
-        return (ro_dict_t){ 0 };
+        return ERROR_RO_DICT;
     }
 
     ro_dict_t d = { .size = size, .items = malloc(size * sizeof(ro_item_t)) };
     if (!d.items)
     {
-        return (ro_dict_t){ 0 };
+        return ERROR_RO_DICT;
     }
     return d;
 }
@@ -75,13 +75,13 @@ ro_dict_t init_ro_dict_with(size_t size, ...)
 {
     if (!size)
     {
-        return (ro_dict_t){ 0 };
+        return ERROR_RO_DICT;
     }
 
     ro_dict_t d = { .size = size, .items = malloc(size * sizeof(ro_item_t)) };
     if (!d.items)
     {
-        return (ro_dict_t){ 0 };
+        return ERROR_RO_DICT;
     }
 
     va_list args;
@@ -94,6 +94,12 @@ ro_dict_t init_ro_dict_with(size_t size, ...)
 
     va_end(args);
     return d;
+}
+
+inline ro_json_t init_ro_json(bool is_array, ro_array_t a, ro_dict_t d)
+{
+    return is_array ? (ro_json_t){ .is_array = true, .array = a }
+                    : (ro_json_t){ .is_array = false, .dict = d };
 }
 
 /*******************************************************************************

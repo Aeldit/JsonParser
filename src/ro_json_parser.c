@@ -400,5 +400,5 @@ ro_json_t ro_parse(char *file)
 
     free(b);
     fclose(f);
-    return RO_JSON(is_array, a, d);
+    return init_ro_json(is_array, a, d);
 }

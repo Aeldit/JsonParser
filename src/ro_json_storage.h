@@ -13,8 +13,8 @@
 #define ERROR_RO_ITEM                                                          \
     ((ro_item_t){ .type = T_ERROR, .key = NULL_STRING, .strv = NULL_STRING })
 
-#define ERROR_RO_ARRAY ((ro_array_t){ .size = 0, .values = 0 })
-#define ERROR_RO_DICT ((ro_dict_t){ .size = 0, .items = 0 })
+#define ERROR_RO_ARRAY ((ro_array_t){ 0 })
+#define ERROR_RO_DICT ((ro_dict_t){ 0 })
 #define ERROR_RO_JSON ((ro_json_t){ .is_array = true, .array = ERROR_RO_ARRAY })
 
 #define ROVAL_STR(v) ((ro_value_t){ .type = T_STR, .strv = (v) })
@@ -50,16 +50,6 @@
 #define ROVAL_EXPDOUBLE_T(v, e)                                                \
     ((ro_value_t){ .type        = T_EXP_DOUBLE,                                \
                    .exp_doublev = EXP_DOUBLE_OF((v), (e)) })
-
-#define RO_ARRAY(s)                                                            \
-    ((ro_array_t){ .size   = (s),                                              \
-                   .values = (s) ? calloc((s), sizeof(ro_value_t)) : 0 })
-#define RO_DICT(s)                                                             \
-    ((ro_dict_t){ .size  = (s),                                                \
-                  .items = (s) ? calloc((s), sizeof(ro_item_t)) : 0 })
-#define RO_JSON(is_arr, a, d)                                                  \
-    ((is_arr) ? (ro_json_t){ .is_array = true, .array = (a) }                  \
-              : (ro_json_t){ .is_array = false, .dict = (d) })
 
 /*******************************************************************************
 **                                 STRUCTURES                                 **
@@ -131,6 +121,7 @@ ro_array_t init_ro_array(size_t size);
 ro_array_t init_ro_array_with(size_t size, ...);
 ro_dict_t init_ro_dict(size_t size);
 ro_dict_t init_ro_dict_with(size_t size, ...);
+ro_json_t init_ro_json(bool is_array, ro_array_t a, ro_dict_t d);
 
 ro_value_t ro_array_get(ro_array_t a, size_t index);
 ro_item_t ro_dict_get(ro_dict_t d, string_t key);
