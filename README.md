@@ -78,6 +78,8 @@ typedef struct
     bool boolv;
     ro_array_t arrayv;
     ro_dict_t dictv;
+    // rw_array_t *arrayv;
+    // rw_dict_t *dictv;
   };
 } ro_value_t;
 ```
@@ -100,6 +102,8 @@ typedef struct
     bool boolv;
     ro_array_t arrayv;
     ro_dict_t dictv;
+    // rw_array_t *arrayv;
+    // rw_dict_t *dictv;
   };
 } ro_item_t;
 ```
