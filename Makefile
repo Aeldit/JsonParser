@@ -51,7 +51,7 @@ valgrind-compile: clean
 
 calgrind: valgrind-compile
 	valgrind --tool=callgrind --simulate-cache=yes --collect-jumps=yes \
-		--dump-instr=yes ./$(TARGET) ./$(JSONFILESDIR)/big.json
+		--dump-instr=yes ./$(TARGET) ./$(JSONFILESDIR)/40mb.json
 
 leaks: valgrind-compile
 	valgrind --leak-check=full --show-leak-kinds=all \
