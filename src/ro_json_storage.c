@@ -17,8 +17,10 @@ ro_array_t init_ro_array(size_t size)
         return (ro_array_t){ 0 };
     }
 
-    ro_array_t a = { .size   = size,
-                     .values = malloc(size * sizeof(ro_value_t)) };
+    ro_array_t a = {
+        .size   = size,
+        .values = malloc(size * sizeof(ro_value_t)),
+    };
     if (!a.values)
     {
         return (ro_array_t){ 0 };
