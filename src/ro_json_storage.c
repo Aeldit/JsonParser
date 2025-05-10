@@ -19,7 +19,7 @@ ro_array_t init_ro_array(size_t size)
 
     ro_array_t a = {
         .size   = size,
-        .values = malloc(size * sizeof(ro_value_t)),
+        .values = calloc(size, sizeof(ro_value_t)),
     };
     if (!a.values)
     {
@@ -37,7 +37,7 @@ ro_array_t init_ro_array_with(size_t size, ...)
 
     ro_array_t a = {
         .size   = size,
-        .values = malloc(size * sizeof(ro_value_t)),
+        .values = calloc(size, sizeof(ro_value_t)),
     };
     if (!a.values)
     {
@@ -63,7 +63,7 @@ ro_dict_t init_ro_dict(size_t size)
         return ERROR_RO_DICT;
     }
 
-    ro_dict_t d = { .size = size, .items = malloc(size * sizeof(ro_item_t)) };
+    ro_dict_t d = { .size = size, .items = calloc(size, sizeof(ro_item_t)) };
     if (!d.items)
     {
         return ERROR_RO_DICT;
@@ -78,7 +78,7 @@ ro_dict_t init_ro_dict_with(size_t size, ...)
         return ERROR_RO_DICT;
     }
 
-    ro_dict_t d = { .size = size, .items = malloc(size * sizeof(ro_item_t)) };
+    ro_dict_t d = { .size = size, .items = calloc(size, sizeof(ro_item_t)) };
     if (!d.items)
     {
         return ERROR_RO_DICT;
