@@ -14,7 +14,8 @@ void test_exp_long_equals(exp_long_t a, exp_long_t b, bool expected_is_equal)
         is_equal == expected_is_equal,
         "Expected exp_long_equals(%lde%ld, %lde%ld) to be %s, but it was %s",
         a.number, a.exponent, b.number, b.exponent,
-        expected_is_equal ? "true" : "false", is_equal ? "true" : "false");
+        expected_is_equal ? "true" : "false", is_equal ? "true" : "false"
+    );
 }
 
 Test(ro_equality, exp_long_equals_numtrue_exptrue)
@@ -40,8 +41,9 @@ Test(ro_equality, exp_long_equals_numfalse_expfalse)
 /*******************************************************************************
 **                              EXP_DOUBLE_EQUALS                             **
 *******************************************************************************/
-void test_exp_double_equals(exp_double_t a, exp_double_t b,
-                            bool expected_is_equal)
+void test_exp_double_equals(
+    exp_double_t a, exp_double_t b, bool expected_is_equal
+)
 {
     bool is_equal = exp_double_equals(a, b);
 
@@ -49,7 +51,8 @@ void test_exp_double_equals(exp_double_t a, exp_double_t b,
         is_equal == expected_is_equal,
         "Expected exp_double_equals(%lfe%ld, %lfe%ld) to be %s, but it was %s",
         a.number, a.exponent, b.number, b.exponent,
-        expected_is_equal ? "true" : "false", is_equal ? "true" : "false");
+        expected_is_equal ? "true" : "false", is_equal ? "true" : "false"
+    );
 }
 
 Test(ro_equality, exp_double_equals_numtrue_exptrue)
