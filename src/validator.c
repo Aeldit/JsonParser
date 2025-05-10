@@ -109,11 +109,40 @@ bool check_bools_nulls_numbers_counts(
     {
         if (is_in_string)
         {
-            if (buff[i++] == '"' && i > 1 && buff[i - 2] != '\\') // String end
+            // Stores whether the previous char was a '\' or if it was '\\'
+            bool prev_is_single_backslash = false;
+            // Counts the number of characters
+            while (1)
             {
-                is_in_string = false;
-                ++nb_quotes;
+                switch (buff[i++])
+                {
+                case 0:
+                    return false;
+                case '"':
+                    if (!prev_is_single_backslash)
+                    {
+                        break;
+                    }
+                    continue;
+                case '\\':
+                    prev_is_single_backslash = !prev_is_single_backslash;
+                    continue;
+                default:
+                    if (prev_is_single_backslash)
+                    {
+                        prev_is_single_backslash = false;
+                    }
+                    continue;
+                }
+                break;
             }
+            is_in_string = false;
+            ++nb_quotes;
+            // if (buff[i++] == '"' && i > 1 && buff[i - 2] != '\\')
+            // {
+            //     is_in_string = false;
+            //     ++nb_quotes;
+            // }
             continue;
         }
 
