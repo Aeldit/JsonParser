@@ -32,13 +32,16 @@ ro_array_t init_ro_array_with(size_t size, ...)
 {
     if (!size)
     {
-        return RO_ARRAY(0);
+        return (ro_array_t){ 0 };
     }
 
-    ro_value_t *values = calloc(size, sizeof(ro_value_t));
-    if (!values)
+    ro_array_t a = {
+        .size   = size,
+        .values = malloc(size * sizeof(ro_value_t)),
+    };
+    if (!a.values)
     {
-        return RO_ARRAY(0);
+        return (ro_array_t){ 0 };
     }
 
     va_list args;
@@ -46,11 +49,11 @@ ro_array_t init_ro_array_with(size_t size, ...)
     va_start(args, size);
     for (size_t i = 0; i < size; ++i)
     {
-        values[i] = va_arg(args, ro_value_t);
+        a.values[i] = va_arg(args, ro_value_t);
     }
 
     va_end(args);
-    return (ro_array_t){ .size = size, .values = values };
+    return a;
 }
 
 ro_dict_t init_ro_dict(size_t size)
@@ -72,13 +75,13 @@ ro_dict_t init_ro_dict_with(size_t size, ...)
 {
     if (!size)
     {
-        return RO_DICT(0);
+        return (ro_dict_t){ 0 };
     }
 
-    ro_item_t *items = calloc(size, sizeof(ro_item_t));
-    if (!items)
+    ro_dict_t d = { .size = size, .items = malloc(size * sizeof(ro_item_t)) };
+    if (!d.items)
     {
-        return RO_DICT(0);
+        return (ro_dict_t){ 0 };
     }
 
     va_list args;
@@ -86,11 +89,11 @@ ro_dict_t init_ro_dict_with(size_t size, ...)
     va_start(args, size);
     for (size_t i = 0; i < size; ++i)
     {
-        items[i] = va_arg(args, ro_item_t);
+        d.items[i] = va_arg(args, ro_item_t);
     }
 
     va_end(args);
-    return (ro_dict_t){ .size = size, .items = items };
+    return d;
 }
 
 /*******************************************************************************
