@@ -191,7 +191,7 @@ string_t parse_string(const char *buff, size_t *idx)
 
     size_t len = 0;
     // Stores whether the previous char was a '\' or if it was '\\'
-    bool prev_is_backslash = false;
+    bool prev_is_single_backslash = false;
     // Counts the number of characters
     while (1)
     {
@@ -200,20 +200,20 @@ string_t parse_string(const char *buff, size_t *idx)
         case 0:
             return NULL_STRING;
         case '"':
-            if (!prev_is_backslash)
+            if (!prev_is_single_backslash)
             {
                 break;
             }
             ++len;
             continue;
         case '\\':
-            prev_is_backslash = !prev_is_backslash;
+            prev_is_single_backslash = !prev_is_single_backslash;
             ++len;
             continue;
         default:
-            if (prev_is_backslash)
+            if (prev_is_single_backslash)
             {
-                prev_is_backslash = false;
+                prev_is_single_backslash = false;
             }
             ++len;
             continue;
@@ -234,9 +234,7 @@ string_t parse_string(const char *buff, size_t *idx)
     memcpy(str, buff, len);
     str[len] = 0;
 
-    // + 1 to not read the last '"' when returning in the calling function
     *idx += len;
-    printf("%zu\n", *idx);
     return STRING_OF(str, len);
 }
 
