@@ -121,6 +121,7 @@ bool check_bools_nulls_numbers_counts(
                 case '"':
                     if (!prev_is_single_backslash)
                     {
+                        printf("'%c'\n", buff[i - 2]);
                         break;
                     }
                     continue;
@@ -138,18 +139,13 @@ bool check_bools_nulls_numbers_counts(
             }
             is_in_string = false;
             ++nb_quotes;
-            // if (buff[i++] == '"' && i > 1 && buff[i - 2] != '\\')
-            // {
-            //     is_in_string = false;
-            //     ++nb_quotes;
-            // }
             continue;
         }
 
         switch (buff[i++])
         {
         case 0:
-            break;
+            return false;
 
         case '"':
             if (!is_in_string)
